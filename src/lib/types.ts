@@ -5,6 +5,7 @@ export interface ClientInfo {
   phone?: string;
   addresses?: string[];
   instagram?: string;
+  clientToken?: string;
 }
 
 export interface ClientData extends ClientInfo {

@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IClient extends Document {
   clientId: string;
+  clientToken: string;
   username: string;
   email: string;
   website: string;
@@ -19,6 +20,12 @@ export interface IClient extends Document {
 const ClientSchema = new Schema<IClient>(
   {
     clientId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    clientToken: {
       type: String,
       required: true,
       unique: true,

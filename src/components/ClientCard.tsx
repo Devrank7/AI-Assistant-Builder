@@ -16,7 +16,7 @@ export default function ClientCard({ client }: ClientCardProps) {
 
   return (
     <div className="glass-card p-6 cursor-pointer group relative">
-      <Link href={`/client/${client.clientId}`} className="absolute inset-0 z-10">
+      <Link href={`/admin/client/${client.clientId}`} className="absolute inset-0 z-10">
         <span className="sr-only">View Details</span>
       </Link>
 

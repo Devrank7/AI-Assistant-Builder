@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
 import { scanWidgetFolders, readClientInfo } from '@/lib/widgetScanner';
+import { generateClientToken } from '@/lib/tokenUtils';
 
 export async function GET() {
   try {
@@ -14,27 +15,41 @@ export async function GET() {
     for (const folder of widgetFolders) {
       if (!folder.hasInfo) continue;
 
+      const clientInfo = readClientInfo(folder.folderPath);
+      if (!clientInfo) continue;
+
       const existingClient = await Client.findOne({ clientId: folder.clientId });
 
       if (!existingClient) {
-        // Читаем info.json и создаём клиента
-        const clientInfo = readClientInfo(folder.folderPath);
-
-        if (clientInfo) {
-          await Client.create({
-            clientId: folder.clientId,
-            username: clientInfo.username,
-            email: clientInfo.email,
-            website: clientInfo.website,
-            phone: clientInfo.phone || undefined,
-            addresses: clientInfo.addresses || [],
-            instagram: clientInfo.instagram || undefined,
-            requests: 0,
-            tokens: 0,
-            startDate: new Date(),
-            folderPath: folder.folderPath,
-          });
-        }
+        // Создаём нового клиента
+        // Используем токен из info.json или генерируем новый
+        await Client.create({
+          clientId: folder.clientId,
+          clientToken: clientInfo.clientToken || generateClientToken(),
+          username: clientInfo.username,
+          email: clientInfo.email,
+          website: clientInfo.website,
+          phone: clientInfo.phone || undefined,
+          addresses: clientInfo.addresses || [],
+          instagram: clientInfo.instagram || undefined,
+          requests: 0,
+          tokens: 0,
+          startDate: new Date(),
+          folderPath: folder.folderPath,
+        });
+      } else if (!existingClient.clientToken && clientInfo.clientToken) {
+        // Обновляем существующего клиента, если у него нет токена, но есть в info.json
+        await Client.findOneAndUpdate(
+          { clientId: folder.clientId },
+          { $set: { clientToken: clientInfo.clientToken } }
+        );
+      } else if (!existingClient.clientToken && !clientInfo.clientToken) {
+        // Генерируем токен если нет ни в БД, ни в info.json
+        const newToken = generateClientToken();
+        await Client.findOneAndUpdate(
+          { clientId: folder.clientId },
+          { $set: { clientToken: newToken } }
+        );
       }
     }
 
