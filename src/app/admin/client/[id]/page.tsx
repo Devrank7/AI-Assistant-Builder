@@ -85,7 +85,7 @@ interface ChatLogSummary {
   createdAt: string;
 }
 
-type TabType = 'info' | 'files' | 'usage' | 'demo' | 'ai-settings' | 'knowledge' | 'history';
+type TabType = 'info' | 'files' | 'usage' | 'demo' | 'ai-settings' | 'knowledge' | 'history' | 'billing';
 
 export default function ClientDetailsPage() {
   const params = useParams();
@@ -429,6 +429,7 @@ export default function ClientDetailsPage() {
 
   const tabs: { id: TabType; label: string; icon?: string }[] = [
     { id: 'info', label: 'Info' },
+    { id: 'billing', label: 'Billing', icon: '💳' },
     { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
     { id: 'knowledge', label: 'Knowledge', icon: '📚' },
     { id: 'history', label: 'History', icon: '💬' },
@@ -852,8 +853,8 @@ export default function ClientDetailsPage() {
                     <div
                       key={i}
                       className={`p-3 rounded-lg ${msg.role === 'user'
-                          ? 'bg-[var(--neon-cyan)]/10 ml-8'
-                          : 'bg-white/5 mr-8'
+                        ? 'bg-[var(--neon-cyan)]/10 ml-8'
+                        : 'bg-white/5 mr-8'
                         }`}
                     >
                       <p className="text-xs text-gray-500 mb-1">
@@ -863,6 +864,157 @@ export default function ClientDetailsPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Billing Tab */}
+        {activeTab === 'billing' && (
+          <div className="space-y-6">
+            {/* Subscription Status Card */}
+            <div className="glass-card p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>💳</span> Статус подписки
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white/5 rounded-lg p-4">
+                  <p className="text-sm text-gray-400 mb-1">Статус</p>
+                  <p className={`text-lg font-medium ${client.subscriptionStatus === 'active' ? 'text-green-400' :
+                      client.subscriptionStatus === 'trial' ? 'text-cyan-400' :
+                        client.subscriptionStatus === 'past_due' ? 'text-yellow-400' :
+                          'text-red-400'
+                    }`}>
+                    {client.subscriptionStatus === 'active' ? '✅ Активна' :
+                      client.subscriptionStatus === 'trial' ? '🎁 Триал' :
+                        client.subscriptionStatus === 'past_due' ? '⚠️ Просрочена' :
+                          client.subscriptionStatus === 'suspended' ? '🚫 Приостановлена' :
+                            '❌ Отменена'}
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-4">
+                  <p className="text-sm text-gray-400 mb-1">Способ оплаты</p>
+                  <p className="text-lg font-medium text-white">
+                    {client.paymentMethod === 'cryptomus' ? '₿ Cryptomus' :
+                      client.paymentMethod === 'dodo' ? '💳 Dodo Payments' :
+                        client.paymentMethod === 'liqpay' ? '💳 LiqPay' :
+                          '❓ Не привязан'}
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-4">
+                  <p className="text-sm text-gray-400 mb-1">Следующий платёж</p>
+                  <p className="text-lg font-medium text-white">
+                    {client.nextPaymentDate
+                      ? new Date(client.nextPaymentDate).toLocaleDateString('ru-RU', {
+                        day: 'numeric', month: 'long', year: 'numeric'
+                      })
+                      : 'Триал период'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {daysUntilPayment > 0 ? `Через ${daysUntilPayment} дней` : 'Сегодня'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Setup */}
+            {!client.paymentMethod && (
+              <div className="glass-card p-6 border border-yellow-500/30">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <span>⚠️</span> Требуется привязка оплаты
+                </h3>
+                <p className="text-gray-400 mb-4">
+                  Для продолжения работы виджета после триал-периода необходимо привязать способ оплаты.
+                  Ежемесячная подписка составляет <strong className="text-white">$50 USD</strong>.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={async () => {
+                      const res = await fetch('/api/payments/setup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ clientId: client.clientId, provider: 'cryptomus' }),
+                      });
+                      const data = await res.json();
+                      if (data.success && data.paymentUrl) {
+                        window.open(data.paymentUrl, '_blank');
+                      }
+                    }}
+                    className="neon-button"
+                  >
+                    ₿ Привязать Crypto
+                  </button>
+                  <button
+                    disabled
+                    className="px-4 py-2 bg-white/10 rounded-lg text-gray-500 cursor-not-allowed"
+                    title="Coming soon"
+                  >
+                    💳 Карта (скоро)
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Payment History */}
+            <div className="glass-card p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>📜</span> История платежей
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="pb-3 text-sm text-gray-400">Дата</th>
+                      <th className="pb-3 text-sm text-gray-400">Сумма</th>
+                      <th className="pb-3 text-sm text-gray-400">Метод</th>
+                      <th className="pb-3 text-sm text-gray-400">Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {client.lastPaymentDate ? (
+                      <tr className="border-b border-white/5">
+                        <td className="py-3 text-white">
+                          {new Date(client.lastPaymentDate).toLocaleDateString('ru-RU')}
+                        </td>
+                        <td className="py-3 text-white">$50.00</td>
+                        <td className="py-3 text-gray-400">{client.paymentMethod || '—'}</td>
+                        <td className="py-3">
+                          <span className="text-green-400">✓ Успешно</span>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="py-8 text-center text-gray-500">
+                          Платежей ещё не было
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Manage Subscription */}
+            {client.paymentMethod && (
+              <div className="glass-card p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <span>⚙️</span> Управление подпиской
+                </h3>
+                <button
+                  onClick={async () => {
+                    if (confirm('Вы уверены, что хотите отменить подписку? Виджет перестанет работать.')) {
+                      await fetch('/api/payments/cancel', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ clientId: client.clientId }),
+                      });
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-4 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
+                >
+                  Отменить подписку
+                </button>
               </div>
             )}
           </div>
