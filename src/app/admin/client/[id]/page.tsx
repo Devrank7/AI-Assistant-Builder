@@ -85,7 +85,7 @@ interface ChatLogSummary {
   createdAt: string;
 }
 
-type TabType = 'info' | 'files' | 'usage' | 'demo' | 'ai-settings' | 'knowledge' | 'history' | 'billing';
+type TabType = 'info' | 'files' | 'usage' | 'demo' | 'ai-settings' | 'knowledge' | 'history' | 'billing' | 'analytics';
 
 export default function ClientDetailsPage() {
   const params = useParams();
@@ -126,6 +126,20 @@ export default function ClientDetailsPage() {
   const [chatLogsLoading, setChatLogsLoading] = useState(false);
   const [selectedLog, setSelectedLog] = useState<{ messages: Array<{ role: string; content: string; timestamp: string }> } | null>(null);
 
+  // Analytics state
+  const [analyticsData, setAnalyticsData] = useState<{
+    totalChats: number;
+    totalMessages: number;
+    avgMessagesPerChat: number;
+    dailyStats: Array<{ date: string; totalChats: number; totalMessages: number }>;
+    hourlyDistribution: Array<{ hour: number; count: number }>;
+    topQuestions: Array<{ text: string; count: number }>;
+  } | null>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [sheetsExporting, setSheetsExporting] = useState(false);
+  const [spreadsheetId, setSpreadsheetId] = useState('');
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
+
   useEffect(() => {
     if (params.id) {
       fetchClientData(params.id as string);
@@ -138,6 +152,9 @@ export default function ClientDetailsPage() {
     }
     if (data?.client.clientId && activeTab === 'knowledge') {
       fetchKnowledge();
+    }
+    if (data?.client.clientId && activeTab === 'analytics') {
+      fetchAnalytics();
     }
   }, [activeTab, data?.client.clientId]);
 
@@ -381,6 +398,56 @@ export default function ClientDetailsPage() {
     }
   };
 
+  // Fetch analytics data
+  const fetchAnalytics = async () => {
+    if (!data?.client.clientId) return;
+    try {
+      setAnalyticsLoading(true);
+      const response = await fetch(`/api/analytics?clientId=${data.client.clientId}&days=30`);
+      const result = await response.json();
+      if (result.success) {
+        setAnalyticsData(result.analytics);
+      }
+    } catch (err) {
+      console.error('Failed to fetch analytics:', err);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  // Export to Google Sheets
+  const exportToSheets = async () => {
+    if (!data?.client.clientId || !spreadsheetId.trim()) {
+      setExportMessage('Введите ID таблицы Google Sheets');
+      return;
+    }
+    try {
+      setSheetsExporting(true);
+      setExportMessage(null);
+
+      const response = await fetch('/api/integrations/sheets/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: data.client.clientId,
+          spreadsheetId: spreadsheetId.trim(),
+        }),
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        setExportMessage(`✅ Экспортировано ${result.rowsExported} строк!`);
+      } else {
+        setExportMessage(`❌ ${result.error}`);
+      }
+    } catch (err) {
+      setExportMessage('❌ Ошибка экспорта');
+      console.error('Export error:', err);
+    } finally {
+      setSheetsExporting(false);
+    }
+  };
+
   // Load templates when AI settings tab is active
   useEffect(() => {
     if (activeTab === 'ai-settings' && templates.length === 0) {
@@ -429,6 +496,7 @@ export default function ClientDetailsPage() {
 
   const tabs: { id: TabType; label: string; icon?: string }[] = [
     { id: 'info', label: 'Info' },
+    { id: 'analytics', label: 'Analytics', icon: '📊' },
     { id: 'billing', label: 'Billing', icon: '💳' },
     { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
     { id: 'knowledge', label: 'Knowledge', icon: '📚' },
@@ -869,6 +937,142 @@ export default function ClientDetailsPage() {
           </div>
         )}
 
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            {analyticsLoading ? (
+              <div className="glass-card p-12 text-center">
+                <div className="animate-spin w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full mx-auto mb-4" />
+                <p className="text-gray-400">Загрузка аналитики...</p>
+              </div>
+            ) : analyticsData ? (
+              <>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="glass-card p-6 text-center">
+                    <p className="text-4xl font-bold text-[var(--neon-cyan)]">{analyticsData.totalChats}</p>
+                    <p className="text-gray-400 mt-2">Всего чатов</p>
+                    <p className="text-xs text-gray-500 mt-1">за 30 дней</p>
+                  </div>
+                  <div className="glass-card p-6 text-center">
+                    <p className="text-4xl font-bold text-[var(--neon-purple)]">{analyticsData.totalMessages}</p>
+                    <p className="text-gray-400 mt-2">Сообщений</p>
+                    <p className="text-xs text-gray-500 mt-1">за 30 дней</p>
+                  </div>
+                  <div className="glass-card p-6 text-center">
+                    <p className="text-4xl font-bold text-green-400">{analyticsData.avgMessagesPerChat}</p>
+                    <p className="text-gray-400 mt-2">Сообщений/чат</p>
+                    <p className="text-xs text-gray-500 mt-1">в среднем</p>
+                  </div>
+                </div>
+
+                {/* Daily Chart */}
+                <div className="glass-card p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">📈 Чаты по дням</h3>
+                  <div className="h-48 flex items-end gap-1">
+                    {analyticsData.dailyStats.slice(-14).map((day, i) => {
+                      const maxChats = Math.max(...analyticsData.dailyStats.map(d => d.totalChats), 1);
+                      const height = (day.totalChats / maxChats) * 100;
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center group">
+                          <div
+                            className="w-full bg-gradient-to-t from-[var(--neon-cyan)] to-[var(--neon-purple)] rounded-t opacity-70 group-hover:opacity-100 transition-opacity"
+                            style={{ height: `${Math.max(height, 2)}%` }}
+                            title={`${day.date}: ${day.totalChats} чатов`}
+                          />
+                          <p className="text-[10px] text-gray-500 mt-1 rotate-45 origin-left">
+                            {new Date(day.date).getDate()}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Hourly Distribution */}
+                <div className="glass-card p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">🕐 Активность по часам</h3>
+                  <div className="h-32 flex items-end gap-1">
+                    {analyticsData.hourlyDistribution.map((h, i) => {
+                      const maxCount = Math.max(...analyticsData.hourlyDistribution.map(x => x.count), 1);
+                      const height = (h.count / maxCount) * 100;
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center group">
+                          <div
+                            className="w-full bg-[var(--neon-cyan)]/60 group-hover:bg-[var(--neon-cyan)] rounded-t transition-colors"
+                            style={{ height: `${Math.max(height, 2)}%` }}
+                            title={`${h.hour}:00 - ${h.count} чатов`}
+                          />
+                          {i % 4 === 0 && (
+                            <p className="text-[10px] text-gray-500 mt-1">{h.hour}:00</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Top Questions */}
+                <div className="glass-card p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">❓ Популярные вопросы</h3>
+                  {analyticsData.topQuestions.length > 0 ? (
+                    <div className="space-y-2">
+                      {analyticsData.topQuestions.map((q, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                          <span className="text-[var(--neon-cyan)] font-bold w-6">{i + 1}</span>
+                          <p className="text-gray-300 flex-1 text-sm truncate">{q.text}</p>
+                          <span className="text-gray-500 text-sm">{q.count}x</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">Пока нет данных</p>
+                  )}
+                </div>
+
+                {/* Google Sheets Export */}
+                <div className="glass-card p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">📊 Экспорт в Google Sheets</h3>
+                  <p className="text-gray-400 text-sm mb-4">
+                    Экспортируйте историю чатов в Google Таблицу для дальнейшего анализа.
+                  </p>
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      placeholder="ID таблицы Google Sheets"
+                      value={spreadsheetId}
+                      onChange={(e) => setSpreadsheetId(e.target.value)}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:border-[var(--neon-cyan)] focus:outline-none"
+                    />
+                    <button
+                      onClick={exportToSheets}
+                      disabled={sheetsExporting}
+                      className="neon-button disabled:opacity-50"
+                    >
+                      {sheetsExporting ? 'Экспорт...' : 'Экспорт'}
+                    </button>
+                  </div>
+                  {exportMessage && (
+                    <p className={`mt-3 text-sm ${exportMessage.startsWith('✅') ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {exportMessage}
+                    </p>
+                  )}
+                  <p className="text-gray-500 text-xs mt-3">
+                    Инструкция: Создайте таблицу → Скопируйте ID из URL (docs.google.com/spreadsheets/d/<b>ID</b>/edit)
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="glass-card p-12 text-center">
+                <p className="text-gray-400">Нет данных для отображения</p>
+                <button onClick={fetchAnalytics} className="neon-button mt-4">
+                  Обновить
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Billing Tab */}
         {activeTab === 'billing' && (
           <div className="space-y-6">
@@ -881,9 +1085,9 @@ export default function ClientDetailsPage() {
                 <div className="bg-white/5 rounded-lg p-4">
                   <p className="text-sm text-gray-400 mb-1">Статус</p>
                   <p className={`text-lg font-medium ${client.subscriptionStatus === 'active' ? 'text-green-400' :
-                      client.subscriptionStatus === 'trial' ? 'text-cyan-400' :
-                        client.subscriptionStatus === 'past_due' ? 'text-yellow-400' :
-                          'text-red-400'
+                    client.subscriptionStatus === 'trial' ? 'text-cyan-400' :
+                      client.subscriptionStatus === 'past_due' ? 'text-yellow-400' :
+                        'text-red-400'
                     }`}>
                     {client.subscriptionStatus === 'active' ? '✅ Активна' :
                       client.subscriptionStatus === 'trial' ? '🎁 Триал' :
