@@ -42,14 +42,13 @@ export async function POST(request: NextRequest) {
                 embedding: c.embedding,
             }));
 
-            const similarChunks = await findSimilarChunks(
+            // Use optimized findSimilarChunks with built-in filtering
+            const relevantChunks = await findSimilarChunks(
                 queryEmbedding,
                 chunksWithEmbeddings,
-                config.topK || 3
+                config.topK || 3,
+                0.3 // minimum similarity threshold
             );
-
-            // Filter by minimum similarity threshold
-            const relevantChunks = similarChunks.filter(c => c.similarity > 0.3);
 
             if (relevantChunks.length > 0) {
                 context = relevantChunks.map((c, i) => `[${i + 1}] ${c.text}`).join('\n\n');
@@ -70,8 +69,9 @@ export async function POST(request: NextRequest) {
             ? `${config.systemPrompt}\n\nИстория разговора:\n${conversationContext}`
             : config.systemPrompt;
 
-        // Generate response
+        // Generate response using Gemini 3 Flash with context caching
         const response = await generateResponse(
+            clientId,           // NEW: Pass clientId for caching
             fullSystemPrompt,
             context,
             message,

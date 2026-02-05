@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import AISettings, { defaultSystemPrompt } from '@/models/AISettings';
+import { invalidatePromptCache } from '@/lib/gemini';
 
 // GET - Get AI settings for a client
 export async function GET(
@@ -60,6 +61,11 @@ export async function PUT(
             { $set: updateData },
             { new: true, upsert: true }
         );
+
+        // If system prompt was updated, invalidate the cached context
+        if (updateData.systemPrompt) {
+            await invalidatePromptCache(clientId);
+        }
 
         return NextResponse.json({ success: true, settings });
     } catch (error) {

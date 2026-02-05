@@ -13,9 +13,17 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 /**
- * Generate chat response using Gemini 3 Fast
+ * Generate chat response using Gemini 3 Flash
+ * 
+ * NOTE: We use Implicit Caching (automatic) by:
+ * 1. Placing the large, stable content (system prompt) at the START of the prompt
+ * 2. Sending similar prompts close together in time
+ * 
+ * Gemini 3 Flash automatically caches repeated prefixes, reducing cost for 
+ * subsequent calls with the same system prompt.
  */
 export async function generateResponse(
+    clientId: string,
     systemPrompt: string,
     context: string,
     userMessage: string,
@@ -23,13 +31,15 @@ export async function generateResponse(
     maxTokens: number = 1024
 ): Promise<string> {
     const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3-flash', // Updated to Gemini 3 Flash
         generationConfig: {
             temperature,
             maxOutputTokens: maxTokens,
         },
     });
 
+    // IMPORTANT: Place system prompt FIRST for implicit caching to work
+    // Gemini automatically caches repeated prompt prefixes
     const prompt = `${systemPrompt}
 
 ---
@@ -101,18 +111,34 @@ export function splitTextIntoChunks(text: string, maxChunkSize: number = 500): s
 
 /**
  * Find most similar chunks from knowledge base
+ * Optimized version with built-in threshold filtering
  */
 export async function findSimilarChunks(
     queryEmbedding: number[],
     chunks: Array<{ text: string; embedding: number[] }>,
-    topK: number = 3
+    topK: number = 3,
+    minSimilarity: number = 0.3
 ): Promise<Array<{ text: string; similarity: number }>> {
     const scored = chunks.map(chunk => ({
         text: chunk.text,
         similarity: cosineSimilarity(queryEmbedding, chunk.embedding),
     }));
 
-    scored.sort((a, b) => b.similarity - a.similarity);
+    // Filter by minimum similarity first to reduce sorting overhead
+    const relevant = scored.filter(c => c.similarity >= minSimilarity);
 
-    return scored.slice(0, topK);
+    relevant.sort((a, b) => b.similarity - a.similarity);
+
+    return relevant.slice(0, topK);
+}
+
+/**
+ * Placeholder for cache invalidation
+ * With implicit caching, no explicit invalidation is needed.
+ * The cache expires automatically based on Gemini's internal TTL.
+ */
+export async function invalidatePromptCache(clientId: string): Promise<void> {
+    // No-op for implicit caching
+    // If we upgrade to explicit caching with server SDK, implement here
+    console.log(`Cache invalidation requested for ${clientId} (using implicit caching, no action needed)`);
 }
