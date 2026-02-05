@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base Widget Styles */
+:host {
+    --aw-primary: #00D9FF;
+    --aw-accent: #FF00E5;
+    --aw-glass: rgba(10, 10, 15, 0.9);
+    --aw-text: #ffffff;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

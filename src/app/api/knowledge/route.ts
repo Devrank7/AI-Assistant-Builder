@@ -1,0 +1,123 @@
+import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/lib/mongodb';
+import KnowledgeChunk from '@/models/KnowledgeChunk';
+import { generateEmbedding, splitTextIntoChunks } from '@/lib/gemini';
+
+// GET - List knowledge chunks for a client
+export async function GET(request: NextRequest) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const clientId = searchParams.get('clientId');
+
+        if (!clientId) {
+            return NextResponse.json(
+                { success: false, error: 'clientId is required' },
+                { status: 400 }
+            );
+        }
+
+        await connectDB();
+        const chunks = await KnowledgeChunk.find({ clientId })
+            .select('text source createdAt _id')
+            .sort({ createdAt: -1 });
+
+        return NextResponse.json({ success: true, chunks });
+    } catch (error) {
+        console.error('Error fetching knowledge:', error);
+        return NextResponse.json(
+            { success: false, error: 'Failed to fetch knowledge' },
+            { status: 500 }
+        );
+    }
+}
+
+// POST - Add new knowledge
+export async function POST(request: NextRequest) {
+    try {
+        const { clientId, text, source } = await request.json();
+
+        if (!clientId || !text) {
+            return NextResponse.json(
+                { success: false, error: 'clientId and text are required' },
+                { status: 400 }
+            );
+        }
+
+        await connectDB();
+
+        // Split text into chunks
+        const textChunks = splitTextIntoChunks(text, 500);
+        const createdChunks = [];
+
+        // Process each chunk
+        for (const chunkText of textChunks) {
+            // Generate embedding
+            const embedding = await generateEmbedding(chunkText);
+
+            // Save to database
+            const chunk = await KnowledgeChunk.create({
+                clientId,
+                text: chunkText,
+                embedding,
+                source: source || 'manual',
+            });
+
+            createdChunks.push({
+                _id: chunk._id,
+                text: chunk.text,
+                source: chunk.source,
+            });
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: `Created ${createdChunks.length} knowledge chunks`,
+            chunks: createdChunks,
+        });
+    } catch (error) {
+        console.error('Error adding knowledge:', error);
+        return NextResponse.json(
+            { success: false, error: 'Failed to add knowledge' },
+            { status: 500 }
+        );
+    }
+}
+
+// DELETE - Remove knowledge chunk
+export async function DELETE(request: NextRequest) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const chunkId = searchParams.get('id');
+        const clientId = searchParams.get('clientId');
+
+        if (!chunkId) {
+            return NextResponse.json(
+                { success: false, error: 'Chunk id is required' },
+                { status: 400 }
+            );
+        }
+
+        await connectDB();
+
+        // Verify ownership before deleting
+        const result = await KnowledgeChunk.findOneAndDelete({
+            _id: chunkId,
+            ...(clientId && { clientId }),
+        });
+
+        if (!result) {
+            return NextResponse.json(
+                { success: false, error: 'Chunk not found' },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({ success: true, message: 'Chunk deleted' });
+    } catch (error) {
+        console.error('Error deleting knowledge:', error);
+        return NextResponse.json(
+            { success: false, error: 'Failed to delete knowledge' },
+            { status: 500 }
+        );
+    }
+}

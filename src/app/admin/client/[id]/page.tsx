@@ -5,11 +5,25 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { IClient } from '@/models/Client';
-import { getWidgetScriptUrl, getWidgetEmbedCode } from '@/lib/config';
 
 interface ClientDetailsData {
   client: IClient;
   files: string[];
+}
+
+interface AISettings {
+  systemPrompt: string;
+  greeting: string;
+  temperature: number;
+  maxTokens: number;
+  topK: number;
+}
+
+interface KnowledgeChunk {
+  _id: string;
+  text: string;
+  source: string;
+  createdAt: string;
 }
 
 const demoTemplates = [
@@ -51,19 +65,52 @@ const demoTemplates = [
   },
 ];
 
+const defaultSystemPrompt = `Ты полезный AI-ассистент. Отвечай вежливо и по существу.
+Используй предоставленную информацию из базы знаний для ответов.
+Если не знаешь ответа, честно скажи об этом.`;
+
+type TabType = 'info' | 'files' | 'usage' | 'demo' | 'ai-settings' | 'knowledge';
+
 export default function ClientDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const [data, setData] = useState<ClientDetailsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'info' | 'files' | 'usage' | 'demo'>('info');
+  const [activeTab, setActiveTab] = useState<TabType>('info');
+
+  // AI Settings state
+  const [aiSettings, setAiSettings] = useState<AISettings | null>(null);
+  const [aiSettingsLoading, setAiSettingsLoading] = useState(false);
+  const [aiSettingsSaving, setAiSettingsSaving] = useState(false);
+  const [aiSettingsMessage, setAiSettingsMessage] = useState<string | null>(null);
+
+  // Knowledge Base state
+  const [knowledgeChunks, setKnowledgeChunks] = useState<KnowledgeChunk[]>([]);
+  const [knowledgeLoading, setKnowledgeLoading] = useState(false);
+  const [newKnowledgeText, setNewKnowledgeText] = useState('');
+  const [newKnowledgeSource, setNewKnowledgeSource] = useState('');
+  const [addingKnowledge, setAddingKnowledge] = useState(false);
+
+  // Chat test state
+  const [testMessage, setTestMessage] = useState('');
+  const [testResponse, setTestResponse] = useState('');
+  const [testLoading, setTestLoading] = useState(false);
 
   useEffect(() => {
     if (params.id) {
       fetchClientData(params.id as string);
     }
   }, [params.id]);
+
+  useEffect(() => {
+    if (data?.client.clientId && activeTab === 'ai-settings') {
+      fetchAISettings();
+    }
+    if (data?.client.clientId && activeTab === 'knowledge') {
+      fetchKnowledge();
+    }
+  }, [activeTab, data?.client.clientId]);
 
   const fetchClientData = async (id: string) => {
     try {
@@ -81,6 +128,126 @@ export default function ClientDetailsPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAISettings = async () => {
+    if (!data?.client.clientId) return;
+    try {
+      setAiSettingsLoading(true);
+      const response = await fetch(`/api/ai-settings/${data.client.clientId}`);
+      const result = await response.json();
+      if (result.success) {
+        setAiSettings(result.settings);
+      }
+    } catch (err) {
+      console.error('Failed to fetch AI settings:', err);
+    } finally {
+      setAiSettingsLoading(false);
+    }
+  };
+
+  const saveAISettings = async () => {
+    if (!data?.client.clientId || !aiSettings) return;
+    try {
+      setAiSettingsSaving(true);
+      setAiSettingsMessage(null);
+      const response = await fetch(`/api/ai-settings/${data.client.clientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(aiSettings),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setAiSettingsMessage('Настройки сохранены!');
+        setTimeout(() => setAiSettingsMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to save AI settings:', err);
+      setAiSettingsMessage('Ошибка сохранения');
+    } finally {
+      setAiSettingsSaving(false);
+    }
+  };
+
+  const fetchKnowledge = async () => {
+    if (!data?.client.clientId) return;
+    try {
+      setKnowledgeLoading(true);
+      const response = await fetch(`/api/knowledge?clientId=${data.client.clientId}`);
+      const result = await response.json();
+      if (result.success) {
+        setKnowledgeChunks(result.chunks);
+      }
+    } catch (err) {
+      console.error('Failed to fetch knowledge:', err);
+    } finally {
+      setKnowledgeLoading(false);
+    }
+  };
+
+  const addKnowledge = async () => {
+    if (!data?.client.clientId || !newKnowledgeText.trim()) return;
+    try {
+      setAddingKnowledge(true);
+      const response = await fetch('/api/knowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: data.client.clientId,
+          text: newKnowledgeText,
+          source: newKnowledgeSource || 'manual',
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setNewKnowledgeText('');
+        setNewKnowledgeSource('');
+        fetchKnowledge();
+      }
+    } catch (err) {
+      console.error('Failed to add knowledge:', err);
+    } finally {
+      setAddingKnowledge(false);
+    }
+  };
+
+  const deleteKnowledge = async (chunkId: string) => {
+    if (!data?.client.clientId) return;
+    try {
+      await fetch(`/api/knowledge?id=${chunkId}&clientId=${data.client.clientId}`, {
+        method: 'DELETE',
+      });
+      fetchKnowledge();
+    } catch (err) {
+      console.error('Failed to delete knowledge:', err);
+    }
+  };
+
+  const testChat = async () => {
+    if (!data?.client.clientId || !testMessage.trim()) return;
+    try {
+      setTestLoading(true);
+      setTestResponse('');
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: data.client.clientId,
+          message: testMessage,
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setTestResponse(result.response);
+      } else {
+        setTestResponse('Ошибка: ' + result.error);
+      }
+    } catch (err) {
+      console.error('Chat test failed:', err);
+      setTestResponse('Ошибка связи с сервером');
+    } finally {
+      setTestLoading(false);
     }
   };
 
@@ -119,6 +286,15 @@ export default function ClientDetailsPage() {
   const daysActive = Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const daysUntilPayment = 30 - (daysActive % 30);
   const scriptUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/widgets/${client.folderPath}/script.js`;
+
+  const tabs: { id: TabType; label: string; icon?: string }[] = [
+    { id: 'info', label: 'Info' },
+    { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
+    { id: 'knowledge', label: 'Knowledge', icon: '📚' },
+    { id: 'files', label: 'Files' },
+    { id: 'usage', label: 'Usage' },
+    { id: 'demo', label: 'Demo' },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-animated">
@@ -170,30 +346,247 @@ export default function ClientDetailsPage() {
             <p className="text-3xl font-bold text-[var(--neon-pink)]">{daysActive}</p>
           </div>
           <div className="glass-card p-6 stat-card">
-            <p className="text-gray-400 text-sm mb-1">Days Until Payment</p>
-            <p className="text-3xl font-bold gradient-text">{daysUntilPayment}</p>
+            <p className="text-gray-400 text-sm mb-1">Knowledge Chunks</p>
+            <p className="text-3xl font-bold gradient-text">{knowledgeChunks.length}</p>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="glass-card mb-6">
-          <div className="flex border-b border-white/10">
-            {(['info', 'files', 'usage', 'demo'] as const).map((tab) => (
+          <div className="flex border-b border-white/10 overflow-x-auto">
+            {tabs.map((tab) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-4 font-medium transition-colors ${activeTab === tab
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-4 font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
                   ? 'text-[var(--neon-cyan)] border-b-2 border-[var(--neon-cyan)]'
                   : 'text-gray-400 hover:text-white'
                   }`}
               >
-                {tab === 'demo' ? 'Demo' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab.icon && <span>{tab.icon}</span>}
+                {tab.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Tab Content */}
+        {/* AI Settings Tab */}
+        {activeTab === 'ai-settings' && (
+          <div className="space-y-6">
+            {aiSettingsLoading ? (
+              <div className="glass-card p-8 text-center">
+                <div className="w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto" />
+              </div>
+            ) : aiSettings ? (
+              <>
+                <div className="glass-card p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <span>🤖</span> System Prompt
+                  </h3>
+                  <textarea
+                    value={aiSettings.systemPrompt}
+                    onChange={(e) => setAiSettings({ ...aiSettings, systemPrompt: e.target.value })}
+                    className="w-full h-40 bg-black/30 border border-white/10 rounded-lg p-4 text-white font-mono text-sm focus:border-[var(--neon-cyan)] focus:outline-none resize-none"
+                    placeholder="Инструкции для AI-ассистента..."
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Опишите роль бота, тон общения и правила поведения.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="glass-card p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">💬 Приветствие</h3>
+                    <input
+                      type="text"
+                      value={aiSettings.greeting}
+                      onChange={(e) => setAiSettings({ ...aiSettings, greeting: e.target.value })}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                      placeholder="Привет! Чем могу помочь?"
+                    />
+                  </div>
+
+                  <div className="glass-card p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">🎨 Креативность</h3>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={aiSettings.temperature}
+                        onChange={(e) => setAiSettings({ ...aiSettings, temperature: parseFloat(e.target.value) })}
+                        className="flex-1 accent-[var(--neon-cyan)]"
+                      />
+                      <span className="text-[var(--neon-cyan)] font-mono w-12 text-right">
+                        {aiSettings.temperature.toFixed(1)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      0 = точные ответы, 1 = более творческие
+                    </p>
+                  </div>
+
+                  <div className="glass-card p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">📊 Макс. токенов ответа</h3>
+                    <input
+                      type="number"
+                      value={aiSettings.maxTokens}
+                      onChange={(e) => setAiSettings({ ...aiSettings, maxTokens: parseInt(e.target.value) || 1024 })}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                      min="100"
+                      max="4096"
+                    />
+                  </div>
+
+                  <div className="glass-card p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">🔍 Кол-во контекста (Top-K)</h3>
+                    <input
+                      type="number"
+                      value={aiSettings.topK}
+                      onChange={(e) => setAiSettings({ ...aiSettings, topK: parseInt(e.target.value) || 3 })}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                      min="1"
+                      max="10"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Сколько кусочков знаний использовать для ответа
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={saveAISettings}
+                    disabled={aiSettingsSaving}
+                    className="neon-button disabled:opacity-50"
+                  >
+                    {aiSettingsSaving ? 'Сохранение...' : 'Сохранить настройки'}
+                  </button>
+                  {aiSettingsMessage && (
+                    <span className="text-[var(--neon-cyan)]">{aiSettingsMessage}</span>
+                  )}
+                </div>
+
+                {/* Test Chat */}
+                <div className="glass-card p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">🧪 Тест чата</h3>
+                  <div className="flex gap-4 mb-4">
+                    <input
+                      type="text"
+                      value={testMessage}
+                      onChange={(e) => setTestMessage(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && testChat()}
+                      className="flex-1 bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                      placeholder="Задайте вопрос для теста..."
+                    />
+                    <button
+                      onClick={testChat}
+                      disabled={testLoading}
+                      className="neon-button disabled:opacity-50"
+                    >
+                      {testLoading ? '...' : 'Отправить'}
+                    </button>
+                  </div>
+                  {testResponse && (
+                    <div className="bg-black/30 rounded-lg p-4 text-gray-300">
+                      {testResponse}
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : null}
+          </div>
+        )}
+
+        {/* Knowledge Base Tab */}
+        {activeTab === 'knowledge' && (
+          <div className="space-y-6">
+            {/* Add Knowledge */}
+            <div className="glass-card p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>➕</span> Добавить знания
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-gray-400 mb-2 block">Источник (опционально)</label>
+                  <input
+                    type="text"
+                    value={newKnowledgeSource}
+                    onChange={(e) => setNewKnowledgeSource(e.target.value)}
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                    placeholder="FAQ, Сайт, Документ..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-2 block">Текст</label>
+                  <textarea
+                    value={newKnowledgeText}
+                    onChange={(e) => setNewKnowledgeText(e.target.value)}
+                    className="w-full h-32 bg-black/30 border border-white/10 rounded-lg p-4 text-white focus:border-[var(--neon-cyan)] focus:outline-none resize-none"
+                    placeholder="Введите информацию о бизнесе, которую должен знать бот..."
+                  />
+                </div>
+                <button
+                  onClick={addKnowledge}
+                  disabled={addingKnowledge || !newKnowledgeText.trim()}
+                  className="neon-button disabled:opacity-50"
+                >
+                  {addingKnowledge ? 'Обработка...' : 'Добавить в базу знаний'}
+                </button>
+              </div>
+            </div>
+
+            {/* Existing Knowledge */}
+            <div className="glass-card p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>📚</span> База знаний ({knowledgeChunks.length} записей)
+              </h3>
+              {knowledgeLoading ? (
+                <div className="text-center py-8">
+                  <div className="w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto" />
+                </div>
+              ) : knowledgeChunks.length > 0 ? (
+                <div className="space-y-3">
+                  {knowledgeChunks.map((chunk) => (
+                    <div
+                      key={chunk._id}
+                      className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-gray-300 text-sm line-clamp-2">{chunk.text}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-xs text-gray-500 bg-white/10 px-2 py-1 rounded">
+                              {chunk.source}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(chunk.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => deleteKnowledge(chunk._id)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-center py-8">
+                  База знаний пуста. Добавьте информацию выше.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Info Tab */}
         {activeTab === 'info' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Contact Information */}
@@ -241,14 +634,6 @@ export default function ClientDetailsPage() {
                     >
                       @{client.instagram}
                     </a>
-                  </div>
-                )}
-                {client.addresses && client.addresses.length > 0 && (
-                  <div>
-                    <label className="text-sm text-gray-400">Addresses</label>
-                    {client.addresses.map((addr, idx) => (
-                      <p key={idx} className="text-white">{addr}</p>
-                    ))}
                   </div>
                 )}
               </div>
