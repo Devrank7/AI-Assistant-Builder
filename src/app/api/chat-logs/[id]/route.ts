@@ -1,0 +1,73 @@
+import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/lib/mongodb';
+import ChatLog from '@/models/ChatLog';
+
+// GET - Get single chat log by ID
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        await connectDB();
+        const { id } = await params;
+
+        const log = await ChatLog.findById(id);
+
+        if (!log) {
+            return NextResponse.json(
+                { success: false, error: 'Chat log not found' },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({
+            success: true,
+            log: {
+                _id: log._id,
+                clientId: log.clientId,
+                sessionId: log.sessionId,
+                messages: log.messages,
+                metadata: log.metadata,
+                createdAt: log.createdAt,
+                updatedAt: log.updatedAt,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching chat log:', error);
+        return NextResponse.json(
+            { success: false, error: 'Failed to fetch chat log' },
+            { status: 500 }
+        );
+    }
+}
+
+// DELETE - Delete a chat log
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        await connectDB();
+        const { id } = await params;
+
+        const result = await ChatLog.findByIdAndDelete(id);
+
+        if (!result) {
+            return NextResponse.json(
+                { success: false, error: 'Chat log not found' },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'Chat log deleted',
+        });
+    } catch (error) {
+        console.error('Error deleting chat log:', error);
+        return NextResponse.json(
+            { success: false, error: 'Failed to delete chat log' },
+            { status: 500 }
+        );
+    }
+}

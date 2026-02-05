@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
 import AISettings, { defaultSystemPrompt } from '@/models/AISettings';
+import ChatLog from '@/models/ChatLog';
 import { generateEmbedding, generateResponse, findSimilarChunks } from '@/lib/gemini';
 
 export async function POST(request: NextRequest) {
     try {
-        const { clientId, message, conversationHistory } = await request.json();
+        const { clientId, message, conversationHistory, sessionId, metadata } = await request.json();
 
         if (!clientId || !message) {
             return NextResponse.json(
@@ -71,13 +72,38 @@ export async function POST(request: NextRequest) {
 
         // Generate response using Gemini 3 Flash with context caching
         const response = await generateResponse(
-            clientId,           // NEW: Pass clientId for caching
+            clientId,
             fullSystemPrompt,
             context,
             message,
             config.temperature,
             config.maxTokens
         );
+
+        // Log conversation to ChatLog (async, non-blocking)
+        if (sessionId) {
+            const logSessionId = sessionId || `session_${Date.now()}`;
+
+            ChatLog.findOneAndUpdate(
+                { clientId, sessionId: logSessionId },
+                {
+                    $push: {
+                        messages: {
+                            $each: [
+                                { role: 'user', content: message, timestamp: new Date() },
+                                { role: 'assistant', content: response, timestamp: new Date() },
+                            ],
+                        },
+                    },
+                    $setOnInsert: {
+                        clientId,
+                        sessionId: logSessionId,
+                        metadata: metadata || {},
+                    },
+                },
+                { upsert: true, new: true }
+            ).catch(err => console.error('Failed to log chat:', err));
+        }
 
         return NextResponse.json({
             success: true,

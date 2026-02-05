@@ -69,7 +69,23 @@ const defaultSystemPrompt = `Ты полезный AI-ассистент. Отв
 Используй предоставленную информацию из базы знаний для ответов.
 Если не знаешь ответа, честно скажи об этом.`;
 
-type TabType = 'info' | 'files' | 'usage' | 'demo' | 'ai-settings' | 'knowledge';
+interface PromptTemplate {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  suggestedTemperature: number;
+}
+
+interface ChatLogSummary {
+  _id: string;
+  sessionId: string;
+  messageCount: number;
+  lastMessage?: string;
+  createdAt: string;
+}
+
+type TabType = 'info' | 'files' | 'usage' | 'demo' | 'ai-settings' | 'knowledge' | 'history';
 
 export default function ClientDetailsPage() {
   const params = useParams();
@@ -96,6 +112,19 @@ export default function ClientDetailsPage() {
   const [testMessage, setTestMessage] = useState('');
   const [testResponse, setTestResponse] = useState('');
   const [testLoading, setTestLoading] = useState(false);
+
+  // Templates state
+  const [templates, setTemplates] = useState<PromptTemplate[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+
+  // File upload state
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+
+  // Chat history state
+  const [chatLogs, setChatLogs] = useState<ChatLogSummary[]>([]);
+  const [chatLogsLoading, setChatLogsLoading] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<{ messages: Array<{ role: string; content: string; timestamp: string }> } | null>(null);
 
   useEffect(() => {
     if (params.id) {
@@ -251,6 +280,117 @@ export default function ClientDetailsPage() {
     }
   };
 
+  // Fetch prompt templates
+  const fetchTemplates = async () => {
+    try {
+      setTemplatesLoading(true);
+      const response = await fetch('/api/templates');
+      const result = await response.json();
+      if (result.success) {
+        setTemplates(result.templates);
+      }
+    } catch (err) {
+      console.error('Failed to fetch templates:', err);
+    } finally {
+      setTemplatesLoading(false);
+    }
+  };
+
+  // Apply template to AI settings
+  const applyTemplate = async (templateId: string) => {
+    try {
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId }),
+      });
+      const result = await response.json();
+      if (result.success && result.template && aiSettings) {
+        setAiSettings({
+          ...aiSettings,
+          systemPrompt: result.template.systemPrompt,
+          greeting: result.template.greeting,
+          temperature: result.template.suggestedTemperature,
+        });
+        setAiSettingsMessage('Шаблон применён! Не забудьте сохранить.');
+        setTimeout(() => setAiSettingsMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to apply template:', err);
+    }
+  };
+
+  // Upload document file
+  const uploadFile = async (file: File) => {
+    if (!data?.client.clientId) return;
+    try {
+      setUploadingFile(true);
+      setUploadMessage(null);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('clientId', data.client.clientId);
+
+      const response = await fetch('/api/knowledge/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        setUploadMessage(`✅ ${result.metadata.filename}: ${result.chunksCreated} чанков добавлено`);
+        fetchKnowledge();
+      } else {
+        setUploadMessage(`❌ Ошибка: ${result.error}`);
+      }
+    } catch (err) {
+      console.error('Failed to upload file:', err);
+      setUploadMessage('❌ Ошибка загрузки файла');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  // Fetch chat logs
+  const fetchChatLogs = async () => {
+    if (!data?.client.clientId) return;
+    try {
+      setChatLogsLoading(true);
+      const response = await fetch(`/api/chat-logs?clientId=${data.client.clientId}&limit=50`);
+      const result = await response.json();
+      if (result.success) {
+        setChatLogs(result.logs);
+      }
+    } catch (err) {
+      console.error('Failed to fetch chat logs:', err);
+    } finally {
+      setChatLogsLoading(false);
+    }
+  };
+
+  // View specific chat log
+  const viewChatLog = async (logId: string) => {
+    try {
+      const response = await fetch(`/api/chat-logs/${logId}`);
+      const result = await response.json();
+      if (result.success) {
+        setSelectedLog(result.log);
+      }
+    } catch (err) {
+      console.error('Failed to fetch chat log:', err);
+    }
+  };
+
+  // Load templates when AI settings tab is active
+  useEffect(() => {
+    if (activeTab === 'ai-settings' && templates.length === 0) {
+      fetchTemplates();
+    }
+    if (activeTab === 'history' && data?.client.clientId) {
+      fetchChatLogs();
+    }
+  }, [activeTab]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-animated flex items-center justify-center">
@@ -291,6 +431,7 @@ export default function ClientDetailsPage() {
     { id: 'info', label: 'Info' },
     { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
     { id: 'knowledge', label: 'Knowledge', icon: '📚' },
+    { id: 'history', label: 'History', icon: '💬' },
     { id: 'files', label: 'Files' },
     { id: 'usage', label: 'Usage' },
     { id: 'demo', label: 'Demo' },
@@ -379,6 +520,28 @@ export default function ClientDetailsPage() {
               </div>
             ) : aiSettings ? (
               <>
+                {/* Template Selector */}
+                <div className="glass-card p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <span>📋</span> Шаблоны промптов
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    {templates.map((template) => (
+                      <button
+                        key={template.id}
+                        onClick={() => applyTemplate(template.id)}
+                        className="p-3 bg-white/5 hover:bg-white/10 rounded-lg text-center transition-colors border border-transparent hover:border-[var(--neon-cyan)]/30"
+                      >
+                        <span className="text-2xl block mb-1">{template.icon}</span>
+                        <span className="text-xs text-gray-300">{template.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-3">
+                    Выберите шаблон для быстрой настройки. Это заполнит промпт и приветствие.
+                  </p>
+                </div>
+
                 <div className="glass-card p-6">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <span>🤖</span> System Prompt
@@ -502,6 +665,47 @@ export default function ClientDetailsPage() {
         {/* Knowledge Base Tab */}
         {activeTab === 'knowledge' && (
           <div className="space-y-6">
+            {/* File Upload */}
+            <div className="glass-card p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>📄</span> Загрузить документ
+              </h3>
+              <div
+                className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-[var(--neon-cyan)]/50 transition-colors cursor-pointer"
+                onClick={() => document.getElementById('fileInput')?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const file = e.dataTransfer.files[0];
+                  if (file) uploadFile(file);
+                }}
+              >
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept=".pdf,.docx,.txt,.md"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadFile(file);
+                  }}
+                />
+                {uploadingFile ? (
+                  <div className="w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto" />
+                ) : (
+                  <>
+                    <span className="text-4xl block mb-2">📁</span>
+                    <p className="text-gray-400">Перетащите файл сюда или нажмите для выбора</p>
+                    <p className="text-xs text-gray-500 mt-2">PDF, DOCX, TXT, MD</p>
+                  </>
+                )}
+              </div>
+              {uploadMessage && (
+                <p className="text-sm mt-3 text-center">{uploadMessage}</p>
+              )}
+            </div>
+
             {/* Add Knowledge */}
             <div className="glass-card p-6">
               <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -583,6 +787,84 @@ export default function ClientDetailsPage() {
                 </p>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Chat History Tab */}
+        {activeTab === 'history' && (
+          <div className="space-y-6">
+            <div className="glass-card p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>💬</span> История чатов ({chatLogs.length})
+              </h3>
+              {chatLogsLoading ? (
+                <div className="text-center py-8">
+                  <div className="w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto" />
+                </div>
+              ) : chatLogs.length > 0 ? (
+                <div className="space-y-3">
+                  {chatLogs.map((log) => (
+                    <button
+                      key={log._id}
+                      onClick={() => viewChatLog(log._id)}
+                      className="w-full text-left bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white font-medium">
+                            Сессия: {log.sessionId.slice(0, 12)}...
+                          </p>
+                          <p className="text-sm text-gray-400 mt-1">
+                            {log.messageCount} сообщений • {new Date(log.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                        <span className="text-gray-500">→</span>
+                      </div>
+                      {log.lastMessage && (
+                        <p className="text-xs text-gray-500 mt-2 truncate">
+                          Последнее: {log.lastMessage}
+                        </p>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-center py-8">
+                  Нет истории чатов. Диалоги появятся после первых сообщений виджета.
+                </p>
+              )}
+            </div>
+
+            {/* Selected Chat Modal */}
+            {selectedLog && (
+              <div className="glass-card p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-white">Детали диалога</h3>
+                  <button
+                    onClick={() => setSelectedLog(null)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {selectedLog.messages.map((msg, i) => (
+                    <div
+                      key={i}
+                      className={`p-3 rounded-lg ${msg.role === 'user'
+                          ? 'bg-[var(--neon-cyan)]/10 ml-8'
+                          : 'bg-white/5 mr-8'
+                        }`}
+                    >
+                      <p className="text-xs text-gray-500 mb-1">
+                        {msg.role === 'user' ? 'Пользователь' : 'Бот'} • {new Date(msg.timestamp).toLocaleTimeString()}
+                      </p>
+                      <p className="text-gray-300 text-sm">{msg.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

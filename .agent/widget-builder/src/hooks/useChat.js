@@ -5,6 +5,17 @@ export function useChat(config) {
     const [isLoading, setIsLoading] = useState(false);
     const [typing, setTyping] = useState(false);
 
+    // Generate unique session ID (persists for this browser session)
+    const [sessionId] = useState(() => {
+        const storageKey = `session_${config.clientId}`;
+        let id = sessionStorage.getItem(storageKey);
+        if (!id) {
+            id = `${config.clientId}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+            sessionStorage.setItem(storageKey, id);
+        }
+        return id;
+    });
+
     // Load history from local storage
     useEffect(() => {
         if (config.features?.persistHistory) {
@@ -40,7 +51,12 @@ export function useChat(config) {
                 body: JSON.stringify({
                     clientId: config.clientId,
                     message: text,
-                    conversationHistory: messages.slice(-10) // Send context
+                    conversationHistory: messages.slice(-10),
+                    sessionId: sessionId,
+                    metadata: {
+                        page: typeof window !== 'undefined' ? window.location.href : '',
+                        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : ''
+                    }
                 })
             });
 
