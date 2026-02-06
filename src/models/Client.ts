@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { SubscriptionTier } from '@/lib/pricing';
 
 // Subscription status enum
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'canceled' | 'suspended';
@@ -33,6 +34,16 @@ export interface IClient extends Document {
   lastPaymentDate: Date | null;
   paymentFailedCount: number;
   gracePeriodEnd: Date | null;
+
+  // Prepayment fields
+  prepaidMonths: number; // Number of months prepaid (1, 3, 6, 12)
+  prepaidUntil: Date | null; // Date until which subscription is prepaid
+  subscriptionTier: SubscriptionTier; // Current subscription tier
+  lastPrepaymentAmount: number; // Amount of last prepayment in USD
+
+  // Extra AI credits (top-up when hitting $40 limit)
+  extraCreditsUsd: number; // Purchased additional credits (reset with monthly counters)
+  extraCreditsExpiry: Date | null; // When extra credits expire
 
   // Provider-specific IDs
   cryptomusSubscriptionId: string | null;
@@ -157,6 +168,35 @@ const ClientSchema = new Schema<IClient>(
       default: 0,
     },
     gracePeriodEnd: {
+      type: Date,
+      default: null,
+    },
+
+    // Prepayment fields
+    prepaidMonths: {
+      type: Number,
+      default: 1,
+    },
+    prepaidUntil: {
+      type: Date,
+      default: null,
+    },
+    subscriptionTier: {
+      type: String,
+      enum: ['monthly', 'quarterly', 'semi_annual', 'annual'],
+      default: 'monthly',
+    },
+    lastPrepaymentAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    // Extra AI credits (top-up when hitting monthly limit)
+    extraCreditsUsd: {
+      type: Number,
+      default: 0,
+    },
+    extraCreditsExpiry: {
       type: Date,
       default: null,
     },

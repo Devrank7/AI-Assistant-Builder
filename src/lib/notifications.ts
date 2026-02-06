@@ -21,6 +21,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
 
   try {
     // Dynamic import to avoid issues if nodemailer not installed
+    // @ts-expect-error - nodemailer types are optional
     const nodemailer = await import('nodemailer');
 
     const transporter = nodemailer.createTransport({

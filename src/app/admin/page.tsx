@@ -2,75 +2,103 @@ import ClientList from '@/components/ClientList';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
-    return (
-        <div className="min-h-screen bg-gradient-animated">
-            {/* Header */}
-            <header className="sticky top-0 z-50 glass-card border-0 border-b border-white/10 rounded-none">
-                <div className="max-w-7xl mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)] flex items-center justify-center">
-                                <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold gradient-text">AI Widget Admin</h1>
-                                <p className="text-xs text-gray-400">Widget Management Dashboard</p>
-                            </div>
-                        </div>
+  return (
+    <div className="bg-gradient-animated relative min-h-screen">
+      {/* Aurora Background */}
+      <div className="aurora" />
 
-                        <nav className="hidden md:flex items-center gap-6">
-                            <Link href="/admin" className="text-[var(--neon-cyan)] font-medium">Dashboard</Link>
-                            <Link href="#" className="text-gray-400 hover:text-white transition-colors">Settings</Link>
-                            <Link href="#" className="text-gray-400 hover:text-white transition-colors">Documentation</Link>
-                        </nav>
+      {/* Grid Overlay */}
+      <div className="bg-grid pointer-events-none fixed inset-0 z-0 opacity-20" />
 
-                        <div className="flex items-center gap-4">
-                            <Link
-                                href="/"
-                                className="px-4 py-2 text-sm rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
-                            >
-                                Logout
-                            </Link>
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-pink)] flex items-center justify-center text-xs font-bold">
-                                A
-                            </div>
-                        </div>
-                    </div>
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#050507]/70 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)] opacity-40 blur-md" />
+                <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)]">
+                  <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.591-.659L5 14.5m14 0V6.5a2.25 2.25 0 00-2.25-2.25h-9.5A2.25 2.25 0 005 6.5v8"
+                    />
+                  </svg>
                 </div>
-            </header>
+              </div>
+              <div>
+                <h1 className="gradient-text text-lg font-bold">AI Widget Admin</h1>
+                <p className="text-[11px] tracking-wide text-gray-500 uppercase">Management Dashboard</p>
+              </div>
+            </div>
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 py-8">
-                {/* Page Title */}
-                <div className="mb-8">
-                    <h2 className="text-3xl font-bold text-white mb-2">
-                        Client <span className="gradient-text">Dashboard</span>
-                    </h2>
-                    <p className="text-gray-400">
-                        Manage and monitor all your widget clients from one place
-                    </p>
+            <nav className="hidden items-center gap-1 md:flex">
+              <Link
+                href="/admin"
+                className="rounded-lg bg-[var(--neon-cyan)]/10 px-4 py-2 text-sm font-medium text-[var(--neon-cyan)]"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="#"
+                className="rounded-lg px-4 py-2 text-sm text-gray-400 transition-all hover:bg-white/5 hover:text-white"
+              >
+                Settings
+              </Link>
+              <Link
+                href="#"
+                className="rounded-lg px-4 py-2 text-sm text-gray-400 transition-all hover:bg-white/5 hover:text-white"
+              >
+                Docs
+              </Link>
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <Link
+                href="/"
+                className="rounded-xl border border-white/[0.06] bg-white/5 px-4 py-2 text-sm text-gray-400 transition-all hover:bg-white/10 hover:text-white"
+              >
+                Logout
+              </Link>
+              <div className="relative">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-pink)] opacity-40 blur-sm" />
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-pink)] text-xs font-bold text-white">
+                  A
                 </div>
-
-                {/* Client List */}
-                <ClientList />
-            </main>
-
-            {/* Footer */}
-            <footer className="border-t border-white/10 mt-16">
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)]" />
-                            <span className="text-sm text-gray-400">AI Widget Admin</span>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                            © {new Date().getFullYear()} All rights reserved
-                        </p>
-                    </div>
-                </div>
-            </footer>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      </header>
+
+      {/* Main Content */}
+      <main className="relative z-10 mx-auto max-w-7xl px-6 py-10">
+        {/* Page Title */}
+        <div className="animate-slide-up mb-10">
+          <h2 className="mb-3 text-4xl font-bold tracking-tight text-white">
+            Client <span className="gradient-text">Dashboard</span>
+          </h2>
+          <p className="text-lg text-gray-400">Manage and monitor all your widget clients from one place</p>
+        </div>
+
+        {/* Client List */}
+        <ClientList />
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 mt-20 border-t border-white/[0.06]">
+        <div className="mx-auto max-w-7xl px-6 py-8">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)]" />
+              <span className="text-sm text-gray-500">AI Widget Admin</span>
+            </div>
+            <p className="text-sm text-gray-600">&copy; {new Date().getFullYear()} All rights reserved</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 }

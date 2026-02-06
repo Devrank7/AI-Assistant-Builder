@@ -17,6 +17,13 @@ interface AISettings {
   temperature: number;
   maxTokens: number;
   topK: number;
+  model?: string;
+}
+
+interface AIModelInfo {
+  id: string;
+  name: string;
+  description: string;
 }
 
 interface KnowledgeChunk {
@@ -65,10 +72,6 @@ const demoTemplates = [
   },
 ];
 
-const defaultSystemPrompt = `Ты полезный AI-ассистент. Отвечай вежливо и по существу.
-Используй предоставленную информацию из базы знаний для ответов.
-Если не знаешь ответа, честно скажи об этом.`;
-
 interface PromptTemplate {
   id: string;
   name: string;
@@ -97,6 +100,7 @@ export default function ClientDetailsPage() {
 
   // AI Settings state
   const [aiSettings, setAiSettings] = useState<AISettings | null>(null);
+  const [availableModels, setAvailableModels] = useState<AIModelInfo[]>([]);
   const [aiSettingsLoading, setAiSettingsLoading] = useState(false);
   const [aiSettingsSaving, setAiSettingsSaving] = useState(false);
   const [aiSettingsMessage, setAiSettingsMessage] = useState<string | null>(null);
@@ -115,7 +119,6 @@ export default function ClientDetailsPage() {
 
   // Templates state
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
-  const [templatesLoading, setTemplatesLoading] = useState(false);
 
   // File upload state
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -124,7 +127,9 @@ export default function ClientDetailsPage() {
   // Chat history state
   const [chatLogs, setChatLogs] = useState<ChatLogSummary[]>([]);
   const [chatLogsLoading, setChatLogsLoading] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<{ messages: Array<{ role: string; content: string; timestamp: string }> } | null>(null);
+  const [selectedLog, setSelectedLog] = useState<{
+    messages: Array<{ role: string; content: string; timestamp: string }>;
+  } | null>(null);
 
   // Analytics state
   const [analyticsData, setAnalyticsData] = useState<{
@@ -185,6 +190,9 @@ export default function ClientDetailsPage() {
       const result = await response.json();
       if (result.success) {
         setAiSettings(result.settings);
+        if (result.availableModels) {
+          setAvailableModels(result.availableModels);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch AI settings:', err);
@@ -460,9 +468,9 @@ export default function ClientDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-animated flex items-center justify-center">
+      <div className="bg-gradient-animated flex min-h-screen items-center justify-center">
         <div className="glass-card p-8 text-center">
-          <div className="w-16 h-16 border-4 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-[var(--neon-cyan)] border-t-transparent" />
           <p className="text-gray-400">Loading client data...</p>
         </div>
       </div>
@@ -471,15 +479,20 @@ export default function ClientDetailsPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gradient-animated flex items-center justify-center">
-        <div className="glass-card p-8 text-center max-w-md">
-          <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <div className="bg-gradient-animated flex min-h-screen items-center justify-center">
+        <div className="glass-card max-w-md p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10">
+            <svg className="h-8 w-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Error</h2>
-          <p className="text-gray-400 mb-6">{error}</p>
+          <h2 className="mb-2 text-xl font-bold text-white">Error</h2>
+          <p className="mb-6 text-gray-400">{error}</p>
           <button onClick={() => router.push('/admin')} className="neon-button">
             Back to Dashboard
           </button>
@@ -507,28 +520,28 @@ export default function ClientDetailsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-animated">
+    <div className="bg-gradient-animated min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 glass-card border-0 border-b border-white/10 rounded-none">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <header className="glass-card sticky top-0 z-50 rounded-none border-0 border-b border-white/10">
+        <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/admin" className="text-gray-400 hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Link href="/admin" className="text-gray-400 transition-colors hover:text-white">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </Link>
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)] flex items-center justify-center">
-                <span className="text-black font-bold">{client.username.charAt(0).toUpperCase()}</span>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)]">
+                <span className="font-bold text-black">{client.username.charAt(0).toUpperCase()}</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold gradient-text">{client.username}</h1>
+                <h1 className="gradient-text text-xl font-bold">{client.username}</h1>
                 <p className="text-xs text-gray-400">{client.email}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="px-4 py-2 text-sm rounded-full bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)] border border-[var(--neon-cyan)]/30">
+              <span className="rounded-full border border-[var(--neon-cyan)]/30 bg-[var(--neon-cyan)]/10 px-4 py-2 text-sm text-[var(--neon-cyan)]">
                 Active
               </span>
             </div>
@@ -536,42 +549,39 @@ export default function ClientDetailsPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="glass-card p-6 stat-card">
-            <p className="text-gray-400 text-sm mb-1">Total Requests</p>
-            <p className="text-3xl font-bold text-[var(--neon-cyan)]">
-              {client.requests.toLocaleString()}
-            </p>
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
+          <div className="glass-card stat-card p-6">
+            <p className="mb-1 text-sm text-gray-400">Total Requests</p>
+            <p className="text-3xl font-bold text-[var(--neon-cyan)]">{client.requests.toLocaleString()}</p>
           </div>
-          <div className="glass-card p-6 stat-card">
-            <p className="text-gray-400 text-sm mb-1">Tokens Used</p>
-            <p className="text-3xl font-bold text-[var(--neon-purple)]">
-              {client.tokens.toLocaleString()}
-            </p>
+          <div className="glass-card stat-card p-6">
+            <p className="mb-1 text-sm text-gray-400">Tokens Used</p>
+            <p className="text-3xl font-bold text-[var(--neon-purple)]">{client.tokens.toLocaleString()}</p>
           </div>
-          <div className="glass-card p-6 stat-card">
-            <p className="text-gray-400 text-sm mb-1">Days Active</p>
-            <p className="text-3xl font-bold text-[var(--neon-pink)]">{daysActive}</p>
+          <div className="glass-card stat-card p-6">
+            <p className="mb-1 text-sm text-gray-400">Earnings (USD)</p>
+            <p className="text-3xl font-bold text-green-400">${(client.monthlyCostUsd || 0).toFixed(2)}</p>
           </div>
-          <div className="glass-card p-6 stat-card">
-            <p className="text-gray-400 text-sm mb-1">Knowledge Chunks</p>
-            <p className="text-3xl font-bold gradient-text">{knowledgeChunks.length}</p>
+          <div className="glass-card stat-card p-6">
+            <p className="mb-1 text-sm text-gray-400">Knowledge Chunks</p>
+            <p className="gradient-text text-3xl font-bold">{knowledgeChunks.length}</p>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="glass-card mb-6">
-          <div className="flex border-b border-white/10 overflow-x-auto">
+          <div className="flex overflow-x-auto border-b border-white/10">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-4 font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
-                  ? 'text-[var(--neon-cyan)] border-b-2 border-[var(--neon-cyan)]'
-                  : 'text-gray-400 hover:text-white'
-                  }`}
+                className={`flex items-center gap-2 px-6 py-4 font-medium whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-b-2 border-[var(--neon-cyan)] text-[var(--neon-cyan)]'
+                    : 'text-gray-400 hover:text-white'
+                }`}
               >
                 {tab.icon && <span>{tab.icon}</span>}
                 {tab.label}
@@ -585,61 +595,84 @@ export default function ClientDetailsPage() {
           <div className="space-y-6">
             {aiSettingsLoading ? (
               <div className="glass-card p-8 text-center">
-                <div className="w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[var(--neon-cyan)] border-t-transparent" />
               </div>
             ) : aiSettings ? (
               <>
                 {/* Template Selector */}
                 <div className="glass-card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                     <span>📋</span> Шаблоны промптов
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
                     {templates.map((template) => (
                       <button
                         key={template.id}
                         onClick={() => applyTemplate(template.id)}
-                        className="p-3 bg-white/5 hover:bg-white/10 rounded-lg text-center transition-colors border border-transparent hover:border-[var(--neon-cyan)]/30"
+                        className="rounded-lg border border-transparent bg-white/5 p-3 text-center transition-colors hover:border-[var(--neon-cyan)]/30 hover:bg-white/10"
                       >
-                        <span className="text-2xl block mb-1">{template.icon}</span>
+                        <span className="mb-1 block text-2xl">{template.icon}</span>
                         <span className="text-xs text-gray-300">{template.name}</span>
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-500 mt-3">
+                  <p className="mt-3 text-xs text-gray-500">
                     Выберите шаблон для быстрой настройки. Это заполнит промпт и приветствие.
                   </p>
                 </div>
 
+                <div className="glass-card border border-[var(--neon-cyan)]/20 p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="flex items-center gap-2 text-lg font-bold text-white">🧠 AI Model</h3>
+                    <span className="rounded border border-[var(--neon-cyan)]/20 bg-[var(--neon-cyan)]/10 px-2 py-1 text-xs text-[var(--neon-cyan)]">
+                      {availableModels.find((m) => m.id === aiSettings.model)?.name || aiSettings.model || 'Default'}
+                    </span>
+                  </div>
+                  <select
+                    value={aiSettings.model || ''}
+                    onChange={(e) => setAiSettings({ ...aiSettings, model: e.target.value })}
+                    className="mb-2 w-full rounded-lg border border-white/10 bg-black/30 p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                  >
+                    {availableModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                    {!aiSettings.model && <option value="">Select a model...</option>}
+                  </select>
+                  <p className="text-xs text-gray-400">
+                    {availableModels.find((m) => m.id === aiSettings.model)?.description ||
+                      'Select the brain power for your agent.'}
+                  </p>
+                </div>
+
                 <div className="glass-card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                     <span>🤖</span> System Prompt
                   </h3>
                   <textarea
                     value={aiSettings.systemPrompt}
                     onChange={(e) => setAiSettings({ ...aiSettings, systemPrompt: e.target.value })}
-                    className="w-full h-40 bg-black/30 border border-white/10 rounded-lg p-4 text-white font-mono text-sm focus:border-[var(--neon-cyan)] focus:outline-none resize-none"
+                    className="h-40 w-full resize-none rounded-lg border border-white/10 bg-black/30 p-4 font-mono text-sm text-white focus:border-[var(--neon-cyan)] focus:outline-none"
                     placeholder="Инструкции для AI-ассистента..."
                   />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Опишите роль бота, тон общения и правила поведения.
-                  </p>
+                  <p className="mt-2 text-xs text-gray-500">Опишите роль бота, тон общения и правила поведения.</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="glass-card p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">💬 Приветствие</h3>
+                    <h3 className="mb-4 text-lg font-semibold text-white">💬 Приветствие</h3>
                     <input
                       type="text"
                       value={aiSettings.greeting}
                       onChange={(e) => setAiSettings({ ...aiSettings, greeting: e.target.value })}
-                      className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                      className="w-full rounded-lg border border-white/10 bg-black/30 p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
                       placeholder="Привет! Чем могу помочь?"
                     />
                   </div>
 
                   <div className="glass-card p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">🎨 Креативность</h3>
+                    <h3 className="mb-4 text-lg font-semibold text-white">🎨 Креативность</h3>
                     <div className="flex items-center gap-4">
                       <input
                         type="range"
@@ -650,40 +683,36 @@ export default function ClientDetailsPage() {
                         onChange={(e) => setAiSettings({ ...aiSettings, temperature: parseFloat(e.target.value) })}
                         className="flex-1 accent-[var(--neon-cyan)]"
                       />
-                      <span className="text-[var(--neon-cyan)] font-mono w-12 text-right">
+                      <span className="w-12 text-right font-mono text-[var(--neon-cyan)]">
                         {aiSettings.temperature.toFixed(1)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      0 = точные ответы, 1 = более творческие
-                    </p>
+                    <p className="mt-2 text-xs text-gray-500">0 = точные ответы, 1 = более творческие</p>
                   </div>
 
                   <div className="glass-card p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">📊 Макс. токенов ответа</h3>
+                    <h3 className="mb-4 text-lg font-semibold text-white">📊 Макс. токенов ответа</h3>
                     <input
                       type="number"
                       value={aiSettings.maxTokens}
                       onChange={(e) => setAiSettings({ ...aiSettings, maxTokens: parseInt(e.target.value) || 1024 })}
-                      className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                      className="w-full rounded-lg border border-white/10 bg-black/30 p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
                       min="100"
                       max="4096"
                     />
                   </div>
 
                   <div className="glass-card p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">🔍 Кол-во контекста (Top-K)</h3>
+                    <h3 className="mb-4 text-lg font-semibold text-white">🔍 Кол-во контекста (Top-K)</h3>
                     <input
                       type="number"
                       value={aiSettings.topK}
                       onChange={(e) => setAiSettings({ ...aiSettings, topK: parseInt(e.target.value) || 3 })}
-                      className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                      className="w-full rounded-lg border border-white/10 bg-black/30 p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
                       min="1"
                       max="10"
                     />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Сколько кусочков знаний использовать для ответа
-                    </p>
+                    <p className="mt-2 text-xs text-gray-500">Сколько кусочков знаний использовать для ответа</p>
                   </div>
                 </div>
 
@@ -695,36 +724,26 @@ export default function ClientDetailsPage() {
                   >
                     {aiSettingsSaving ? 'Сохранение...' : 'Сохранить настройки'}
                   </button>
-                  {aiSettingsMessage && (
-                    <span className="text-[var(--neon-cyan)]">{aiSettingsMessage}</span>
-                  )}
+                  {aiSettingsMessage && <span className="text-[var(--neon-cyan)]">{aiSettingsMessage}</span>}
                 </div>
 
                 {/* Test Chat */}
                 <div className="glass-card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">🧪 Тест чата</h3>
-                  <div className="flex gap-4 mb-4">
+                  <h3 className="mb-4 text-lg font-semibold text-white">🧪 Тест чата</h3>
+                  <div className="mb-4 flex gap-4">
                     <input
                       type="text"
                       value={testMessage}
                       onChange={(e) => setTestMessage(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && testChat()}
-                      className="flex-1 bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                      className="flex-1 rounded-lg border border-white/10 bg-black/30 p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
                       placeholder="Задайте вопрос для теста..."
                     />
-                    <button
-                      onClick={testChat}
-                      disabled={testLoading}
-                      className="neon-button disabled:opacity-50"
-                    >
+                    <button onClick={testChat} disabled={testLoading} className="neon-button disabled:opacity-50">
                       {testLoading ? '...' : 'Отправить'}
                     </button>
                   </div>
-                  {testResponse && (
-                    <div className="bg-black/30 rounded-lg p-4 text-gray-300">
-                      {testResponse}
-                    </div>
-                  )}
+                  {testResponse && <div className="rounded-lg bg-black/30 p-4 text-gray-300">{testResponse}</div>}
                 </div>
               </>
             ) : null}
@@ -736,13 +755,16 @@ export default function ClientDetailsPage() {
           <div className="space-y-6">
             {/* File Upload */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                 <span>📄</span> Загрузить документ
               </h3>
               <div
-                className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-[var(--neon-cyan)]/50 transition-colors cursor-pointer"
+                className="cursor-pointer rounded-lg border-2 border-dashed border-white/20 p-8 text-center transition-colors hover:border-[var(--neon-cyan)]/50"
                 onClick={() => document.getElementById('fileInput')?.click()}
-                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
                 onDrop={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -761,42 +783,40 @@ export default function ClientDetailsPage() {
                   }}
                 />
                 {uploadingFile ? (
-                  <div className="w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto" />
+                  <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[var(--neon-cyan)] border-t-transparent" />
                 ) : (
                   <>
-                    <span className="text-4xl block mb-2">📁</span>
+                    <span className="mb-2 block text-4xl">📁</span>
                     <p className="text-gray-400">Перетащите файл сюда или нажмите для выбора</p>
-                    <p className="text-xs text-gray-500 mt-2">PDF, DOCX, TXT, MD</p>
+                    <p className="mt-2 text-xs text-gray-500">PDF, DOCX, TXT, MD</p>
                   </>
                 )}
               </div>
-              {uploadMessage && (
-                <p className="text-sm mt-3 text-center">{uploadMessage}</p>
-              )}
+              {uploadMessage && <p className="mt-3 text-center text-sm">{uploadMessage}</p>}
             </div>
 
             {/* Add Knowledge */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                 <span>➕</span> Добавить знания
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-gray-400 mb-2 block">Источник (опционально)</label>
+                  <label className="mb-2 block text-sm text-gray-400">Источник (опционально)</label>
                   <input
                     type="text"
                     value={newKnowledgeSource}
                     onChange={(e) => setNewKnowledgeSource(e.target.value)}
-                    className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
+                    className="w-full rounded-lg border border-white/10 bg-black/30 p-3 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
                     placeholder="FAQ, Сайт, Документ..."
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-gray-400 mb-2 block">Текст</label>
+                  <label className="mb-2 block text-sm text-gray-400">Текст</label>
                   <textarea
                     value={newKnowledgeText}
                     onChange={(e) => setNewKnowledgeText(e.target.value)}
-                    className="w-full h-32 bg-black/30 border border-white/10 rounded-lg p-4 text-white focus:border-[var(--neon-cyan)] focus:outline-none resize-none"
+                    className="h-32 w-full resize-none rounded-lg border border-white/10 bg-black/30 p-4 text-white focus:border-[var(--neon-cyan)] focus:outline-none"
                     placeholder="Введите информацию о бизнесе, которую должен знать бот..."
                   />
                 </div>
@@ -812,27 +832,22 @@ export default function ClientDetailsPage() {
 
             {/* Existing Knowledge */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                 <span>📚</span> База знаний ({knowledgeChunks.length} записей)
               </h3>
               {knowledgeLoading ? (
-                <div className="text-center py-8">
-                  <div className="w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="py-8 text-center">
+                  <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[var(--neon-cyan)] border-t-transparent" />
                 </div>
               ) : knowledgeChunks.length > 0 ? (
                 <div className="space-y-3">
                   {knowledgeChunks.map((chunk) => (
-                    <div
-                      key={chunk._id}
-                      className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors"
-                    >
+                    <div key={chunk._id} className="rounded-lg bg-white/5 p-4 transition-colors hover:bg-white/10">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-gray-300 text-sm line-clamp-2">{chunk.text}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs text-gray-500 bg-white/10 px-2 py-1 rounded">
-                              {chunk.source}
-                            </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="line-clamp-2 text-sm text-gray-300">{chunk.text}</p>
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="rounded bg-white/10 px-2 py-1 text-xs text-gray-500">{chunk.source}</span>
                             <span className="text-xs text-gray-500">
                               {new Date(chunk.createdAt).toLocaleDateString()}
                             </span>
@@ -840,10 +855,15 @@ export default function ClientDetailsPage() {
                         </div>
                         <button
                           onClick={() => deleteKnowledge(chunk._id)}
-                          className="text-red-400 hover:text-red-300 transition-colors"
+                          className="text-red-400 transition-colors hover:text-red-300"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -851,9 +871,7 @@ export default function ClientDetailsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-8">
-                  База знаний пуста. Добавьте информацию выше.
-                </p>
+                <p className="py-8 text-center text-gray-400">База знаний пуста. Добавьте информацию выше.</p>
               )}
             </div>
           </div>
@@ -863,12 +881,12 @@ export default function ClientDetailsPage() {
         {activeTab === 'history' && (
           <div className="space-y-6">
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                 <span>💬</span> История чатов ({chatLogs.length})
               </h3>
               {chatLogsLoading ? (
-                <div className="text-center py-8">
-                  <div className="w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="py-8 text-center">
+                  <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[var(--neon-cyan)] border-t-transparent" />
                 </div>
               ) : chatLogs.length > 0 ? (
                 <div className="space-y-3">
@@ -876,29 +894,25 @@ export default function ClientDetailsPage() {
                     <button
                       key={log._id}
                       onClick={() => viewChatLog(log._id)}
-                      className="w-full text-left bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors"
+                      className="w-full rounded-lg bg-white/5 p-4 text-left transition-colors hover:bg-white/10"
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-white font-medium">
-                            Сессия: {log.sessionId.slice(0, 12)}...
-                          </p>
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="font-medium text-white">Сессия: {log.sessionId.slice(0, 12)}...</p>
+                          <p className="mt-1 text-sm text-gray-400">
                             {log.messageCount} сообщений • {new Date(log.createdAt).toLocaleString()}
                           </p>
                         </div>
                         <span className="text-gray-500">→</span>
                       </div>
                       {log.lastMessage && (
-                        <p className="text-xs text-gray-500 mt-2 truncate">
-                          Последнее: {log.lastMessage}
-                        </p>
+                        <p className="mt-2 truncate text-xs text-gray-500">Последнее: {log.lastMessage}</p>
                       )}
                     </button>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-8">
+                <p className="py-8 text-center text-gray-400">
                   Нет истории чатов. Диалоги появятся после первых сообщений виджета.
                 </p>
               )}
@@ -907,28 +921,24 @@ export default function ClientDetailsPage() {
             {/* Selected Chat Modal */}
             {selectedLog && (
               <div className="glass-card p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-white">Детали диалога</h3>
-                  <button
-                    onClick={() => setSelectedLog(null)}
-                    className="text-gray-400 hover:text-white"
-                  >
+                  <button onClick={() => setSelectedLog(null)} className="text-gray-400 hover:text-white">
                     ✕
                   </button>
                 </div>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="max-h-96 space-y-3 overflow-y-auto">
                   {selectedLog.messages.map((msg, i) => (
                     <div
                       key={i}
-                      className={`p-3 rounded-lg ${msg.role === 'user'
-                        ? 'bg-[var(--neon-cyan)]/10 ml-8'
-                        : 'bg-white/5 mr-8'
-                        }`}
+                      className={`rounded-lg p-3 ${
+                        msg.role === 'user' ? 'ml-8 bg-[var(--neon-cyan)]/10' : 'mr-8 bg-white/5'
+                      }`}
                     >
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="mb-1 text-xs text-gray-500">
                         {msg.role === 'user' ? 'Пользователь' : 'Бот'} • {new Date(msg.timestamp).toLocaleTimeString()}
                       </p>
-                      <p className="text-gray-300 text-sm">{msg.content}</p>
+                      <p className="text-sm text-gray-300">{msg.content}</p>
                     </div>
                   ))}
                 </div>
@@ -942,45 +952,45 @@ export default function ClientDetailsPage() {
           <div className="space-y-6">
             {analyticsLoading ? (
               <div className="glass-card p-12 text-center">
-                <div className="animate-spin w-8 h-8 border-2 border-[var(--neon-cyan)] border-t-transparent rounded-full mx-auto mb-4" />
+                <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[var(--neon-cyan)] border-t-transparent" />
                 <p className="text-gray-400">Загрузка аналитики...</p>
               </div>
             ) : analyticsData ? (
               <>
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="glass-card p-6 text-center">
                     <p className="text-4xl font-bold text-[var(--neon-cyan)]">{analyticsData.totalChats}</p>
-                    <p className="text-gray-400 mt-2">Всего чатов</p>
-                    <p className="text-xs text-gray-500 mt-1">за 30 дней</p>
+                    <p className="mt-2 text-gray-400">Всего чатов</p>
+                    <p className="mt-1 text-xs text-gray-500">за 30 дней</p>
                   </div>
                   <div className="glass-card p-6 text-center">
                     <p className="text-4xl font-bold text-[var(--neon-purple)]">{analyticsData.totalMessages}</p>
-                    <p className="text-gray-400 mt-2">Сообщений</p>
-                    <p className="text-xs text-gray-500 mt-1">за 30 дней</p>
+                    <p className="mt-2 text-gray-400">Сообщений</p>
+                    <p className="mt-1 text-xs text-gray-500">за 30 дней</p>
                   </div>
                   <div className="glass-card p-6 text-center">
                     <p className="text-4xl font-bold text-green-400">{analyticsData.avgMessagesPerChat}</p>
-                    <p className="text-gray-400 mt-2">Сообщений/чат</p>
-                    <p className="text-xs text-gray-500 mt-1">в среднем</p>
+                    <p className="mt-2 text-gray-400">Сообщений/чат</p>
+                    <p className="mt-1 text-xs text-gray-500">в среднем</p>
                   </div>
                 </div>
 
                 {/* Daily Chart */}
                 <div className="glass-card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">📈 Чаты по дням</h3>
-                  <div className="h-48 flex items-end gap-1">
+                  <h3 className="mb-4 text-lg font-semibold text-white">📈 Чаты по дням</h3>
+                  <div className="flex h-48 items-end gap-1">
                     {analyticsData.dailyStats.slice(-14).map((day, i) => {
-                      const maxChats = Math.max(...analyticsData.dailyStats.map(d => d.totalChats), 1);
+                      const maxChats = Math.max(...analyticsData.dailyStats.map((d) => d.totalChats), 1);
                       const height = (day.totalChats / maxChats) * 100;
                       return (
-                        <div key={i} className="flex-1 flex flex-col items-center group">
+                        <div key={i} className="group flex flex-1 flex-col items-center">
                           <div
-                            className="w-full bg-gradient-to-t from-[var(--neon-cyan)] to-[var(--neon-purple)] rounded-t opacity-70 group-hover:opacity-100 transition-opacity"
+                            className="w-full rounded-t bg-gradient-to-t from-[var(--neon-cyan)] to-[var(--neon-purple)] opacity-70 transition-opacity group-hover:opacity-100"
                             style={{ height: `${Math.max(height, 2)}%` }}
                             title={`${day.date}: ${day.totalChats} чатов`}
                           />
-                          <p className="text-[10px] text-gray-500 mt-1 rotate-45 origin-left">
+                          <p className="mt-1 origin-left rotate-45 text-[10px] text-gray-500">
                             {new Date(day.date).getDate()}
                           </p>
                         </div>
@@ -991,21 +1001,19 @@ export default function ClientDetailsPage() {
 
                 {/* Hourly Distribution */}
                 <div className="glass-card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">🕐 Активность по часам</h3>
-                  <div className="h-32 flex items-end gap-1">
+                  <h3 className="mb-4 text-lg font-semibold text-white">🕐 Активность по часам</h3>
+                  <div className="flex h-32 items-end gap-1">
                     {analyticsData.hourlyDistribution.map((h, i) => {
-                      const maxCount = Math.max(...analyticsData.hourlyDistribution.map(x => x.count), 1);
+                      const maxCount = Math.max(...analyticsData.hourlyDistribution.map((x) => x.count), 1);
                       const height = (h.count / maxCount) * 100;
                       return (
-                        <div key={i} className="flex-1 flex flex-col items-center group">
+                        <div key={i} className="group flex flex-1 flex-col items-center">
                           <div
-                            className="w-full bg-[var(--neon-cyan)]/60 group-hover:bg-[var(--neon-cyan)] rounded-t transition-colors"
+                            className="w-full rounded-t bg-[var(--neon-cyan)]/60 transition-colors group-hover:bg-[var(--neon-cyan)]"
                             style={{ height: `${Math.max(height, 2)}%` }}
                             title={`${h.hour}:00 - ${h.count} чатов`}
                           />
-                          {i % 4 === 0 && (
-                            <p className="text-[10px] text-gray-500 mt-1">{h.hour}:00</p>
-                          )}
+                          {i % 4 === 0 && <p className="mt-1 text-[10px] text-gray-500">{h.hour}:00</p>}
                         </div>
                       );
                     })}
@@ -1014,26 +1022,26 @@ export default function ClientDetailsPage() {
 
                 {/* Top Questions */}
                 <div className="glass-card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">❓ Популярные вопросы</h3>
+                  <h3 className="mb-4 text-lg font-semibold text-white">❓ Популярные вопросы</h3>
                   {analyticsData.topQuestions.length > 0 ? (
                     <div className="space-y-2">
                       {analyticsData.topQuestions.map((q, i) => (
-                        <div key={i} className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
-                          <span className="text-[var(--neon-cyan)] font-bold w-6">{i + 1}</span>
-                          <p className="text-gray-300 flex-1 text-sm truncate">{q.text}</p>
-                          <span className="text-gray-500 text-sm">{q.count}x</span>
+                        <div key={i} className="flex items-center gap-3 rounded-lg bg-white/5 p-2">
+                          <span className="w-6 font-bold text-[var(--neon-cyan)]">{i + 1}</span>
+                          <p className="flex-1 truncate text-sm text-gray-300">{q.text}</p>
+                          <span className="text-sm text-gray-500">{q.count}x</span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 text-center py-4">Пока нет данных</p>
+                    <p className="py-4 text-center text-gray-500">Пока нет данных</p>
                   )}
                 </div>
 
                 {/* Google Sheets Export */}
                 <div className="glass-card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">📊 Экспорт в Google Sheets</h3>
-                  <p className="text-gray-400 text-sm mb-4">
+                  <h3 className="mb-4 text-lg font-semibold text-white">📊 Экспорт в Google Sheets</h3>
+                  <p className="mb-4 text-sm text-gray-400">
                     Экспортируйте историю чатов в Google Таблицу для дальнейшего анализа.
                   </p>
                   <div className="flex gap-3">
@@ -1042,7 +1050,7 @@ export default function ClientDetailsPage() {
                       placeholder="ID таблицы Google Sheets"
                       value={spreadsheetId}
                       onChange={(e) => setSpreadsheetId(e.target.value)}
-                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:border-[var(--neon-cyan)] focus:outline-none"
+                      className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white placeholder-gray-500 focus:border-[var(--neon-cyan)] focus:outline-none"
                     />
                     <button
                       onClick={exportToSheets}
@@ -1053,11 +1061,13 @@ export default function ClientDetailsPage() {
                     </button>
                   </div>
                   {exportMessage && (
-                    <p className={`mt-3 text-sm ${exportMessage.startsWith('✅') ? 'text-green-400' : 'text-yellow-400'}`}>
+                    <p
+                      className={`mt-3 text-sm ${exportMessage.startsWith('✅') ? 'text-green-400' : 'text-yellow-400'}`}
+                    >
                       {exportMessage}
                     </p>
                   )}
-                  <p className="text-gray-500 text-xs mt-3">
+                  <p className="mt-3 text-xs text-gray-500">
                     Инструкция: Создайте таблицу → Скопируйте ID из URL (docs.google.com/spreadsheets/d/<b>ID</b>/edit)
                   </p>
                 </div>
@@ -1078,43 +1088,58 @@ export default function ClientDetailsPage() {
           <div className="space-y-6">
             {/* Subscription Status Card */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                 <span>💳</span> Статус подписки
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/5 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Статус</p>
-                  <p className={`text-lg font-medium ${client.subscriptionStatus === 'active' ? 'text-green-400' :
-                    client.subscriptionStatus === 'trial' ? 'text-cyan-400' :
-                      client.subscriptionStatus === 'past_due' ? 'text-yellow-400' :
-                        'text-red-400'
-                    }`}>
-                    {client.subscriptionStatus === 'active' ? '✅ Активна' :
-                      client.subscriptionStatus === 'trial' ? '🎁 Триал' :
-                        client.subscriptionStatus === 'past_due' ? '⚠️ Просрочена' :
-                          client.subscriptionStatus === 'suspended' ? '🚫 Приостановлена' :
-                            '❌ Отменена'}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-lg bg-white/5 p-4">
+                  <p className="mb-1 text-sm text-gray-400">Статус</p>
+                  <p
+                    className={`text-lg font-medium ${
+                      client.subscriptionStatus === 'active'
+                        ? 'text-green-400'
+                        : client.subscriptionStatus === 'trial'
+                          ? 'text-cyan-400'
+                          : client.subscriptionStatus === 'past_due'
+                            ? 'text-yellow-400'
+                            : 'text-red-400'
+                    }`}
+                  >
+                    {client.subscriptionStatus === 'active'
+                      ? '✅ Активна'
+                      : client.subscriptionStatus === 'trial'
+                        ? '🎁 Триал'
+                        : client.subscriptionStatus === 'past_due'
+                          ? '⚠️ Просрочена'
+                          : client.subscriptionStatus === 'suspended'
+                            ? '🚫 Приостановлена'
+                            : '❌ Отменена'}
                   </p>
                 </div>
-                <div className="bg-white/5 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Способ оплаты</p>
+                <div className="rounded-lg bg-white/5 p-4">
+                  <p className="mb-1 text-sm text-gray-400">Способ оплаты</p>
                   <p className="text-lg font-medium text-white">
-                    {client.paymentMethod === 'cryptomus' ? '₿ Cryptomus' :
-                      client.paymentMethod === 'dodo' ? '💳 Dodo Payments' :
-                        client.paymentMethod === 'liqpay' ? '💳 LiqPay' :
-                          '❓ Не привязан'}
+                    {client.paymentMethod === 'cryptomus'
+                      ? '₿ Cryptomus'
+                      : client.paymentMethod === 'dodo'
+                        ? '💳 Dodo Payments'
+                        : client.paymentMethod === 'liqpay'
+                          ? '💳 LiqPay'
+                          : '❓ Не привязан'}
                   </p>
                 </div>
-                <div className="bg-white/5 rounded-lg p-4">
-                  <p className="text-sm text-gray-400 mb-1">Следующий платёж</p>
+                <div className="rounded-lg bg-white/5 p-4">
+                  <p className="mb-1 text-sm text-gray-400">Следующий платёж</p>
                   <p className="text-lg font-medium text-white">
                     {client.nextPaymentDate
                       ? new Date(client.nextPaymentDate).toLocaleDateString('ru-RU', {
-                        day: 'numeric', month: 'long', year: 'numeric'
-                      })
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })
                       : 'Триал период'}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="mt-1 text-xs text-gray-500">
                     {daysUntilPayment > 0 ? `Через ${daysUntilPayment} дней` : 'Сегодня'}
                   </p>
                 </div>
@@ -1123,13 +1148,13 @@ export default function ClientDetailsPage() {
 
             {/* Payment Setup */}
             {!client.paymentMethod && (
-              <div className="glass-card p-6 border border-yellow-500/30">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="glass-card border border-yellow-500/30 p-6">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                   <span>⚠️</span> Требуется привязка оплаты
                 </h3>
-                <p className="text-gray-400 mb-4">
-                  Для продолжения работы виджета после триал-периода необходимо привязать способ оплаты.
-                  Ежемесячная подписка составляет <strong className="text-white">$50 USD</strong>.
+                <p className="mb-4 text-gray-400">
+                  Для продолжения работы виджета после триал-периода необходимо привязать способ оплаты. Ежемесячная
+                  подписка составляет <strong className="text-white">$50 USD</strong>.
                 </p>
                 <div className="flex gap-3">
                   <button
@@ -1150,7 +1175,7 @@ export default function ClientDetailsPage() {
                   </button>
                   <button
                     disabled
-                    className="px-4 py-2 bg-white/10 rounded-lg text-gray-500 cursor-not-allowed"
+                    className="cursor-not-allowed rounded-lg bg-white/10 px-4 py-2 text-gray-500"
                     title="Coming soon"
                   >
                     💳 Карта (скоро)
@@ -1161,7 +1186,7 @@ export default function ClientDetailsPage() {
 
             {/* Payment History */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                 <span>📜</span> История платежей
               </h3>
               <div className="overflow-x-auto">
@@ -1201,7 +1226,7 @@ export default function ClientDetailsPage() {
             {/* Manage Subscription */}
             {client.paymentMethod && (
               <div className="glass-card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                   <span>⚙️</span> Управление подпиской
                 </h3>
                 <button
@@ -1215,7 +1240,7 @@ export default function ClientDetailsPage() {
                       window.location.reload();
                     }
                   }}
-                  className="px-4 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
+                  className="rounded-lg bg-red-500/10 px-4 py-2 text-red-400 transition-colors hover:bg-red-500/20"
                 >
                   Отменить подписку
                 </button>
@@ -1226,12 +1251,17 @@ export default function ClientDetailsPage() {
 
         {/* Info Tab */}
         {activeTab === 'info' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Contact Information */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-[var(--neon-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
+                <svg className="h-5 w-5 text-[var(--neon-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
                 </svg>
                 Contact Information
               </h3>
@@ -1250,7 +1280,7 @@ export default function ClientDetailsPage() {
                     href={client.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[var(--neon-cyan)] hover:underline block"
+                    className="block text-[var(--neon-cyan)] hover:underline"
                   >
                     {client.website}
                   </a>
@@ -1268,7 +1298,7 @@ export default function ClientDetailsPage() {
                       href={`https://instagram.com/${client.instagram}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[var(--neon-pink)] hover:underline block"
+                      className="block text-[var(--neon-pink)] hover:underline"
                     >
                       @{client.instagram}
                     </a>
@@ -1279,29 +1309,36 @@ export default function ClientDetailsPage() {
 
             {/* Widget Integration */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-[var(--neon-purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
+                <svg
+                  className="h-5 w-5 text-[var(--neon-purple)]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                  />
                 </svg>
                 Widget Integration
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-gray-400 mb-2 block">Script URL</label>
-                  <div className="bg-black/30 rounded-lg p-3 font-mono text-sm text-[var(--neon-cyan)] break-all">
+                  <label className="mb-2 block text-sm text-gray-400">Script URL</label>
+                  <div className="rounded-lg bg-black/30 p-3 font-mono text-sm break-all text-[var(--neon-cyan)]">
                     {scriptUrl}
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-400 mb-2 block">Embed Code</label>
-                  <div className="bg-black/30 rounded-lg p-3 font-mono text-sm text-gray-300 overflow-x-auto">
+                  <label className="mb-2 block text-sm text-gray-400">Embed Code</label>
+                  <div className="overflow-x-auto rounded-lg bg-black/30 p-3 font-mono text-sm text-gray-300">
                     <pre>{`<script src="${scriptUrl}"></script>`}</pre>
                   </div>
                 </div>
-                <button
-                  onClick={() => navigator.clipboard.writeText(scriptUrl)}
-                  className="neon-button w-full"
-                >
+                <button onClick={() => navigator.clipboard.writeText(scriptUrl)} className="neon-button w-full">
                   Copy Script URL
                 </button>
               </div>
@@ -1309,13 +1346,18 @@ export default function ClientDetailsPage() {
 
             {/* Subscription Info */}
             <div className="glass-card p-6 lg:col-span-2">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-[var(--neon-pink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
+                <svg className="h-5 w-5 text-[var(--neon-pink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
                 Subscription Details
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
                 <div>
                   <label className="text-sm text-gray-400">Start Date</label>
                   <p className="text-white">{startDate.toLocaleDateString()}</p>
@@ -1328,19 +1370,24 @@ export default function ClientDetailsPage() {
                 </div>
                 <div>
                   <label className="text-sm text-gray-400">Client ID</label>
-                  <p className="text-white font-mono text-sm">{client.clientId}</p>
+                  <p className="font-mono text-sm text-white">{client.clientId}</p>
                 </div>
                 <div>
                   <label className="text-sm text-gray-400">Client Token</label>
                   <div className="flex items-center gap-2">
-                    <p className="text-[var(--neon-cyan)] font-mono text-sm truncate">{client.clientToken}</p>
+                    <p className="truncate font-mono text-sm text-[var(--neon-cyan)]">{client.clientToken}</p>
                     <button
                       onClick={() => navigator.clipboard.writeText(client.clientToken)}
-                      className="text-gray-400 hover:text-white transition-colors"
+                      className="text-gray-400 transition-colors hover:text-white"
                       title="Copy token"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -1352,32 +1399,42 @@ export default function ClientDetailsPage() {
 
         {activeTab === 'files' && (
           <div className="glass-card p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Widget Files</h3>
+            <h3 className="mb-4 text-lg font-semibold text-white">Widget Files</h3>
             <div className="space-y-2">
               {files.length > 0 ? (
                 files.map((file) => (
                   <div
                     key={file}
-                    className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                    className="flex items-center justify-between rounded-lg bg-white/5 p-3 transition-colors hover:bg-white/10"
                   >
                     <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5 text-[var(--neon-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <svg
+                        className="h-5 w-5 text-[var(--neon-cyan)]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
                       </svg>
-                      <span className="text-gray-300 font-mono text-sm">{file}</span>
+                      <span className="font-mono text-sm text-gray-300">{file}</span>
                     </div>
                     <a
                       href={`/widgets/${client.folderPath}/${file}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[var(--neon-cyan)] hover:underline text-sm"
+                      className="text-sm text-[var(--neon-cyan)] hover:underline"
                     >
                       View
                     </a>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-400 text-center py-8">No files found</p>
+                <p className="py-8 text-center text-gray-400">No files found</p>
               )}
             </div>
           </div>
@@ -1385,36 +1442,36 @@ export default function ClientDetailsPage() {
 
         {activeTab === 'usage' && (
           <div className="glass-card p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Usage Statistics</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white/5 rounded-lg p-6">
-                <h4 className="text-sm text-gray-400 mb-2">Requests Over Time</h4>
-                <div className="h-48 flex items-end justify-around gap-2">
+            <h3 className="mb-4 text-lg font-semibold text-white">Usage Statistics</h3>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="rounded-lg bg-white/5 p-6">
+                <h4 className="mb-2 text-sm text-gray-400">Requests Over Time</h4>
+                <div className="flex h-48 items-end justify-around gap-2">
                   {[40, 65, 45, 80, 55, 90, 70].map((height, i) => (
                     <div
                       key={i}
-                      className="w-full bg-gradient-to-t from-[var(--neon-cyan)] to-[var(--neon-purple)] rounded-t"
+                      className="w-full rounded-t bg-gradient-to-t from-[var(--neon-cyan)] to-[var(--neon-purple)]"
                       style={{ height: `${height}%` }}
                     />
                   ))}
                 </div>
-                <div className="flex justify-around mt-2 text-xs text-gray-500">
+                <div className="mt-2 flex justify-around text-xs text-gray-500">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
                     <span key={day}>{day}</span>
                   ))}
                 </div>
               </div>
-              <div className="bg-white/5 rounded-lg p-6">
-                <h4 className="text-sm text-gray-400 mb-4">Token Usage</h4>
+              <div className="rounded-lg bg-white/5 p-6">
+                <h4 className="mb-4 text-sm text-gray-400">Token Usage</h4>
                 <div className="space-y-4">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="mb-1 flex justify-between text-sm">
                       <span className="text-gray-400">Used</span>
                       <span className="text-white">{client.tokens.toLocaleString()} tokens</span>
                     </div>
-                    <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-3 overflow-hidden rounded-full bg-white/10">
                       <div
-                        className="h-full bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)] rounded-full"
+                        className="h-full rounded-full bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)]"
                         style={{ width: `${Math.min((client.tokens / 100000) * 100, 100)}%` }}
                       />
                     </div>
@@ -1431,22 +1488,20 @@ export default function ClientDetailsPage() {
         {activeTab === 'demo' && (
           <div>
             <div className="mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2">Live Demo Templates</h3>
+              <h3 className="mb-2 text-2xl font-bold text-white">Live Demo Templates</h3>
               <p className="text-gray-400">Preview how your widget looks on different website templates</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               {demoTemplates.map((template) => {
                 const href = template.isClientSite
                   ? `/demo/${template.id}?client=${client.clientId}&website=${encodeURIComponent(client.website)}`
                   : `/demo/${template.id}?client=${client.clientId}`;
 
                 return (
-                  <Link
-                    key={template.id}
-                    href={href}
-                    className="group"
-                  >
-                    <div className={`glass-card overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl ${template.isClientSite ? 'hover:shadow-green-500/20 ring-2 ring-green-500/30' : 'hover:shadow-[var(--neon-cyan)]/20'}`}>
+                  <Link key={template.id} href={href} className="group">
+                    <div
+                      className={`glass-card overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl ${template.isClientSite ? 'ring-2 ring-green-500/30 hover:shadow-green-500/20' : 'hover:shadow-[var(--neon-cyan)]/20'}`}
+                    >
                       <div className="relative h-48 overflow-hidden">
                         <Image
                           src={template.image}
@@ -1458,22 +1513,38 @@ export default function ClientDetailsPage() {
                         <div className="absolute inset-0 flex items-center justify-center">
                           <span className="text-6xl">{template.icon}</span>
                         </div>
-                        <div className={`absolute top-3 right-3 px-3 py-1 backdrop-blur-sm rounded-full text-xs text-white ${template.isClientSite ? 'bg-green-500/70' : 'bg-black/50'}`}>
+                        <div
+                          className={`absolute top-3 right-3 rounded-full px-3 py-1 text-xs text-white backdrop-blur-sm ${template.isClientSite ? 'bg-green-500/70' : 'bg-black/50'}`}
+                        >
                           {template.isClientSite ? 'Your Website' : 'Live Preview'}
                         </div>
                       </div>
                       <div className="p-5">
-                        <h4 className={`text-lg font-semibold text-white mb-1 transition-colors ${template.isClientSite ? 'group-hover:text-green-400' : 'group-hover:text-[var(--neon-cyan)]'}`}>
+                        <h4
+                          className={`mb-1 text-lg font-semibold text-white transition-colors ${template.isClientSite ? 'group-hover:text-green-400' : 'group-hover:text-[var(--neon-cyan)]'}`}
+                        >
                           {template.name}
                         </h4>
-                        <p className="text-sm text-gray-400 mb-2">{template.description}</p>
+                        <p className="mb-2 text-sm text-gray-400">{template.description}</p>
                         {template.isClientSite && (
-                          <p className="text-xs text-green-400/70 mb-2 truncate">{client.website}</p>
+                          <p className="mb-2 truncate text-xs text-green-400/70">{client.website}</p>
                         )}
-                        <div className={`flex items-center text-sm font-medium ${template.isClientSite ? 'text-green-400' : 'text-[var(--neon-cyan)]'}`}>
+                        <div
+                          className={`flex items-center text-sm font-medium ${template.isClientSite ? 'text-green-400' : 'text-[var(--neon-cyan)]'}`}
+                        >
                           <span>Open Demo</span>
-                          <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          <svg
+                            className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14 5l7 7m0 0l-7 7m7-7H3"
+                            />
                           </svg>
                         </div>
                       </div>

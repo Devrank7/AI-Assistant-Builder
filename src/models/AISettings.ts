@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IAISettings extends Document {
   clientId: string;
-  model: string; // Gemini model ID (e.g. 'gemini-3-flash')
+  aiModel: string; // Gemini model ID (e.g. 'gemini-3-flash')
   systemPrompt: string;
   greeting: string;
   temperature: number;
@@ -24,7 +24,7 @@ const AISettingsSchema = new Schema<IAISettings>(
       unique: true,
       index: true,
     },
-    model: {
+    aiModel: {
       type: String,
       required: true,
       default: 'gemini-3-flash',

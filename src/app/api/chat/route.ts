@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Get AI settings for client
     const settingsDoc = await AISettings.findOne({ clientId });
     const config = {
-      model: settingsDoc?.model || 'gemini-3-flash',
+      model: settingsDoc?.aiModel || 'gemini-3-flash',
       systemPrompt: settingsDoc?.systemPrompt || defaultSystemPrompt,
       temperature: settingsDoc?.temperature || 0.7,
       maxTokens: settingsDoc?.maxTokens || 1024,

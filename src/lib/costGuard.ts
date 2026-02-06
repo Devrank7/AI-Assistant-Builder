@@ -3,21 +3,29 @@
  *
  * Monitors API spending per client and enforces cost limits.
  * - $20/month → warning notification
- * - $40/month → widget disabled
+ * - $40/month → widget disabled (unless extra credits purchased)
+ * - Clients can top-up $10/$20/$30 to extend limit
  */
 
 import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
-import { sendEmail } from '@/lib/notifications';
+import { sendEmail, sendTelegram } from '@/lib/notifications';
 
 const COST_WARNING_THRESHOLD = 20; // USD per month
 const COST_BLOCK_THRESHOLD = 40; // USD per month
+export const TOP_UP_OPTIONS = [10, 20, 30]; // Available top-up amounts
 
 export type CostCheckResult = {
   allowed: boolean;
   status: 'ok' | 'warning' | 'blocked';
   monthlyCostUsd: number;
   message?: string;
+  // Top-up info
+  canTopUp: boolean;
+  effectiveLimit: number;
+  extraCreditsUsd: number;
+  remainingCredits: number;
+  topUpOptions: number[];
 };
 
 /**
@@ -28,11 +36,21 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
   await connectDB();
 
   const client = await Client.findOne({ clientId }).select(
-    'monthlyCostUsd costResetDate costWarningNotified email telegram isActive'
+    'monthlyCostUsd costResetDate costWarningNotified email telegram isActive extraCreditsUsd extraCreditsExpiry'
   );
 
   if (!client) {
-    return { allowed: false, status: 'blocked', monthlyCostUsd: 0, message: 'Client not found' };
+    return {
+      allowed: false,
+      status: 'blocked',
+      monthlyCostUsd: 0,
+      message: 'Client not found',
+      canTopUp: false,
+      effectiveLimit: COST_BLOCK_THRESHOLD,
+      extraCreditsUsd: 0,
+      remainingCredits: 0,
+      topUpOptions: [],
+    };
   }
 
   // Check if we need to reset monthly counters
@@ -41,6 +59,16 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
   const daysSinceReset = (now.getTime() - resetDate.getTime()) / (1000 * 60 * 60 * 24);
 
   if (daysSinceReset >= 30) {
+    // Calculate unused credits to carry over
+    const currentCost = client.monthlyCostUsd || 0;
+    const currentExtraCredits = client.extraCreditsUsd || 0;
+
+    // Unused credits = extra credits - (cost spent above base limit)
+    // Example: extraCredits=20, cost=50 → used 10 of credits → carry over 10
+    const creditsUsed = Math.max(0, currentCost - COST_BLOCK_THRESHOLD);
+    const unusedCredits = Math.max(0, currentExtraCredits - creditsUsed);
+
+    // Reset monthly counters, but carry over unused credits
     await Client.updateOne(
       { clientId },
       {
@@ -49,41 +77,67 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
         monthlyCostUsd: 0,
         costResetDate: now,
         costWarningNotified: false,
+        extraCreditsUsd: unusedCredits, // Carry over unused credits!
+        extraCreditsExpiry: unusedCredits > 0 ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) : null,
       }
     );
-    return { allowed: true, status: 'ok', monthlyCostUsd: 0 };
+
+    const newEffectiveLimit = COST_BLOCK_THRESHOLD + unusedCredits;
+
+    return {
+      allowed: true,
+      status: 'ok',
+      monthlyCostUsd: 0,
+      canTopUp: false,
+      effectiveLimit: newEffectiveLimit,
+      extraCreditsUsd: unusedCredits,
+      remainingCredits: newEffectiveLimit,
+      topUpOptions: TOP_UP_OPTIONS,
+    };
   }
 
   const cost = client.monthlyCostUsd || 0;
+  const extraCredits = client.extraCreditsUsd || 0;
+  const effectiveLimit = COST_BLOCK_THRESHOLD + extraCredits;
 
-  // BLOCKED: Over $40/month
-  if (cost >= COST_BLOCK_THRESHOLD) {
+  // BLOCKED: Over effective limit (base $40 + extra credits)
+  if (cost >= effectiveLimit) {
     // Disable widget if not already disabled
     if (client.isActive) {
       await Client.updateOne({ clientId }, { isActive: false });
 
-      // Notify client
-      await sendCostBlockedNotification(client.email, client.telegram, cost);
+      // Notify client with top-up option
+      await sendCostBlockedNotification(client.email, client.telegram, cost, effectiveLimit);
     }
 
     return {
       allowed: false,
       status: 'blocked',
       monthlyCostUsd: cost,
-      message: `Виджет отключен: расходы за месяц $${cost.toFixed(2)} превысили лимит $${COST_BLOCK_THRESHOLD}. Обратитесь к администратору.`,
+      message: `Виджет отключен: расходы $${cost.toFixed(2)} превысили лимит $${effectiveLimit}. Докупите кредиты для продолжения.`,
+      canTopUp: true,
+      effectiveLimit,
+      extraCreditsUsd: extraCredits,
+      remainingCredits: 0,
+      topUpOptions: TOP_UP_OPTIONS,
     };
   }
 
   // WARNING: Over $20/month
   if (cost >= COST_WARNING_THRESHOLD && !client.costWarningNotified) {
     await Client.updateOne({ clientId }, { costWarningNotified: true });
-    await sendCostWarningNotification(client.email, client.telegram, cost);
+    await sendCostWarningNotification(client.email, client.telegram, cost, effectiveLimit);
 
     return {
       allowed: true,
       status: 'warning',
       monthlyCostUsd: cost,
-      message: `Внимание: расходы за месяц $${cost.toFixed(2)}. При превышении $${COST_BLOCK_THRESHOLD} виджет будет отключен.`,
+      message: `Внимание: расходы $${cost.toFixed(2)}. При превышении $${effectiveLimit} виджет будет отключен.`,
+      canTopUp: false,
+      effectiveLimit,
+      extraCreditsUsd: extraCredits,
+      remainingCredits: effectiveLimit - cost,
+      topUpOptions: TOP_UP_OPTIONS,
     };
   }
 
@@ -91,6 +145,11 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
     allowed: true,
     status: cost >= COST_WARNING_THRESHOLD ? 'warning' : 'ok',
     monthlyCostUsd: cost,
+    canTopUp: false,
+    effectiveLimit,
+    extraCreditsUsd: extraCredits,
+    remainingCredits: effectiveLimit - cost,
+    topUpOptions: TOP_UP_OPTIONS,
   };
 }
 
@@ -146,14 +205,15 @@ export async function resetMonthlyCosts(): Promise<number> {
 async function sendCostWarningNotification(
   email: string,
   telegram: string | undefined,
-  currentCost: number
+  currentCost: number,
+  effectiveLimit: number
 ): Promise<void> {
   const subject = `⚠️ Предупреждение: высокие расходы на API — $${currentCost.toFixed(2)}`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #f59e0b;">⚠️ Высокие расходы на API</h2>
       <p>Ваши расходы на AI API за текущий месяц составили <strong>$${currentCost.toFixed(2)}</strong>.</p>
-      <p>При превышении <strong>$${COST_BLOCK_THRESHOLD}</strong> ваш виджет будет автоматически отключен.</p>
+      <p>При превышении <strong>$${effectiveLimit}</strong> ваш виджет будет автоматически отключен.</p>
       <p>Рекомендации:</p>
       <ul>
         <li>Переключитесь на более экономичную модель (Gemini 3 Flash Lite)</li>
@@ -168,10 +228,9 @@ async function sendCostWarningNotification(
   await sendEmail(email, subject, html);
 
   if (telegram) {
-    const { sendTelegram } = await import('@/lib/notifications');
     await sendTelegram(
       telegram,
-      `⚠️ <b>Высокие расходы на API</b>\n\nРасходы: <b>$${currentCost.toFixed(2)}</b> из $${COST_BLOCK_THRESHOLD}\nПри превышении лимита виджет будет отключен.`
+      `⚠️ <b>Высокие расходы на API</b>\n\nРасходы: <b>$${currentCost.toFixed(2)}</b> из $${effectiveLimit}\nПри превышении лимита виджет будет отключен.`
     );
   }
 }
@@ -179,14 +238,24 @@ async function sendCostWarningNotification(
 async function sendCostBlockedNotification(
   email: string,
   telegram: string | undefined,
-  currentCost: number
+  currentCost: number,
+  effectiveLimit: number
 ): Promise<void> {
+  const topUpUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/cabinet/credits`;
   const subject = `🚫 Виджет отключен: расходы $${currentCost.toFixed(2)} превысили лимит`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #ef4444;">🚫 Виджет отключен</h2>
-      <p>Ваши расходы на AI API за текущий месяц составили <strong>$${currentCost.toFixed(2)}</strong>, что превышает лимит <strong>$${COST_BLOCK_THRESHOLD}</strong>.</p>
-      <p>Ваш AI-виджет был автоматически отключен. Обратитесь к администратору для возобновления работы.</p>
+      <p>Ваши расходы на AI API за текущий месяц составили <strong>$${currentCost.toFixed(2)}</strong>, что превышает лимит <strong>$${effectiveLimit}</strong>.</p>
+      <p>Ваш AI-виджет был автоматически отключен.</p>
+      
+      <div style="background: linear-gradient(135deg, #00d9ff 0%, #0066ff 100%); padding: 20px; border-radius: 12px; margin: 24px 0; text-align: center;">
+        <p style="color: white; font-size: 16px; margin-bottom: 16px;">Хотите продолжить использование?</p>
+        <a href="${topUpUrl}" style="display: inline-block; background: white; color: #0066ff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+          💳 Докупить кредиты $10/$20/$30
+        </a>
+      </div>
+      
       <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
       <p style="color: #666; font-size: 12px;">AI Widget Team</p>
     </div>
@@ -195,10 +264,38 @@ async function sendCostBlockedNotification(
   await sendEmail(email, subject, html);
 
   if (telegram) {
-    const { sendTelegram } = await import('@/lib/notifications');
     await sendTelegram(
       telegram,
-      `🚫 <b>Виджет отключен</b>\n\nРасходы: <b>$${currentCost.toFixed(2)}</b> — превышен лимит $${COST_BLOCK_THRESHOLD}.\nОбратитесь к администратору.`
+      `🚫 <b>Виджет отключен</b>\n\nРасходы: <b>$${currentCost.toFixed(2)}</b> — превышен лимит $${effectiveLimit}.\n\n💳 Докупите кредиты: ${topUpUrl}`
     );
   }
+}
+
+/**
+ * Add extra credits to client (after successful payment)
+ */
+export async function addExtraCredits(clientId: string, amount: number): Promise<boolean> {
+  await connectDB();
+
+  // Calculate expiry date (30 days from now or until cost reset)
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + 30);
+
+  const result = await Client.updateOne(
+    { clientId },
+    {
+      $inc: { extraCreditsUsd: amount },
+      $set: {
+        isActive: true, // Re-enable widget
+        extraCreditsExpiry: expiryDate,
+      },
+    }
+  );
+
+  if (result.modifiedCount > 0) {
+    console.log(`Added $${amount} extra credits for client ${clientId}`);
+    return true;
+  }
+
+  return false;
 }

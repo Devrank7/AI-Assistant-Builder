@@ -21,11 +21,22 @@ export function middleware(request: NextRequest) {
   }
 
   // Admin API routes protection
-  const adminApiPaths = ['/api/clients', '/api/analytics', '/api/integrations'];
+  const adminApiPaths = [
+    '/api/clients',
+    '/api/analytics',
+    '/api/integrations',
+    '/api/audit-log',
+    '/api/notifications',
+    '/api/invoices',
+    '/api/webhooks',
+    '/api/export',
+    '/api/payments',
+  ];
   if (adminApiPaths.some((p) => pathname.startsWith(p))) {
     const authHeader = request.headers.get('authorization');
     const adminToken = request.cookies.get('admin_token')?.value;
-    if (!authHeader && !adminToken) {
+    const clientToken = request.cookies.get('client_token')?.value;
+    if (!authHeader && !adminToken && !clientToken) {
       return NextResponse.json({ success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
     }
   }

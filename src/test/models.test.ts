@@ -49,8 +49,8 @@ describe('Gemini Model Registry', () => {
       expect(model.isDefault).toBe(true);
     });
 
-    it('should return gemini-3-flash-lite correctly', () => {
-      const model = getModel('gemini-3-flash-lite');
+    it('should return gemini-2.5-flash-lite correctly', () => {
+      const model = getModel('gemini-2.5-flash-lite');
       expect(model.tier).toBe('lite');
       expect(model.pricing.inputPer1M).toBe(0.05);
     });
@@ -102,7 +102,7 @@ describe('Gemini Model Registry', () => {
     it('should return array of all model IDs', () => {
       const ids = getModelIds();
       expect(ids).toContain('gemini-3-flash');
-      expect(ids).toContain('gemini-3-flash-lite');
+      expect(ids).toContain('gemini-2.5-flash-lite');
       expect(ids).toContain('gemini-3-pro');
       expect(ids.length).toBe(GEMINI_MODELS.length);
     });

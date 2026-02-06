@@ -1,7 +1,82 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+
+/* ─── Floating Orb Component ─── */
+function FloatingOrb({
+  size,
+  color,
+  top,
+  left,
+  delay,
+}: {
+  size: number;
+  color: string;
+  top: string;
+  left: string;
+  delay: number;
+}) {
+  return (
+    <div
+      className="animate-float-slow pointer-events-none absolute rounded-full"
+      style={{
+        width: size,
+        height: size,
+        top,
+        left,
+        background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
+        filter: 'blur(60px)',
+        opacity: 0.3,
+        animationDelay: `${delay}s`,
+      }}
+    />
+  );
+}
+
+/* ─── Particle Field ─── */
+function ParticleField() {
+  // Use lazy initializer to generate particles only once on mount
+  const [particles] = useState(() =>
+    Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      delay: Math.random() * 5,
+      duration: Math.random() * 10 + 10,
+    }))
+  );
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="animate-pulse-glow absolute rounded-full bg-white/20"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ─── Feature Badge ─── */
+function FeatureBadge({ icon, label }: { icon: string; label: string }) {
+  return (
+    <div className="glass-subtle flex cursor-default items-center gap-2 rounded-full px-4 py-2 text-sm text-gray-300 transition-all duration-300 hover:border-white/10 hover:text-white">
+      <span className="text-base">{icon}</span>
+      <span>{label}</span>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const router = useRouter();
@@ -12,7 +87,7 @@ export default function LandingPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleAdminLogin = async () => {
+  const handleAdminLogin = useCallback(async () => {
     if (!adminToken.trim()) {
       setError('Please enter admin token');
       return;
@@ -40,9 +115,9 @@ export default function LandingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [adminToken, router]);
 
-  const handleClientLogin = async () => {
+  const handleClientLogin = useCallback(async () => {
     if (!clientToken.trim()) {
       setError('Please enter your access token');
       return;
@@ -70,7 +145,7 @@ export default function LandingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [clientToken, router]);
 
   const closeModals = () => {
     setShowAdminModal(false);
@@ -81,177 +156,300 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-animated flex items-center justify-center p-6">
-      <div className="max-w-2xl w-full">
-        {/* Logo & Title */}
-        <div className="text-center mb-12">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)] flex items-center justify-center shadow-2xl shadow-cyan-500/20">
-            <svg className="w-10 h-10 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-            </svg>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            AI Widget <span className="gradient-text">Platform</span>
-          </h1>
-          <p className="text-gray-400 text-lg">
-            Manage your AI-powered chat widgets
-          </p>
-        </div>
+    <div className="bg-gradient-animated relative min-h-screen overflow-hidden">
+      {/* Aurora Background */}
+      <div className="aurora" />
 
-        {/* Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Admin Button */}
-          <button
-            onClick={() => { setShowAdminModal(true); setError(''); }}
-            className="glass-card p-8 text-left group hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 border border-white/10 hover:border-purple-500/30"
-          >
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
-              Admin Panel
-            </h2>
-            <p className="text-gray-400">
-              Access the full management dashboard to manage all clients and widgets
-            </p>
-            <div className="mt-6 flex items-center text-purple-400 font-medium">
-              <span>Enter Admin Token</span>
-              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </div>
-          </button>
+      {/* Particle Field */}
+      <ParticleField />
 
-          {/* Client Button */}
-          <button
-            onClick={() => { setShowClientModal(true); setError(''); }}
-            className="glass-card p-8 text-left group hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/20 border border-white/10 hover:border-cyan-500/30"
-          >
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
-              Client Cabinet
-            </h2>
-            <p className="text-gray-400">
-              View your widget information, usage statistics, and integration details
-            </p>
-            <div className="mt-6 flex items-center text-cyan-400 font-medium">
-              <span>Enter Your Token</span>
-              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </div>
-          </button>
-        </div>
+      {/* Floating Orbs */}
+      <FloatingOrb size={500} color="rgba(124, 58, 237, 0.15)" top="-10%" left="-5%" delay={0} />
+      <FloatingOrb size={400} color="rgba(0, 229, 255, 0.12)" top="60%" left="70%" delay={3} />
+      <FloatingOrb size={300} color="rgba(255, 45, 135, 0.1)" top="30%" left="50%" delay={6} />
 
-        {/* Footer */}
-        <p className="text-center text-gray-500 text-sm mt-12">
-          © {new Date().getFullYear()} AI Widget Platform. All rights reserved.
-        </p>
-      </div>
+      {/* Grid Overlay */}
+      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" />
 
-      {/* Admin Modal */}
-      {showAdminModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-          <div className="glass-card p-8 max-w-md w-full relative animate-in fade-in zoom-in duration-200">
-            <button
-              onClick={closeModals}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      {/* Main Content */}
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center p-6">
+        <div className="w-full max-w-3xl">
+          {/* Logo & Title */}
+          <div className="animate-slide-up mb-16 text-center">
+            {/* Animated Logo */}
+            <div className="relative mx-auto mb-8 h-24 w-24">
+              <div className="animate-rotate-slow absolute inset-0 rounded-3xl bg-gradient-to-br from-[var(--neon-cyan)] via-[var(--accent)] to-[var(--neon-pink)] opacity-50 blur-xl" />
+              <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/20 bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)] shadow-2xl shadow-cyan-500/30 backdrop-blur-sm">
+                <svg className="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.591-.659L5 14.5m14 0V6.5a2.25 2.25 0 00-2.25-2.25h-9.5A2.25 2.25 0 005 6.5v8"
+                  />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-white">Admin Access</h2>
-              <p className="text-gray-400 mt-2">Enter your secret admin token</p>
             </div>
 
-            {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center">
-                {error}
-              </div>
-            )}
+            <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl">
+              AI Widget <span className="gradient-text">Platform</span>
+            </h1>
+            <p className="mx-auto max-w-lg text-xl leading-relaxed text-gray-400">
+              Intelligent AI-powered chat widgets with RAG knowledge base, multi-model support, and real-time analytics
+            </p>
 
-            <div className="space-y-4">
-              <input
-                type="password"
-                value={adminToken}
-                onChange={(e) => setAdminToken(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
-                placeholder="Enter admin token..."
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                autoFocus
-              />
+            {/* Feature Badges */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <FeatureBadge icon="✦" label="Gemini AI" />
+              <FeatureBadge icon="◉" label="RAG System" />
+              <FeatureBadge icon="⚡" label="Multi-Model" />
+              <FeatureBadge icon="📊" label="Analytics" />
+              <FeatureBadge icon="🔒" label="Secure" />
+            </div>
+          </div>
+
+          {/* Login Cards */}
+          <div className="stagger grid grid-cols-1 gap-8 md:grid-cols-2">
+            {/* Admin Card */}
+            <button
+              onClick={() => {
+                setShowAdminModal(true);
+                setError('');
+              }}
+              className="group relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.03]"
+            >
+              {/* Gradient Border */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+              <div className="glass relative h-full border-white/5 p-8 text-left group-hover:border-purple-500/30 group-hover:bg-white/[0.06]">
+                {/* Glow Dot */}
+                <div className="animate-pulse-neon absolute top-4 right-4 h-2 w-2 rounded-full bg-purple-400" />
+
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-purple-500/30">
+                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                    />
+                  </svg>
+                </div>
+
+                <h2 className="mb-3 text-2xl font-bold text-white transition-colors group-hover:text-purple-300">
+                  Admin Panel
+                </h2>
+                <p className="mb-6 leading-relaxed text-gray-400">
+                  Full management dashboard to oversee all clients, widgets, and system analytics
+                </p>
+
+                <div className="flex items-center text-sm font-medium text-purple-400 group-hover:text-purple-300">
+                  <span>Enter Admin Token</span>
+                  <svg
+                    className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+
+            {/* Client Card */}
+            <button
+              onClick={() => {
+                setShowClientModal(true);
+                setError('');
+              }}
+              className="group relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.03]"
+            >
+              {/* Gradient Border */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+              <div className="glass relative h-full border-white/5 p-8 text-left group-hover:border-cyan-500/30 group-hover:bg-white/[0.06]">
+                {/* Glow Dot */}
+                <div className="animate-pulse-neon absolute top-4 right-4 h-2 w-2 rounded-full bg-cyan-400" />
+
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-cyan-500/30">
+                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                    />
+                  </svg>
+                </div>
+
+                <h2 className="mb-3 text-2xl font-bold text-white transition-colors group-hover:text-cyan-300">
+                  Client Cabinet
+                </h2>
+                <p className="mb-6 leading-relaxed text-gray-400">
+                  View widget details, usage statistics, knowledge base, and integration setup
+                </p>
+
+                <div className="flex items-center text-sm font-medium text-cyan-400 group-hover:text-cyan-300">
+                  <span>Enter Your Token</span>
+                  <svg
+                    className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Glow Line Separator */}
+          <div className="glow-line mt-16 mb-8 h-px" />
+
+          {/* Footer */}
+          <p className="text-center text-sm text-gray-600">
+            &copy; {new Date().getFullYear()} AI Widget Platform &middot; Powered by Gemini AI
+          </p>
+        </div>
+      </div>
+
+      {/* ─── Admin Modal ─── */}
+      {showAdminModal && (
+        <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
+          <div className="animate-scale-in relative w-full max-w-md">
+            {/* Glow behind modal */}
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-purple-500/20 via-pink-500/10 to-transparent blur-xl" />
+
+            <div className="glass relative rounded-2xl border-purple-500/20 p-8">
               <button
-                onClick={handleAdminLogin}
-                disabled={loading}
-                className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={closeModals}
+                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-gray-400 transition-all hover:bg-white/10 hover:text-white"
               >
-                {loading ? 'Verifying...' : 'Access Admin Panel'}
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
+
+              <div className="mb-8 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg shadow-purple-500/30">
+                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-white">Admin Access</h2>
+                <p className="mt-2 text-sm text-gray-400">Enter your secret admin token to continue</p>
+              </div>
+
+              {error && (
+                <div className="animate-scale-in mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-400">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={adminToken}
+                    onChange={(e) => setAdminToken(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
+                    placeholder="Enter admin token..."
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-gray-500 transition-all focus:border-purple-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
+                    autoFocus
+                  />
+                </div>
+                <button
+                  onClick={handleAdminLogin}
+                  disabled={loading}
+                  className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 py-3.5 font-semibold text-white transition-all hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {loading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      <span>Verifying...</span>
+                    </div>
+                  ) : (
+                    'Access Admin Panel'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Client Modal */}
+      {/* ─── Client Modal ─── */}
       {showClientModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-          <div className="glass-card p-8 max-w-md w-full relative animate-in fade-in zoom-in duration-200">
-            <button
-              onClick={closeModals}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+        <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
+          <div className="animate-scale-in relative w-full max-w-md">
+            {/* Glow behind modal */}
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-cyan-500/20 via-blue-500/10 to-transparent blur-xl" />
 
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-white">Client Cabinet</h2>
-              <p className="text-gray-400 mt-2">Enter your access token</p>
-            </div>
-
-            {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <input
-                type="text"
-                value={clientToken}
-                onChange={(e) => setClientToken(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleClientLogin()}
-                placeholder="Enter your access token..."
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
-                autoFocus
-              />
+            <div className="glass relative rounded-2xl border-cyan-500/20 p-8">
               <button
-                onClick={handleClientLogin}
-                disabled={loading}
-                className="w-full py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={closeModals}
+                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-gray-400 transition-all hover:bg-white/10 hover:text-white"
               >
-                {loading ? 'Verifying...' : 'Access My Cabinet'}
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
+
+              <div className="mb-8 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/30">
+                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-white">Client Cabinet</h2>
+                <p className="mt-2 text-sm text-gray-400">Enter your access token to view your dashboard</p>
+              </div>
+
+              {error && (
+                <div className="animate-scale-in mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-400">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={clientToken}
+                    onChange={(e) => setClientToken(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleClientLogin()}
+                    placeholder="Enter your access token..."
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-gray-500 transition-all focus:border-cyan-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-cyan-500/20 focus:outline-none"
+                    autoFocus
+                  />
+                </div>
+                <button
+                  onClick={handleClientLogin}
+                  disabled={loading}
+                  className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 font-semibold text-white transition-all hover:shadow-lg hover:shadow-cyan-500/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {loading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      <span>Verifying...</span>
+                    </div>
+                  ) : (
+                    'Access My Cabinet'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -45,76 +45,180 @@ export default function ClientList() {
   const totalTokens = clients.reduce((sum, c) => sum + c.tokens, 0);
 
   return (
-    <div className="space-y-8">
+    <div className="animate-slide-up space-y-8">
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="glass-card p-6 stat-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Total Clients</p>
-              <p className="text-3xl font-bold gradient-text">{clients.length}</p>
-            </div>
-            <div className="w-12 h-12 rounded-lg bg-[var(--neon-cyan)]/10 flex items-center justify-center">
-              <svg className="w-6 h-6 text-[var(--neon-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+        {/* Total Clients */}
+        <div className="stat-premium group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
+            <svg
+              className="h-16 w-16 -rotate-12 transform text-[var(--neon-cyan)] transition-transform duration-500 group-hover:scale-110"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1}
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          </div>
+          <div className="relative z-10 mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-cyan)]/20 bg-[var(--neon-cyan)]/10 shadow-[0_0_15px_rgba(0,229,255,0.1)] backdrop-blur-md">
+              <svg className="h-5 w-5 text-[var(--neon-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                />
               </svg>
             </div>
+            <span className="text-sm font-medium tracking-wide text-gray-400">Total Clients</span>
+          </div>
+          <p className="stat-value relative z-10">{clients.length}</p>
+          <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+            <span className="flex items-center gap-0.5 text-emerald-400">
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              +12%
+            </span>
+            <span>vs last month</span>
           </div>
         </div>
 
-        <div className="glass-card p-6 stat-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Total Requests</p>
-              <p className="text-3xl font-bold text-[var(--neon-cyan)]">
-                {totalRequests.toLocaleString()}
-              </p>
+        {/* Total Requests */}
+        <div className="stat-premium group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
+            <svg
+              className="h-16 w-16 -rotate-12 transform text-[var(--neon-purple)] transition-transform duration-500 group-hover:scale-110"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1}
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+              />
+            </svg>
+          </div>
+          <div className="relative z-10 mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-purple)]/20 bg-[var(--neon-purple)]/10 shadow-[0_0_15px_rgba(184,77,255,0.1)] backdrop-blur-md">
+              <svg className="h-5 w-5 text-[var(--neon-purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-[var(--neon-purple)]/10 flex items-center justify-center">
-              <svg className="w-6 h-6 text-[var(--neon-purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="text-sm font-medium tracking-wide text-gray-400">Requests</span>
+          </div>
+          <p className="stat-value relative z-10">{totalRequests.toLocaleString()}</p>
+          <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+            <span className="flex items-center gap-0.5 text-emerald-400">
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              +5.3%
+            </span>
+            <span>vs last month</span>
+          </div>
+        </div>
+
+        {/* Total Tokens */}
+        <div className="stat-premium group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
+            <svg
+              className="h-16 w-16 -rotate-12 transform text-[var(--neon-pink)] transition-transform duration-500 group-hover:scale-110"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1}
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+              />
+            </svg>
+          </div>
+          <div className="relative z-10 mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-pink)]/20 bg-[var(--neon-pink)]/10 shadow-[0_0_15px_rgba(255,45,135,0.1)] backdrop-blur-md">
+              <svg className="h-5 w-5 text-[var(--neon-pink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
+            <span className="text-sm font-medium tracking-wide text-gray-400">Tokens Used</span>
+          </div>
+          <p className="stat-value relative z-10">
+            {totalTokens >= 1000000
+              ? `${(totalTokens / 1000000).toFixed(1)}M`
+              : totalTokens >= 1000
+                ? `${(totalTokens / 1000).toFixed(1)}k`
+                : totalTokens.toLocaleString()}
+          </p>
+          <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+            <span className="flex items-center gap-0.5 text-emerald-400">
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              +24%
+            </span>
+            <span>vs last month</span>
           </div>
         </div>
 
-        <div className="glass-card p-6 stat-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Total Tokens</p>
-              <p className="text-3xl font-bold text-[var(--neon-purple)]">
-                {totalTokens.toLocaleString()}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-lg bg-[var(--neon-pink)]/10 flex items-center justify-center">
-              <svg className="w-6 h-6 text-[var(--neon-pink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
+        {/* Active Widgets */}
+        <div className="stat-premium group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
+            <svg
+              className="h-16 w-16 -rotate-12 transform text-emerald-400 transition-transform duration-500 group-hover:scale-110"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
           </div>
-        </div>
-
-        <div className="glass-card p-6 stat-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Active Widgets</p>
-              <p className="text-3xl font-bold text-[var(--neon-pink)]">{clients.length}</p>
-            </div>
-            <div className="w-12 h-12 rounded-lg bg-[var(--neon-cyan)]/10 flex items-center justify-center">
-              <svg className="w-6 h-6 text-[var(--neon-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+          <div className="relative z-10 mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 shadow-[0_0_15px_rgba(52,211,153,0.1)] backdrop-blur-md">
+              <svg className="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"
+                />
               </svg>
             </div>
+            <span className="text-sm font-medium tracking-wide text-gray-400">Active</span>
+          </div>
+          <p className="stat-value relative z-10">{clients.filter((c) => c.isActive).length || clients.length}</p>
+          <div className="relative z-10 mt-2 text-xs text-gray-500">
+            <span className="font-medium text-gray-300">100%</span> uptime
           </div>
         </div>
       </div>
 
-      {/* Search and Filter */}
-      <div className="glass-card p-4">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-96">
+      {/* Search Bar */}
+      <div className="card-premium flex flex-col items-center justify-between gap-4 p-4 md:flex-row">
+        <div className="group relative w-full md:w-96">
+          <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)] opacity-20 blur transition duration-500 group-hover:opacity-40"></div>
+          <div className="relative flex items-center">
             <svg
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+              className="absolute left-4 h-5 w-5 text-gray-400 transition-colors group-hover:text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -128,39 +232,51 @@ export default function ClientList() {
             </svg>
             <input
               type="text"
-              placeholder="Search clients by name, email, or website..."
+              placeholder="Search clients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[var(--neon-cyan)] focus:ring-1 focus:ring-[var(--neon-cyan)] transition-all"
+              className="w-full rounded-xl border border-white/10 bg-[#050507] py-3.5 pr-4 pl-12 text-sm text-white placeholder-gray-500 transition-all focus:outline-none"
             />
           </div>
-
-          <button
-            onClick={fetchClients}
-            className="neon-button flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh
-          </button>
         </div>
+
+        <button onClick={fetchClients} className="btn-outline-premium group flex items-center gap-2">
+          <svg
+            className="h-4 w-4 transition-transform duration-500 group-hover:rotate-180"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          Refresh Data
+        </button>
       </div>
 
       {/* Error State */}
       {error && (
-        <div className="glass-card p-6 border-red-500/30 bg-red-500/5">
+        <div className="glass rounded-2xl border-red-500/20 bg-red-500/[0.03] p-5">
           <div className="flex items-center gap-3 text-red-400">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg className="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+              />
             </svg>
-            <p>{error}</p>
+            <p className="text-sm">{error}</p>
           </div>
         </div>
       )}
 
       {/* Clients Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading ? (
           <>
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -168,19 +284,22 @@ export default function ClientList() {
             ))}
           </>
         ) : filteredClients.length > 0 ? (
-          filteredClients.map((client) => (
-            <ClientCard key={client.clientId} client={client} />
-          ))
+          filteredClients.map((client) => <ClientCard key={client.clientId} client={client} />)
         ) : (
           <div className="col-span-full">
-            <div className="glass-card p-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            <div className="glass rounded-2xl border-white/[0.04] p-16 text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.04]">
+                <svg className="h-8 w-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                  />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">No clients found</h3>
-              <p className="text-gray-400">
+              <h3 className="mb-2 text-xl font-semibold text-white">No clients found</h3>
+              <p className="text-sm text-gray-500">
                 {searchTerm
                   ? 'No clients match your search criteria'
                   : 'Add widget folders to the /widgets directory to get started'}

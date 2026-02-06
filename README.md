@@ -41,15 +41,18 @@
 
 ### Ключевые возможности
 
-| Функция | Описание |
-|---------|----------|
-| 🤖 **AI Chat** | Ответы на основе базы знаний клиента |
-| 📚 **Knowledge Base** | Векторный поиск по embeddings |
-| 📄 **Document Upload** | Загрузка PDF, DOCX, TXT файлов |
-| 📊 **Analytics** | Статистика чатов, популярные вопросы |
-| 💳 **Payments** | Рекуррентные криптоплатежи (Cryptomus) |
-| 📧 **Notifications** | Email + Telegram уведомления |
-| 📤 **Google Sheets** | Экспорт данных в таблицы |
+| Функция                | Описание                                               |
+| ---------------------- | ------------------------------------------------------ |
+| 🤖 **AI Chat**         | Ответы на основе базы знаний клиента                   |
+| 📚 **Knowledge Base**  | Векторный поиск по embeddings                          |
+| 📄 **Document Upload** | Загрузка PDF, DOCX, TXT файлов                         |
+| 📊 **Analytics**       | Статистика чатов, популярные вопросы                   |
+| 💳 **Payments**        | Рекуррентные криптоплатежи (Cryptomus)                 |
+| 💰 **Prepayment**      | Предоплата на 1/3/6/12 месяцев (годовая скидка 15%)    |
+| 🎨 **Mood Interface**  | Интерфейс реагирует на "температуру" AI (цвета, формы) |
+| 🔋 **AI Credits**      | Докупка кредитов при достижении лимита                 |
+| 📧 **Notifications**   | Email + Telegram уведомления                           |
+| 📤 **Google Sheets**   | Экспорт данных в таблицы                               |
 
 ---
 
@@ -136,7 +139,7 @@ npm run dev
 # ═══════════════════════════════════════════════════════════════
 # DATABASE
 # ═══════════════════════════════════════════════════════════════
-MONGODB_URI=mongodb://mongo:boot@localhost:7878/ai-widget-admin?authSource=admin
+MONGODB_URI=mongodb://localhost:27017/ai-widget-admin
 
 # ═══════════════════════════════════════════════════════════════
 # AI / GEMINI
@@ -169,10 +172,13 @@ SMTP_FROM=ChatBot Fusion <your@email.com>
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 
 # ═══════════════════════════════════════════════════════════════
-# GOOGLE SHEETS (Optional)
+# GOOGLE SHEETS (via service_account.json)
 # ═══════════════════════════════════════════════════════════════
-GOOGLE_SHEETS_CLIENT_EMAIL=service@project.iam.gserviceaccount.com
-GOOGLE_SHEETS_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...key...\n-----END PRIVATE KEY-----\n"
+# Option 1: Path to service account JSON file (recommended)
+GOOGLE_SERVICE_ACCOUNT_PATH=./service_account.json
+# Option 2: Inline credentials (fallback)
+# GOOGLE_SHEETS_CLIENT_EMAIL=service@project.iam.gserviceaccount.com
+# GOOGLE_SHEETS_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
 # ═══════════════════════════════════════════════════════════════
 # APPLICATION
@@ -253,70 +259,73 @@ AIWidget/
 
 ### 🔐 Аутентификация
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/login` | Вход админа (token → cookie) |
-| POST | `/api/auth/logout` | Выход |
+| Method | Endpoint           | Description                  |
+| ------ | ------------------ | ---------------------------- |
+| POST   | `/api/auth/login`  | Вход админа (token → cookie) |
+| POST   | `/api/auth/logout` | Выход                        |
 
 ### 👥 Клиенты
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/clients` | Список всех клиентов |
-| POST | `/api/clients` | Создать клиента |
-| GET | `/api/clients/[id]` | Детали клиента |
-| PUT | `/api/clients/[id]` | Обновить клиента |
-| DELETE | `/api/clients/[id]` | Удалить клиента |
+| Method | Endpoint            | Description          |
+| ------ | ------------------- | -------------------- |
+| GET    | `/api/clients`      | Список всех клиентов |
+| POST   | `/api/clients`      | Создать клиента      |
+| GET    | `/api/clients/[id]` | Детали клиента       |
+| PUT    | `/api/clients/[id]` | Обновить клиента     |
+| DELETE | `/api/clients/[id]` | Удалить клиента      |
 
 ### 🤖 AI & Chat
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/chat` | Главный endpoint чата |
-| GET | `/api/ai-settings/[clientId]` | Получить настройки AI |
-| POST | `/api/ai-settings/[clientId]` | Сохранить настройки AI |
-| GET | `/api/templates` | Список шаблонов промптов |
-| POST | `/api/templates` | Применить шаблон |
+| Method | Endpoint                      | Description              |
+| ------ | ----------------------------- | ------------------------ |
+| POST   | `/api/chat`                   | Главный endpoint чата    |
+| GET    | `/api/ai-settings/[clientId]` | Получить настройки AI    |
+| POST   | `/api/ai-settings/[clientId]` | Сохранить настройки AI   |
+| GET    | `/api/templates`              | Список шаблонов промптов |
+| POST   | `/api/templates`              | Применить шаблон         |
 
 ### 📚 Knowledge Base
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/knowledge?clientId=X` | Получить chunks |
-| POST | `/api/knowledge` | Добавить chunk |
-| DELETE | `/api/knowledge/[id]` | Удалить chunk |
-| POST | `/api/knowledge/upload` | Загрузить документ |
+| Method | Endpoint                    | Description        |
+| ------ | --------------------------- | ------------------ |
+| GET    | `/api/knowledge?clientId=X` | Получить chunks    |
+| POST   | `/api/knowledge`            | Добавить chunk     |
+| DELETE | `/api/knowledge/[id]`       | Удалить chunk      |
+| POST   | `/api/knowledge/upload`     | Загрузить документ |
 
 ### 💬 Chat History
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/chat-logs?clientId=X` | Список чатов |
-| GET | `/api/chat-logs/[id]` | Детали чата |
-| DELETE | `/api/chat-logs/[id]` | Удалить чат |
+| Method | Endpoint                    | Description  |
+| ------ | --------------------------- | ------------ |
+| GET    | `/api/chat-logs?clientId=X` | Список чатов |
+| GET    | `/api/chat-logs/[id]`       | Детали чата  |
+| DELETE | `/api/chat-logs/[id]`       | Удалить чат  |
 
 ### 📊 Analytics
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/analytics?clientId=X` | Полная аналитика |
-| GET | `/api/analytics?clientId=X&quick=true` | Быстрая статистика |
+| Method | Endpoint                               | Description        |
+| ------ | -------------------------------------- | ------------------ |
+| GET    | `/api/analytics?clientId=X`            | Полная аналитика   |
+| GET    | `/api/analytics?clientId=X&quick=true` | Быстрая статистика |
 
-### 💳 Payments
+### 💳 Payments & Credits
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/payments/setup` | Создать подписку |
-| GET | `/api/payments/setup?clientId=X` | Статус подписки |
-| POST | `/api/payments/cancel` | Отменить подписку |
-| POST | `/api/payments/webhook/cryptomus` | Webhook Cryptomus |
+| Method | Endpoint                          | Description                    |
+| ------ | --------------------------------- | ------------------------------ |
+| POST   | `/api/payments/setup`             | Создать подписку               |
+| GET    | `/api/payments/setup?clientId=X`  | Статус подписки                |
+| GET    | `/api/payments/tiers`             | Получить тарифы (1/3/6/12 мес) |
+| POST   | `/api/payments/cancel`            | Отменить подписку              |
+| POST   | `/api/payments/webhook/cryptomus` | Webhook Cryptomus              |
+| GET    | `/api/credits/status?clientId=X`  | Статус AI-кредитов             |
+| POST   | `/api/credits/topup`              | Докупить кредиты ($10/$20/$30) |
 
 ### 📤 Integrations
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/integrations/sheets/export` | Статус конфигурации |
-| POST | `/api/integrations/sheets/export` | Экспорт в Sheets |
+| Method | Endpoint                          | Description         |
+| ------ | --------------------------------- | ------------------- |
+| GET    | `/api/integrations/sheets/export` | Статус конфигурации |
+| POST   | `/api/integrations/sheets/export` | Экспорт в Sheets    |
 
 ---
 
@@ -333,7 +342,7 @@ AIWidget/
   website: string;
   phone?: string;
   telegram?: string;          // Для уведомлений
-  
+
   // Подписка
   isActive: boolean;
   subscriptionStatus: 'trial' | 'active' | 'past_due' | 'canceled' | 'suspended';
@@ -343,7 +352,17 @@ AIWidget/
   paymentFailedCount: number;
   gracePeriodEnd: Date | null;
   cryptomusSubscriptionId: string | null;
-  
+
+  // Prepayment (предоплата)
+  prepaidMonths: number;       // 1, 3, 6, 12
+  prepaidUntil: Date | null;
+  subscriptionTier: 'monthly' | 'quarterly' | 'semi_annual' | 'annual';
+  lastPrepaymentAmount: number;
+
+  // AI Credits (пополнение)
+  extraCreditsUsd: number;     // Докупленные кредиты
+  extraCreditsExpiry: Date | null;
+
   folderPath: string;         // Путь к файлам виджета
   startDate: Date;
   createdAt: Date;
@@ -356,11 +375,11 @@ AIWidget/
 ```typescript
 {
   clientId: string;
-  systemPrompt: string;       // Системный промпт
-  greeting: string;           // Приветствие
-  temperature: number;        // 0.0 - 1.0
-  maxTokens: number;          // Макс. токенов ответа
-  language: string;           // 'ru', 'en', 'uk'
+  systemPrompt: string; // Системный промпт
+  greeting: string; // Приветствие
+  temperature: number; // 0.0 - 1.0
+  maxTokens: number; // Макс. токенов ответа
+  language: string; // 'ru', 'en', 'uk'
 }
 ```
 
@@ -560,7 +579,6 @@ AI-агент использует этот skill для создания вид
 name: create-widget
 description: Creates a customized AI chat widget for a client.
 ---
-
 # Phases:
 1. Phase 0: Technical Stack Verification
 2. Phase 1: Discovery (20 обязательных вопросов)
@@ -570,13 +588,13 @@ description: Creates a customized AI chat widget for a client.
 
 ### 20 Обязательных вопросов при создании
 
-| Категория | Вопросы |
-|-----------|---------|
-| **Дизайн** | Стиль (Neon/Glass/Light/Dark), цвета (HEX), позиция кнопки, размер окна |
-| **Бот** | Имя бота, приветствие, тон общения, подсказки-вопросы |
-| **Функции** | Отправка файлов, изображения в ответах, звуки, typing-индикатор, сохранение истории |
-| **Интеграции** | CRM, календарь, оплата, webhook/email |
-| **AI** | Лимит токенов, температура, ограничение тем |
+| Категория      | Вопросы                                                                             |
+| -------------- | ----------------------------------------------------------------------------------- |
+| **Дизайн**     | Стиль (Neon/Glass/Light/Dark), цвета (HEX), позиция кнопки, размер окна             |
+| **Бот**        | Имя бота, приветствие, тон общения, подсказки-вопросы                               |
+| **Функции**    | Отправка файлов, изображения в ответах, звуки, typing-индикатор, сохранение истории |
+| **Интеграции** | CRM, календарь, оплата, webhook/email                                               |
+| **AI**         | Лимит токенов, температура, ограничение тем                                         |
 
 ### Структура исходного кода виджета
 
@@ -611,10 +629,7 @@ description: Creates a customized AI chat widget for a client.
 // Файл: .agent/widget-builder/clients/<client_id>/src/components/Widget.jsx
 
 // Добавляем в header виджета:
-<button 
-  onClick={() => window.open('tel:+380991234567')}
-  className="call-button"
->
+<button onClick={() => window.open('tel:+380991234567')} className="call-button">
   📞 Позвонить
 </button>
 ```
@@ -626,8 +641,8 @@ description: Creates a customized AI chat widget for a client.
 
 if (message.content.includes('/calendar')) {
   return (
-    <div 
-      className="calendly-inline-widget" 
+    <div
+      className="calendly-inline-widget"
       data-url="https://calendly.com/your-link"
       style={{ minWidth: '320px', height: '400px' }}
     />
@@ -671,23 +686,23 @@ cp .agent/widget-builder/dist/script.js public/widgets/<client_id>/script.js
 
 ### Почему это лучше чем no-code?
 
-| No-Code конструкторы | AI Widget Builder |
-|---------------------|-------------------|
-| ❌ Ограниченные шаблоны | ✅ **Полный контроль** над кодом |
-| ❌ Невозможно добавить свою логику | ✅ **Любая кастомизация** — это просто JSX |
-| ❌ Vendor lock-in | ✅ **Исходники у вас** — можете форкнуть |
-| ❌ Стандартный дизайн | ✅ **Уникальный дизайн** под каждого клиента |
-| ❌ Платные интеграции | ✅ **Бесплатные интеграции** — пишете сами |
+| No-Code конструкторы               | AI Widget Builder                            |
+| ---------------------------------- | -------------------------------------------- |
+| ❌ Ограниченные шаблоны            | ✅ **Полный контроль** над кодом             |
+| ❌ Невозможно добавить свою логику | ✅ **Любая кастомизация** — это просто JSX   |
+| ❌ Vendor lock-in                  | ✅ **Исходники у вас** — можете форкнуть     |
+| ❌ Стандартный дизайн              | ✅ **Уникальный дизайн** под каждого клиента |
+| ❌ Платные интеграции              | ✅ **Бесплатные интеграции** — пишете сами   |
 
 ### Доступные стили дизайна
 
-| Стиль | Описание | Пример CSS |
-|-------|----------|------------|
-| 🌟 **Neon/Cyberpunk** | Яркие градиенты, свечение | `box-shadow: 0 0 20px var(--neon-cyan)` |
-| 🪟 **Glassmorphism** | Размытый стеклянный эффект | `backdrop-filter: blur(20px)` |
-| ⬜ **Light Minimal** | Чистый светлый фон | `background: #ffffff` |
-| ⬛ **Dark Minimal** | Тёмный элегантный | `background: #1a1a2e` |
-| 🎯 **Custom** | Под цвета сайта клиента | Любые HEX |
+| Стиль                 | Описание                   | Пример CSS                              |
+| --------------------- | -------------------------- | --------------------------------------- |
+| 🌟 **Neon/Cyberpunk** | Яркие градиенты, свечение  | `box-shadow: 0 0 20px var(--neon-cyan)` |
+| 🪟 **Glassmorphism**  | Размытый стеклянный эффект | `backdrop-filter: blur(20px)`           |
+| ⬜ **Light Minimal**  | Чистый светлый фон         | `background: #ffffff`                   |
+| ⬛ **Dark Minimal**   | Тёмный элегантный          | `background: #1a1a2e`                   |
+| 🎯 **Custom**         | Под цвета сайта клиента    | Любые HEX                               |
 
 ### Конфигурационный файл виджета
 
@@ -697,7 +712,7 @@ cp .agent/widget-builder/dist/script.js public/widgets/<client_id>/script.js
   "clientId": "dental-clinic-kyiv",
   "clientToken": "token_xxxxx",
   "apiUrl": "https://your-domain.com/api/chat",
-  
+
   "design": {
     "style": "glassmorphism",
     "primaryColor": "#00d4ff",
@@ -705,18 +720,14 @@ cp .agent/widget-builder/dist/script.js public/widgets/<client_id>/script.js
     "position": "bottom-right",
     "size": "medium"
   },
-  
+
   "bot": {
     "name": "Ассистент Анна",
     "greeting": "Привет! Я помогу записать вас к врачу 🦷",
     "tone": "friendly",
-    "suggestedQuestions": [
-      "Какие услуги вы предоставляете?",
-      "Как записаться на приём?",
-      "Сколько стоит консультация?"
-    ]
+    "suggestedQuestions": ["Какие услуги вы предоставляете?", "Как записаться на приём?", "Сколько стоит консультация?"]
   },
-  
+
   "features": {
     "fileUpload": false,
     "imageDisplay": true,
@@ -724,14 +735,14 @@ cp .agent/widget-builder/dist/script.js public/widgets/<client_id>/script.js
     "typingIndicator": true,
     "persistHistory": true
   },
-  
+
   "integrations": {
     "crm": null,
     "calendar": "https://calendly.com/dental-clinic",
     "payment": null,
     "webhook": "https://hooks.zapier.com/xxx"
   },
-  
+
   "ai": {
     "maxTokens": 500,
     "temperature": 0.7,
@@ -744,21 +755,22 @@ cp .agent/widget-builder/dist/script.js public/widgets/<client_id>/script.js
 
 ### Вкладки клиента
 
-| Tab | Описание |
-|-----|----------|
-| **Info** | Контактные данные, embed-код |
-| **📊 Analytics** | Графики, статистика, экспорт |
-| **💳 Billing** | Статус подписки, оплата |
+| Tab                | Описание                     |
+| ------------------ | ---------------------------- |
+| **Info**           | Контактные данные, embed-код |
+| **📊 Analytics**   | Графики, статистика, экспорт |
+| **💳 Billing**     | Статус подписки, оплата      |
 | **🤖 AI Settings** | Промпт, температура, шаблоны |
-| **📚 Knowledge** | База знаний, загрузка файлов |
-| **💬 History** | История чатов |
-| **Files** | Файлы виджета |
-| **Usage** | Использование токенов |
-| **Demo** | Превью виджета |
+| **📚 Knowledge**   | База знаний, загрузка файлов |
+| **💬 History**     | История чатов                |
+| **Files**          | Файлы виджета                |
+| **Usage**          | Использование токенов        |
+| **Demo**           | Превью виджета               |
 
 ### Шаблоны промптов
 
 Готовые шаблоны для разных бизнесов:
+
 - 🦷 Стоматология
 - 🏨 Отель
 - 🛒 E-commerce
@@ -772,11 +784,11 @@ cp .agent/widget-builder/dist/script.js public/widgets/<client_id>/script.js
 
 ### Поддерживаемые провайдеры
 
-| Провайдер | Статус | Описание |
-|-----------|--------|----------|
-| **Cryptomus** | ✅ Реализован | Крипто-платежи (BTC, ETH, USDT) |
-| **Dodo Payments** | 🔜 Планируется | Карты без юр.лица |
-| **LiqPay** | 🔜 Планируется | Украинские карты |
+| Провайдер         | Статус         | Описание                        |
+| ----------------- | -------------- | ------------------------------- |
+| **Cryptomus**     | ✅ Реализован  | Крипто-платежи (BTC, ETH, USDT) |
+| **Dodo Payments** | 🔜 Планируется | Карты без юр.лица               |
+| **LiqPay**        | 🔜 Планируется | Украинские карты                |
 
 ### Архитектура
 
@@ -803,6 +815,70 @@ class PaymentService {
 ```bash
 # Добавить в crontab
 0 9 * * * cd /path/to/AIWidget && npx ts-node scripts/checkPayments.ts
+```
+
+### Тарифы предоплаты
+
+| Период         | Цена     | Скидка  | За месяц   |
+| -------------- | -------- | ------- | ---------- |
+| 1 месяц        | $50      | —       | $50        |
+| 3 месяца       | $150     | —       | $50        |
+| 6 месяцев      | $300     | —       | $50        |
+| **12 месяцев** | **$510** | **15%** | **$42.50** |
+
+```bash
+# Получить тарифы
+curl http://localhost:3000/api/payments/tiers
+
+# Оплата на год
+curl -X POST http://localhost:3000/api/payments/setup \
+  -H "Content-Type: application/json" \
+  -d '{"clientId":"xxx","months":12}'
+```
+
+---
+
+## 🔋 AI Credits (Система пополнения)
+
+### Лимиты
+
+- **$40/месяц** — базовый лимит на AI API
+- **$20** — предупреждение
+- **$40** — виджет отключается (можно докупить кредиты)
+
+### Тарифы пополнения
+
+| Кредиты | Цена |
+| ------- | ---- |
+| $10     | $10  |
+| $20     | $20  |
+| $30     | $30  |
+
+### Логика
+
+```
+effectiveLimit = $40 (базовый) + extraCreditsUsd (докупленные)
+
+При достижении лимита:
+  → Виджет выключается
+  → Email/Telegram с кнопкой "Докупить кредиты"
+  → Клиент покупает $20 → effectiveLimit = $60
+
+При сбросе месяца (30 дней):
+  → Неиспользованные кредиты ПЕРЕНОСЯТСЯ на следующий месяц!
+  → unusedCredits = extraCredits - max(0, cost - $40)
+```
+
+### API
+
+```bash
+# Статус кредитов
+curl "http://localhost:3000/api/credits/status?clientId=xxx"
+
+# Докупить кредиты
+curl -X POST http://localhost:3000/api/credits/topup \
+  -H "Content-Type: application/json" \
+  -d '{"clientId":"xxx","amount":20}'
 ```
 
 ---
@@ -873,7 +949,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - .env.local
     depends_on:
@@ -902,7 +978,17 @@ vercel deploy
 
 ## 📝 Changelog
 
+### v1.1.0 (Февраль 2026)
+
+- ✅ **Prepayment System** — предоплата на 1/3/6/12 месяцев
+- ✅ **Annual Discount** — 15% скидка при годовой оплате ($510 вместо $600)
+- ✅ **AI Credits Top-Up** — докупка кредитов при достижении лимита $40
+- ✅ **Credits Carry-Over** — неиспользованные кредиты переносятся на следующий месяц
+- ✅ **Billing Page** — `/cabinet/billing` страница выбора тарифа
+- ✅ **Google Sheets via service_account.json** — упрощённая настройка интеграции
+
 ### v1.0.0 (Февраль 2026)
+
 - ✅ Базовая функциональность виджета
 - ✅ Admin Panel с табами
 - ✅ RAG с Gemini

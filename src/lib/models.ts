@@ -33,8 +33,8 @@ export const GEMINI_MODELS: AIModel[] = [
     tier: 'standard',
   },
   {
-    id: 'gemini-3-flash-lite',
-    name: 'Gemini 3 Flash Lite',
+    id: 'gemini-2.5-flash-lite',
+    name: 'Gemini 2.5 Flash Lite',
     provider: 'google',
     pricing: { inputPer1M: 0.05, outputPer1M: 0.2 },
     maxOutputTokens: 8192,
