@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -45,7 +46,7 @@ console.log("🔨 Running Vite build...");
 try {
     execSync('npm run build', { stdio: 'inherit', cwd: BUILDER_ROOT });
     console.log("✅ Build successful!");
-} catch (e) {
+} catch {
     console.error("❌ Build failed");
     process.exit(1);
 }

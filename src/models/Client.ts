@@ -16,6 +16,12 @@ export interface IClient extends Document {
   telegram?: string; // For payment notifications
   requests: number;
   tokens: number;
+  costUsd: number; // Total lifetime API cost in USD
+  monthlyTokensInput: number;
+  monthlyTokensOutput: number;
+  monthlyCostUsd: number; // Current month API cost in USD
+  costResetDate: Date; // Date when monthly counters were last reset
+  costWarningNotified: boolean; // Whether $20 warning was sent this month
   startDate: Date;
   folderPath: string;
 
@@ -89,6 +95,30 @@ const ClientSchema = new Schema<IClient>(
       required: true,
       default: 0,
     },
+    costUsd: {
+      type: Number,
+      default: 0,
+    },
+    monthlyTokensInput: {
+      type: Number,
+      default: 0,
+    },
+    monthlyTokensOutput: {
+      type: Number,
+      default: 0,
+    },
+    monthlyCostUsd: {
+      type: Number,
+      default: 0,
+    },
+    costResetDate: {
+      type: Date,
+      default: Date.now,
+    },
+    costWarningNotified: {
+      type: Boolean,
+      default: false,
+    },
     startDate: {
       type: Date,
       required: true,
@@ -150,7 +180,6 @@ const ClientSchema = new Schema<IClient>(
 ClientSchema.index({ nextPaymentDate: 1, subscriptionStatus: 1 });
 ClientSchema.index({ gracePeriodEnd: 1 });
 
-const Client: Model<IClient> =
-  mongoose.models.Client || mongoose.model<IClient>('Client', ClientSchema);
+const Client: Model<IClient> = mongoose.models.Client || mongoose.model<IClient>('Client', ClientSchema);
 
 export default Client;

@@ -6,41 +6,51 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
  * Generate embedding vector for text using Gemini
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-    const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
-    const result = await model.embedContent(text);
-    return result.embedding.values;
+  const result = await model.embedContent(text);
+  return result.embedding.values;
+}
+
+export interface GenerateResponseResult {
+  text: string;
+  tokensUsed: {
+    input: number;
+    output: number;
+    total: number;
+  };
 }
 
 /**
- * Generate chat response using Gemini 3 Flash
- * 
+ * Generate chat response using specified Gemini model
+ *
  * NOTE: We use Implicit Caching (automatic) by:
  * 1. Placing the large, stable content (system prompt) at the START of the prompt
  * 2. Sending similar prompts close together in time
- * 
- * Gemini 3 Flash automatically caches repeated prefixes, reducing cost for 
+ *
+ * Gemini automatically caches repeated prefixes, reducing cost for
  * subsequent calls with the same system prompt.
  */
 export async function generateResponse(
-    clientId: string,
-    systemPrompt: string,
-    context: string,
-    userMessage: string,
-    temperature: number = 0.7,
-    maxTokens: number = 1024
-): Promise<string> {
-    const model = genAI.getGenerativeModel({
-        model: 'gemini-3-flash', // Updated to Gemini 3 Flash
-        generationConfig: {
-            temperature,
-            maxOutputTokens: maxTokens,
-        },
-    });
+  clientId: string,
+  systemPrompt: string,
+  context: string,
+  userMessage: string,
+  temperature: number = 0.7,
+  maxTokens: number = 1024,
+  modelId: string = 'gemini-3-flash'
+): Promise<GenerateResponseResult> {
+  const model = genAI.getGenerativeModel({
+    model: modelId,
+    generationConfig: {
+      temperature,
+      maxOutputTokens: maxTokens,
+    },
+  });
 
-    // IMPORTANT: Place system prompt FIRST for implicit caching to work
-    // Gemini automatically caches repeated prompt prefixes
-    const prompt = `${systemPrompt}
+  // IMPORTANT: Place system prompt FIRST for implicit caching to work
+  // Gemini automatically caches repeated prompt prefixes
+  const prompt = `${systemPrompt}
 
 ---
 БАЗА ЗНАНИЙ:
@@ -51,62 +61,75 @@ ${context || 'Нет дополнительной информации.'}
 
 Ответ:`;
 
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    return response.text();
+  const result = await model.generateContent(prompt);
+  const response = result.response;
+
+  // Extract token usage from response metadata
+  const usage = response.usageMetadata;
+  const inputTokens = usage?.promptTokenCount ?? 0;
+  const outputTokens = usage?.candidatesTokenCount ?? 0;
+
+  return {
+    text: response.text(),
+    tokensUsed: {
+      input: inputTokens,
+      output: outputTokens,
+      total: inputTokens + outputTokens,
+    },
+  };
 }
 
 /**
  * Calculate cosine similarity between two vectors
  */
 export function cosineSimilarity(a: number[], b: number[]): number {
-    if (a.length !== b.length) {
-        throw new Error('Vectors must have the same length');
-    }
+  if (a.length !== b.length) {
+    throw new Error('Vectors must have the same length');
+  }
 
-    let dotProduct = 0;
-    let normA = 0;
-    let normB = 0;
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
 
-    for (let i = 0; i < a.length; i++) {
-        dotProduct += a[i] * b[i];
-        normA += a[i] * a[i];
-        normB += b[i] * b[i];
-    }
+  for (let i = 0; i < a.length; i++) {
+    dotProduct += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
 
-    if (normA === 0 || normB === 0) {
-        return 0;
-    }
+  if (normA === 0 || normB === 0) {
+    return 0;
+  }
 
-    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
 /**
  * Split text into chunks for embedding
  */
 export function splitTextIntoChunks(text: string, maxChunkSize: number = 500): string[] {
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const chunks: string[] = [];
-    let currentChunk = '';
+  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  const chunks: string[] = [];
+  let currentChunk = '';
 
-    for (const sentence of sentences) {
-        const trimmedSentence = sentence.trim();
+  for (const sentence of sentences) {
+    const trimmedSentence = sentence.trim();
 
-        if ((currentChunk + ' ' + trimmedSentence).length <= maxChunkSize) {
-            currentChunk = currentChunk ? currentChunk + '. ' + trimmedSentence : trimmedSentence;
-        } else {
-            if (currentChunk) {
-                chunks.push(currentChunk + '.');
-            }
-            currentChunk = trimmedSentence;
-        }
-    }
-
-    if (currentChunk) {
+    if ((currentChunk + ' ' + trimmedSentence).length <= maxChunkSize) {
+      currentChunk = currentChunk ? currentChunk + '. ' + trimmedSentence : trimmedSentence;
+    } else {
+      if (currentChunk) {
         chunks.push(currentChunk + '.');
+      }
+      currentChunk = trimmedSentence;
     }
+  }
 
-    return chunks;
+  if (currentChunk) {
+    chunks.push(currentChunk + '.');
+  }
+
+  return chunks;
 }
 
 /**
@@ -114,22 +137,22 @@ export function splitTextIntoChunks(text: string, maxChunkSize: number = 500): s
  * Optimized version with built-in threshold filtering
  */
 export async function findSimilarChunks(
-    queryEmbedding: number[],
-    chunks: Array<{ text: string; embedding: number[] }>,
-    topK: number = 3,
-    minSimilarity: number = 0.3
+  queryEmbedding: number[],
+  chunks: Array<{ text: string; embedding: number[] }>,
+  topK: number = 3,
+  minSimilarity: number = 0.3
 ): Promise<Array<{ text: string; similarity: number }>> {
-    const scored = chunks.map(chunk => ({
-        text: chunk.text,
-        similarity: cosineSimilarity(queryEmbedding, chunk.embedding),
-    }));
+  const scored = chunks.map((chunk) => ({
+    text: chunk.text,
+    similarity: cosineSimilarity(queryEmbedding, chunk.embedding),
+  }));
 
-    // Filter by minimum similarity first to reduce sorting overhead
-    const relevant = scored.filter(c => c.similarity >= minSimilarity);
+  // Filter by minimum similarity first to reduce sorting overhead
+  const relevant = scored.filter((c) => c.similarity >= minSimilarity);
 
-    relevant.sort((a, b) => b.similarity - a.similarity);
+  relevant.sort((a, b) => b.similarity - a.similarity);
 
-    return relevant.slice(0, topK);
+  return relevant.slice(0, topK);
 }
 
 /**
@@ -138,7 +161,7 @@ export async function findSimilarChunks(
  * The cache expires automatically based on Gemini's internal TTL.
  */
 export async function invalidatePromptCache(clientId: string): Promise<void> {
-    // No-op for implicit caching
-    // If we upgrade to explicit caching with server SDK, implement here
-    console.log(`Cache invalidation requested for ${clientId} (using implicit caching, no action needed)`);
+  // No-op for implicit caching
+  // If we upgrade to explicit caching with server SDK, implement here
+  console.log(`Cache invalidation requested for ${clientId} (using implicit caching, no action needed)`);
 }

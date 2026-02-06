@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+*.md
+LICENSE
+.vscode
+.idea
+.husky
+coverage
+.github
+docker-compose.yml
+Dockerfile

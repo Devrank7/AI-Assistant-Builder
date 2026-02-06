@@ -2,77 +2,70 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import AISettings, { defaultSystemPrompt } from '@/models/AISettings';
 import { invalidatePromptCache } from '@/lib/gemini';
+import { getModelIds } from '@/lib/models';
 
 // GET - Get AI settings for a client
-export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ clientId: string }> }
-) {
-    try {
-        await connectDB();
-        const { clientId } = await params;
+export async function GET(request: NextRequest, { params }: { params: Promise<{ clientId: string }> }) {
+  try {
+    await connectDB();
+    const { clientId } = await params;
 
-        let settings = await AISettings.findOne({ clientId });
+    let settings = await AISettings.findOne({ clientId });
 
-        // Create default settings if none exist
-        if (!settings) {
-            settings = await AISettings.create({
-                clientId,
-                systemPrompt: defaultSystemPrompt,
-                greeting: 'Привет! Чем могу помочь?',
-                temperature: 0.7,
-                maxTokens: 1024,
-                topK: 3,
-            });
-        }
-
-        return NextResponse.json({ success: true, settings });
-    } catch (error) {
-        console.error('Error fetching AI settings:', error);
-        return NextResponse.json(
-            { success: false, error: 'Failed to fetch AI settings' },
-            { status: 500 }
-        );
+    // Create default settings if none exist
+    if (!settings) {
+      settings = await AISettings.create({
+        clientId,
+        systemPrompt: defaultSystemPrompt,
+        greeting: 'Привет! Чем могу помочь?',
+        temperature: 0.7,
+        maxTokens: 1024,
+        topK: 3,
+      });
     }
+
+    return NextResponse.json({ success: true, settings });
+  } catch (error) {
+    console.error('Error fetching AI settings:', error);
+    return NextResponse.json({ success: false, error: 'Failed to fetch AI settings' }, { status: 500 });
+  }
 }
 
 // PUT - Update AI settings
-export async function PUT(
-    request: NextRequest,
-    { params }: { params: Promise<{ clientId: string }> }
-) {
-    try {
-        await connectDB();
-        const { clientId } = await params;
-        const body = await request.json();
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ clientId: string }> }) {
+  try {
+    await connectDB();
+    const { clientId } = await params;
+    const body = await request.json();
 
-        // Only allow specific fields to be updated
-        const allowedFields = ['systemPrompt', 'greeting', 'temperature', 'maxTokens', 'topK'];
-        const updateData: Record<string, unknown> = {};
+    // Only allow specific fields to be updated
+    const allowedFields = ['model', 'systemPrompt', 'greeting', 'temperature', 'maxTokens', 'topK'];
 
-        for (const field of allowedFields) {
-            if (body[field] !== undefined) {
-                updateData[field] = body[field];
-            }
-        }
-
-        const settings = await AISettings.findOneAndUpdate(
-            { clientId },
-            { $set: updateData },
-            { new: true, upsert: true }
-        );
-
-        // If system prompt was updated, invalidate the cached context
-        if (updateData.systemPrompt) {
-            await invalidatePromptCache(clientId);
-        }
-
-        return NextResponse.json({ success: true, settings });
-    } catch (error) {
-        console.error('Error updating AI settings:', error);
-        return NextResponse.json(
-            { success: false, error: 'Failed to update AI settings' },
-            { status: 500 }
-        );
+    // Validate model if provided
+    if (body.model && !getModelIds().includes(body.model)) {
+      return NextResponse.json(
+        { success: false, error: `Invalid model. Available: ${getModelIds().join(', ')}` },
+        { status: 400 }
+      );
     }
+    const updateData: Record<string, unknown> = {};
+
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field];
+      }
+    }
+
+    const settings = await AISettings.findOneAndUpdate({ clientId }, { $set: updateData }, { new: true, upsert: true });
+
+    // If system prompt was updated, invalidate the cached context
+    if (updateData.systemPrompt) {
+      await invalidatePromptCache(clientId);
+    }
+
+    return NextResponse.json({ success: true, settings });
+  } catch (error) {
+    console.error('Error updating AI settings:', error);
+    return NextResponse.json({ success: false, error: 'Failed to update AI settings' }, { status: 500 });
+  }
 }
