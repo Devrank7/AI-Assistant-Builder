@@ -1,0 +1,9 @@
+{
+  "username": "example_user",
+  "email": "user@example.com",
+  "website": "https://example.com",
+  "phone": "+1-555-000-0000",
+  "addresses": ["123 Example St, City, Country"],
+  "instagram": "example_handle",
+  "clientToken": "optional-predefined-token-123"
+}
