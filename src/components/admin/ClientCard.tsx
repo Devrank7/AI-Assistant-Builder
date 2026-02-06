@@ -58,6 +58,18 @@ export default function ClientCard({ client, href, onAction }: ClientCardProps) 
         {client.createdAt && (
           <span className="text-xs text-gray-600">{new Date(client.createdAt).toLocaleDateString('ru-RU')}</span>
         )}
+        {client.status === 'pending' && onAction && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onAction(client.clientId, 'activate');
+            }}
+            className="mr-2 ml-auto rounded-lg border border-[var(--neon-green)]/30 bg-[var(--neon-green)]/10 px-3 py-1.5 text-xs font-medium text-[var(--neon-green)] transition-colors hover:bg-[var(--neon-green)]/20"
+          >
+            Activate 🚀
+          </button>
+        )}
         {onAction && (
           <div className="ml-auto flex gap-1">
             <button

@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 import { SubscriptionTier } from '@/lib/pricing';
 
 // Subscription status enum
-export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'canceled' | 'suspended';
+export type SubscriptionStatus = 'pending' | 'trial' | 'active' | 'past_due' | 'canceled' | 'suspended';
 export type PaymentMethod = 'cryptomus' | 'dodo' | 'liqpay' | null;
 
 export interface IClient extends Document {
@@ -34,6 +34,7 @@ export interface IClient extends Document {
   lastPaymentDate: Date | null;
   paymentFailedCount: number;
   gracePeriodEnd: Date | null;
+  trialActivatedAt: Date | null;
 
   // Prepayment fields
   prepaidMonths: number; // Number of months prepaid (1, 3, 6, 12)
@@ -140,6 +141,15 @@ const ClientSchema = new Schema<IClient>(
       required: true,
     },
 
+    gracePeriodEnd: {
+      type: Date,
+      default: null,
+    },
+    trialActivatedAt: {
+      type: Date,
+      default: null,
+    },
+
     // Subscription fields
     isActive: {
       type: Boolean,
@@ -147,8 +157,8 @@ const ClientSchema = new Schema<IClient>(
     },
     subscriptionStatus: {
       type: String,
-      enum: ['trial', 'active', 'past_due', 'canceled', 'suspended'],
-      default: 'trial',
+      enum: ['pending', 'trial', 'active', 'past_due', 'canceled', 'suspended'],
+      default: 'pending',
     },
     paymentMethod: {
       type: String,

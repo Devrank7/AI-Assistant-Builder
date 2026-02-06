@@ -10,7 +10,7 @@
 
 import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
-import { TRIAL_DAYS } from '@/lib/paymentProviders/types';
+import { TRIAL_DAYS, GRACE_PERIOD_DAYS } from '@/lib/paymentProviders/types';
 import { sendEmail, sendTelegram } from '@/lib/notifications';
 
 interface TrialCheckResult {
@@ -19,6 +19,7 @@ interface TrialCheckResult {
   reminders3d: number;
   reminders1d: number;
   suspended: number;
+  gracePeriodStarted: number;
   errors: string[];
 }
 
@@ -34,29 +35,61 @@ export async function checkTrialReminders(): Promise<TrialCheckResult> {
     reminders3d: 0,
     reminders1d: 0,
     suspended: 0,
+    gracePeriodStarted: 0,
     errors: [],
   };
 
   try {
-    const trialClients = await Client.find({
-      subscriptionStatus: 'trial',
-    }).select('clientId email telegram startDate isActive username');
+    const clientsToCheck = await Client.find({
+      subscriptionStatus: { $in: ['trial', 'past_due'] },
+    }).select('clientId email telegram startDate trialActivatedAt isActive username subscriptionStatus gracePeriodEnd');
 
-    result.totalChecked = trialClients.length;
+    result.totalChecked = clientsToCheck.length;
 
-    for (const client of trialClients) {
+    for (const client of clientsToCheck) {
       try {
-        const trialEnd = new Date(client.startDate);
+        const now = new Date();
+
+        // Handle Grace Period Expiration (past_due)
+        if (client.subscriptionStatus === 'past_due') {
+          if (!client.gracePeriodEnd) {
+            // Abnormal state: past_due but no grace end date. Treat as expired.
+            await Client.updateOne({ clientId: client.clientId }, { isActive: false, subscriptionStatus: 'suspended' });
+            result.suspended++;
+            continue;
+          }
+
+          if (now > new Date(client.gracePeriodEnd)) {
+            // Grace period expired — suspend
+            await Client.updateOne({ clientId: client.clientId }, { isActive: false, subscriptionStatus: 'suspended' });
+            await sendTrialExpiredEmail(client.email, client.telegram, client.username);
+            result.suspended++;
+          }
+          continue;
+        }
+
+        // Handle Trial Status
+        // Use trialActivatedAt if available, otherwise fallback to startDate (legacy)
+        const effectiveStart = client.trialActivatedAt ? new Date(client.trialActivatedAt) : new Date(client.startDate);
+        const trialEnd = new Date(effectiveStart);
         trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS);
 
-        const now = new Date();
         const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
         if (daysLeft <= 0) {
-          // Trial expired — suspend
-          await Client.updateOne({ clientId: client.clientId }, { isActive: false, subscriptionStatus: 'suspended' });
-          await sendTrialExpiredEmail(client.email, client.telegram, client.username);
-          result.suspended++;
+          // Trial ended -> Start Grace Period
+          const graceEnd = new Date();
+          graceEnd.setDate(graceEnd.getDate() + GRACE_PERIOD_DAYS);
+
+          await Client.updateOne(
+            { clientId: client.clientId },
+            {
+              subscriptionStatus: 'past_due',
+              gracePeriodEnd: graceEnd,
+            }
+          );
+          await sendGracePeriodStartedEmail(client.email, client.telegram, client.username);
+          result.gracePeriodStarted++;
         } else if (daysLeft === 1) {
           await sendTrialReminderEmail(client.email, client.telegram, client.username, 1);
           result.reminders1d++;
@@ -81,8 +114,9 @@ export async function checkTrialReminders(): Promise<TrialCheckResult> {
 /**
  * Calculate days remaining in trial
  */
-export function getTrialDaysLeft(startDate: Date): number {
-  const trialEnd = new Date(startDate);
+export function getTrialDaysLeft(startDate: Date, trialActivatedAt?: Date | null): number {
+  const effectiveStart = trialActivatedAt ? new Date(trialActivatedAt) : new Date(startDate);
+  const trialEnd = new Date(effectiveStart);
   trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS);
   const now = new Date();
   return Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
@@ -91,12 +125,44 @@ export function getTrialDaysLeft(startDate: Date): number {
 /**
  * Get trial progress percentage (0-100)
  */
-export function getTrialProgress(startDate: Date): number {
-  const elapsed = (Date.now() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24);
+export function getTrialProgress(startDate: Date, trialActivatedAt?: Date | null): number {
+  const effectiveStart = trialActivatedAt ? new Date(trialActivatedAt) : new Date(startDate);
+  const elapsed = (Date.now() - effectiveStart.getTime()) / (1000 * 60 * 60 * 24);
   return Math.min(100, Math.round((elapsed / TRIAL_DAYS) * 100));
 }
 
 // --- Email templates ---
+
+async function sendGracePeriodStartedEmail(
+  email: string,
+  telegram: string | undefined,
+  username: string
+): Promise<void> {
+  const subject = `⚠️ Ваш пробный период истек. Начался Grace Period (${GRACE_PERIOD_DAYS} дня)`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
+      <h2 style="color: #f59e0b;">⚠️ Пробный период истек</h2>
+      <p style="color: #d1d5db;">Привет, ${username}!</p>
+      <p style="color: #d1d5db;">Ваши 30 дней бесплатного использования подошли к концу.</p>
+      <p style="color: #fff; font-weight: bold;">У вас есть ${GRACE_PERIOD_DAYS} дня (Grace Period), чтобы оплатить подписку, иначе виджет будет отключен.</p>
+      <div style="margin: 24px 0;">
+        <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
+           style="display: inline-block; background: #f59e0b; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
+          Оплатить подписку
+        </a>
+      </div>
+      <p style="color: #6b7280; font-size: 12px;">AI Widget Team</p>
+    </div>
+  `;
+
+  await sendEmail(email, subject, html);
+
+  if (telegram) {
+    const msg = `⚠️ <b>Пробный период истек</b>\n\nПривет, ${username}! Начался Grace Period (${GRACE_PERIOD_DAYS} дня). Оплатите подписку, чтобы избежать отключения.`;
+    await sendTelegram(telegram, msg);
+  }
+}
 
 async function sendTrialReminderEmail(
   email: string,

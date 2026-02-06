@@ -188,26 +188,41 @@ sudo certbot --nginx -d your-domain.com
 
 ---
 
-## 🔄 6. Updates & Maintenance
+---
 
-### How to update the app?
+## 🔄 6. Updates & Maintenance (CI/CD)
 
-When you push changes to GitHub, do this on the server:
+We have set up **GitHub Actions** to automate deployments.
+
+### 1. Configure GitHub Secrets
+
+Go to your GitHub repository -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**.
+
+Add the following secrets:
+
+| Secret Name      | Value                                                                                                                   |
+| :--------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| `SERVER_HOST`    | Your server IP address (e.g., `123.45.67.89`)                                                                           |
+| `SERVER_USER`    | The username you SSH with (usually `root`)                                                                              |
+| `SERVER_SSH_KEY` | Your **Private SSH Key** (content of `~/.ssh/id_rsa` from your local machine, or the key you use to access the server). |
+
+### 2. Automatic Deployment
+
+- **Trigger:** Push to `main` branch.
+- **Workflow:**
+  1. GitHub Action logs into your server via SSH.
+  2. Pulls the latest code (`git pull origin main`).
+  3. Rebuilds and restarts containers (`docker compose up -d --build`).
+  4. Prunes old Docker images to save disk space.
+
+### 3. Manual Deployment (Fallback)
+
+If CI/CD fails, you can still deploy manually:
 
 ```bash
 cd ~/ai-widget
-
-# 1. Pull changes
 git pull origin main
-
-# 2. Rebuild and restart
 docker compose up -d --build
-```
-
-### View Logs
-
-```bash
-docker compose logs -f app
 ```
 
 ---
