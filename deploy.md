@@ -9,6 +9,21 @@
 
 ---
 
+> [!important]
+> **Low-RAM Warning (e.g. 2GB Server)**: Next.js builds are memory intensive. If you have less than 4GB RAM, you **MUST** add a swap file to prevent build crashes.
+>
+> ```bash
+> # Create 4GB swap file
+> sudo fallocate -l 4G /swapfile
+> sudo chmod 600 /swapfile
+> sudo mkswap /swapfile
+> sudo swapon /swapfile
+> # Make permanent
+> echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+> ```
+
+---
+
 ## 🛠️ 1. Server Setup (Ubuntu)
 
 Connect to your server via SSH:
@@ -210,6 +225,38 @@ Add the following secrets:
 | `SERVER_USER`    | The username you SSH with (usually `root`)                                                                              |
 | `SERVER_SSH_KEY` | Your **Private SSH Key** (content of `~/.ssh/id_rsa` from your local machine, or the key you use to access the server). |
 
+### How to generate a new SSH Key for GitHub Actions
+
+If you lost your `.pem` file or want a dedicated key for GitHub:
+
+1.  **On your local computer**, generate a new key:
+
+    ```bash
+    ssh-keygen -t rsa -b 4096 -f github_actions_key
+    # Press Enter for paraphrase (empty)
+    ```
+
+2.  **Copy the public key** to your server:
+
+    ```bash
+    # View the public key
+    cat github_actions_key.pub
+    ```
+
+    - Copy the output (starts with `ssh-rsa ...`).
+    - Login to your server: `ssh ubuntu@your-ip`
+    - Add it to authorized keys:
+      ```bash
+      echo "PASTE_PUBLIC_KEY_HERE" >> ~/.ssh/authorized_keys
+      ```
+
+3.  **Use the private key** for GitHub Secret:
+    ```bash
+    cat github_actions_key
+    ```
+
+    - Copy the **entire** content and paste it into **SERVER_SSH_KEY**.
+
 ### 2. Automatic Deployment
 
 - **Trigger:** Push to `main` branch.
@@ -247,3 +294,55 @@ A: The database files are stored in a Docker volume named `mongo-data`.
 docker exec aiwidget-mongo-1 mongodump --out /dump
 docker cp aiwidget-mongo-1:/dump ./backup
 ```
+
+---
+
+## 🛠️ Troubleshooting
+
+### Docker Build Fails ("snapshot does not exist" or "failed to calculate checksum")
+
+This error often happens when the Docker build cache is corrupted or the server is out of disk space.
+
+**Fix 1: Prune Docker Builder Cache (Recommended)**
+
+```bash
+docker builder prune -a -f
+```
+
+**Fix 2: Clear All Docker System Data (If Fix 1 fails)**
+
+```bash
+# WARNING: This removes all stopped containers, networks, and unused images
+docker system prune -a -f --volumes
+```
+
+**Fix 3: Check Disk Space**
+
+```bash
+df -h
+```
+
+If your disk is full (Use% is 100%), run the prune commands above to free space.
+
+---
+
+## 📈 Scaling Your Server (AWS EC2)
+
+Yes! You can upgrade your server (RAM/CPU) without losing data.
+
+**This process takes ~3-5 minutes. Your site will be offline during this time.**
+
+1.  **Stop the Instance**
+    - Go to AWS Console -> EC2 -> Instances.
+    - Select your instance -> **Instance state** -> **Stop instance**.
+    - _Wait until it says "Stopped"._
+
+2.  **Change Instance Type**
+    - Click **Actions** -> **Instance settings** -> **Change instance type**.
+    - Select a larger type (e.g., `t3.medium` has 4GB RAM / 2 vCPU).
+    - Click **Apply**.
+
+3.  **Start the Instance**
+    - **Instance state** -> **Start instance**.
+
+**Note:** Your IP address might change _unless_ you are using an **Elastic IP** (static IP). If it changes, update your DNS (A record) to the new IP. All your Docker containers and data will remain intact.
