@@ -23,7 +23,7 @@ jobs:
             set -e
 
             # Navigate to project directory
-            cd ~/ai-widget
+            cd ~/AIWidget
 
             # Pull latest changes
             echo "📥 Pulling latest changes..."
