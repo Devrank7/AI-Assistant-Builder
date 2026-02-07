@@ -6,7 +6,7 @@ import AISettings, { defaultSystemPrompt } from '@/models/AISettings';
 import ChatLog from '@/models/ChatLog';
 import Client from '@/models/Client';
 import { generateEmbedding, findSimilarChunks } from '@/lib/gemini';
-import { calculateCost } from '@/lib/models';
+import { calculateCost, getModel, getDefaultModel } from '@/lib/models';
 import { checkCostLimit, trackCost } from '@/lib/costGuard';
 import mongoose from 'mongoose';
 
@@ -37,17 +37,12 @@ export async function POST(request: NextRequest) {
 
     // Get AI settings
     const settingsDoc = await AISettings.findOne({ clientId });
-    // Map UI references to actual API model names
-    const modelMap: Record<string, string> = {
-      'gemini-3-flash': 'gemini-3-flash-preview',
-      'gemini-2.0-flash': 'gemini-2.0-flash',
-      'gemini-pro': 'gemini-pro',
-    };
 
-    const selectedModel = settingsDoc?.aiModel || 'gemini-2.0-flash';
+    const selectedModel = settingsDoc?.aiModel || getDefaultModel().id;
+    const resolvedModel = getModel(selectedModel);
     const systemPrompt = settingsDoc?.systemPrompt || defaultSystemPrompt;
     const config = {
-      model: modelMap[selectedModel] || selectedModel,
+      model: resolvedModel.id,
       systemPrompt,
       temperature: settingsDoc?.temperature || 0.7,
       maxTokens: settingsDoc?.maxTokens || 1024,
@@ -126,18 +121,27 @@ export async function POST(request: NextRequest) {
 
             // After stream ends, log chat and cost
             try {
-              // Calculate cost (approximate for stream)
-              const inputTokens = Math.ceil((fullSystemPrompt.length + message.length) / 4);
-              const outputTokens = Math.ceil(fullResponse.length / 4);
+              // Get actual token counts from Gemini response metadata
+              let inputTokens: number;
+              let outputTokens: number;
+              try {
+                const finalResponse = await result.response;
+                const usage = finalResponse.usageMetadata;
+                inputTokens = usage?.promptTokenCount ?? Math.ceil((fullSystemPrompt.length + message.length) / 4);
+                outputTokens = usage?.candidatesTokenCount ?? Math.ceil(fullResponse.length / 4);
+              } catch {
+                // Fallback to estimation if metadata unavailable
+                inputTokens = Math.ceil((fullSystemPrompt.length + message.length) / 4);
+                outputTokens = Math.ceil(fullResponse.length / 4);
+              }
               const requestCost = calculateCost(config.model, inputTokens, outputTokens);
 
               await trackCost(clientId, inputTokens, outputTokens, requestCost);
 
               // Log chat
               if (sessionId) {
-                const logSessionId = sessionId || `session_${Date.now()}`;
                 await ChatLog.findOneAndUpdate(
-                  { clientId, sessionId: logSessionId },
+                  { clientId, sessionId },
                   {
                     $push: {
                       messages: {
@@ -149,7 +153,7 @@ export async function POST(request: NextRequest) {
                     },
                     $setOnInsert: {
                       clientId,
-                      sessionId: logSessionId,
+                      sessionId,
                       metadata: metadata || {},
                     },
                   },

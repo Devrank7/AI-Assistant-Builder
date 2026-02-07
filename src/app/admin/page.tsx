@@ -1,5 +1,8 @@
+'use client';
+
 import ClientList from '@/components/ClientList';
 import Link from 'next/link';
+import { PageTransition } from '@/components/ui/motion';
 
 export default function AdminDashboard() {
   return (
@@ -74,9 +77,9 @@ export default function AdminDashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 mx-auto max-w-7xl px-6 py-10">
+      <PageTransition className="relative z-10 mx-auto max-w-7xl px-6 py-10">
         {/* Page Title */}
-        <div className="animate-slide-up mb-10">
+        <div className="mb-10">
           <h2 className="mb-3 text-4xl font-bold tracking-tight text-white">
             Client <span className="gradient-text">Dashboard</span>
           </h2>
@@ -85,7 +88,7 @@ export default function AdminDashboard() {
 
         {/* Client List */}
         <ClientList />
-      </main>
+      </PageTransition>
 
       {/* Footer */}
       <footer className="relative z-10 mt-20 border-t border-white/[0.06]">

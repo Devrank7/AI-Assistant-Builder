@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getDefaultModel } from '@/lib/models';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -38,7 +39,7 @@ export async function generateResponse(
   userMessage: string,
   temperature: number = 0.7,
   maxTokens: number = 1024,
-  modelId: string = 'gemini-3-flash'
+  modelId: string = getDefaultModel().id
 ): Promise<GenerateResponseResult> {
   const model = genAI.getGenerativeModel({
     model: modelId,

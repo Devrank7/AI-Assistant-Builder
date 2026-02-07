@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { IClient } from '@/models/Client';
 import ClientCard from './ClientCard';
-import LoadingCard from './LoadingCard';
+import { MotionList, MotionItem, AnimatedNumber, SkeletonCard } from '@/components/ui/motion';
 
 export default function ClientList() {
   const [clients, setClients] = useState<IClient[]>([]);
@@ -45,11 +45,11 @@ export default function ClientList() {
   const totalTokens = clients.reduce((sum, c) => sum + c.tokens, 0);
 
   return (
-    <div className="animate-slide-up space-y-8">
+    <div className="space-y-8">
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+      <MotionList className="grid grid-cols-1 gap-6 md:grid-cols-4">
         {/* Total Clients */}
-        <div className="stat-premium group">
+        <MotionItem className="stat-premium group">
           <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
             <svg
               className="h-16 w-16 -rotate-12 transform text-[var(--neon-cyan)] transition-transform duration-500 group-hover:scale-110"
@@ -78,12 +78,14 @@ export default function ClientList() {
             </div>
             <span className="text-sm font-medium tracking-wide text-gray-400">Total Clients</span>
           </div>
-          <p className="stat-value relative z-10">{clients.length}</p>
+          <p className="stat-value relative z-10">
+            <AnimatedNumber value={clients.length} />
+          </p>
           <div className="mt-2 text-xs text-gray-500">all time</div>
-        </div>
+        </MotionItem>
 
         {/* Total Requests */}
-        <div className="stat-premium group">
+        <MotionItem className="stat-premium group">
           <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
             <svg
               className="h-16 w-16 -rotate-12 transform text-[var(--neon-purple)] transition-transform duration-500 group-hover:scale-110"
@@ -112,12 +114,14 @@ export default function ClientList() {
             </div>
             <span className="text-sm font-medium tracking-wide text-gray-400">Requests</span>
           </div>
-          <p className="stat-value relative z-10">{totalRequests.toLocaleString()}</p>
+          <p className="stat-value relative z-10">
+            <AnimatedNumber value={totalRequests} />
+          </p>
           <div className="mt-2 text-xs text-gray-500">all time</div>
-        </div>
+        </MotionItem>
 
         {/* Total Tokens */}
-        <div className="stat-premium group">
+        <MotionItem className="stat-premium group">
           <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
             <svg
               className="h-16 w-16 -rotate-12 transform text-[var(--neon-pink)] transition-transform duration-500 group-hover:scale-110"
@@ -142,17 +146,13 @@ export default function ClientList() {
             <span className="text-sm font-medium tracking-wide text-gray-400">Tokens Used</span>
           </div>
           <p className="stat-value relative z-10">
-            {totalTokens >= 1000000
-              ? `${(totalTokens / 1000000).toFixed(1)}M`
-              : totalTokens >= 1000
-                ? `${(totalTokens / 1000).toFixed(1)}k`
-                : totalTokens.toLocaleString()}
+            <AnimatedNumber value={totalTokens} />
           </p>
           <div className="mt-2 text-xs text-gray-500">all time</div>
-        </div>
+        </MotionItem>
 
         {/* Active Widgets */}
-        <div className="stat-premium group">
+        <MotionItem className="stat-premium group">
           <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
             <svg
               className="h-16 w-16 -rotate-12 transform text-emerald-400 transition-transform duration-500 group-hover:scale-110"
@@ -181,12 +181,14 @@ export default function ClientList() {
             </div>
             <span className="text-sm font-medium tracking-wide text-gray-400">Active</span>
           </div>
-          <p className="stat-value relative z-10">{clients.filter((c) => c.isActive).length || clients.length}</p>
+          <p className="stat-value relative z-10">
+            <AnimatedNumber value={clients.filter((c) => c.isActive).length || clients.length} />
+          </p>
           <div className="relative z-10 mt-2 text-xs text-gray-500">
             <span className="font-medium text-gray-300">100%</span> uptime
           </div>
-        </div>
-      </div>
+        </MotionItem>
+      </MotionList>
 
       {/* Search Bar */}
       <div className="card-premium flex flex-col items-center justify-between gap-4 p-4 md:flex-row">
@@ -252,15 +254,19 @@ export default function ClientList() {
       )}
 
       {/* Clients Grid */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <MotionList className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" staggerDelay={0.07}>
         {loading ? (
           <>
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <LoadingCard key={i} />
+              <SkeletonCard key={i} lines={4} />
             ))}
           </>
         ) : filteredClients.length > 0 ? (
-          filteredClients.map((client) => <ClientCard key={client.clientId} client={client} />)
+          filteredClients.map((client) => (
+            <MotionItem key={client.clientId}>
+              <ClientCard client={client} />
+            </MotionItem>
+          ))
         ) : (
           <div className="col-span-full">
             <div className="glass rounded-2xl border-white/[0.04] p-16 text-center">
@@ -283,7 +289,7 @@ export default function ClientList() {
             </div>
           </div>
         )}
-      </div>
+      </MotionList>
     </div>
   );
 }

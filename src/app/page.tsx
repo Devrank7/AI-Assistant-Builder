@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 
 /* ─── Floating Orb Component ─── */
 function FloatingOrb({
@@ -214,7 +215,7 @@ export default function LandingPage() {
 
             {/* Feature Badges */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <FeatureBadge icon="✦" label="Gemini AI" />
+              <FeatureBadge icon="✦" label="Powerful AI" />
               <FeatureBadge icon="◉" label="RAG System" />
               <FeatureBadge icon="⚡" label="Multi-Model" />
               <FeatureBadge icon="📊" label="Analytics" />
@@ -330,144 +331,184 @@ export default function LandingPage() {
       </div>
 
       {/* ─── Admin Modal ─── */}
-      {showAdminModal && (
-        <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
-          <div className="animate-scale-in relative w-full max-w-md">
-            {/* Glow behind modal */}
-            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-purple-500/20 via-pink-500/10 to-transparent blur-xl" />
+      <AnimatePresence>
+        {showAdminModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="relative w-full max-w-md"
+            >
+              {/* Glow behind modal */}
+              <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-purple-500/20 via-pink-500/10 to-transparent blur-xl" />
 
-            <div className="glass relative rounded-2xl border-purple-500/20 p-8">
-              <button
-                onClick={closeModals}
-                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-gray-400 transition-all hover:bg-white/10 hover:text-white"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
-              <div className="mb-8 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg shadow-purple-500/30">
-                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-                    />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-white">Admin Access</h2>
-                <p className="mt-2 text-sm text-gray-400">Enter your secret admin token to continue</p>
-              </div>
-
-              {error && (
-                <div className="animate-scale-in mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-400">
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div className="relative">
-                  <input
-                    type="password"
-                    value={adminToken}
-                    onChange={(e) => setAdminToken(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
-                    placeholder="Enter admin token..."
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-gray-500 transition-all focus:border-purple-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
-                    autoFocus
-                  />
-                </div>
+              <div className="glass relative rounded-2xl border-purple-500/20 p-8">
                 <button
-                  onClick={handleAdminLogin}
-                  disabled={loading}
-                  className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 py-3.5 font-semibold text-white transition-all hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={closeModals}
+                  className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-gray-400 transition-all hover:bg-white/10 hover:text-white"
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      <span>Verifying...</span>
-                    </div>
-                  ) : (
-                    'Access Admin Panel'
-                  )}
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
+
+                <div className="mb-8 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg shadow-purple-500/30">
+                    <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">Admin Access</h2>
+                  <p className="mt-2 text-sm text-gray-400">Enter your secret admin token to continue</p>
+                </div>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-400"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <div className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type="password"
+                      value={adminToken}
+                      onChange={(e) => setAdminToken(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
+                      placeholder="Enter admin token..."
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-gray-500 transition-all focus:border-purple-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
+                      autoFocus
+                    />
+                  </div>
+                  <motion.button
+                    onClick={handleAdminLogin}
+                    disabled={loading}
+                    whileHover={loading ? undefined : { scale: 1.02 }}
+                    whileTap={loading ? undefined : { scale: 0.97 }}
+                    className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 py-3.5 font-semibold text-white transition-all hover:shadow-lg hover:shadow-purple-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        <span>Verifying...</span>
+                      </div>
+                    ) : (
+                      'Access Admin Panel'
+                    )}
+                  </motion.button>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── Client Modal ─── */}
-      {showClientModal && (
-        <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
-          <div className="animate-scale-in relative w-full max-w-md">
-            {/* Glow behind modal */}
-            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-cyan-500/20 via-blue-500/10 to-transparent blur-xl" />
+      <AnimatePresence>
+        {showClientModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="relative w-full max-w-md"
+            >
+              {/* Glow behind modal */}
+              <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-cyan-500/20 via-blue-500/10 to-transparent blur-xl" />
 
-            <div className="glass relative rounded-2xl border-cyan-500/20 p-8">
-              <button
-                onClick={closeModals}
-                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-gray-400 transition-all hover:bg-white/10 hover:text-white"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
-              <div className="mb-8 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/30">
-                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
-                    />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-white">Client Cabinet</h2>
-                <p className="mt-2 text-sm text-gray-400">Enter your access token to view your dashboard</p>
-              </div>
-
-              {error && (
-                <div className="animate-scale-in mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-400">
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={clientToken}
-                    onChange={(e) => setClientToken(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleClientLogin()}
-                    placeholder="Enter your access token..."
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-gray-500 transition-all focus:border-cyan-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-cyan-500/20 focus:outline-none"
-                    autoFocus
-                  />
-                </div>
+              <div className="glass relative rounded-2xl border-cyan-500/20 p-8">
                 <button
-                  onClick={handleClientLogin}
-                  disabled={loading}
-                  className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 font-semibold text-white transition-all hover:shadow-lg hover:shadow-cyan-500/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={closeModals}
+                  className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-gray-400 transition-all hover:bg-white/10 hover:text-white"
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      <span>Verifying...</span>
-                    </div>
-                  ) : (
-                    'Access My Cabinet'
-                  )}
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
+
+                <div className="mb-8 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/30">
+                    <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">Client Cabinet</h2>
+                  <p className="mt-2 text-sm text-gray-400">Enter your access token to view your dashboard</p>
+                </div>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-400"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <div className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={clientToken}
+                      onChange={(e) => setClientToken(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleClientLogin()}
+                      placeholder="Enter your access token..."
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-gray-500 transition-all focus:border-cyan-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-cyan-500/20 focus:outline-none"
+                      autoFocus
+                    />
+                  </div>
+                  <motion.button
+                    onClick={handleClientLogin}
+                    disabled={loading}
+                    whileHover={loading ? undefined : { scale: 1.02 }}
+                    whileTap={loading ? undefined : { scale: 0.97 }}
+                    className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 font-semibold text-white transition-all hover:shadow-lg hover:shadow-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        <span>Verifying...</span>
+                      </div>
+                    ) : (
+                      'Access My Cabinet'
+                    )}
+                  </motion.button>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

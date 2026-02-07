@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { PageTransition, MotionList, MotionItem } from '@/components/ui/motion';
+import { PageTransition, MotionList, MotionItem, AnimatedNumber } from '@/components/ui/motion';
 import { IClient } from '@/models/Client';
 import { useMoodTheme } from '@/hooks/use-mood-theme';
 
@@ -528,7 +528,9 @@ function ClientCabinetContent() {
               </div>
               <span className="stat-label mb-0">Total Requests</span>
             </div>
-            <p className="stat-value">{client.requests?.toLocaleString() || '0'}</p>
+            <p className="stat-value">
+              <AnimatedNumber value={client.requests || 0} />
+            </p>
           </MotionItem>
           <MotionItem className="stat-premium group">
             <div className="mb-3 flex items-center gap-3">
@@ -557,7 +559,7 @@ function ClientCabinetContent() {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              {client.tokens?.toLocaleString() || '0'}
+              <AnimatedNumber value={client.tokens || 0} />
             </p>
           </MotionItem>
           <MotionItem className="stat-premium group">
@@ -582,7 +584,7 @@ function ClientCabinetContent() {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              ${(client.monthlyCostUsd || 0).toFixed(2)}
+              <AnimatedNumber value={client.monthlyCostUsd || 0} prefix="$" decimals={2} />
             </p>
           </MotionItem>
           <MotionItem className="stat-premium group">

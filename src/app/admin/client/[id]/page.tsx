@@ -3,7 +3,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { AnimatePresence, motion } from 'framer-motion';
 import { IClient } from '@/models/Client';
+import {
+  PageTransition,
+  MotionList,
+  MotionItem,
+  AnimatedNumber,
+  AnimatedTabs,
+  TabContent,
+  SkeletonCard,
+} from '@/components/ui/motion';
 
 // Tab components
 import AISettingsTab from '@/components/admin/tabs/AISettingsTab';
@@ -499,124 +509,130 @@ export default function ClientDetailsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <PageTransition className="mx-auto max-w-7xl px-6 py-8">
         {/* Stats Cards */}
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
-          <div className="glass-card stat-card p-6">
+        <MotionList className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
+          <MotionItem className="glass-card stat-card p-6">
             <p className="mb-1 text-sm text-gray-400">Total Requests</p>
-            <p className="text-3xl font-bold text-[var(--neon-cyan)]">{client.requests.toLocaleString()}</p>
-          </div>
-          <div className="glass-card stat-card p-6">
+            <p className="text-3xl font-bold text-[var(--neon-cyan)]">
+              <AnimatedNumber value={client.requests} />
+            </p>
+          </MotionItem>
+          <MotionItem className="glass-card stat-card p-6">
             <p className="mb-1 text-sm text-gray-400">Tokens Used</p>
-            <p className="text-3xl font-bold text-[var(--neon-purple)]">{client.tokens.toLocaleString()}</p>
-          </div>
-          <div className="glass-card stat-card p-6">
+            <p className="text-3xl font-bold text-[var(--neon-purple)]">
+              <AnimatedNumber value={client.tokens} />
+            </p>
+          </MotionItem>
+          <MotionItem className="glass-card stat-card p-6">
             <p className="mb-1 text-sm text-gray-400">Earnings (USD)</p>
-            <p className="text-3xl font-bold text-green-400">${(client.monthlyCostUsd || 0).toFixed(2)}</p>
-          </div>
-          <div className="glass-card stat-card p-6">
+            <p className="text-3xl font-bold text-green-400">
+              <AnimatedNumber value={client.monthlyCostUsd || 0} prefix="$" decimals={2} />
+            </p>
+          </MotionItem>
+          <MotionItem className="glass-card stat-card p-6">
             <p className="mb-1 text-sm text-gray-400">Knowledge Chunks</p>
-            <p className="gradient-text text-3xl font-bold">{knowledgeChunks.length}</p>
-          </div>
-        </div>
+            <p className="gradient-text text-3xl font-bold">
+              <AnimatedNumber value={knowledgeChunks.length} />
+            </p>
+          </MotionItem>
+        </MotionList>
 
         {/* Tabs Navigation */}
-        <div className="glass-card mb-6">
-          <div className="flex overflow-x-auto border-b border-white/10">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-4 font-medium whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-b-2 border-[var(--neon-cyan)] text-[var(--neon-cyan)]'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                {tab.icon && <span>{tab.icon}</span>}
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <AnimatedTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={(id) => setActiveTab(id as TabType)}
+          className="mb-6"
+        />
 
         {/* Tab Content */}
-        {activeTab === 'ai-settings' && (
-          <AISettingsTab
-            aiSettings={aiSettings}
-            setAiSettings={setAiSettings}
-            aiSettingsLoading={aiSettingsLoading}
-            aiSettingsSaving={aiSettingsSaving}
-            saveAISettings={saveAISettings}
-            availableModels={availableModels}
-            templates={templates}
-            applyTemplate={applyTemplate}
-            aiSettingsMessage={aiSettingsMessage}
-            testMessage={testMessage}
-            setTestMessage={setTestMessage}
-            testChat={testChat}
-            testLoading={testLoading}
-            testResponse={testResponse}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            {activeTab === 'ai-settings' && (
+              <AISettingsTab
+                aiSettings={aiSettings}
+                setAiSettings={setAiSettings}
+                aiSettingsLoading={aiSettingsLoading}
+                aiSettingsSaving={aiSettingsSaving}
+                saveAISettings={saveAISettings}
+                availableModels={availableModels}
+                templates={templates}
+                applyTemplate={applyTemplate}
+                aiSettingsMessage={aiSettingsMessage}
+                testMessage={testMessage}
+                setTestMessage={setTestMessage}
+                testChat={testChat}
+                testLoading={testLoading}
+                testResponse={testResponse}
+              />
+            )}
 
-        {activeTab === 'knowledge' && (
-          <KnowledgeTab
-            uploadFile={uploadFile}
-            uploadingFile={uploadingFile}
-            uploadMessage={uploadMessage}
-            newKnowledgeSource={newKnowledgeSource}
-            setNewKnowledgeSource={setNewKnowledgeSource}
-            newKnowledgeText={newKnowledgeText}
-            setNewKnowledgeText={setNewKnowledgeText}
-            addKnowledge={addKnowledge}
-            addingKnowledge={addingKnowledge}
-            knowledgeChunks={knowledgeChunks}
-            knowledgeLoading={knowledgeLoading}
-            deleteKnowledge={deleteKnowledge}
-          />
-        )}
+            {activeTab === 'knowledge' && (
+              <KnowledgeTab
+                uploadFile={uploadFile}
+                uploadingFile={uploadingFile}
+                uploadMessage={uploadMessage}
+                newKnowledgeSource={newKnowledgeSource}
+                setNewKnowledgeSource={setNewKnowledgeSource}
+                newKnowledgeText={newKnowledgeText}
+                setNewKnowledgeText={setNewKnowledgeText}
+                addKnowledge={addKnowledge}
+                addingKnowledge={addingKnowledge}
+                knowledgeChunks={knowledgeChunks}
+                knowledgeLoading={knowledgeLoading}
+                deleteKnowledge={deleteKnowledge}
+              />
+            )}
 
-        {activeTab === 'history' && (
-          <ChatHistoryTab
-            chatLogs={chatLogs}
-            chatLogsLoading={chatLogsLoading}
-            viewChatLog={viewChatLog}
-            selectedLog={selectedLog}
-            setSelectedLog={() => setSelectedLog(null)}
-          />
-        )}
+            {activeTab === 'history' && (
+              <ChatHistoryTab
+                chatLogs={chatLogs}
+                chatLogsLoading={chatLogsLoading}
+                viewChatLog={viewChatLog}
+                selectedLog={selectedLog}
+                setSelectedLog={() => setSelectedLog(null)}
+              />
+            )}
 
-        {activeTab === 'analytics' && (
-          <AnalyticsTab
-            analyticsLoading={analyticsLoading}
-            analyticsData={analyticsData}
-            fetchAnalytics={fetchAnalytics}
-            spreadsheetId={spreadsheetId}
-            setSpreadsheetId={setSpreadsheetId}
-            exportToSheets={exportToSheets}
-            sheetsExporting={sheetsExporting}
-            exportMessage={exportMessage}
-          />
-        )}
+            {activeTab === 'analytics' && (
+              <AnalyticsTab
+                analyticsLoading={analyticsLoading}
+                analyticsData={analyticsData}
+                fetchAnalytics={fetchAnalytics}
+                spreadsheetId={spreadsheetId}
+                setSpreadsheetId={setSpreadsheetId}
+                exportToSheets={exportToSheets}
+                sheetsExporting={sheetsExporting}
+                exportMessage={exportMessage}
+              />
+            )}
 
-        {activeTab === 'billing' && <BillingTab client={client} daysUntilPayment={daysUntilPayment} />}
+            {activeTab === 'billing' && <BillingTab client={client} daysUntilPayment={daysUntilPayment} />}
 
-        {activeTab === 'info' && (
-          <ClientInfoTab
-            client={client}
-            scriptUrl={scriptUrl}
-            startDate={startDate}
-            daysUntilPayment={daysUntilPayment}
-          />
-        )}
+            {activeTab === 'info' && (
+              <ClientInfoTab
+                client={client}
+                scriptUrl={scriptUrl}
+                startDate={startDate}
+                daysUntilPayment={daysUntilPayment}
+              />
+            )}
 
-        {activeTab === 'files' && <FilesTab files={files} folderPath={client.folderPath} />}
+            {activeTab === 'files' && <FilesTab files={files} folderPath={client.folderPath} />}
 
-        {activeTab === 'usage' && <UsageTab tokens={client.tokens} requests={client.requests} />}
+            {activeTab === 'usage' && <UsageTab tokens={client.tokens} requests={client.requests} />}
 
-        {activeTab === 'demo' && <DemoTab clientId={client.clientId} website={client.website} />}
-      </main>
+            {activeTab === 'demo' && <DemoTab clientId={client.clientId} website={client.website} />}
+          </motion.div>
+        </AnimatePresence>
+      </PageTransition>
     </div>
   );
 }

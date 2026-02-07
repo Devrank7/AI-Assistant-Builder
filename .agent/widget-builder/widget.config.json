@@ -1,9 +1,9 @@
 {
-  "clientId": "bindfo-123",
+  "clientId": "bruno",
   "bot": {
-    "name": "bindfocuc",
-    "avatar": "https://api.dicebear.com/9.x/glass/svg?seed=bindfocuc",
-    "greeting": "Приветствия! Я бот компании **bindfocuc**.",
+    "name": "Bruno AI",
+    "avatar": "https://api.dicebear.com/9.x/glass/svg?seed=Bruno",
+    "greeting": "Hello! Welcome to **Bruno Car Rentals**. How can I help you find your perfect ride today?",
     "tone": "professional_friendly"
   },
   "design": {
@@ -20,10 +20,10 @@
     "streaming": true,
     "quickReplies": {
       "enabled": true,
-      "starters": ["Цены на ТО", "Записаться на сервис", "Гарантия на запчасти", "Как проехать?"]
+      "starters": ["Rent a Car", "Pricing", "Fleet", "Support"]
     },
-    "feedback": true,
-    "leads": false,
+    "feedback": false,
+    "leads": true,
     "integrations": {}
   }
 }
