@@ -102,12 +102,18 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
 
   // BLOCKED: Over effective limit (base $40 + extra credits)
   if (cost >= effectiveLimit) {
-    // Disable widget if not already disabled
-    if (client.isActive) {
-      await Client.updateOne({ clientId }, { isActive: false });
+    // Atomically disable widget only if still active (prevents duplicate notifications)
+    const disableResult = await Client.findOneAndUpdate(
+      { clientId, isActive: true },
+      { isActive: false },
+      { new: true }
+    );
 
-      // Notify client with top-up option
-      await sendCostBlockedNotification(client.email, client.telegram, cost, effectiveLimit);
+    if (disableResult) {
+      // Only notify if we were the ones to disable it
+      await sendCostBlockedNotification(client.email, client.telegram, cost, effectiveLimit).catch((err) =>
+        console.error(`[CostGuard] Failed to send blocked notification for ${clientId}:`, err)
+      );
     }
 
     return {
@@ -123,10 +129,18 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
     };
   }
 
-  // WARNING: Over $20/month
+  // WARNING: Over $20/month (atomic update to prevent duplicate notifications)
   if (cost >= COST_WARNING_THRESHOLD && !client.costWarningNotified) {
-    await Client.updateOne({ clientId }, { costWarningNotified: true });
-    await sendCostWarningNotification(client.email, client.telegram, cost, effectiveLimit);
+    const warnResult = await Client.findOneAndUpdate(
+      { clientId, costWarningNotified: false },
+      { costWarningNotified: true },
+      { new: true }
+    );
+    if (warnResult) {
+      await sendCostWarningNotification(client.email, client.telegram, cost, effectiveLimit).catch((err) =>
+        console.error(`[CostGuard] Failed to send warning notification for ${clientId}:`, err)
+      );
+    }
 
     return {
       allowed: true,

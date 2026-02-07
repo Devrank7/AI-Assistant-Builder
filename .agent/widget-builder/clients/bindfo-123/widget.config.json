@@ -1,0 +1,29 @@
+{
+  "clientId": "bindfo-123",
+  "bot": {
+    "name": "bindfocuc",
+    "avatar": "https://api.dicebear.com/9.x/glass/svg?seed=bindfocuc",
+    "greeting": "Приветствия! Я бот компании **bindfocuc**.",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "glass_3d",
+    "colors": {
+      "primary": "emerald",
+      "gradient": "from-emerald-400 to-teal-600",
+      "glass": "bg-emerald-900/10 backdrop-blur-xl border-white/20"
+    },
+    "shapes": "rounded-3xl",
+    "animations": "spring_smooth"
+  },
+  "features": {
+    "streaming": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["Цены на ТО", "Записаться на сервис", "Гарантия на запчасти", "Как проехать?"]
+    },
+    "feedback": true,
+    "leads": false,
+    "integrations": {}
+  }
+}

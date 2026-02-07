@@ -79,15 +79,7 @@ export default function ClientList() {
             <span className="text-sm font-medium tracking-wide text-gray-400">Total Clients</span>
           </div>
           <p className="stat-value relative z-10">{clients.length}</p>
-          <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
-            <span className="flex items-center gap-0.5 text-emerald-400">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              +12%
-            </span>
-            <span>vs last month</span>
-          </div>
+          <div className="mt-2 text-xs text-gray-500">all time</div>
         </div>
 
         {/* Total Requests */}
@@ -121,15 +113,7 @@ export default function ClientList() {
             <span className="text-sm font-medium tracking-wide text-gray-400">Requests</span>
           </div>
           <p className="stat-value relative z-10">{totalRequests.toLocaleString()}</p>
-          <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
-            <span className="flex items-center gap-0.5 text-emerald-400">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              +5.3%
-            </span>
-            <span>vs last month</span>
-          </div>
+          <div className="mt-2 text-xs text-gray-500">all time</div>
         </div>
 
         {/* Total Tokens */}
@@ -164,15 +148,7 @@ export default function ClientList() {
                 ? `${(totalTokens / 1000).toFixed(1)}k`
                 : totalTokens.toLocaleString()}
           </p>
-          <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
-            <span className="flex items-center gap-0.5 text-emerald-400">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              +24%
-            </span>
-            <span>vs last month</span>
-          </div>
+          <div className="mt-2 text-xs text-gray-500">all time</div>
         </div>
 
         {/* Active Widgets */}
