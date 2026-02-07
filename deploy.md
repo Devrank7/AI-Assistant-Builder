@@ -30,6 +30,10 @@ sudo apt install -y apt-transport-https ca-certificates curl software-properties
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
+# Add current user to docker group (avoids permission denied error)
+sudo usermod -aG docker $USER
+newgrp docker
+
 # Install Docker Compose
 sudo apt install -y docker-compose-plugin
 ```
@@ -51,14 +55,14 @@ cd ai-widget
 
 ---
 
-## ⚙️ 3. Environment Configuration (.env.local)
+## ⚙️ 3. Environment Configuration (.env)
 
-The file `.env.local` stores your secrets. **It is NOT committed to Git** for security. You must create it manually on the server.
+The file `.env` stores your secrets and is automatically read by Docker Compose. **It is NOT committed to Git** for security. You must create it manually on the server.
 
 ### Create the file:
 
 ```bash
-nano .env.local
+nano .env
 ```
 
 ### Paste the content (edit with your real keys):
@@ -100,7 +104,7 @@ GOOGLE_SHEETS_SPREADSHEET_ID=your_spreadsheet_id
 
 ### Add Google Service Account JSON
 
-Since `.env.local` references `./service_account.json`, you must upload this file too.
+Since `.env` references `./service_account.json`, you must upload this file too.
 
 1. **Option A (SCP):** Upload from your local machine
 
@@ -229,8 +233,8 @@ docker compose up -d --build
 
 ## ❓ FAQ
 
-**Q: What is `dotenv.local`?**
-A: In Next.js, `.env.local` is the standard file for **local environment variables**. It overrides defaults. We use it on the server too for simplicity. Since it contains secrets (API keys), it is ignored by Git (`.gitignore`) so your secrets don't leak.
+**Q: What is `dotenv`?**
+A: `.env` is the standard file env vars. We use it on the server. Since it contains secrets (API keys), it is ignored by Git (`.gitignore`) so your secrets don't leak.
 
 **Q: Why `mongodb://mongo:27017`?**
 A: In `docker-compose.yml`, services can talk to each other by name. The database service is named `mongo`, so the app connects to hostname `mongo`.

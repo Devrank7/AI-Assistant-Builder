@@ -177,10 +177,6 @@ const ClientSchema = new Schema<IClient>(
       type: Number,
       default: 0,
     },
-    gracePeriodEnd: {
-      type: Date,
-      default: null,
-    },
 
     // Prepayment fields
     prepaidMonths: {
