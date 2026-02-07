@@ -37,9 +37,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Get AI settings for client
+    // Map UI references to actual API model names (same as in stream/route.ts)
     const settingsDoc = await AISettings.findOne({ clientId });
+    const modelMap: Record<string, string> = {
+      'gemini-3-flash': 'gemini-3-flash-preview',
+      'gemini-2.0-flash': 'gemini-2.0-flash',
+      'gemini-pro': 'gemini-pro',
+    };
+    const selectedModel = settingsDoc?.aiModel || 'gemini-3-flash-preview';
     const config = {
-      model: settingsDoc?.aiModel || 'gemini-3-flash',
+      model: modelMap[selectedModel] || selectedModel,
       systemPrompt: settingsDoc?.systemPrompt || defaultSystemPrompt,
       temperature: settingsDoc?.temperature || 0.7,
       maxTokens: settingsDoc?.maxTokens || 1024,

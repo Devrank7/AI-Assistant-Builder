@@ -23,13 +23,23 @@ export interface AIModel {
 
 export const GEMINI_MODELS: AIModel[] = [
   {
-    id: 'gemini-3-flash',
-    name: 'Gemini 3 Flash',
+    id: 'gemini-3-flash-preview',
+    name: 'Gemini 3 Flash (Preview)',
     provider: 'google',
     pricing: { inputPer1M: 0.1, outputPer1M: 0.4 },
     maxOutputTokens: 8192,
-    description: 'Быстрая и экономичная модель. Рекомендуется для большинства задач.',
+    description: 'Новейшая экономичная модель (Preview).',
     isDefault: true,
+    tier: 'standard',
+  },
+  {
+    id: 'gemini-2.0-flash',
+    name: 'Gemini 2.0 Flash',
+    provider: 'google',
+    pricing: { inputPer1M: 0.1, outputPer1M: 0.4 },
+    maxOutputTokens: 8192,
+    description: 'Быстрая и стабильная модель v2.0.',
+    isDefault: false,
     tier: 'standard',
   },
   {

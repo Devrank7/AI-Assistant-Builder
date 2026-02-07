@@ -145,24 +145,6 @@ export default function ClientDetailsPage() {
   const [spreadsheetId, setSpreadsheetId] = useState('');
   const [exportMessage, setExportMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (params.id) {
-      fetchClientData(params.id as string);
-    }
-  }, [params.id, fetchClientData]);
-
-  useEffect(() => {
-    if (data?.client.clientId && activeTab === 'ai-settings') {
-      fetchAISettings();
-    }
-    if (data?.client.clientId && activeTab === 'knowledge') {
-      fetchKnowledge();
-    }
-    if (data?.client.clientId && activeTab === 'analytics') {
-      fetchAnalytics();
-    }
-  }, [activeTab, data?.client.clientId, fetchAISettings, fetchKnowledge, fetchAnalytics]);
-
   const fetchClientData = useCallback(async (id: string) => {
     try {
       setLoading(true);
@@ -446,6 +428,26 @@ export default function ClientDetailsPage() {
       setAnalyticsLoading(false);
     }
   }, [data?.client.clientId]);
+
+  // Initial data fetch
+  useEffect(() => {
+    if (params.id) {
+      fetchClientData(params.id as string);
+    }
+  }, [params.id, fetchClientData]);
+
+  // Tab-dependent data fetch
+  useEffect(() => {
+    if (data?.client.clientId && activeTab === 'ai-settings') {
+      fetchAISettings();
+    }
+    if (data?.client.clientId && activeTab === 'knowledge') {
+      fetchKnowledge();
+    }
+    if (data?.client.clientId && activeTab === 'analytics') {
+      fetchAnalytics();
+    }
+  }, [activeTab, data?.client.clientId, fetchAISettings, fetchKnowledge, fetchAnalytics]);
 
   // Export to Google Sheets
   const exportToSheets = async () => {

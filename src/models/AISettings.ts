@@ -27,7 +27,7 @@ const AISettingsSchema = new Schema<IAISettings>(
     aiModel: {
       type: String,
       required: true,
-      default: 'gemini-3-flash',
+      default: 'gemini-3-flash-preview',
     },
     systemPrompt: {
       type: String,
