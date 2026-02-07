@@ -206,7 +206,7 @@ export default function LandingPage() {
             </div>
 
             <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl">
-              AI Widget <span className="gradient-text">Platform</span>
+              Winbix <span className="gradient-text">AI</span>
             </h1>
             <p className="mx-auto max-w-lg text-xl leading-relaxed text-gray-400">
               Intelligent AI-powered chat widgets with RAG knowledge base, multi-model support, and real-time analytics
@@ -324,7 +324,7 @@ export default function LandingPage() {
 
           {/* Footer */}
           <p className="text-center text-sm text-gray-600">
-            &copy; {new Date().getFullYear()} AI Widget Platform &middot; Powered by Gemini AI
+            &copy; {new Date().getFullYear()} Winbix AI &middot; Powered by Gemini AI
           </p>
         </div>
       </div>
