@@ -1,0 +1,13 @@
+{
+  "name": "GearShift Pro",
+  "clientId": "bindfo-123",
+  "username": "gearshift_pro",
+  "email": "support@gearshift.pro",
+  "website": "https://gearshift.pro",
+  "phone": "+7 (999) 123-45-67",
+  "addresses": ["г. Москва, ул. Индустриальная, д. 42, стр. 3"],
+  "instagram": null,
+  "features": ["streaming", "quick-replies", "feedback", "glassmorphism"],
+  "createdAt": "2026-02-07T14:55:00Z",
+  "version": "2.0.0"
+}

@@ -1,5 +1,6 @@
 import { h, render } from 'preact';
 import { Widget } from './components/Widget';
+import './index.css';
 
 // Inject global config
 window.__WIDGET_CONFIG__ = __WIDGET_CONFIG__;
@@ -14,8 +15,17 @@ class AIChatWidget extends HTMLElement {
     connectedCallback() {
         const container = document.createElement('div');
         container.id = 'widget-root';
+
+        // Inject processed Tailwind CSS into Shadow DOM
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = window.__WIDGET_CSS__ || '';
+        this.shadowRoot.appendChild(styleSheet);
+
         this.shadowRoot.appendChild(container);
-        render(h(Widget, {}), container);
+
+        console.log('AIWidget: Styles injected into Shadow DOM', window.__WIDGET_CSS__ ? 'yes (' + window.__WIDGET_CSS__.length + ' chars)' : 'no');
+
+        render(h(Widget, { config: window.__WIDGET_CONFIG__ }), container);
     }
 }
 

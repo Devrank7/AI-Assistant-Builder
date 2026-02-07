@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 /* ─── Floating Orb Component ─── */
@@ -37,16 +37,30 @@ function FloatingOrb({
 /* ─── Particle Field ─── */
 function ParticleField() {
   // Use lazy initializer to generate particles only once on mount
-  const [particles] = useState(() =>
-    Array.from({ length: 40 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      delay: Math.random() * 5,
-      duration: Math.random() * 10 + 10,
-    }))
-  );
+  // Use lazy initializer to generate particles only once on mount
+  const [particles, setParticles] = useState<
+    {
+      id: number;
+      x: number;
+      y: number;
+      size: number;
+      delay: number;
+      duration: number;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 40 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 3 + 1,
+        delay: Math.random() * 5,
+        duration: Math.random() * 10 + 10,
+      }))
+    );
+  }, []);
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">

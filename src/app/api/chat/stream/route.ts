@@ -45,8 +45,10 @@ export async function POST(request: NextRequest) {
     };
 
     const selectedModel = settingsDoc?.aiModel || 'gemini-2.0-flash';
+    const systemPrompt = settingsDoc?.systemPrompt || defaultSystemPrompt;
     const config = {
-      model: modelMap[selectedModel] || selectedModel, // Fallback to raw string if not in map
+      model: modelMap[selectedModel] || selectedModel,
+      systemPrompt,
       temperature: settingsDoc?.temperature || 0.7,
       maxTokens: settingsDoc?.maxTokens || 1024,
       topK: settingsDoc?.topK || 3,

@@ -1,0 +1,12 @@
+{
+    "name": "GearShift Pro",
+    "clientId": "bindfo-123",
+    "features": [
+        "streaming",
+        "quick-replies",
+        "feedback",
+        "glassmorphism"
+    ],
+    "createdAt": "2026-02-07T14:55:00Z",
+    "version": "2.0.0"
+}

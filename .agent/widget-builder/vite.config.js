@@ -18,8 +18,23 @@ try {
 export default defineConfig({
     plugins: [
         preact(),
-        cssInjectedByJsPlugin(),
+        cssInjectedByJsPlugin({
+            injectCodeFunction: function(cssCode) {
+                try {
+                    window.__WIDGET_CSS__ = (window.__WIDGET_CSS__ || '') + cssCode;
+                } catch (e) {
+                    console.error('AIWidget: CSS injection error', e);
+                }
+            },
+        }),
     ],
+    resolve: {
+        alias: {
+            react: 'preact/compat',
+            'react-dom': 'preact/compat',
+            'react/jsx-runtime': 'preact/compat/jsx-runtime',
+        },
+    },
     build: {
         lib: {
             entry: 'src/main.jsx',
@@ -28,12 +43,14 @@ export default defineConfig({
             formats: ['iife'],
         },
         rollupOptions: {
+            external: (id) => false,
             output: {
                 extend: true,
             },
         },
         outDir: 'dist',
         emptyOutDir: true,
+        cssCodeSplit: false,
     },
     define: {
         'process.env': {},
