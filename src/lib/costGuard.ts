@@ -193,6 +193,7 @@ export async function trackCost(
 
 /**
  * Reset monthly costs for all clients (call from cron)
+ * Carries over unused extra credits (same logic as checkCostLimit)
  */
 export async function resetMonthlyCosts(): Promise<number> {
   await connectDB();
@@ -200,18 +201,34 @@ export async function resetMonthlyCosts(): Promise<number> {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const result = await Client.updateMany(
-    { costResetDate: { $lte: thirtyDaysAgo } },
-    {
-      monthlyTokensInput: 0,
-      monthlyTokensOutput: 0,
-      monthlyCostUsd: 0,
-      costResetDate: new Date(),
-      costWarningNotified: false,
-    }
-  );
+  const clientsToReset = await Client.find({ costResetDate: { $lte: thirtyDaysAgo } });
+  let resetCount = 0;
 
-  return result.modifiedCount;
+  for (const client of clientsToReset) {
+    const currentCost = client.monthlyCostUsd || 0;
+    const currentExtraCredits = client.extraCreditsUsd || 0;
+
+    // Carry over unused credits (same formula as checkCostLimit)
+    const creditsUsed = Math.max(0, currentCost - COST_BLOCK_THRESHOLD);
+    const unusedCredits = Math.max(0, currentExtraCredits - creditsUsed);
+
+    const now = new Date();
+    await Client.updateOne(
+      { _id: client._id },
+      {
+        monthlyTokensInput: 0,
+        monthlyTokensOutput: 0,
+        monthlyCostUsd: 0,
+        costResetDate: now,
+        costWarningNotified: false,
+        extraCreditsUsd: unusedCredits,
+        extraCreditsExpiry: unusedCredits > 0 ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) : null,
+      }
+    );
+    resetCount++;
+  }
+
+  return resetCount;
 }
 
 // --- Notification helpers ---

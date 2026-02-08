@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { addExtraCredits, TOP_UP_OPTIONS } from '@/lib/costGuard';
+import { TOP_UP_OPTIONS } from '@/lib/costGuard';
 import { getPaymentService } from '@/lib/PaymentService';
 import { CryptomusProvider } from '@/lib/paymentProviders/cryptomus';
 import connectDB from '@/lib/mongodb';
@@ -59,24 +59,15 @@ export async function POST(request: NextRequest) {
             message: `Перейдите по ссылке для оплаты $${amount}`,
           });
         }
+
+        return NextResponse.json({ success: false, error: 'Payment creation failed' }, { status: 502 });
       } catch (error) {
         console.error('Payment provider error:', error);
+        return NextResponse.json({ success: false, error: 'Payment provider unavailable' }, { status: 503 });
       }
     }
 
-    // Fallback: Direct credit addition (for testing or when provider is unavailable)
-    const success = await addExtraCredits(clientId, amount);
-
-    if (success) {
-      return NextResponse.json({
-        success: true,
-        message: `Добавлено $${amount} кредитов. Виджет включен.`,
-        amount,
-        newLimit: 40 + (client.extraCreditsUsd || 0) + amount,
-      });
-    }
-
-    return NextResponse.json({ success: false, error: 'Failed to add credits' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Payment provider not configured' }, { status: 503 });
   } catch (error) {
     console.error('Credits top-up error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });

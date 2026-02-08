@@ -237,7 +237,7 @@ class PaymentService {
    * Uses trialActivatedAt if available, otherwise falls back to startDate
    */
   static isInTrial(startDate: Date, trialActivatedAt?: Date | null): boolean {
-    const trialEnd = this.calculateFirstPaymentDate(startDate, trialActivatedAt);
+    const trialEnd = PaymentService.calculateFirstPaymentDate(startDate, trialActivatedAt);
     return new Date() < trialEnd;
   }
 

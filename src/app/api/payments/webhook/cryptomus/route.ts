@@ -41,9 +41,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing clientId' }, { status: 400 });
     }
 
-    // Detect top-up payments: clientId format is "realClientId_topup_timestamp"
-    const isTopUp = result.clientId.includes('_topup_');
-    const actualClientId = isTopUp ? result.clientId.split('_topup_')[0] : result.clientId;
+    // Detect top-up payments via explicit type field or legacy clientId format
+    let additionalData: Record<string, unknown> = {};
+    try {
+      if (body.additional_data) {
+        additionalData = JSON.parse(body.additional_data);
+      }
+    } catch {
+      /* ignore parse errors, use result.clientId as fallback */
+    }
+
+    const isTopUp = additionalData.type === 'top_up' || result.clientId.includes('_topup_');
+    const actualClientId =
+      additionalData.type === 'top_up'
+        ? (additionalData.clientId as string) || result.clientId
+        : isTopUp
+          ? result.clientId.split('_topup_')[0]
+          : result.clientId;
 
     await connectDB();
     const client = await Client.findOne({ clientId: actualClientId });

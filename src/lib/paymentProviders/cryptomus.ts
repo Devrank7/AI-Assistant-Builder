@@ -153,7 +153,7 @@ export class CryptomusProvider implements PaymentProvider {
         order_id: `topup_${clientId}_${Date.now()}`,
         url_callback: this.config.webhookUrl,
         name: `WinBix AI Credits Top-Up $${amount}`,
-        additional_data: JSON.stringify({ clientId: `${clientId}_topup_${Date.now()}`, email }),
+        additional_data: JSON.stringify({ clientId, type: 'top_up', email }),
       };
 
       const response = await this.request<CryptomusPaymentResponse>('/payment', data);
@@ -234,20 +234,23 @@ export class CryptomusProvider implements PaymentProvider {
       const receivedSign = (data.sign as string) || signature;
       delete data.sign; // Remove sign before generating hash
 
-      // Validate signature
-      if (receivedSign) {
-        // Per Cryptomus JS docs: escape slashes to match PHP behavior
-        const jsonData = JSON.stringify(data).replace(/\//g, '\\/');
-        const base64Data = Buffer.from(jsonData).toString('base64');
-        const expectedSign = crypto
-          .createHash('md5')
-          .update(base64Data + this.config.apiKey)
-          .digest('hex');
+      // Validate signature — REJECT if no signature present
+      if (!receivedSign) {
+        console.error('Webhook received without signature — rejecting');
+        return { valid: false, eventType: 'unknown' };
+      }
 
-        if (receivedSign !== expectedSign) {
-          console.warn('Cryptomus webhook signature mismatch');
-          return { valid: false, eventType: 'unknown' };
-        }
+      // Per Cryptomus JS docs: escape slashes to match PHP behavior
+      const jsonData = JSON.stringify(data).replace(/\//g, '\\/');
+      const base64Data = Buffer.from(jsonData).toString('base64');
+      const expectedSign = crypto
+        .createHash('md5')
+        .update(base64Data + this.config.apiKey)
+        .digest('hex');
+
+      if (receivedSign !== expectedSign) {
+        console.warn('Cryptomus webhook signature mismatch');
+        return { valid: false, eventType: 'unknown' };
       }
 
       const status = data.status as string;

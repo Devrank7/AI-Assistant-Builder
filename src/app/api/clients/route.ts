@@ -52,13 +52,16 @@ export async function GET() {
       }
     }
 
-    // Удаляем клиентов, которых нет в папке widgets (Orphaned Clients)
-    const deleteResult = await Client.deleteMany({
+    // Log orphaned clients (without widget folders) but DON'T delete them
+    // Deletion on a GET request is dangerous — empty widgets/ folder would wipe all clients
+    const orphanedClients = await Client.find({
       clientId: { $nin: Array.from(foundClientIds) },
-    });
+    }).select('clientId username');
 
-    if (deleteResult.deletedCount > 0) {
-      console.log(`🧹 Deleted ${deleteResult.deletedCount} orphaned clients from database.`);
+    if (orphanedClients.length > 0) {
+      console.warn(
+        `⚠️ Found ${orphanedClients.length} clients without widget folders: ${orphanedClients.map((c) => c.clientId).join(', ')}`
+      );
     }
 
     // Возвращаем всех клиентов из БД

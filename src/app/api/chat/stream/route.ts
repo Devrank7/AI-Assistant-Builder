@@ -8,7 +8,6 @@ import Client from '@/models/Client';
 import { generateEmbedding, findSimilarChunks } from '@/lib/gemini';
 import { calculateCost, getModel, getDefaultModel } from '@/lib/models';
 import { checkCostLimit, trackCost } from '@/lib/costGuard';
-import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
   try {

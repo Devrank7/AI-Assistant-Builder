@@ -5,7 +5,7 @@ import AISettings, { defaultSystemPrompt } from '@/models/AISettings';
 import ChatLog from '@/models/ChatLog';
 import Client from '@/models/Client';
 import { generateEmbedding, generateResponse, findSimilarChunks } from '@/lib/gemini';
-import { calculateCost } from '@/lib/models';
+import { calculateCost, getModel, getDefaultModel } from '@/lib/models';
 import { checkCostLimit, trackCost } from '@/lib/costGuard';
 
 export async function POST(request: NextRequest) {
@@ -37,16 +37,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Get AI settings for client
-    // Map UI references to actual API model names (same as in stream/route.ts)
     const settingsDoc = await AISettings.findOne({ clientId });
-    const modelMap: Record<string, string> = {
-      'gemini-3-flash': 'gemini-3-flash-preview',
-      'gemini-2.0-flash': 'gemini-2.0-flash',
-      'gemini-pro': 'gemini-pro',
-    };
-    const selectedModel = settingsDoc?.aiModel || 'gemini-3-flash-preview';
+    const selectedModel = settingsDoc?.aiModel || getDefaultModel().id;
+    const resolvedModel = getModel(selectedModel);
     const config = {
-      model: modelMap[selectedModel] || selectedModel,
+      model: resolvedModel.id,
       systemPrompt: settingsDoc?.systemPrompt || defaultSystemPrompt,
       temperature: settingsDoc?.temperature || 0.7,
       maxTokens: settingsDoc?.maxTokens || 1024,

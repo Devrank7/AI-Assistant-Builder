@@ -59,7 +59,30 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { id } = await params;
     const body = await request.json();
 
-    const client = await Client.findOneAndUpdate({ clientId: id }, { $set: body }, { new: true });
+    // Whitelist allowed fields to prevent mass assignment of internal fields
+    const allowedFields = [
+      'username',
+      'email',
+      'website',
+      'phone',
+      'addresses',
+      'instagram',
+      'telegram',
+      'isActive',
+      'folderPath',
+    ];
+    const updateData: Record<string, unknown> = {};
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field];
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ success: false, error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    const client = await Client.findOneAndUpdate({ clientId: id }, { $set: updateData }, { new: true });
 
     if (!client) {
       return NextResponse.json({ success: false, error: 'Client not found' }, { status: 404 });

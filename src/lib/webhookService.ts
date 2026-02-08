@@ -99,8 +99,17 @@ function generateSignature(payload: string, secret: string): string {
  * Verify webhook signature (for client-side verification)
  */
 export function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-  const expected = generateSignature(payload, secret);
-  return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
+  try {
+    const expected = generateSignature(payload, secret);
+    const sigBuf = Buffer.from(signature, 'hex');
+    const expectedBuf = Buffer.from(expected, 'hex');
+    if (sigBuf.length !== expectedBuf.length) {
+      return false;
+    }
+    return crypto.timingSafeEqual(sigBuf, expectedBuf);
+  } catch {
+    return false;
+  }
 }
 
 /**
