@@ -1,8 +1,21 @@
 import fs from 'fs';
 import path from 'path';
+import vm from 'vm';
 import { ClientInfo, WidgetFolder } from './types';
 
 const WIDGETS_DIR = path.join(process.cwd(), 'widgets');
+
+export type DetectedChannel = 'instagram' | 'whatsapp' | 'telegram-bot';
+
+const CHANNEL_DIRS: DetectedChannel[] = ['instagram', 'whatsapp', 'telegram-bot'];
+
+export interface ChannelFolderInfo {
+  channel: DetectedChannel;
+  hasConfig: boolean;
+  hasScript: boolean;
+  config?: Record<string, unknown>;
+  scriptMeta?: { version: string; description: string; provider?: string };
+}
 
 export function getWidgetsDirectory(): string {
   return WIDGETS_DIR;
@@ -100,6 +113,89 @@ export function getWidgetFile(folderName: string, relativePath: string): Buffer 
   }
 
   return null;
+}
+
+/**
+ * Scan for channel subdirectories (instagram, whatsapp, telegram-bot)
+ * inside a client's widget folder.
+ */
+export function scanChannelFolders(clientFolderName: string): ChannelFolderInfo[] {
+  const clientDir = path.join(WIDGETS_DIR, clientFolderName);
+  const results: ChannelFolderInfo[] = [];
+
+  for (const channel of CHANNEL_DIRS) {
+    const channelDir = path.join(clientDir, channel);
+    if (!fs.existsSync(channelDir) || !fs.statSync(channelDir).isDirectory()) continue;
+
+    const configPath = path.join(channelDir, 'channel.config.json');
+    const scriptPath = path.join(channelDir, 'script.js');
+    let hasConfig = false;
+    let hasScript = false;
+    let config: Record<string, unknown> | undefined;
+    let scriptMeta: { version: string; description: string; provider?: string } | undefined;
+
+    try {
+      if (fs.existsSync(configPath)) {
+        hasConfig = true;
+        config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      }
+    } catch (err) {
+      console.error(`Error reading channel config for ${clientFolderName}/${channel}:`, err);
+    }
+
+    // Check for executable script
+    try {
+      if (fs.existsSync(scriptPath)) {
+        hasScript = true;
+        // Extract meta using vm.runInNewContext to avoid webpack bundling issues
+        try {
+          const code = fs.readFileSync(scriptPath, 'utf-8');
+          const moduleExports: Record<string, unknown> = {};
+          const moduleObj = { exports: moduleExports };
+          const sandbox = {
+            module: moduleObj,
+            exports: moduleExports,
+            require: () => ({}),
+            console,
+            process: { env: {} },
+            fetch: () => Promise.resolve(),
+            setTimeout,
+            clearTimeout,
+            Buffer,
+            URL,
+            URLSearchParams,
+            JSON,
+            Date,
+            Math,
+            RegExp,
+            Promise,
+            Error,
+          };
+          vm.runInNewContext(code, sandbox, { filename: scriptPath, timeout: 3000 });
+          const script = moduleObj.exports as Record<string, unknown>;
+          const meta = script?.meta as Record<string, unknown> | undefined;
+          if (meta) {
+            scriptMeta = {
+              version: (meta.version as string) || '1.0.0',
+              description: (meta.description as string) || '',
+              provider: meta.provider as string | undefined,
+            };
+          }
+        } catch (err) {
+          console.error(`Error loading script meta for ${clientFolderName}/${channel}:`, err);
+        }
+      }
+    } catch (err) {
+      console.error(`Error checking script at ${clientFolderName}/${channel}:`, err);
+    }
+
+    // Include channel if it has either a config or a script
+    if (hasConfig || hasScript) {
+      results.push({ channel, hasConfig, hasScript, config, scriptMeta });
+    }
+  }
+
+  return results;
 }
 
 export function listWidgetFiles(folderName: string): string[] {

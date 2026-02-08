@@ -10,6 +10,9 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
   const result = await model.embedContent(text);
+  if (!result?.embedding?.values) {
+    throw new Error('Invalid embedding response from Gemini API');
+  }
   return result.embedding.values;
 }
 

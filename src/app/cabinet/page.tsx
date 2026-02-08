@@ -7,6 +7,15 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { PageTransition, MotionList, MotionItem, AnimatedNumber } from '@/components/ui/motion';
 import { IClient } from '@/models/Client';
 import { useMoodTheme } from '@/hooks/use-mood-theme';
+import ChannelDetailTab from '@/components/admin/tabs/ChannelDetailTab';
+
+type DetectedChannel = 'instagram' | 'whatsapp' | 'telegram-bot';
+
+interface DetectedChannelInfo {
+  channel: DetectedChannel;
+  folderExists: boolean;
+  isActive: boolean;
+}
 
 // --- Interfaces ---
 
@@ -64,7 +73,16 @@ interface AnalyticsData {
   topQuestions: Array<{ text: string; count: number }>;
 }
 
-type TabType = 'analytics' | 'ai-settings' | 'knowledge' | 'history' | 'billing' | 'embed';
+type TabType =
+  | 'analytics'
+  | 'ai-settings'
+  | 'knowledge'
+  | 'history'
+  | 'billing'
+  | 'embed'
+  | 'channel-instagram'
+  | 'channel-whatsapp'
+  | 'channel-telegram';
 
 // --- Loading Component ---
 
@@ -133,12 +151,30 @@ function ClientCabinetContent() {
     messages: Array<{ role: string; content: string; timestamp: string }>;
   } | null>(null);
 
+  // Detected channel folders
+  const [detectedChannels, setDetectedChannels] = useState<DetectedChannelInfo[]>([]);
+
   // Analytics
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [sheetsExporting, setSheetsExporting] = useState(false);
   const [spreadsheetId, setSpreadsheetId] = useState('');
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+
+  // --- Fetch detected channels ---
+
+  const fetchDetectedChannels = async () => {
+    if (!data?.client.clientId) return;
+    try {
+      const res = await fetch(`/api/clients/${data.client.clientId}/channels`);
+      const result = await res.json();
+      if (result.success) {
+        setDetectedChannels((result.channels || []).filter((ch: DetectedChannelInfo) => ch.folderExists));
+      }
+    } catch {
+      // non-critical
+    }
+  };
 
   // --- 1. Initial Data Fetch ---
 
@@ -171,6 +207,10 @@ function ClientCabinetContent() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (data?.client.clientId) fetchDetectedChannels();
+  }, [data?.client.clientId]);
 
   // --- 2. Tab Data Fetchers ---
 
@@ -474,11 +514,24 @@ function ClientCabinetContent() {
   const { client } = data;
   const scriptUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/widgets/${client.folderPath}/script.js`;
 
+  const CHANNEL_TAB_META: Record<DetectedChannel, { tabId: TabType; label: string; icon: string }> = {
+    instagram: { tabId: 'channel-instagram', label: 'Instagram', icon: '📸' },
+    whatsapp: { tabId: 'channel-whatsapp', label: 'WhatsApp', icon: '💬' },
+    'telegram-bot': { tabId: 'channel-telegram', label: 'Telegram Bot', icon: '📱' },
+  };
+
+  const dynamicChannelTabs = detectedChannels.map((ch) => ({
+    id: CHANNEL_TAB_META[ch.channel].tabId,
+    label: CHANNEL_TAB_META[ch.channel].label,
+    icon: CHANNEL_TAB_META[ch.channel].icon,
+  }));
+
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: 'analytics', label: 'Analytics', icon: '📊' },
     { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
     { id: 'knowledge', label: 'Knowledge', icon: '📚' },
     { id: 'history', label: 'History', icon: '💬' },
+    ...dynamicChannelTabs,
     { id: 'billing', label: 'Billing', icon: '💳' },
     { id: 'embed', label: 'Install', icon: '🔌' },
   ];
@@ -1240,6 +1293,17 @@ function ClientCabinetContent() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* CHANNEL TABS */}
+            {activeTab === 'channel-instagram' && (
+              <ChannelDetailTab clientId={client.clientId} channel="instagram" readOnly />
+            )}
+            {activeTab === 'channel-whatsapp' && (
+              <ChannelDetailTab clientId={client.clientId} channel="whatsapp" readOnly />
+            )}
+            {activeTab === 'channel-telegram' && (
+              <ChannelDetailTab clientId={client.clientId} channel="telegram-bot" readOnly />
             )}
 
             {/* BILLING TAB */}

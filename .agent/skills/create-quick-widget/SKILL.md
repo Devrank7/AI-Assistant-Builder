@@ -437,5 +437,28 @@ Already in `package.json` — do NOT install anything new:
 ### 8.3 SSE Stream Format
 
 - Tokens: `data: {"token": "chunk"}\n\n`
+- Rich blocks: `data: {"rich": [...]}\n\n` (before DONE)
 - End: `data: [DONE]\n\n`
 - Errors: `data: {"error": "message"}\n\n`
+
+### 8.4 Advanced Features Reference
+
+For detailed implementation of these optional features, see `create-widget` SKILL.md:
+
+- **Section 11: Proactive Chat** — Smart triggers (time, scroll, exit intent)
+- **Section 12: Rich Messages** — Cards, buttons, carousels in AI responses
+- **Section 13: Voice Input/Output** — Speech-to-text and text-to-speech
+- **Section 14: Message Feedback** — Thumbs up/down on assistant messages
+
+These features are configured via `widget.config.json` `features` object:
+
+```json
+{
+  "features": {
+    "proactiveChat": true,
+    "richMessages": true,
+    "voice": { "enabled": true, "autoSpeak": false, "lang": "ru-RU" },
+    "feedback": true
+  }
+}
+```

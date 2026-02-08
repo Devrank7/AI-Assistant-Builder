@@ -133,6 +133,9 @@ async function getAccessToken(config: GoogleSheetsConfig): Promise<string> {
   });
 
   const data = await response.json();
+  if (!response.ok || !data.access_token) {
+    throw new Error(`Failed to get Google access token: ${data.error || response.statusText}`);
+  }
   return data.access_token;
 }
 

@@ -148,7 +148,11 @@ class PaymentService {
 
     // Get client to determine prepaid months if not provided
     const client = await Client.findOne({ clientId });
-    const prepaidMonths = months ?? client?.prepaidMonths ?? 1;
+    if (!client) {
+      console.error(`[PaymentService] Client ${clientId} not found for payment processing`);
+      return;
+    }
+    const prepaidMonths = months ?? client.prepaidMonths ?? 1;
 
     // Calculate next payment date based on prepaid months
     const nextPaymentDate = new Date();

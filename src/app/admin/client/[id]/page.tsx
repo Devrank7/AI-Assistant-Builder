@@ -25,6 +25,17 @@ import ClientInfoTab from '@/components/admin/tabs/ClientInfoTab';
 import FilesTab from '@/components/admin/tabs/FilesTab';
 import UsageTab from '@/components/admin/tabs/UsageTab';
 import DemoTab from '@/components/admin/tabs/DemoTab';
+import ProactiveTab from '@/components/admin/tabs/ProactiveTab';
+import TrainingTab from '@/components/admin/tabs/TrainingTab';
+import ChannelDetailTab from '@/components/admin/tabs/ChannelDetailTab';
+
+type DetectedChannel = 'instagram' | 'whatsapp' | 'telegram-bot';
+
+interface ChannelInfo {
+  channel: DetectedChannel;
+  folderExists: boolean;
+  isActive: boolean;
+}
 
 interface ClientDetailsData {
   client: IClient;
@@ -38,6 +49,7 @@ interface AISettings {
   maxTokens: number;
   topK: number;
   model?: string;
+  handoffEnabled?: boolean;
 }
 
 interface AIModelInfo {
@@ -69,7 +81,21 @@ interface ChatLogSummary {
   createdAt: string;
 }
 
-type TabType = 'info' | 'files' | 'usage' | 'demo' | 'ai-settings' | 'knowledge' | 'history' | 'billing' | 'analytics';
+type TabType =
+  | 'info'
+  | 'files'
+  | 'usage'
+  | 'demo'
+  | 'ai-settings'
+  | 'knowledge'
+  | 'history'
+  | 'billing'
+  | 'analytics'
+  | 'proactive'
+  | 'training'
+  | 'channel-instagram'
+  | 'channel-whatsapp'
+  | 'channel-telegram';
 
 export default function ClientDetailsPage() {
   const params = useParams();
@@ -117,14 +143,21 @@ export default function ClientDetailsPage() {
     totalChats: number;
     totalMessages: number;
     avgMessagesPerChat: number;
-    dailyStats: Array<{ date: string; totalChats: number; totalMessages: number }>;
+    avgResponseTimeMs: number;
+    satisfactionPercent: number;
+    feedbackCount: number;
+    dailyStats: Array<{ date: string; totalChats: number; totalMessages: number; avgResponseTimeMs: number }>;
     hourlyDistribution: Array<{ hour: number; count: number }>;
     topQuestions: Array<{ text: string; count: number }>;
+    channelStats: Array<{ channel: string; count: number; percentage: number }>;
   } | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [sheetsExporting, setSheetsExporting] = useState(false);
   const [spreadsheetId, setSpreadsheetId] = useState('');
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+
+  // Detected channel folders state
+  const [detectedChannels, setDetectedChannels] = useState<ChannelInfo[]>([]);
 
   // --- Data fetching callbacks ---
 
@@ -351,6 +384,19 @@ export default function ClientDetailsPage() {
     }
   }, [data?.client.clientId]);
 
+  const fetchDetectedChannels = useCallback(async () => {
+    if (!data?.client.clientId) return;
+    try {
+      const response = await fetch(`/api/clients/${data.client.clientId}/channels`);
+      const result = await response.json();
+      if (result.success) {
+        setDetectedChannels((result.channels || []).filter((ch: ChannelInfo) => ch.folderExists));
+      }
+    } catch (err) {
+      console.error('Failed to fetch detected channels:', err);
+    }
+  }, [data?.client.clientId]);
+
   const exportToSheets = async () => {
     if (!data?.client.clientId || !spreadsheetId.trim()) {
       setExportMessage('Введите ID таблицы Google Sheets');
@@ -389,6 +435,10 @@ export default function ClientDetailsPage() {
     if (data?.client.clientId && activeTab === 'knowledge') fetchKnowledge();
     if (data?.client.clientId && activeTab === 'analytics') fetchAnalytics();
   }, [activeTab, data?.client.clientId, fetchAISettings, fetchKnowledge, fetchAnalytics]);
+
+  useEffect(() => {
+    if (data?.client.clientId) fetchDetectedChannels();
+  }, [data?.client.clientId, fetchDetectedChannels]);
 
   useEffect(() => {
     if (activeTab === 'ai-settings' && templates.length === 0) fetchTemplates();
@@ -438,6 +488,18 @@ export default function ClientDetailsPage() {
   const daysUntilPayment = 30 - (daysActive % 30);
   const scriptUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/widgets/${client.folderPath}/script.js`;
 
+  const CHANNEL_TAB_META: Record<DetectedChannel, { tabId: TabType; label: string; icon: string }> = {
+    instagram: { tabId: 'channel-instagram', label: 'Instagram', icon: '📸' },
+    whatsapp: { tabId: 'channel-whatsapp', label: 'WhatsApp', icon: '💬' },
+    'telegram-bot': { tabId: 'channel-telegram', label: 'Telegram Bot', icon: '📱' },
+  };
+
+  const dynamicChannelTabs = detectedChannels.map((ch) => ({
+    id: CHANNEL_TAB_META[ch.channel].tabId,
+    label: CHANNEL_TAB_META[ch.channel].label,
+    icon: CHANNEL_TAB_META[ch.channel].icon,
+  }));
+
   const tabs: { id: TabType; label: string; icon?: string }[] = [
     { id: 'info', label: 'Info' },
     { id: 'analytics', label: 'Analytics', icon: '📊' },
@@ -445,6 +507,9 @@ export default function ClientDetailsPage() {
     { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
     { id: 'knowledge', label: 'Knowledge', icon: '📚' },
     { id: 'history', label: 'History', icon: '💬' },
+    ...dynamicChannelTabs,
+    { id: 'proactive', label: 'Proactive', icon: '🎯' },
+    { id: 'training', label: 'Training', icon: '🧠' },
     { id: 'files', label: 'Files' },
     { id: 'usage', label: 'Usage' },
     { id: 'demo', label: 'Demo' },
@@ -630,6 +695,14 @@ export default function ClientDetailsPage() {
             {activeTab === 'usage' && <UsageTab tokens={client.tokens} requests={client.requests} />}
 
             {activeTab === 'demo' && <DemoTab clientId={client.clientId} website={client.website} />}
+
+            {activeTab === 'proactive' && <ProactiveTab clientId={client.clientId} />}
+
+            {activeTab === 'training' && <TrainingTab clientId={client.clientId} />}
+
+            {activeTab === 'channel-instagram' && <ChannelDetailTab clientId={client.clientId} channel="instagram" />}
+            {activeTab === 'channel-whatsapp' && <ChannelDetailTab clientId={client.clientId} channel="whatsapp" />}
+            {activeTab === 'channel-telegram' && <ChannelDetailTab clientId={client.clientId} channel="telegram-bot" />}
           </motion.div>
         </AnimatePresence>
       </PageTransition>

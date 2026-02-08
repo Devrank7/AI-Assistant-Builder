@@ -8,6 +8,7 @@ export interface IAISettings extends Document {
   temperature: number;
   maxTokens: number;
   topK: number; // Number of knowledge chunks to retrieve
+  handoffEnabled: boolean; // Enable "Handoff to Human" feature
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +58,10 @@ const AISettingsSchema = new Schema<IAISettings>(
       default: 3,
       min: 1,
       max: 10,
+    },
+    handoffEnabled: {
+      type: Boolean,
+      default: false,
     },
   },
   {

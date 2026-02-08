@@ -5,10 +5,13 @@
  * - /start {clientToken} - Auto-link Telegram to client
  * - /status - Get subscription status
  * - /help - Show available commands
+ * - Regular text messages - Forward to AI chat via channelRouter
  */
 
 import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
+import { routeMessage } from '@/lib/channelRouter';
+import { runBeforeAI, runAfterAIResponse, buildScriptContext, buildPreprocessContext } from '@/lib/scriptRunner';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -56,12 +59,9 @@ async function sendMessage(chatId: number | string, text: string, parseMode = 'H
 
 /**
  * Handle /start command
- * Usage: /start clientToken
- * Links the user's Telegram to their WinBix AI account
  */
 async function handleStartCommand(chatId: number, args: string, firstName: string): Promise<void> {
   if (!args) {
-    // No token provided - show welcome message
     await sendMessage(
       chatId,
       `👋 <b>Привет, ${firstName}!</b>\n\n` +
@@ -78,8 +78,6 @@ async function handleStartCommand(chatId: number, args: string, firstName: strin
   }
 
   await connectDB();
-
-  // Find client by token
   const client = await Client.findOne({ clientToken: args });
 
   if (!client) {
@@ -90,13 +88,11 @@ async function handleStartCommand(chatId: number, args: string, firstName: strin
     return;
   }
 
-  // Check if already linked
   if (client.telegram === String(chatId)) {
     await sendMessage(chatId, `✅ Telegram уже привязан к аккаунту <b>${client.username}</b>!`);
     return;
   }
 
-  // Link Telegram
   await Client.updateOne({ clientId: client.clientId }, { telegram: String(chatId) });
 
   await sendMessage(
@@ -108,6 +104,7 @@ async function handleStartCommand(chatId: number, args: string, firstName: strin
       `• О расходах на AI API\n` +
       `• О платежах и подписке\n` +
       `• О важных событиях\n\n` +
+      `Также вы можете общаться с AI-ботом прямо здесь! Просто напишите любое сообщение.\n\n` +
       `Команды:\n` +
       `/status — статус подписки\n` +
       `/help — помощь`
@@ -116,11 +113,9 @@ async function handleStartCommand(chatId: number, args: string, firstName: strin
 
 /**
  * Handle /status command
- * Shows subscription status and usage
  */
 async function handleStatusCommand(chatId: number): Promise<void> {
   await connectDB();
-
   const client = await Client.findOne({ telegram: String(chatId) });
 
   if (!client) {
@@ -179,6 +174,8 @@ async function handleHelpCommand(chatId: number): Promise<void> {
       `/start — привязать Telegram\n` +
       `/status — статус подписки и расходов\n` +
       `/help — эта справка\n\n` +
+      `<b>AI-чат:</b>\n` +
+      `Просто напишите любое сообщение, и AI-ассистент ответит вам.\n\n` +
       `<b>Уведомления:</b>\n` +
       `• ⚠️ Предупреждение при достижении $20\n` +
       `• 🚫 Блокировка при $40 (можно докупить кредиты)\n` +
@@ -186,6 +183,100 @@ async function handleHelpCommand(chatId: number): Promise<void> {
       `• ✅ Подтверждения платежей\n\n` +
       `Поддержка: @chatbotfusion`
   );
+}
+
+/**
+ * Handle regular text message — forward to AI via channelRouter
+ */
+async function handleAIMessage(chatId: number, text: string, firstName: string): Promise<void> {
+  await connectDB();
+
+  // Find client linked to this Telegram chat
+  const client = await Client.findOne({ telegram: String(chatId) });
+
+  if (!client) {
+    await sendMessage(chatId, `❌ Telegram не привязан к аккаунту. Используйте /start для привязки.`);
+    return;
+  }
+
+  // Send "typing" action
+  if (BOT_TOKEN) {
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendChatAction`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, action: 'typing' }),
+    }).catch(() => {});
+  }
+
+  try {
+    const sessionId = `tg_${chatId}_${new Date().toISOString().split('T')[0]}`;
+    const metadata = {
+      telegramChatId: chatId,
+      telegramUsername: firstName,
+    };
+
+    // --- Script: onBeforeAI hook ---
+    const preCtx = await buildPreprocessContext({
+      clientId: client.clientId,
+      channel: 'telegram',
+      channelFolder: 'telegram-bot',
+      rawMessage: text,
+      metadata,
+    });
+    const preResult = await runBeforeAI(client.clientId, 'telegram-bot', preCtx);
+
+    if (preResult.skip) {
+      if (preResult.customResponse) await sendMessage(chatId, preResult.customResponse, 'Markdown');
+      return;
+    }
+
+    const messageToSend = preResult.modifiedMessage || text;
+
+    // --- AI pipeline ---
+    const result = await routeMessage({
+      channel: 'telegram',
+      clientId: client.clientId,
+      message: messageToSend,
+      sessionId,
+      metadata,
+    });
+
+    if (!result.success) {
+      await sendMessage(chatId, `⚠️ ${result.error || 'Не удалось получить ответ от AI'}`);
+      return;
+    }
+
+    // --- Script: onAfterAIResponse hook ---
+    let response = result.response;
+    const scriptCtx = await buildScriptContext({
+      clientId: client.clientId,
+      channel: 'telegram',
+      channelFolder: 'telegram-bot',
+      userMessage: messageToSend,
+      aiResponse: response,
+      sessionId,
+      metadata,
+      isFirstContact: false,
+    });
+    const scriptResult = await runAfterAIResponse(client.clientId, 'telegram-bot', scriptCtx);
+
+    if (scriptResult.replaceResponse) {
+      response = scriptResult.replaceResponse;
+    } else if (scriptResult.appendToResponse) {
+      response += scriptResult.appendToResponse;
+    }
+
+    // Truncate if too long for Telegram (max 4096 chars)
+    if (response.length > 4000) {
+      response = response.slice(0, 4000) + '...';
+    }
+
+    // Send as plain text (Telegram doesn't support rich blocks)
+    await sendMessage(chatId, response, 'Markdown');
+  } catch (error) {
+    console.error('[TelegramBot] AI message error:', error);
+    await sendMessage(chatId, `⚠️ Произошла ошибка. Попробуйте позже.`);
+  }
 }
 
 /**
@@ -209,6 +300,9 @@ export async function processTelegramUpdate(update: TelegramUpdate): Promise<voi
     await handleHelpCommand(chatId);
   } else if (text.startsWith('/')) {
     await sendMessage(chatId, `❓ Неизвестная команда. Используйте /help для списка команд.`);
+  } else {
+    // Regular text → AI chat
+    await handleAIMessage(chatId, text, firstName);
   }
 }
 

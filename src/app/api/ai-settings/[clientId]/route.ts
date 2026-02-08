@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Only allow specific fields to be updated
-    const allowedFields = ['aiModel', 'systemPrompt', 'greeting', 'temperature', 'maxTokens', 'topK'];
+    const allowedFields = ['aiModel', 'systemPrompt', 'greeting', 'temperature', 'maxTokens', 'topK', 'handoffEnabled'];
     const updateData: Record<string, unknown> = {};
 
     for (const field of allowedFields) {

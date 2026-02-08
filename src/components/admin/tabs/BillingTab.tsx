@@ -93,14 +93,20 @@ export default function BillingTab({ client, daysUntilPayment }: BillingTabProps
           <div className="flex gap-3">
             <button
               onClick={async () => {
-                const res = await fetch('/api/payments/setup', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ clientId: client.clientId, provider: 'cryptomus' }),
-                });
-                const data = await res.json();
-                if (data.success && data.paymentUrl) {
-                  window.open(data.paymentUrl, '_blank');
+                try {
+                  const res = await fetch('/api/payments/setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clientId: client.clientId, provider: 'cryptomus' }),
+                  });
+                  const data = await res.json();
+                  if (data.success && data.paymentUrl) {
+                    window.open(data.paymentUrl, '_blank');
+                  } else {
+                    console.error('Payment setup failed:', data.error);
+                  }
+                } catch (err) {
+                  console.error('Payment setup error:', err);
                 }
               }}
               className="neon-button"
@@ -164,12 +170,21 @@ export default function BillingTab({ client, daysUntilPayment }: BillingTabProps
           <button
             onClick={async () => {
               if (confirm('Вы уверены, что хотите отменить подписку? Виджет перестанет работать.')) {
-                await fetch('/api/payments/cancel', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ clientId: client.clientId }),
-                });
-                window.location.reload();
+                try {
+                  const res = await fetch('/api/payments/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clientId: client.clientId }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    window.location.reload();
+                  } else {
+                    console.error('Cancel failed:', data.error);
+                  }
+                } catch (err) {
+                  console.error('Cancel subscription error:', err);
+                }
               }
             }}
             className="rounded-lg bg-red-500/10 px-4 py-2 text-red-400 transition-colors hover:bg-red-500/20"

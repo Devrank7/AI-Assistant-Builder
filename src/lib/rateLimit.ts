@@ -6,7 +6,7 @@ interface RateLimitEntry {
 const store = new Map<string, RateLimitEntry>();
 
 if (typeof globalThis !== 'undefined') {
-  setInterval(
+  const cleanupTimer = setInterval(
     () => {
       const now = Date.now();
       for (const [key, entry] of store.entries()) {
@@ -15,6 +15,8 @@ if (typeof globalThis !== 'undefined') {
     },
     5 * 60 * 1000
   );
+  // Allow Node.js process to exit cleanly even if timer is still active
+  if (cleanupTimer.unref) cleanupTimer.unref();
 }
 
 export interface RateLimitConfig {

@@ -611,3 +611,379 @@ widgets/                       # Root project directory - served by API
 - [ ] `info.json` written to `widgets/<client_id>/`
 - [ ] Build produces < 500KB bundle
 - [ ] Widget works on demo page without console errors
+
+---
+
+## 11. Proactive Chat (Smart Triggers)
+
+The widget can auto-open with a contextual message based on server-configured triggers.
+
+### 11.1 How It Works
+
+1. On mount, widget fetches triggers: `GET /api/proactive-triggers?clientId=<clientId>`
+2. Response: `{ triggers: [{ triggerType, config, maxShowsPerSession, cooldownMinutes, priority }] }`
+3. Widget evaluates triggers client-side and shows a notification bubble when one fires
+
+### 11.2 Trigger Types
+
+| Type           | Config Fields   | Behavior                                      |
+| -------------- | --------------- | --------------------------------------------- |
+| `time_on_page` | `delayMs`       | Show after N ms on page                       |
+| `scroll_depth` | `scrollPercent` | Show when user scrolls past N%                |
+| `exit_intent`  | —               | Show on `mouseleave` from top of viewport     |
+| `url_match`    | `urlPattern`    | Show if current URL matches pattern           |
+| `inactivity`   | `delayMs`       | Show after N ms of no mouse/keyboard activity |
+
+### 11.3 Implementation in Widget
+
+Add to `useChat.js` or a new `useProactiveTriggers.js` hook:
+
+```javascript
+// Fetch triggers on mount
+useEffect(() => {
+  fetch(`${API_URL}/api/proactive-triggers?clientId=${clientId}`)
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.triggers) evaluateTriggers(data.triggers);
+    });
+}, []);
+
+function evaluateTriggers(triggers) {
+  const shown = JSON.parse(sessionStorage.getItem('proactive_shown') || '{}');
+
+  triggers.forEach((trigger) => {
+    const key = trigger._id || trigger.triggerType;
+    if ((shown[key] || 0) >= trigger.maxShowsPerSession) return;
+
+    switch (trigger.triggerType) {
+      case 'time_on_page':
+        setTimeout(() => showProactiveMessage(trigger, key), trigger.config.delayMs || 5000);
+        break;
+      case 'scroll_depth':
+        const handler = () => {
+          const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+          if (pct >= (trigger.config.scrollPercent || 50)) {
+            showProactiveMessage(trigger, key);
+            window.removeEventListener('scroll', handler);
+          }
+        };
+        window.addEventListener('scroll', handler);
+        break;
+      case 'exit_intent':
+        document.addEventListener(
+          'mouseleave',
+          (e) => {
+            if (e.clientY <= 0) showProactiveMessage(trigger, key);
+          },
+          { once: true }
+        );
+        break;
+    }
+  });
+}
+```
+
+### 11.4 Config Extension
+
+Add to `widget.config.json`:
+
+```json
+{
+  "features": {
+    "proactiveChat": true
+  }
+}
+```
+
+---
+
+## 12. Rich Messages (Cards, Buttons, Carousels)
+
+The AI can respond with structured rich blocks that render as interactive cards, button groups, and carousels.
+
+### 12.1 SSE Stream Format Extension
+
+After all text tokens and `[DONE]`, the server may send:
+
+```
+data: {"rich": [{"type": "card", "title": "...", ...}, ...]}
+```
+
+The `useChat.js` hook must parse this and attach rich blocks to the message.
+
+### 12.2 Rich Block Types
+
+**Card:**
+
+```json
+{
+  "type": "card",
+  "title": "Product Name",
+  "image": "https://example.com/img.jpg",
+  "description": "Description text",
+  "button": { "label": "Buy Now", "url": "https://example.com" }
+}
+```
+
+**Button Group:**
+
+```json
+{
+  "type": "button_group",
+  "buttons": [
+    { "label": "FAQ", "url": "/faq" },
+    { "label": "Pricing", "url": "/pricing" }
+  ]
+}
+```
+
+**Carousel:**
+
+```json
+{
+  "type": "carousel",
+  "items": [
+    { "type": "card", "title": "Item 1", "image": "...", "description": "...", "button": {...} },
+    { "type": "card", "title": "Item 2", "image": "...", "description": "...", "button": {...} }
+  ]
+}
+```
+
+### 12.3 Component Implementation
+
+Create these components when rich messages are enabled:
+
+**`RichCard.jsx`** — Renders a single card with optional image, title, description, and CTA button.
+
+**`ButtonGroup.jsx`** — Row of action buttons. Buttons can be links (open URL) or quick-replies (send text to chat).
+
+**`Carousel.jsx`** — Horizontal scrollable container of RichCard components. Use CSS `overflow-x: auto` with `snap-x` for smooth scrolling.
+
+**`ChatMessage.jsx` update** — After the text content, check `message.richBlocks` array and render corresponding components.
+
+### 12.4 useChat.js SSE Parser Update
+
+```javascript
+// In the SSE parsing loop, before [DONE]:
+if (data.rich) {
+  setMessages((prev) => {
+    const updated = [...prev];
+    const last = updated[updated.length - 1];
+    if (last && last.role === 'assistant') {
+      last.richBlocks = data.rich;
+    }
+    return updated;
+  });
+}
+```
+
+### 12.5 Config Extension
+
+```json
+{
+  "features": {
+    "richMessages": true
+  }
+}
+```
+
+---
+
+## 13. Voice Input/Output
+
+Widget supports speech-to-text input and text-to-speech output using the browser's Web Speech API.
+
+### 13.1 Voice Button (`VoiceButton.jsx`)
+
+A microphone button next to the text input. Uses `webkitSpeechRecognition` or `SpeechRecognition`.
+
+```jsx
+const VoiceButton = ({ onResult, lang = 'ru-RU' }) => {
+  const [listening, setListening] = useState(false);
+
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return; // Hide button if unsupported
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = lang;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      onResult(text);
+      setListening(false);
+    };
+
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+
+    recognition.start();
+    setListening(true);
+  };
+
+  // Only render if browser supports Speech API
+  if (!window.SpeechRecognition && !window.webkitSpeechRecognition) return null;
+
+  return (
+    <button onClick={startListening} className={listening ? 'voice-btn active' : 'voice-btn'}>
+      <Mic size={18} />
+    </button>
+  );
+};
+```
+
+### 13.2 Text-to-Speech (TTS)
+
+After assistant message is fully received, optionally speak it:
+
+```javascript
+if (config.voice?.autoSpeak && 'speechSynthesis' in window) {
+  const utterance = new SpeechSynthesisUtterance(assistantMessage);
+  utterance.lang = config.voice.lang || 'ru-RU';
+  utterance.rate = 1.0;
+  speechSynthesis.speak(utterance);
+}
+```
+
+### 13.3 Visual Feedback
+
+- Pulsing mic icon while recording (CSS animation: `animate-pulse` with red glow)
+- Optional waveform animation during recording
+
+### 13.4 Config Extension
+
+```json
+{
+  "features": {
+    "voice": {
+      "enabled": true,
+      "autoSpeak": false,
+      "lang": "ru-RU"
+    }
+  }
+}
+```
+
+### 13.5 Graceful Degradation
+
+- Check `window.SpeechRecognition || window.webkitSpeechRecognition` before rendering mic button
+- Check `'speechSynthesis' in window` before attempting TTS
+- If not supported, hide voice features entirely (no error messages)
+
+---
+
+## 14. Message Feedback
+
+The widget can show thumbs up/down buttons on assistant messages for user satisfaction tracking.
+
+### 14.1 API
+
+```
+POST /api/feedback
+Body: { clientId, sessionId, messageIndex, rating: "up"|"down" }
+```
+
+### 14.2 Implementation
+
+In `ChatMessage.jsx`, after assistant message text:
+
+```jsx
+{
+  message.role === 'assistant' && config.features.feedback && (
+    <div className="feedback-buttons">
+      <button onClick={() => sendFeedback('up')}>👍</button>
+      <button onClick={() => sendFeedback('down')}>👎</button>
+    </div>
+  );
+}
+```
+
+### 14.3 Config Extension
+
+```json
+{
+  "features": {
+    "feedback": true
+  }
+}
+```
+
+---
+
+## 15. Handoff to Human (Opt-in)
+
+Allows customers to request a live human operator. The AI bot pauses the conversation and notifies the operator. **This feature is opt-in** — it only activates when `handoffEnabled: true` is set in the client's AI Settings (via admin panel toggle).
+
+### 15.1 How It Works
+
+1. Customer types a handoff keyword ("оператор", "человек", "менеджер", "human", "operator", "live agent", etc.)
+2. `channelRouter` detects the keyword (only if `handoffEnabled` is true for that client)
+3. A Handoff record is created with status `pending`
+4. Operator is notified via Telegram (if connected) and admin panel (Channels tab shows pending handoffs)
+5. While handoff is pending/active, the bot responds with a "human is coming" message instead of AI generation
+6. Admin resolves the handoff via the admin panel → bot resumes normal operation
+
+### 15.2 Widget Implementation
+
+When handoff is enabled, the widget should implement:
+
+**Handoff Button (optional)**:
+
+```jsx
+// A "Talk to Human" button in the header or as a quick reply
+<button onClick={() => sendMessage('Соединить с оператором')}>
+  <UserCheck size={16} /> Оператор
+</button>
+```
+
+**Handoff State Detection**:
+The SSE stream will return a single non-AI message when handoff is active. The widget should detect this and display a special UI:
+
+```jsx
+// In ChatMessage.jsx, detect handoff response pattern
+const isHandoffMessage =
+  message.content.includes('Передаю вашу беседу оператору') ||
+  message.content.includes('Ваш запрос уже передан оператору');
+
+if (isHandoffMessage) {
+  // Show a special "waiting for operator" card with pulsing animation
+  return (
+    <div className="handoff-card">
+      <div className="animate-pulse">🤝</div>
+      <p>{message.content}</p>
+    </div>
+  );
+}
+```
+
+### 15.3 Handoff Keywords (Server-side)
+
+The server automatically detects these keywords (case-insensitive):
+
+- Russian: оператор, человек, менеджер, живой человек, поговорить с человеком, соединить с оператором, позвать менеджера, нужен человек
+- English: human, operator, agent, talk to human, real person, support agent, live agent
+
+### 15.4 API Reference
+
+**Handoff status is managed server-side** — the widget does NOT call handoff APIs directly. The `/api/chat/stream` and `/api/chat` endpoints automatically handle handoff via `channelRouter`.
+
+Admin API (for reference only):
+
+- `GET /api/handoff?clientId=X` — list handoffs with stats
+- `PATCH /api/handoff` — `{ handoffId, action: 'assign' | 'resolve' }`
+
+### 15.5 Config Extension
+
+```json
+{
+  "features": {
+    "handoff": true
+  }
+}
+```
+
+When `features.handoff` is true in `widget.config.json`, include the "Talk to Human" button in the widget UI. The actual handoff logic is handled entirely server-side — the widget just needs to send the keyword message and display the response.
+
+**IMPORTANT**: This feature requires the admin to enable `handoffEnabled` in AI Settings for the specific client. If the admin hasn't enabled it, the keyword detection won't trigger even if the widget has the handoff button.

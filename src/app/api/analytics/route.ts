@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const clientId = searchParams.get('clientId');
     const days = parseInt(searchParams.get('days') || '30');
     const quick = searchParams.get('quick') === 'true';
+    const channel = searchParams.get('channel') || undefined;
 
     if (!clientId) {
       return NextResponse.json({ success: false, error: 'clientId is required' }, { status: 400 });
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Return full analytics
-    const analytics = await getAnalytics(clientId, days);
+    const analytics = await getAnalytics(clientId, days, channel);
     return NextResponse.json({ success: true, analytics });
   } catch (error) {
     console.error('Analytics API error:', error);

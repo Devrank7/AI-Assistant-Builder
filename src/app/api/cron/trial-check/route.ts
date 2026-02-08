@@ -21,8 +21,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Run trial checks and cost resets in parallel
-    const [trialResult, costResetCount] = await Promise.all([checkTrialReminders(), resetMonthlyCosts()]);
+    // Run trial checks and cost resets in parallel (allSettled so one failure doesn't block the other)
+    const [trialSettled, costSettled] = await Promise.allSettled([checkTrialReminders(), resetMonthlyCosts()]);
+
+    const trialResult =
+      trialSettled.status === 'fulfilled' ? trialSettled.value : { error: String(trialSettled.reason) };
+    const costResetCount = costSettled.status === 'fulfilled' ? costSettled.value : 0;
+
+    if (trialSettled.status === 'rejected') console.error('Trial check failed:', trialSettled.reason);
+    if (costSettled.status === 'rejected') console.error('Cost reset failed:', costSettled.reason);
 
     return NextResponse.json({
       success: true,

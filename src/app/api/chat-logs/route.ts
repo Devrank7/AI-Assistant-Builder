@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const clientId = searchParams.get('clientId');
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const page = parseInt(searchParams.get('page') || '1', 10);
+    const channel = searchParams.get('channel');
 
     if (!clientId) {
       return NextResponse.json({ success: false, error: 'clientId is required' }, { status: 400 });
@@ -28,25 +29,34 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
+    // Build query with optional channel filter
+    const query: Record<string, unknown> = { clientId };
+    if (channel) {
+      query['metadata.channel'] = channel;
+    }
+
     const [logs, total] = await Promise.all([
-      ChatLog.find({ clientId })
+      ChatLog.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .select('sessionId messages metadata createdAt'),
-      ChatLog.countDocuments({ clientId }),
+      ChatLog.countDocuments(query),
     ]);
 
     return NextResponse.json({
       success: true,
-      logs: logs.map((log) => ({
-        _id: log._id,
-        sessionId: log.sessionId,
-        messageCount: log.messages.length,
-        lastMessage: log.messages[log.messages.length - 1]?.content?.substring(0, 100),
-        createdAt: log.createdAt,
-        metadata: log.metadata,
-      })),
+      logs: logs.map((log) => {
+        const messages = log.messages || [];
+        return {
+          _id: log._id,
+          sessionId: log.sessionId,
+          messageCount: messages.length,
+          lastMessage: messages[messages.length - 1]?.content?.substring(0, 100),
+          createdAt: log.createdAt,
+          metadata: log.metadata,
+        };
+      }),
       pagination: {
         page,
         limit,

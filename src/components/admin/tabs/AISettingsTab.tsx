@@ -7,6 +7,7 @@ interface AISettings {
   maxTokens: number;
   topK: number;
   model?: string;
+  handoffEnabled?: boolean;
 }
 
 interface AIModelInfo {
@@ -183,6 +184,38 @@ export default function AISettingsTab({
           />
           <p className="mt-2 text-xs text-gray-500">Сколько кусочков знаний использовать для ответа</p>
         </div>
+      </div>
+
+      {/* Handoff to Human Toggle */}
+      <div className="glass-card p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
+              <span>🤝</span> Handoff to Human
+            </h3>
+            <p className="mt-1 text-sm text-gray-400">
+              Позволяет клиентам запросить связь с живым оператором. Бот поставит беседу на паузу и уведомит вас.
+            </p>
+          </div>
+          <button
+            onClick={() => setAiSettings({ ...aiSettings, handoffEnabled: !aiSettings.handoffEnabled })}
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
+              aiSettings.handoffEnabled ? 'bg-[var(--neon-cyan)]' : 'bg-white/20'
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 rounded-full bg-white shadow-lg transition-transform ${
+                aiSettings.handoffEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+        {aiSettings.handoffEnabled && (
+          <div className="mt-3 rounded-lg border border-[var(--neon-cyan)]/20 bg-[var(--neon-cyan)]/5 p-3 text-xs text-gray-300">
+            Ключевые слова: «оператор», «человек», «менеджер», «human», «operator», «live agent» и др. Уведомления
+            придут в Telegram (если подключён) и в админ-панель.
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-4">
