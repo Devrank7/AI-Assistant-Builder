@@ -136,8 +136,22 @@ export default function BillingPage() {
             <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
               <div>
                 <p className="text-sm text-gray-400">Статус</p>
-                <p className={`font-semibold ${subscription.isActive ? 'text-green-400' : 'text-red-400'}`}>
-                  {subscription.status === 'trial' ? '🎁 Trial' : subscription.isActive ? '✅ Активна' : '❌ Неактивна'}
+                <p
+                  className={`font-semibold ${
+                    subscription.status === 'pending'
+                      ? 'text-purple-400'
+                      : subscription.isActive
+                        ? 'text-green-400'
+                        : 'text-red-400'
+                  }`}
+                >
+                  {subscription.status === 'pending'
+                    ? '⏳ Ожидание активации'
+                    : subscription.status === 'trial'
+                      ? '🎁 Trial'
+                      : subscription.isActive
+                        ? '✅ Активна'
+                        : '❌ Неактивна'}
                 </p>
               </div>
               {subscription.isInTrial && subscription.trialEndsAt && (

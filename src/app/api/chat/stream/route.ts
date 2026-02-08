@@ -12,7 +12,7 @@ import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
   try {
-    const { clientId, message, conversationHistory, sessionId, metadata } = await request.json();
+    const { clientId, message, conversationHistory, sessionId, metadata, image } = await request.json();
 
     if (!clientId || !message) {
       return NextResponse.json({ success: false, error: 'clientId and message are required' }, { status: 400 });
@@ -96,7 +96,13 @@ export async function POST(request: NextRequest) {
     console.log(`[Stream] Generating content for client ${clientId} with model ${config.model}`);
 
     try {
-      const result = await model.generateContentStream(fullSystemPrompt + `\n\nВопрос пользователя: ${message}`);
+      // Support multimodal input (text + image) for Gemini vision
+      const textPrompt = fullSystemPrompt + `\n\nВопрос пользователя: ${message}`;
+      const contentInput = image?.data
+        ? [{ text: textPrompt }, { inlineData: { data: image.data, mimeType: image.mimeType || 'image/jpeg' } }]
+        : textPrompt;
+
+      const result = await model.generateContentStream(contentInput);
 
       // Create SSE Stream
       const encoder = new TextEncoder();

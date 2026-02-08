@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { IClient } from '@/models/Client';
 import ClientCard from './ClientCard';
 import { MotionList, MotionItem, AnimatedNumber, SkeletonCard } from '@/components/ui/motion';
@@ -254,7 +255,8 @@ export default function ClientList() {
       )}
 
       {/* Clients Grid */}
-      <MotionList className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" staggerDelay={0.07}>
+      {/* Clients Grid */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading ? (
           <>
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -262,10 +264,15 @@ export default function ClientList() {
             ))}
           </>
         ) : filteredClients.length > 0 ? (
-          filteredClients.map((client) => (
-            <MotionItem key={client.clientId}>
+          filteredClients.map((client, index) => (
+            <motion.div
+              key={client.clientId}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+            >
               <ClientCard client={client} />
-            </MotionItem>
+            </motion.div>
           ))
         ) : (
           <div className="col-span-full">
@@ -289,7 +296,7 @@ export default function ClientList() {
             </div>
           </div>
         )}
-      </MotionList>
+      </div>
     </div>
   );
 }

@@ -24,20 +24,24 @@ export default function BillingTab({ client, daysUntilPayment }: BillingTabProps
                   ? 'text-green-400'
                   : client.subscriptionStatus === 'trial'
                     ? 'text-cyan-400'
-                    : client.subscriptionStatus === 'past_due'
-                      ? 'text-yellow-400'
-                      : 'text-red-400'
+                    : client.subscriptionStatus === 'pending'
+                      ? 'text-purple-400'
+                      : client.subscriptionStatus === 'past_due'
+                        ? 'text-yellow-400'
+                        : 'text-red-400'
               }`}
             >
               {client.subscriptionStatus === 'active'
                 ? '✅ Активна'
                 : client.subscriptionStatus === 'trial'
                   ? '🎁 Триал'
-                  : client.subscriptionStatus === 'past_due'
-                    ? '⚠️ Просрочена'
-                    : client.subscriptionStatus === 'suspended'
-                      ? '🚫 Приостановлена'
-                      : '❌ Отменена'}
+                  : client.subscriptionStatus === 'pending'
+                    ? '⏳ Ожидание активации'
+                    : client.subscriptionStatus === 'past_due'
+                      ? '⚠️ Просрочена'
+                      : client.subscriptionStatus === 'suspended'
+                        ? '🚫 Приостановлена'
+                        : '❌ Отменена'}
             </p>
           </div>
           <div className="rounded-lg bg-white/5 p-4">
@@ -49,29 +53,35 @@ export default function BillingTab({ client, daysUntilPayment }: BillingTabProps
                   ? '💳 Dodo Payments'
                   : client.paymentMethod === 'liqpay'
                     ? '💳 LiqPay'
-                    : '❓ Не привязан'}
+                    : client.subscriptionStatus === 'pending'
+                      ? '— Ожидание активации'
+                      : '❓ Не привязан'}
             </p>
           </div>
           <div className="rounded-lg bg-white/5 p-4">
             <p className="mb-1 text-sm text-gray-400">Следующий платёж</p>
             <p className="text-lg font-medium text-white">
-              {client.nextPaymentDate
-                ? new Date(client.nextPaymentDate).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })
-                : 'Триал период'}
+              {client.subscriptionStatus === 'pending'
+                ? 'Не активирован'
+                : client.nextPaymentDate
+                  ? new Date(client.nextPaymentDate).toLocaleDateString('ru-RU', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })
+                  : 'Триал период'}
             </p>
-            <p className="mt-1 text-xs text-gray-500">
-              {daysUntilPayment > 0 ? `Через ${daysUntilPayment} дней` : 'Сегодня'}
-            </p>
+            {client.subscriptionStatus !== 'pending' && (
+              <p className="mt-1 text-xs text-gray-500">
+                {daysUntilPayment > 0 ? `Через ${daysUntilPayment} дней` : 'Сегодня'}
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Payment Setup */}
-      {!client.paymentMethod && (
+      {/* Payment Setup - only show for trial/active/past_due, not for pending */}
+      {!client.paymentMethod && client.subscriptionStatus !== 'pending' && (
         <div className="glass-card border border-yellow-500/30 p-6">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
             <span>⚠️</span> Требуется привязка оплаты

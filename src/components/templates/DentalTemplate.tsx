@@ -12,7 +12,7 @@ export default function DentalTemplate({ scriptUrl }: DentalTemplateProps) {
   useEffect(() => {
     if (scriptUrl) {
       const script = document.createElement('script');
-      script.src = scriptUrl;
+      script.src = `${scriptUrl}?v=${Date.now()}`;
       script.async = true;
       document.body.appendChild(script);
 

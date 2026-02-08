@@ -24,18 +24,12 @@ function getMimeType(filePath: string): string {
   return MIME_TYPES[ext] || 'application/octet-stream';
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
     const { path: pathSegments } = await params;
 
     if (!pathSegments || pathSegments.length === 0) {
-      return NextResponse.json(
-        { error: 'Path is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Path is required' }, { status: 400 });
     }
 
     // Первый сегмент - это ID клиента (папка)
@@ -49,10 +43,7 @@ export async function GET(
     const fileContent = getWidgetFile(clientFolder, targetFile);
 
     if (!fileContent) {
-      return NextResponse.json(
-        { error: 'File not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
 
     const mimeType = getMimeType(targetFile);
@@ -64,7 +55,7 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': mimeType,
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -72,10 +63,7 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error serving widget file:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
