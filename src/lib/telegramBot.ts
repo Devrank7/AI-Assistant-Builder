@@ -57,7 +57,7 @@ async function sendMessage(chatId: number | string, text: string, parseMode = 'H
 /**
  * Handle /start command
  * Usage: /start clientToken
- * Links the user's Telegram to their AI Widget account
+ * Links the user's Telegram to their WinBix AI account
  */
 async function handleStartCommand(chatId: number, args: string, firstName: string): Promise<void> {
   if (!args) {
@@ -65,7 +65,7 @@ async function handleStartCommand(chatId: number, args: string, firstName: strin
     await sendMessage(
       chatId,
       `👋 <b>Привет, ${firstName}!</b>\n\n` +
-        `Это бот уведомлений AI Widget.\n\n` +
+        `Это бот уведомлений WinBix AI.\n\n` +
         `Чтобы привязать Telegram к вашему аккаунту:\n` +
         `1. Перейдите в личный кабинет\n` +
         `2. Нажмите "Привязать Telegram"\n` +
@@ -175,7 +175,7 @@ async function handleStatusCommand(chatId: number): Promise<void> {
 async function handleHelpCommand(chatId: number): Promise<void> {
   await sendMessage(
     chatId,
-    `📖 <b>Команды бота AI Widget</b>\n\n` +
+    `📖 <b>Команды бота WinBix AI</b>\n\n` +
       `/start — привязать Telegram\n` +
       `/status — статус подписки и расходов\n` +
       `/help — эта справка\n\n` +
@@ -216,6 +216,6 @@ export async function processTelegramUpdate(update: TelegramUpdate): Promise<voi
  * Generate Telegram deep link for client
  */
 export function generateTelegramLink(clientToken: string): string {
-  const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'AIWidgetBot';
+  const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'WinBixAIBot';
   return `https://t.me/${botUsername}?start=${clientToken}`;
 }

@@ -32,7 +32,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div>
-                <h1 className="gradient-text text-lg font-bold">AI Widget Admin</h1>
+                <h1 className="gradient-text text-lg font-bold">WinBix AI</h1>
                 <p className="text-[11px] tracking-wide text-gray-500 uppercase">Management Dashboard</p>
               </div>
             </div>
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-3">
               <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)]" />
-              <span className="text-sm text-gray-500">AI Widget Admin</span>
+              <span className="text-sm text-gray-500">WinBix AI</span>
             </div>
             <p className="text-sm text-gray-600">&copy; {new Date().getFullYear()} All rights reserved</p>
           </div>

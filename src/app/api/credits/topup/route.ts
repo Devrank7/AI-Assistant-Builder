@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addExtraCredits, TOP_UP_OPTIONS } from '@/lib/costGuard';
 import { getPaymentService } from '@/lib/PaymentService';
+import { CryptomusProvider } from '@/lib/paymentProviders/cryptomus';
 import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
 
@@ -40,51 +41,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Client not found' }, { status: 404 });
     }
 
-    // For now, simulate payment success and add credits immediately
-    // In production, this would create a payment and wait for webhook
+    // Create one-time payment with provider (not a recurring subscription)
     const paymentService = getPaymentService();
-    const providers = paymentService.getAvailableProviders();
+    const cryptomusProvider = paymentService.getProvider(provider);
 
-    if (providers.includes(provider)) {
-      // Create actual payment with provider
-      const cryptomusProvider = paymentService.getProvider(provider);
-      if (cryptomusProvider) {
-        try {
-          const result = await cryptomusProvider.createSubscription(
-            `${clientId}_topup_${Date.now()}`,
-            client.email,
+    if (cryptomusProvider && cryptomusProvider instanceof CryptomusProvider) {
+      try {
+        // Use one-time payment endpoint instead of recurring subscription
+        const result = await cryptomusProvider.createOneTimePayment(clientId, client.email, amount, 'USD');
+
+        if (result.success) {
+          return NextResponse.json({
+            success: true,
+            paymentUrl: result.paymentUrl,
+            paymentId: result.subscriptionId,
             amount,
-            'USD'
-          );
-
-          if (result.success) {
-            // Store pending top-up info (webhook will complete it)
-            await Client.updateOne(
-              { clientId },
-              {
-                $set: {
-                  pendingTopUpAmount: amount,
-                  pendingTopUpPaymentId: result.subscriptionId,
-                },
-              }
-            );
-
-            return NextResponse.json({
-              success: true,
-              paymentUrl: result.paymentUrl,
-              paymentId: result.subscriptionId,
-              amount,
-              message: `Перейдите по ссылке для оплаты $${amount}`,
-            });
-          }
-        } catch (error) {
-          console.error('Payment provider error:', error);
+            message: `Перейдите по ссылке для оплаты $${amount}`,
+          });
         }
+      } catch (error) {
+        console.error('Payment provider error:', error);
       }
     }
 
-    // Fallback: Direct credit addition (for testing or manual approval)
-    // In production, this should only happen via webhook after payment confirmation
+    // Fallback: Direct credit addition (for testing or when provider is unavailable)
     const success = await addExtraCredits(clientId, amount);
 
     if (success) {

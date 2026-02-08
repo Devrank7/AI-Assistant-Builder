@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'AI Widget Admin - Dashboard',
-  description: 'Manage and monitor your AI widget clients',
+  title: 'WinBix AI - Dashboard',
+  description: 'Manage and monitor your WinBix AI widget clients',
   icons: {
     icon: '/favicon.ico',
   },

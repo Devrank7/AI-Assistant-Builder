@@ -12,7 +12,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
   const port = parseInt(process.env.SMTP_PORT || '587');
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const from = process.env.SMTP_FROM || 'noreply@aiwidget.com';
+  const from = process.env.SMTP_FROM || 'noreply@winbix.ai';
 
   if (!host || !user || !pass) {
     console.warn('SMTP not configured, skipping email');
@@ -94,7 +94,7 @@ export async function sendPaymentReminder(
   const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Payment Reminder</h2>
-            <p>Your AI Widget subscription payment of <strong>$50</strong> is due in <strong>${daysUntilPayment} days</strong>.</p>
+            <p>Your WinBix AI subscription payment of <strong>$50</strong> is due in <strong>${daysUntilPayment} days</strong>.</p>
             ${
               !paymentSetupUrl.includes('already')
                 ? `
@@ -106,7 +106,7 @@ export async function sendPaymentReminder(
                 : '<p>Your payment method is already configured. Payment will be processed automatically.</p>'
             }
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 12px;">AI Widget Team</p>
+            <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
         </div>
     `;
 
@@ -118,7 +118,7 @@ export async function sendPaymentReminder(
     const telegramMsg = `
 ⏰ <b>Payment Reminder</b>
 
-Your AI Widget subscription ($50) is due in <b>${daysUntilPayment} days</b>.
+Your WinBix AI subscription ($50) is due in <b>${daysUntilPayment} days</b>.
 
 ${!paymentSetupUrl.includes('already') ? `Set up payment: ${paymentSetupUrl}` : 'Payment will be processed automatically.'}
         `.trim();
@@ -141,13 +141,13 @@ export async function sendPaymentFailedNotice(
   const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #e74c3c;">Payment Failed</h2>
-            <p>We were unable to process your AI Widget subscription payment.</p>
+            <p>We were unable to process your WinBix AI subscription payment.</p>
             <p><strong>Your service will be suspended in ${gracePeriodDays} days</strong> unless payment is received.</p>
             <a href="${paymentUrl}" style="display: inline-block; background: #e74c3c; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
                 Pay Now - $50
             </a>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 12px;">AI Widget Team</p>
+            <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
         </div>
     `;
 
@@ -181,13 +181,13 @@ export async function sendSuspensionNotice(
   const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #e74c3c;">Service Suspended</h2>
-            <p>Your AI Widget service has been suspended due to non-payment.</p>
+            <p>Your WinBix AI service has been suspended due to non-payment.</p>
             <p>To reactivate your widget, please complete the outstanding payment:</p>
             <a href="${reactivateUrl}" style="display: inline-block; background: #00d9ff; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
                 Reactivate - Pay $50
             </a>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 12px;">AI Widget Team</p>
+            <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
         </div>
     `;
 
@@ -197,7 +197,7 @@ export async function sendSuspensionNotice(
     const telegramMsg = `
 🚫 <b>Service Suspended</b>
 
-Your AI Widget has been suspended due to non-payment.
+Your WinBix AI widget has been suspended due to non-payment.
 
 To reactivate: ${reactivateUrl}
         `.trim();
@@ -225,10 +225,10 @@ export async function sendPaymentSuccessNotice(
   const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #27ae60;">Payment Successful!</h2>
-            <p>Thank you! Your AI Widget subscription payment of <strong>$50</strong> has been processed.</p>
+            <p>Thank you! Your WinBix AI subscription payment of <strong>$50</strong> has been processed.</p>
             <p>Next payment date: <strong>${formattedDate}</strong></p>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 12px;">AI Widget Team</p>
+            <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
         </div>
     `;
 

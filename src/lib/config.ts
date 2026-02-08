@@ -39,7 +39,7 @@ export function getWidgetEmbedCode(clientId: string): string {
  * Configuration object
  */
 export const config = {
-  appName: 'AI Widget Admin',
+  appName: 'WinBix AI',
   getBaseUrl,
   getWidgetScriptUrl,
   getWidgetEmbedCode,

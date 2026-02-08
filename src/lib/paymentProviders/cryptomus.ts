@@ -110,7 +110,7 @@ export class CryptomusProvider implements PaymentProvider {
         url_callback: this.config.webhookUrl,
         is_recurring: true,
         recurring_period: 'monthly',
-        name: 'AI Widget Monthly Subscription',
+        name: 'WinBix AI Monthly Subscription',
         additional_data: JSON.stringify({ clientId, email }),
       };
 
@@ -127,6 +127,48 @@ export class CryptomusProvider implements PaymentProvider {
       return {
         success: false,
         error: 'Failed to create subscription',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
+   * Create one-time payment (for credit top-ups)
+   * Uses /payment endpoint instead of /recurrence/create
+   */
+  async createOneTimePayment(
+    clientId: string,
+    email: string,
+    amount: number,
+    currency: string = 'USD'
+  ): Promise<SubscriptionResult> {
+    try {
+      const data = {
+        amount: amount.toString(),
+        currency: currency,
+        order_id: `topup_${clientId}_${Date.now()}`,
+        url_callback: this.config.webhookUrl,
+        name: `WinBix AI Credits Top-Up $${amount}`,
+        additional_data: JSON.stringify({ clientId: `${clientId}_topup_${Date.now()}`, email }),
+      };
+
+      const response = await this.request<CryptomusPaymentResponse>('/payment', data);
+
+      if (response.state === 0 && response.result) {
+        return {
+          success: true,
+          subscriptionId: response.result.uuid,
+          paymentUrl: response.result.url,
+        };
+      }
+
+      return {
+        success: false,
+        error: 'Failed to create payment',
       };
     } catch (error) {
       return {

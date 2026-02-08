@@ -223,18 +223,21 @@ class PaymentService {
 
   /**
    * Calculate first payment date (after trial)
+   * Uses trialActivatedAt if available, otherwise falls back to startDate
    */
-  static calculateFirstPaymentDate(startDate: Date): Date {
-    const paymentDate = new Date(startDate);
+  static calculateFirstPaymentDate(startDate: Date, trialActivatedAt?: Date | null): Date {
+    const effectiveStart = trialActivatedAt ? new Date(trialActivatedAt) : new Date(startDate);
+    const paymentDate = new Date(effectiveStart);
     paymentDate.setDate(paymentDate.getDate() + TRIAL_DAYS);
     return paymentDate;
   }
 
   /**
    * Check if client is in trial
+   * Uses trialActivatedAt if available, otherwise falls back to startDate
    */
-  static isInTrial(startDate: Date): boolean {
-    const trialEnd = this.calculateFirstPaymentDate(startDate);
+  static isInTrial(startDate: Date, trialActivatedAt?: Date | null): boolean {
+    const trialEnd = this.calculateFirstPaymentDate(startDate, trialActivatedAt);
     return new Date() < trialEnd;
   }
 

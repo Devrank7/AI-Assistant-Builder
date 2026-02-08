@@ -152,7 +152,7 @@ async function sendGracePeriodStartedEmail(
           Оплатить подписку
         </a>
       </div>
-      <p style="color: #6b7280; font-size: 12px;">AI Widget Team</p>
+      <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
     </div>
   `;
 
@@ -177,7 +177,7 @@ async function sendTrialReminderEmail(
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
       <h2 style="${urgency}">⏰ Trial заканчивается через ${daysLeft} ${getDayWord(daysLeft)}</h2>
       <p style="color: #d1d5db;">Привет, ${username}!</p>
-      <p style="color: #d1d5db;">Ваш бесплатный период использования AI Widget заканчивается через <strong style="color: #fff;">${daysLeft} ${getDayWord(daysLeft)}</strong>.</p>
+      <p style="color: #d1d5db;">Ваш бесплатный период использования WinBix AI заканчивается через <strong style="color: #fff;">${daysLeft} ${getDayWord(daysLeft)}</strong>.</p>
       <p style="color: #d1d5db;">Чтобы продолжить работу вашего AI-виджета, настройте оплату в вашем кабинете.</p>
       <div style="margin: 24px 0;">
         <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
@@ -186,7 +186,7 @@ async function sendTrialReminderEmail(
         </a>
       </div>
       <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
-      <p style="color: #6b7280; font-size: 12px;">AI Widget Team</p>
+      <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
     </div>
   `;
 
@@ -205,7 +205,7 @@ async function sendTrialExpiredEmail(email: string, telegram: string | undefined
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
       <h2 style="color: #ef4444;">🚫 Trial период закончился</h2>
       <p style="color: #d1d5db;">Привет, ${username}!</p>
-      <p style="color: #d1d5db;">Ваш бесплатный период использования AI Widget истёк. Виджет был приостановлен.</p>
+      <p style="color: #d1d5db;">Ваш бесплатный период использования WinBix AI истёк. Виджет был приостановлен.</p>
       <p style="color: #d1d5db;">Настройте оплату, чтобы возобновить работу.</p>
       <div style="margin: 24px 0;">
         <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
@@ -214,7 +214,7 @@ async function sendTrialExpiredEmail(email: string, telegram: string | undefined
         </a>
       </div>
       <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
-      <p style="color: #6b7280; font-size: 12px;">AI Widget Team</p>
+      <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
     </div>
   `;
 

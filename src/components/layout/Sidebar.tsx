@@ -18,7 +18,7 @@ interface SidebarProps {
   footer?: React.ReactNode;
 }
 
-export default function Sidebar({ items, logo, title = 'AI Widget', footer }: SidebarProps) {
+export default function Sidebar({ items, logo, title = 'WinBix AI', footer }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 

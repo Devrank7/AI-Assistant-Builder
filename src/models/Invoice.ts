@@ -65,7 +65,7 @@ const InvoiceSchema = new Schema<IInvoice>(
     },
     description: {
       type: String,
-      default: 'AI Widget Subscription',
+      default: 'WinBix AI Subscription',
     },
     metadata: {
       type: Schema.Types.Mixed,

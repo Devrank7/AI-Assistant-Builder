@@ -235,7 +235,7 @@ async function sendCostWarningNotification(
         <li>Оптимизируйте базу знаний</li>
       </ul>
       <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
-      <p style="color: #666; font-size: 12px;">AI Widget Team</p>
+      <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
     </div>
   `;
 
@@ -271,7 +271,7 @@ async function sendCostBlockedNotification(
       </div>
       
       <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
-      <p style="color: #666; font-size: 12px;">AI Widget Team</p>
+      <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
     </div>
   `;
 

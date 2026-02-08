@@ -47,9 +47,9 @@ export async function GET(request: NextRequest) {
           addresses: client.addresses,
         },
         company: {
-          name: 'AI Widget Admin',
-          email: process.env.SMTP_FROM || 'billing@aiwidget.com',
-          website: process.env.NEXT_PUBLIC_BASE_URL || 'https://aiwidget.com',
+          name: 'WinBix AI',
+          email: process.env.SMTP_FROM || 'billing@winbix.ai',
+          website: process.env.NEXT_PUBLIC_BASE_URL || 'https://winbix.ai',
         },
       });
 
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
       status: 'pending',
       periodStart: new Date(periodStart),
       periodEnd: new Date(periodEnd),
-      description: description || 'AI Widget Subscription',
+      description: description || 'WinBix AI Subscription',
       metadata: {
         tokensUsed: client.monthlyTokensInput + client.monthlyTokensOutput,
         requestsCount: client.requests,

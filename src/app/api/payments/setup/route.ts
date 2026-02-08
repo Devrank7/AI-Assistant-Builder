@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if still in trial
-    const isInTrial = PaymentService.isInTrial(client.startDate);
-    const firstPaymentDate = PaymentService.calculateFirstPaymentDate(client.startDate);
+    // Check if still in trial (use trialActivatedAt if available)
+    const isInTrial = PaymentService.isInTrial(client.startDate, client.trialActivatedAt);
+    const firstPaymentDate = PaymentService.calculateFirstPaymentDate(client.startDate, client.trialActivatedAt);
 
     // Calculate pricing
     const pricing = calculatePrepaymentPrice(months);
@@ -122,15 +122,15 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
     const client = await Client.findOne({ clientId }).select(
-      'subscriptionStatus paymentMethod nextPaymentDate lastPaymentDate isActive gracePeriodEnd startDate paymentFailedCount'
+      'subscriptionStatus paymentMethod nextPaymentDate lastPaymentDate isActive gracePeriodEnd startDate trialActivatedAt paymentFailedCount'
     );
 
     if (!client) {
       return NextResponse.json({ success: false, error: 'Client not found' }, { status: 404 });
     }
 
-    const isInTrial = PaymentService.isInTrial(client.startDate);
-    const trialEndsAt = PaymentService.calculateFirstPaymentDate(client.startDate);
+    const isInTrial = PaymentService.isInTrial(client.startDate, client.trialActivatedAt);
+    const trialEndsAt = PaymentService.calculateFirstPaymentDate(client.startDate, client.trialActivatedAt);
     const daysUntilPayment = client.nextPaymentDate ? PaymentService.getDaysUntilPayment(client.nextPaymentDate) : null;
 
     return NextResponse.json({

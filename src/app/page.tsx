@@ -325,7 +325,7 @@ export default function LandingPage() {
 
           {/* Footer */}
           <p className="text-center text-sm text-gray-600">
-            &copy; {new Date().getFullYear()} Winbix AI &middot; Powered by Gemini AI
+            &copy; {new Date().getFullYear()} WinBix AI &middot; Powered by WinBix AI
           </p>
         </div>
       </div>

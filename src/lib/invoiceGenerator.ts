@@ -86,7 +86,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
 <body>
   <div class="header">
     <div>
-      <div class="logo">AI Widget</div>
+      <div class="logo">WinBix AI</div>
       <p style="color: #6b7280; font-size: 13px; margin-top: 4px;">${company.name}</p>
     </div>
     <div style="text-align: right;">
@@ -137,7 +137,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
     <tbody>
       <tr>
         <td>
-          <strong>AI Widget Subscription</strong>
+          <strong>WinBix AI Subscription</strong>
           <br><span style="color: #6b7280; font-size: 12px;">${invoice.description}</span>
         </td>
         <td style="text-align: center;">1 мес.</td>
@@ -173,7 +173,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
   }
 
   <div class="footer">
-    <p>Спасибо за использование AI Widget!</p>
+    <p>Спасибо за использование WinBix AI!</p>
     <p style="margin-top: 4px;">${company.website} | ${company.email}</p>
   </div>
 </body>
