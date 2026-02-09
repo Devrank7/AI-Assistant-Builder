@@ -41,7 +41,8 @@ const ChatLogSchema = new Schema(
   { timestamps: true }
 );
 
-// Compound index for efficient queries
+// Compound indexes for efficient queries
 ChatLogSchema.index({ clientId: 1, createdAt: -1 });
+ChatLogSchema.index({ clientId: 1, sessionId: 1 });
 
 export default mongoose.models.ChatLog || mongoose.model<IChatLog>('ChatLog', ChatLogSchema);

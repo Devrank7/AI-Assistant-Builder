@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import AuditLog from '@/models/AuditLog';
+import { verifyAdmin } from '@/lib/auth';
 
 /**
  * GET /api/audit-log?page=1&limit=50&action=xxx&actor=xxx
- * Get paginated audit logs with optional filters
+ * Get paginated audit logs with optional filters (admin only)
  */
 export async function GET(request: NextRequest) {
   try {
+    const auth = await verifyAdmin(request);
+    if (!auth.authenticated) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectDB();
 
     const { searchParams } = new URL(request.url);

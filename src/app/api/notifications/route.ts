@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Notification from '@/models/Notification';
+import { verifyAdmin } from '@/lib/auth';
 
 /**
  * GET /api/notifications?unreadOnly=true&limit=50
- * Get admin notifications
+ * Get admin notifications (admin only)
  */
 export async function GET(request: NextRequest) {
   try {
+    const auth = await verifyAdmin(request);
+    if (!auth.authenticated) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectDB();
 
     const { searchParams } = new URL(request.url);
@@ -37,10 +43,15 @@ export async function GET(request: NextRequest) {
 
 /**
  * PATCH /api/notifications
- * Mark notifications as read
+ * Mark notifications as read (admin only)
  */
 export async function PATCH(request: NextRequest) {
   try {
+    const auth = await verifyAdmin(request);
+    if (!auth.authenticated) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectDB();
 
     const { ids, markAllRead } = await request.json();
@@ -65,10 +76,15 @@ export async function PATCH(request: NextRequest) {
 
 /**
  * DELETE /api/notifications?id=xxx
- * Delete a notification
+ * Delete a notification (admin only)
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await verifyAdmin(request);
+    if (!auth.authenticated) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectDB();
 
     const id = new URL(request.url).searchParams.get('id');

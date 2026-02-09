@@ -81,10 +81,10 @@ export async function POST(request: NextRequest) {
           );
           console.log(`Top-up $${topUpAmount} credited to client ${actualClientId}`);
         } else {
-          // Idempotency check: skip if payment was already processed very recently (within 60s)
+          // Idempotency check: skip if payment was already processed recently (within 1 hour)
           if (client.lastPaymentDate) {
             const timeSinceLastPayment = Date.now() - new Date(client.lastPaymentDate).getTime();
-            if (timeSinceLastPayment < 60_000) {
+            if (timeSinceLastPayment < 3_600_000) {
               console.log(`Duplicate webhook ignored for client ${actualClientId}`);
               return NextResponse.json({ success: true, message: 'Already processed' });
             }

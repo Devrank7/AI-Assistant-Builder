@@ -49,11 +49,18 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await connectDB();
     const { id } = await params;
 
-    const result = await ChatLog.findByIdAndDelete(id);
+    const log = await ChatLog.findById(id);
 
-    if (!result) {
+    if (!log) {
       return NextResponse.json({ success: false, error: 'Chat log not found' }, { status: 404 });
     }
+
+    // Clients can only delete their own chat logs
+    if (auth.role === 'client' && log.clientId !== auth.clientId) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+    }
+
+    await ChatLog.deleteOne({ _id: id });
 
     return NextResponse.json({
       success: true,
