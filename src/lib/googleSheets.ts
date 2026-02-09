@@ -94,8 +94,10 @@ export function getServiceAccountEmail(): string | null {
 
 /**
  * Get access token using service account
+ * @param config - Google Sheets configuration
+ * @param extraScopes - Additional OAuth scopes to request
  */
-async function getAccessToken(config: GoogleSheetsConfig): Promise<string> {
+async function getAccessToken(config: GoogleSheetsConfig, extraScopes?: string[]): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const exp = now + 3600;
 
@@ -104,9 +106,14 @@ async function getAccessToken(config: GoogleSheetsConfig): Promise<string> {
     typ: 'JWT',
   };
 
+  const scopes = ['https://www.googleapis.com/auth/spreadsheets'];
+  if (extraScopes) {
+    scopes.push(...extraScopes);
+  }
+
   const payload = {
     iss: config.clientEmail,
-    scope: 'https://www.googleapis.com/auth/spreadsheets',
+    scope: scopes.join(' '),
     aud: 'https://oauth2.googleapis.com/token',
     iat: now,
     exp: exp,
@@ -233,4 +240,127 @@ export async function testConnection(spreadsheetId: string): Promise<boolean> {
  */
 export function isConfigured(): boolean {
   return getConfig() !== null;
+}
+
+/**
+ * Read values from a Google Sheet
+ */
+export async function readSheetValues(
+  spreadsheetId: string,
+  range: string = 'A:Z'
+): Promise<{ success: boolean; values: string[][]; error?: string }> {
+  const config = getConfig();
+
+  if (!config) {
+    return { success: false, values: [], error: 'Google Sheets not configured.' };
+  }
+
+  try {
+    const accessToken = await getAccessToken(config);
+
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
+
+    const data = await response.json();
+    return { success: true, values: data.values || [] };
+  } catch (error) {
+    return {
+      success: false,
+      values: [],
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Update values in a Google Sheet
+ */
+export async function updateSheetValues(
+  spreadsheetId: string,
+  range: string,
+  values: string[][]
+): Promise<{ success: boolean; updatedCells: number; error?: string }> {
+  const config = getConfig();
+
+  if (!config) {
+    return { success: false, updatedCells: 0, error: 'Google Sheets not configured.' };
+  }
+
+  try {
+    const accessToken = await getAccessToken(config);
+
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ values }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
+
+    const data = await response.json();
+    return { success: true, updatedCells: data.updatedCells || 0 };
+  } catch (error) {
+    return {
+      success: false,
+      updatedCells: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Search for spreadsheets by name using Google Drive API
+ */
+export async function searchSpreadsheets(
+  query: string
+): Promise<{ success: boolean; files: Array<{ id: string; name: string }>; error?: string }> {
+  const config = getConfig();
+
+  if (!config) {
+    return { success: false, files: [], error: 'Google Sheets not configured.' };
+  }
+
+  try {
+    const accessToken = await getAccessToken(config, ['https://www.googleapis.com/auth/drive.readonly']);
+
+    const driveQuery = `name contains '${query.replace(/'/g, "\\'")}' and mimeType='application/vnd.google-apps.spreadsheet'`;
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(driveQuery)}&fields=files(id,name)&orderBy=modifiedTime desc`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
+
+    const data = await response.json();
+    return { success: true, files: data.files || [] };
+  } catch (error) {
+    return {
+      success: false,
+      files: [],
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
 }
