@@ -278,6 +278,8 @@ Create all files in `.agent/widget-builder/clients/<client_id>/src/`:
 
 ### 5.4 Build & Deploy
 
+**IMPORTANT: Quick widgets deploy to `quickwidgets/` (NOT `widgets/`)**
+
 ```bash
 # Build
 node .agent/widget-builder/scripts/build.js <client_id>
@@ -285,26 +287,28 @@ node .agent/widget-builder/scripts/build.js <client_id>
 # Verify build output
 ls -la .agent/widget-builder/dist/script.js
 
-# Deploy
-mkdir -p widgets/<client_id>
-cp .agent/widget-builder/dist/script.js widgets/<client_id>/script.js
+# Deploy to quickwidgets/ folder (NOT widgets/)
+mkdir -p quickwidgets/<client_id>
+cp .agent/widget-builder/dist/script.js quickwidgets/<client_id>/script.js
 ```
 
 ### 5.5 Write info.json
 
-Write `widgets/<client_id>/info.json`:
+Write `quickwidgets/<client_id>/info.json` (**NOT** `widgets/`):
+
+**NOTE: No `clientToken` field — quick widgets don't use auth tokens.**
 
 ```json
 {
   "name": "<Brand Name>",
   "clientId": "<client_id>",
   "username": "<username>",
-  "email": "<email>",
+  "email": "<email or empty string>",
   "website": "<website>",
   "phone": "<phone from site or null>",
   "addresses": ["<address from site or empty>"],
   "instagram": null,
-  "clientToken": "<client_id>-<random_6_chars>",
+  "clientType": "quick",
   "features": ["streaming", "quick-replies", "feedback"],
   "createdAt": "<ISO date>",
   "version": "2.0.0"
@@ -393,10 +397,10 @@ After everything is done, output:
 🔗 Demo: http://localhost:3000/demo/dental?client=<client_id>
 
 📦 Embed code:
-<script src="https://<domain>/widgets/<client_id>/script.js"></script>
+<script src="https://<domain>/quickwidgets/<client_id>/script.js"></script>
 
 📁 Files:
-- Widget: widgets/<client_id>/script.js
+- Widget: quickwidgets/<client_id>/script.js
 - Config: .agent/widget-builder/clients/<client_id>/widget.config.json
 - Knowledge: .agent/widget-builder/clients/<client_id>/knowledge/context.md
 ```

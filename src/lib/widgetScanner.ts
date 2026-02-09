@@ -4,6 +4,7 @@ import vm from 'vm';
 import { ClientInfo, WidgetFolder } from './types';
 
 const WIDGETS_DIR = path.join(process.cwd(), 'widgets');
+const QUICK_WIDGETS_DIR = path.join(process.cwd(), 'quickwidgets');
 
 export type DetectedChannel = 'instagram' | 'whatsapp' | 'telegram-bot';
 
@@ -222,4 +223,109 @@ export function listWidgetFiles(folderName: string): string[] {
 
   scanDir(folderPath);
   return files;
+}
+
+// --- Quick Widgets ---
+
+export function getQuickWidgetsDirectory(): string {
+  return QUICK_WIDGETS_DIR;
+}
+
+export function ensureQuickWidgetsDirectory(): void {
+  if (!fs.existsSync(QUICK_WIDGETS_DIR)) {
+    fs.mkdirSync(QUICK_WIDGETS_DIR, { recursive: true });
+  }
+}
+
+export function scanQuickWidgetFolders(): WidgetFolder[] {
+  ensureQuickWidgetsDirectory();
+
+  const folders: WidgetFolder[] = [];
+
+  try {
+    const entries = fs.readdirSync(QUICK_WIDGETS_DIR, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const folderPath = path.join(QUICK_WIDGETS_DIR, entry.name);
+        const scriptPath = path.join(folderPath, 'script.js');
+        const infoPath = path.join(folderPath, 'info.json');
+
+        const parts = entry.name.split('_');
+        const clientId = parts[0];
+        const username = parts.slice(1).join('_');
+
+        folders.push({
+          clientId: entry.name,
+          username: username || clientId,
+          folderPath: entry.name,
+          hasScript: fs.existsSync(scriptPath),
+          hasInfo: fs.existsSync(infoPath),
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error scanning quickwidgets directory:', error);
+  }
+
+  return folders;
+}
+
+export function readQuickWidgetInfo(folderName: string): ClientInfo | null {
+  const infoPath = path.join(QUICK_WIDGETS_DIR, folderName, 'info.json');
+
+  try {
+    if (fs.existsSync(infoPath)) {
+      const content = fs.readFileSync(infoPath, 'utf-8');
+      return JSON.parse(content) as ClientInfo;
+    }
+  } catch (error) {
+    console.error(`Error reading info.json for quick widget ${folderName}:`, error);
+  }
+
+  return null;
+}
+
+export function getQuickWidgetFile(folderName: string, relativePath: string): Buffer | null {
+  const safePath = path.normalize(relativePath).replace(/^(\.\.(\/|\\|$))+/, '');
+  const filePath = path.join(QUICK_WIDGETS_DIR, folderName, safePath);
+
+  const resolvedPath = path.resolve(filePath);
+  const widgetDir = path.resolve(path.join(QUICK_WIDGETS_DIR, folderName));
+
+  if (!resolvedPath.startsWith(widgetDir)) {
+    console.error('Attempted path traversal attack');
+    return null;
+  }
+
+  try {
+    if (fs.existsSync(filePath)) {
+      return fs.readFileSync(filePath);
+    }
+  } catch (error) {
+    console.error(`Error reading file ${relativePath} for quick widget ${folderName}:`, error);
+  }
+
+  return null;
+}
+
+export function deleteQuickWidgetFolder(folderName: string): boolean {
+  const folderPath = path.join(QUICK_WIDGETS_DIR, folderName);
+  const resolvedPath = path.resolve(folderPath);
+
+  if (!resolvedPath.startsWith(path.resolve(QUICK_WIDGETS_DIR))) {
+    console.error('Attempted path traversal attack on delete');
+    return false;
+  }
+
+  try {
+    if (fs.existsSync(folderPath)) {
+      fs.rmSync(folderPath, { recursive: true, force: true });
+      return true;
+    }
+  } catch (error) {
+    console.error(`Error deleting quick widget folder ${folderName}:`, error);
+  }
+
+  return false;
 }

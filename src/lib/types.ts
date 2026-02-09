@@ -6,6 +6,7 @@ export interface ClientInfo {
   addresses?: string[];
   instagram?: string;
   clientToken?: string;
+  clientType?: 'full' | 'quick';
 }
 
 export interface ClientData extends ClientInfo {

@@ -35,15 +35,20 @@ export default function ClientList() {
     }
   };
 
-  const filteredClients = clients.filter(
-    (client) =>
-      client.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.website.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Split clients by type
+  const regularClients = clients.filter((c) => c.clientType !== 'quick');
+  const quickClients = clients.filter((c) => c.clientType === 'quick');
 
-  const totalRequests = clients.reduce((sum, c) => sum + c.requests, 0);
-  const totalTokens = clients.reduce((sum, c) => sum + c.tokens, 0);
+  const searchFilter = (client: IClient) =>
+    client.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (client.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.website.toLowerCase().includes(searchTerm.toLowerCase());
+
+  const filteredRegular = regularClients.filter(searchFilter);
+  const filteredQuick = quickClients.filter(searchFilter);
+
+  const totalRequests = regularClients.reduce((sum, c) => sum + c.requests, 0);
+  const totalTokens = regularClients.reduce((sum, c) => sum + c.tokens, 0);
 
   return (
     <div className="space-y-8">
@@ -80,7 +85,7 @@ export default function ClientList() {
             <span className="text-sm font-medium tracking-wide text-gray-400">Total Clients</span>
           </div>
           <p className="stat-value relative z-10">
-            <AnimatedNumber value={clients.length} />
+            <AnimatedNumber value={regularClients.length} />
           </p>
           <div className="mt-2 text-xs text-gray-500">all time</div>
         </MotionItem>
@@ -183,7 +188,7 @@ export default function ClientList() {
             <span className="text-sm font-medium tracking-wide text-gray-400">Active</span>
           </div>
           <p className="stat-value relative z-10">
-            <AnimatedNumber value={clients.filter((c) => c.isActive).length || clients.length} />
+            <AnimatedNumber value={regularClients.filter((c) => c.isActive).length || regularClients.length} />
           </p>
           <div className="relative z-10 mt-2 text-xs text-gray-500">
             <span className="font-medium text-gray-300">100%</span> uptime
@@ -254,8 +259,7 @@ export default function ClientList() {
         </div>
       )}
 
-      {/* Clients Grid */}
-      {/* Clients Grid */}
+      {/* Regular Clients Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading ? (
           <>
@@ -263,8 +267,8 @@ export default function ClientList() {
               <SkeletonCard key={i} lines={4} />
             ))}
           </>
-        ) : filteredClients.length > 0 ? (
-          filteredClients.map((client, index) => (
+        ) : filteredRegular.length > 0 ? (
+          filteredRegular.map((client, index) => (
             <motion.div
               key={client.clientId}
               initial={{ opacity: 0, y: 20 }}
@@ -297,6 +301,40 @@ export default function ClientList() {
           </div>
         )}
       </div>
+
+      {/* Quick Widgets Section */}
+      {!loading && quickClients.length > 0 && (
+        <div className="space-y-6">
+          {/* Separator */}
+          <div className="flex items-center gap-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+            <div className="flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-2">
+              <span className="text-sm font-medium text-amber-400">Quick Widgets (Demo)</span>
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-300">
+                {quickClients.length}
+              </span>
+            </div>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+          </div>
+          <p className="text-center text-sm text-gray-500">
+            Demo widgets for prospecting — no billing, no client cabinet
+          </p>
+
+          {/* Quick Widgets Grid */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredQuick.map((client, index) => (
+              <motion.div
+                key={client.clientId}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <ClientCard client={client} isQuick />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

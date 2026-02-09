@@ -5,9 +5,12 @@ import { SubscriptionTier } from '@/lib/pricing';
 export type SubscriptionStatus = 'pending' | 'trial' | 'active' | 'past_due' | 'canceled' | 'suspended';
 export type PaymentMethod = 'cryptomus' | 'dodo' | 'liqpay' | null;
 
+export type ClientType = 'full' | 'quick';
+
 export interface IClient extends Document {
   clientId: string;
   clientToken: string;
+  clientType: ClientType;
   username: string;
   email: string;
   website: string;
@@ -64,9 +67,13 @@ const ClientSchema = new Schema<IClient>(
     },
     clientToken: {
       type: String,
-      required: true,
-      unique: true,
+      default: '',
       index: true,
+    },
+    clientType: {
+      type: String,
+      enum: ['full', 'quick'],
+      default: 'full',
     },
     username: {
       type: String,
@@ -74,7 +81,7 @@ const ClientSchema = new Schema<IClient>(
     },
     email: {
       type: String,
-      required: true,
+      default: '',
     },
     website: {
       type: String,

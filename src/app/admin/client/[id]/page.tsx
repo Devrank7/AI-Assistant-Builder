@@ -483,10 +483,12 @@ export default function ClientDetailsPage() {
   }
 
   const { client, files } = data;
+  const isQuick = client.clientType === 'quick';
   const startDate = new Date(client.startDate);
   const daysActive = Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const daysUntilPayment = 30 - (daysActive % 30);
-  const scriptUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/widgets/${client.folderPath}/script.js`;
+  const widgetBase = isQuick ? 'quickwidgets' : 'widgets';
+  const scriptUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/${widgetBase}/${client.folderPath}/script.js`;
 
   const CHANNEL_TAB_META: Record<DetectedChannel, { tabId: TabType; label: string; icon: string }> = {
     instagram: { tabId: 'channel-instagram', label: 'Instagram', icon: '📸' },
@@ -500,20 +502,28 @@ export default function ClientDetailsPage() {
     icon: CHANNEL_TAB_META[ch.channel].icon,
   }));
 
-  const tabs: { id: TabType; label: string; icon?: string }[] = [
-    { id: 'info', label: 'Info' },
-    { id: 'analytics', label: 'Analytics', icon: '📊' },
-    { id: 'billing', label: 'Billing', icon: '💳' },
-    { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
-    { id: 'knowledge', label: 'Knowledge', icon: '📚' },
-    { id: 'history', label: 'History', icon: '💬' },
-    ...dynamicChannelTabs,
-    { id: 'proactive', label: 'Proactive', icon: '🎯' },
-    { id: 'training', label: 'Training', icon: '🧠' },
-    { id: 'files', label: 'Files' },
-    { id: 'usage', label: 'Usage' },
-    { id: 'demo', label: 'Demo' },
-  ];
+  const tabs: { id: TabType; label: string; icon?: string }[] = isQuick
+    ? [
+        { id: 'info', label: 'Info' },
+        { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
+        { id: 'knowledge', label: 'Knowledge', icon: '📚' },
+        { id: 'history', label: 'History', icon: '💬' },
+        { id: 'demo', label: 'Demo' },
+      ]
+    : [
+        { id: 'info', label: 'Info' },
+        { id: 'analytics', label: 'Analytics', icon: '📊' },
+        { id: 'billing', label: 'Billing', icon: '💳' },
+        { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
+        { id: 'knowledge', label: 'Knowledge', icon: '📚' },
+        { id: 'history', label: 'History', icon: '💬' },
+        ...dynamicChannelTabs,
+        { id: 'proactive', label: 'Proactive', icon: '🎯' },
+        { id: 'training', label: 'Training', icon: '🧠' },
+        { id: 'files', label: 'Files' },
+        { id: 'usage', label: 'Usage' },
+        { id: 'demo', label: 'Demo' },
+      ];
 
   return (
     <div className="bg-gradient-animated min-h-screen">
@@ -537,7 +547,38 @@ export default function ClientDetailsPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              {client.subscriptionStatus === 'pending' ? (
+              {isQuick ? (
+                <>
+                  <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-sm font-medium text-amber-400">
+                    Demo Widget
+                  </span>
+                  <button
+                    onClick={async () => {
+                      if (
+                        !confirm(
+                          'Delete this quick widget? This will remove the folder, DB record, knowledge base, and chat logs.'
+                        )
+                      )
+                        return;
+                      try {
+                        const res = await fetch(`/api/clients/${client.clientId}/delete`, { method: 'DELETE' });
+                        const json = await res.json();
+                        if (json.success) {
+                          router.push('/admin');
+                        } else {
+                          alert('Error: ' + json.error);
+                        }
+                      } catch (e) {
+                        console.error(e);
+                        alert('Failed to delete');
+                      }
+                    }}
+                    className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-400 transition-all hover:bg-red-500/20"
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : client.subscriptionStatus === 'pending' ? (
                 <button
                   onClick={async () => {
                     if (!confirm('Activate 30-day trial for this client?')) return;
