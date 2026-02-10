@@ -379,7 +379,22 @@ curl -X PUT http://localhost:3000/api/ai-settings/<client_id> \
 
 ## 7. COMPLETION
 
-### 7.1 Output to User
+### 7.1 Send Telegram Notification
+
+After the widget is successfully built and deployed, send a Telegram notification to report the creation:
+
+```bash
+curl -s -X POST "http://localhost:3000/api/telegram/notify" \
+  -H "Content-Type: application/json" \
+  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
+  -d '{
+    "message": "✅ <b>Quick Widget Created</b>\n\n👤 Client: <username>\n🌐 Website: <website>\n📧 Email: <email or N/A>\n\n📦 Embed:\n<code>&lt;script src=\"https://<domain>/quickwidgets/<client_id>/script.js\"&gt;&lt;/script&gt;</code>\n\n🔗 <a href=\"http://localhost:3000/admin/client/<client_id>\">Open in Admin</a>"
+  }'
+```
+
+**IMPORTANT**: This notification is sent when the skill is invoked directly (standalone), NOT when called from `mass-quick-widgets` (which sends its own batch report).
+
+### 7.2 Output to User
 
 After everything is done, output:
 
@@ -403,6 +418,8 @@ After everything is done, output:
 - Widget: quickwidgets/<client_id>/script.js
 - Config: .agent/widget-builder/clients/<client_id>/widget.config.json
 - Knowledge: .agent/widget-builder/clients/<client_id>/knowledge/context.md
+
+📨 Telegram notification sent
 ```
 
 ---

@@ -93,8 +93,17 @@ Response format:
 From the response, filter leads:
 
 1. **Skip** rows where `email` AND `website` are both empty
-2. **Skip** rows where `hasWidget` is `TRUE` (already processed)
+2. **Skip** rows where `hasWidget` column value is `TRUE` (case-insensitive) — these leads already have a widget created. Only process leads where `hasWidget` is empty, `FALSE`, or any value other than `TRUE`.
 3. **Apply limit** if specified by the user
+
+**Example filtering logic:**
+
+```
+for each row:
+  if row.hasWidget?.toUpperCase() === 'TRUE' → SKIP (already has widget)
+  if row.email is empty AND row.website is empty → SKIP (no data)
+  otherwise → PROCESS this lead
+```
 
 ### 4.3 Derive Username (if missing)
 

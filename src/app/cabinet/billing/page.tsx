@@ -24,9 +24,13 @@ interface SubscriptionInfo {
   currentTier: string;
 }
 
+type PaymentMethodType = 'wayforpay' | 'nowpayments';
+
 export default function BillingPage() {
   const [tiers, setTiers] = useState<TierConfig[]>([]);
   const [selectedTier, setSelectedTier] = useState<string>('monthly');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('wayforpay');
+  const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -46,6 +50,14 @@ export default function BillingPage() {
       const tiersData = await tiersRes.json();
       if (tiersData.success) {
         setTiers(tiersData.tiers);
+        const providers: string[] = tiersData.availableProviders || [];
+        setAvailableProviders(providers);
+        // Auto-select first available provider
+        if (providers.includes('wayforpay')) {
+          setPaymentMethod('wayforpay');
+        } else if (providers.includes('nowpayments')) {
+          setPaymentMethod('nowpayments');
+        }
       }
 
       // Fetch subscription status if clientId exists
@@ -83,7 +95,7 @@ export default function BillingPage() {
         body: JSON.stringify({
           clientId,
           months,
-          provider: 'cryptomus',
+          provider: paymentMethod,
         }),
       });
 
@@ -125,7 +137,7 @@ export default function BillingPage() {
           <Link href="/cabinet" className="mb-4 inline-block text-cyan-400 hover:text-cyan-300">
             &larr; Назад в кабинет
           </Link>
-          <h1 className="mb-4 text-4xl font-bold text-white">💳 Выберите план подписки</h1>
+          <h1 className="mb-4 text-4xl font-bold text-white">Выберите план подписки</h1>
           <p className="text-lg text-gray-400">Оплатите на несколько месяцев вперёд и получите скидку</p>
         </div>
 
@@ -146,12 +158,12 @@ export default function BillingPage() {
                   }`}
                 >
                   {subscription.status === 'pending'
-                    ? '⏳ Ожидание активации'
+                    ? 'Ожидание активации'
                     : subscription.status === 'trial'
-                      ? '🎁 Trial'
+                      ? 'Trial'
                       : subscription.isActive
-                        ? '✅ Активна'
-                        : '❌ Неактивна'}
+                        ? 'Активна'
+                        : 'Неактивна'}
                 </p>
               </div>
               {subscription.isInTrial && subscription.trialEndsAt && (
@@ -180,6 +192,49 @@ export default function BillingPage() {
           </div>
         )}
 
+        {/* Payment Method Selector — only show if more than one provider available */}
+        {availableProviders.length > 1 && (
+          <div className="mb-8">
+            <h2 className="mb-4 text-center text-lg font-semibold text-white">Способ оплаты</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {availableProviders.includes('wayforpay') && (
+                <button
+                  onClick={() => setPaymentMethod('wayforpay')}
+                  className={`rounded-xl border-2 p-4 transition-all duration-300 ${
+                    paymentMethod === 'wayforpay'
+                      ? 'border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+                      : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                  }`}
+                >
+                  <div className="text-center">
+                    <p className="mb-1 text-2xl">💳</p>
+                    <p className="font-semibold text-white">Картой</p>
+                    <p className="text-xs text-gray-400">Visa / Mastercard</p>
+                    <p className="mt-1 text-xs text-green-400">Автоплатёж</p>
+                  </div>
+                </button>
+              )}
+
+              {availableProviders.includes('nowpayments') && (
+                <button
+                  onClick={() => setPaymentMethod('nowpayments')}
+                  className={`rounded-xl border-2 p-4 transition-all duration-300 ${
+                    paymentMethod === 'nowpayments'
+                      ? 'border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+                      : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                  }`}
+                >
+                  <div className="text-center">
+                    <p className="mb-1 text-2xl">🪙</p>
+                    <p className="font-semibold text-white">Криптовалютой</p>
+                    <p className="text-xs text-gray-400">BTC, ETH, USDT...</p>
+                  </div>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Tier Selection */}
         <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
           {tiers.map((tier) => (
@@ -195,8 +250,8 @@ export default function BillingPage() {
               {/* Recommended Badge */}
               {tier.id === 'annual' && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 px-3 py-1 text-xs font-bold text-white">
-                    ⭐ ВЫГОДНО
+                  <span className="rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 px-3 py-1 text-xs font-bold whitespace-nowrap text-white">
+                    ВЫГОДНО
                   </span>
                 </div>
               )}
@@ -229,11 +284,18 @@ export default function BillingPage() {
                   ? `Вы экономите $${Math.round(50 * 12 - (selectedTierData?.totalPrice || 0))} (${Math.round(selectedTierData.discount * 100)}%)`
                   : 'Стандартная цена'}
               </p>
+              {paymentMethod === 'wayforpay' && (
+                <p className="mt-1 text-sm text-green-400">
+                  После оплаты подписка продлевается автоматически ($50/мес)
+                </p>
+              )}
             </div>
 
             <div className="text-center md:text-right">
               <p className="mb-2 text-4xl font-bold text-white">${selectedTierData?.totalPrice || 50}</p>
-              <p className="text-sm text-gray-400">единоразовый платёж</p>
+              <p className="text-sm text-gray-400">
+                {paymentMethod === 'wayforpay' ? '💳 Картой' : '🪙 Криптовалютой'}
+              </p>
             </div>
           </div>
 
@@ -264,18 +326,22 @@ export default function BillingPage() {
 
           {!clientId && (
             <p className="mt-4 text-center text-sm text-yellow-400">
-              ⚠️ Client ID не указан в URL. Добавьте ?clientId=your_id
+              Client ID не указан в URL. Добавьте ?clientId=your_id
             </p>
           )}
         </div>
 
         {/* FAQ */}
         <div className="mt-12 text-center text-sm text-gray-500">
-          <p>Платежи обрабатываются через Cryptomus (криптовалюта)</p>
+          <p>
+            {paymentMethod === 'wayforpay'
+              ? 'Картой (Visa/Mastercard) через WayForPay'
+              : 'Криптовалютой (BTC, ETH, USDT) через NowPayments'}
+          </p>
           <p className="mt-2">
             Вопросы?{' '}
-            <a href="mailto:support@example.com" className="text-cyan-400 hover:underline">
-              support@example.com
+            <a href="mailto:chatbotfusion@gmail.com" className="text-cyan-400 hover:underline">
+              chatbotfusion@gmail.com
             </a>
           </p>
         </div>

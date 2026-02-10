@@ -2,11 +2,13 @@
  * Payment Service
  *
  * Unified payment service that routes to the correct provider.
- * Supports: Cryptomus (now), Dodo/LiqPay (future)
+ * Supports: WayForPay (card), NowPayments (crypto), Cryptomus (legacy)
  */
 
 import { PaymentProvider, SubscriptionResult, TRIAL_DAYS, GRACE_PERIOD_DAYS } from './paymentProviders/types';
+import { createNowPaymentsProvider } from './paymentProviders/nowpayments';
 import { createCryptomusProvider } from './paymentProviders/cryptomus';
+import { createWayForPayProvider } from './paymentProviders/wayforpay';
 import Client, { PaymentMethod } from '@/models/Client';
 import connectDB from '@/lib/mongodb';
 import { calculatePrepaymentPrice, getSubscriptionTier, isValidPrepaymentMonths } from '@/lib/pricing';
@@ -19,13 +21,23 @@ class PaymentService {
   }
 
   private initializeProviders() {
-    // Initialize Cryptomus
+    // Initialize WayForPay (card payments)
+    const wayforpay = createWayForPayProvider();
+    if (wayforpay) {
+      this.providers.set('wayforpay', wayforpay);
+    }
+
+    // Initialize NowPayments (crypto payments)
+    const nowpayments = createNowPaymentsProvider();
+    if (nowpayments) {
+      this.providers.set('nowpayments', nowpayments);
+    }
+
+    // Initialize Cryptomus (legacy, for existing subscriptions)
     const cryptomus = createCryptomusProvider();
     if (cryptomus) {
       this.providers.set('cryptomus', cryptomus);
     }
-
-    // Future: Initialize Dodo, LiqPay here
   }
 
   /**
@@ -85,17 +97,20 @@ class PaymentService {
 
     if (result.success && result.subscriptionId) {
       // Update client with subscription info and prepayment metadata
-      await Client.updateOne(
-        { clientId },
-        {
-          paymentMethod: providerName,
-          cryptomusSubscriptionId: providerName === 'cryptomus' ? result.subscriptionId : undefined,
-          externalCustomerId: providerName !== 'cryptomus' ? result.subscriptionId : undefined,
-          prepaidMonths: months,
-          subscriptionTier: getSubscriptionTier(months),
-          lastPrepaymentAmount: pricing.total,
-        }
-      );
+      const updateFields: Record<string, unknown> = {
+        paymentMethod: providerName,
+        prepaidMonths: months,
+        subscriptionTier: getSubscriptionTier(months),
+        lastPrepaymentAmount: pricing.total,
+      };
+
+      if (providerName === 'cryptomus') {
+        updateFields.cryptomusSubscriptionId = result.subscriptionId;
+      } else {
+        updateFields.externalCustomerId = result.subscriptionId;
+      }
+
+      await Client.updateOne({ clientId }, updateFields);
     }
 
     return result;
@@ -113,17 +128,14 @@ class PaymentService {
     }
 
     const provider = this.providers.get(client.paymentMethod);
-    if (!provider) {
-      return false;
-    }
-
     const subscriptionId = client.cryptomusSubscriptionId || client.externalCustomerId;
-    if (!subscriptionId) {
-      return false;
-    }
 
     try {
-      await provider.cancelSubscription(subscriptionId);
+      // Cancel at provider level if possible (no-op for invoice-based providers)
+      if (provider && subscriptionId) {
+        await provider.cancelSubscription(subscriptionId);
+      }
+
       await Client.updateOne(
         { clientId },
         {
@@ -131,6 +143,7 @@ class PaymentService {
           paymentMethod: null,
           cryptomusSubscriptionId: null,
           externalCustomerId: null,
+          wayforpayRecToken: null,
         }
       );
       return true;
@@ -155,7 +168,11 @@ class PaymentService {
     const prepaidMonths = months ?? client.prepaidMonths ?? 1;
 
     // Calculate next payment date based on prepaid months
-    const nextPaymentDate = new Date();
+    // If client has remaining prepaid time, extend from that date (don't lose remaining days)
+    const now = new Date();
+    const baseDate =
+      client.nextPaymentDate && new Date(client.nextPaymentDate) > now ? new Date(client.nextPaymentDate) : now;
+    const nextPaymentDate = new Date(baseDate);
     nextPaymentDate.setMonth(nextPaymentDate.getMonth() + prepaidMonths);
 
     const pricing = calculatePrepaymentPrice(prepaidMonths);

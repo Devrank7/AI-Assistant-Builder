@@ -17,7 +17,7 @@ import Client from '@/models/Client';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { clientId, provider = 'cryptomus', months = 1 } = body;
+    const { clientId, provider = 'wayforpay', months = 1 } = body;
 
     if (!clientId) {
       return NextResponse.json({ success: false, error: 'clientId is required' }, { status: 400 });

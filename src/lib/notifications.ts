@@ -87,40 +87,40 @@ export async function sendPaymentReminder(
   email: string,
   telegram: string | undefined,
   daysUntilPayment: number,
-  paymentSetupUrl: string
+  paymentUrl: string
 ): Promise<void> {
-  const subject = `⏰ Payment Reminder - ${daysUntilPayment} days left`;
+  const subject =
+    daysUntilPayment > 0
+      ? `⏰ Payment Reminder - ${daysUntilPayment} days left`
+      : `⏰ Payment Required - Subscription Expired`;
+
+  const daysText =
+    daysUntilPayment > 0 ? `is due in <strong>${daysUntilPayment} days</strong>` : `is <strong>due now</strong>`;
 
   const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Payment Reminder</h2>
-            <p>Your WinBix AI subscription payment of <strong>$50</strong> is due in <strong>${daysUntilPayment} days</strong>.</p>
-            ${
-              !paymentSetupUrl.includes('already')
-                ? `
-                <p>Please ensure your payment method is set up:</p>
-                <a href="${paymentSetupUrl}" style="display: inline-block; background: #00d9ff; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                    Setup Payment Method
-                </a>
-            `
-                : '<p>Your payment method is already configured. Payment will be processed automatically.</p>'
-            }
+            <p>Your WinBix AI subscription payment ${daysText}.</p>
+            <p>Please complete your payment:</p>
+            <a href="${paymentUrl}" style="display: inline-block; background: #00d9ff; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                Pay Now
+            </a>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
         </div>
     `;
 
-  // Send email
   await sendEmail(email, subject, emailHtml);
 
-  // Send Telegram if configured
   if (telegram) {
+    const daysTelegramText = daysUntilPayment > 0 ? `is due in <b>${daysUntilPayment} days</b>` : `is <b>due now</b>`;
+
     const telegramMsg = `
 ⏰ <b>Payment Reminder</b>
 
-Your WinBix AI subscription ($50) is due in <b>${daysUntilPayment} days</b>.
+Your WinBix AI subscription ${daysTelegramText}.
 
-${!paymentSetupUrl.includes('already') ? `Set up payment: ${paymentSetupUrl}` : 'Payment will be processed automatically.'}
+Pay now: ${paymentUrl}
         `.trim();
 
     await sendTelegram(telegram, telegramMsg);
@@ -134,7 +134,8 @@ export async function sendPaymentFailedNotice(
   email: string,
   telegram: string | undefined,
   gracePeriodDays: number,
-  paymentUrl: string
+  paymentUrl: string,
+  amount: number = 50
 ): Promise<void> {
   const subject = `❌ Payment Failed - Action Required`;
 
@@ -144,7 +145,7 @@ export async function sendPaymentFailedNotice(
             <p>We were unable to process your WinBix AI subscription payment.</p>
             <p><strong>Your service will be suspended in ${gracePeriodDays} days</strong> unless payment is received.</p>
             <a href="${paymentUrl}" style="display: inline-block; background: #e74c3c; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                Pay Now - $50
+                Pay Now - $${amount}
             </a>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
@@ -157,7 +158,7 @@ export async function sendPaymentFailedNotice(
     const telegramMsg = `
 ❌ <b>Payment Failed</b>
 
-We couldn't process your $50 subscription payment.
+We couldn't process your $${amount} subscription payment.
 
 ⚠️ Your widget will be <b>suspended in ${gracePeriodDays} days</b>.
 
@@ -174,7 +175,8 @@ We couldn't process your $50 subscription payment.
 export async function sendSuspensionNotice(
   email: string,
   telegram: string | undefined,
-  reactivateUrl: string
+  reactivateUrl: string,
+  amount: number = 50
 ): Promise<void> {
   const subject = `🚫 Service Suspended`;
 
@@ -184,7 +186,7 @@ export async function sendSuspensionNotice(
             <p>Your WinBix AI service has been suspended due to non-payment.</p>
             <p>To reactivate your widget, please complete the outstanding payment:</p>
             <a href="${reactivateUrl}" style="display: inline-block; background: #00d9ff; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                Reactivate - Pay $50
+                Reactivate - Pay $${amount}
             </a>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
@@ -212,7 +214,8 @@ To reactivate: ${reactivateUrl}
 export async function sendPaymentSuccessNotice(
   email: string,
   telegram: string | undefined,
-  nextPaymentDate: Date
+  nextPaymentDate: Date,
+  amount: number = 50
 ): Promise<void> {
   const subject = `✅ Payment Successful`;
 
@@ -225,7 +228,7 @@ export async function sendPaymentSuccessNotice(
   const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #27ae60;">Payment Successful!</h2>
-            <p>Thank you! Your WinBix AI subscription payment of <strong>$50</strong> has been processed.</p>
+            <p>Thank you! Your WinBix AI subscription payment of <strong>$${amount}</strong> has been processed.</p>
             <p>Next payment date: <strong>${formattedDate}</strong></p>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
@@ -238,7 +241,7 @@ export async function sendPaymentSuccessNotice(
     const telegramMsg = `
 ✅ <b>Payment Successful!</b>
 
-Your $50 subscription payment is confirmed.
+Your $${amount} subscription payment is confirmed.
 Next payment: ${formattedDate}
         `.trim();
 

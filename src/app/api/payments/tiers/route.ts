@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { getAllTiers, BASE_MONTHLY_PRICE, ANNUAL_DISCOUNT } from '@/lib/pricing';
+import { getPaymentService } from '@/lib/PaymentService';
 
 /**
  * GET - Get all available subscription tiers
@@ -13,10 +14,13 @@ import { getAllTiers, BASE_MONTHLY_PRICE, ANNUAL_DISCOUNT } from '@/lib/pricing'
 export async function GET() {
   try {
     const tiers = getAllTiers();
+    const paymentService = getPaymentService();
+    const availableProviders = paymentService.getAvailableProviders();
 
     return NextResponse.json({
       success: true,
       tiers,
+      availableProviders,
       recommended: 'annual',
       pricing: {
         baseMonthlyPrice: BASE_MONTHLY_PRICE,

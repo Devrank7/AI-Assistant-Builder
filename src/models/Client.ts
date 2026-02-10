@@ -3,7 +3,7 @@ import { SubscriptionTier } from '@/lib/pricing';
 
 // Subscription status enum
 export type SubscriptionStatus = 'pending' | 'trial' | 'active' | 'past_due' | 'canceled' | 'suspended';
-export type PaymentMethod = 'cryptomus' | 'dodo' | 'liqpay' | null;
+export type PaymentMethod = 'nowpayments' | 'cryptomus' | 'wayforpay' | 'dodo' | 'liqpay' | null;
 
 export type ClientType = 'full' | 'quick';
 
@@ -50,8 +50,9 @@ export interface IClient extends Document {
   extraCreditsExpiry: Date | null; // When extra credits expire
 
   // Provider-specific IDs
-  cryptomusSubscriptionId: string | null;
-  externalCustomerId: string | null; // For Dodo/LiqPay in future
+  cryptomusSubscriptionId: string | null; // Legacy
+  externalCustomerId: string | null; // NowPayments invoice ID / other providers
+  wayforpayRecToken: string | null; // WayForPay recurring token
 
   createdAt: Date;
   updatedAt: Date;
@@ -169,7 +170,7 @@ const ClientSchema = new Schema<IClient>(
     },
     paymentMethod: {
       type: String,
-      enum: ['cryptomus', 'dodo', 'liqpay', null],
+      enum: ['nowpayments', 'cryptomus', 'wayforpay', 'dodo', 'liqpay', null],
       default: null,
     },
     nextPaymentDate: {
@@ -220,6 +221,10 @@ const ClientSchema = new Schema<IClient>(
       default: null,
     },
     externalCustomerId: {
+      type: String,
+      default: null,
+    },
+    wayforpayRecToken: {
       type: String,
       default: null,
     },
