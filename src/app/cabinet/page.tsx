@@ -1316,6 +1316,42 @@ function ClientCabinetContent() {
                     <span className="rounded-lg bg-white/5 p-2">💳</span> Billing & Usage
                   </h2>
 
+                  {/* Subscription Status */}
+                  {client.nextPaymentDate && (
+                    <div className="relative z-10 mb-8 rounded-2xl border border-[var(--neon-cyan)]/20 bg-[var(--neon-cyan)]/5 p-6">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                          <p className="mb-1 text-xs font-bold tracking-wider text-gray-500 uppercase">
+                            {(() => {
+                              const nextDate = new Date(client.nextPaymentDate!);
+                              const now = new Date();
+                              const diffDays = Math.ceil((nextDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                              return diffDays > 35 ? 'Подписка оплачена до' : 'Следующий платёж';
+                            })()}
+                          </p>
+                          <p className="text-2xl font-bold text-white">
+                            {new Date(client.nextPaymentDate).toLocaleDateString('ru-RU', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="mb-1 text-xs font-bold tracking-wider text-gray-500 uppercase">Осталось дней</p>
+                          <p className="text-2xl font-bold text-[var(--neon-cyan)]">
+                            {Math.max(
+                              0,
+                              Math.ceil(
+                                (new Date(client.nextPaymentDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                              )
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="relative z-10 mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div className="group rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 transition-colors hover:bg-white/[0.05]">
                       <p className="mb-2 text-xs font-bold tracking-wider text-gray-500 uppercase">Current Month</p>
@@ -1351,9 +1387,12 @@ function ClientCabinetContent() {
                   </div>
 
                   <div className="relative z-10 border-t border-white/[0.06] pt-6 text-center">
-                    <button className="btn-premium px-8 py-3 shadow-[0_0_20px_rgba(0,229,255,0.15)] hover:shadow-[0_0_30px_rgba(0,229,255,0.25)]">
+                    <a
+                      href={`/cabinet/billing?clientId=${client.clientId}`}
+                      className="btn-premium inline-block px-8 py-3 shadow-[0_0_20px_rgba(0,229,255,0.15)] hover:shadow-[0_0_30px_rgba(0,229,255,0.25)]"
+                    >
                       Manage Subscription
-                    </button>
+                    </a>
                     <p className="mt-4 flex items-center justify-center gap-1 text-[10px] text-gray-600 opacity-60 transition-opacity hover:opacity-100">
                       <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -1363,7 +1402,7 @@ function ClientCabinetContent() {
                           d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                         />
                       </svg>
-                      Payments secured by Cryptomus
+                      Secure payments
                     </p>
                   </div>
                 </div>

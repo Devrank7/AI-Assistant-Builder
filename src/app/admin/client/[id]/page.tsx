@@ -720,7 +720,13 @@ export default function ClientDetailsPage() {
               />
             )}
 
-            {activeTab === 'billing' && <BillingTab client={client} daysUntilPayment={daysUntilPayment} />}
+            {activeTab === 'billing' && (
+              <BillingTab
+                client={client}
+                daysUntilPayment={daysUntilPayment}
+                onClientUpdate={() => fetchClientData(client.clientId)}
+              />
+            )}
 
             {activeTab === 'info' && (
               <ClientInfoTab
