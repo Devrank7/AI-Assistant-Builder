@@ -17,14 +17,8 @@
  */
 
 import crypto from 'crypto';
-import {
-  PaymentProvider,
-  SubscriptionResult,
-  SubscriptionStatus,
-  WebhookResult,
-  SUBSCRIPTION_AMOUNT,
-  SUBSCRIPTION_CURRENCY,
-} from './types';
+import { PaymentProvider, SubscriptionResult, SubscriptionStatus, WebhookResult, SUBSCRIPTION_CURRENCY } from './types';
+import { getPricingConfig } from '@/lib/pricingConfig';
 
 interface WayForPayConfig {
   merchantAccount: string;
@@ -109,11 +103,14 @@ export class WayForPayProvider implements PaymentProvider {
   async createSubscription(
     clientId: string,
     email: string,
-    amount: number = SUBSCRIPTION_AMOUNT,
+    amount: number,
     currency: string = SUBSCRIPTION_CURRENCY
   ): Promise<SubscriptionResult> {
     try {
       cleanupExpiredOrders();
+
+      const config = await getPricingConfig();
+      const basePrice = config.baseMonthlyPrice;
 
       const orderReference = `wfp_sub_${clientId}_${Date.now()}`;
       const orderDate = Math.floor(Date.now() / 1000);
@@ -122,9 +119,8 @@ export class WayForPayProvider implements PaymentProvider {
       const productPrice = amount;
 
       // Calculate recurring start date (after prepaid period)
-      // Amount determines months: $50=1mo, $150=3mo, $300=6mo, $510=12mo
-      const monthsMap: Record<number, number> = { 50: 1, 150: 3, 300: 6, 510: 12 };
-      const months = monthsMap[amount] || Math.round(amount / 50) || 1;
+      // Derive months from amount and base price
+      const months = Math.round(amount / basePrice) || 1;
       const dateNext = new Date();
       dateNext.setMonth(dateNext.getMonth() + months);
 
@@ -164,7 +160,7 @@ export class WayForPayProvider implements PaymentProvider {
         clientEmail: email,
         // Recurring params
         regularMode: 'monthly',
-        regularAmount: String(SUBSCRIPTION_AMOUNT), // Always $50/month after prepaid
+        regularAmount: String(basePrice), // Monthly recurring amount from config
         regularBehavior: 'preset',
         dateNext: formatDate(dateNext),
         dateEnd: formatDate(dateEnd),

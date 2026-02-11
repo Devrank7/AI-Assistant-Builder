@@ -83,7 +83,7 @@ export interface PaymentConfig {
 /**
  * Subscription amount constants
  */
-export const SUBSCRIPTION_AMOUNT = 50; // USD
+export const SUBSCRIPTION_AMOUNT = 65; // USD
 export const SUBSCRIPTION_CURRENCY = 'USD';
 export const TRIAL_DAYS = 30;
 export const GRACE_PERIOD_DAYS = 3;

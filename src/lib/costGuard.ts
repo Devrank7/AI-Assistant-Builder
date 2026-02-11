@@ -2,17 +2,17 @@
  * Cost Guard
  *
  * Monitors API spending per client and enforces cost limits.
- * - $20/month → warning notification
- * - $40/month → widget disabled (unless extra credits purchased)
+ * Thresholds are configurable via admin panel (stored in DB).
+ * - Warning threshold → warning notification
+ * - Block threshold → widget disabled (unless extra credits purchased)
  * - Clients can top-up $10/$20/$30 to extend limit
  */
 
 import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
 import { sendEmail, sendTelegram } from '@/lib/notifications';
+import { getPricingConfig } from '@/lib/pricingConfig';
 
-const COST_WARNING_THRESHOLD = 20; // USD per month
-const COST_BLOCK_THRESHOLD = 40; // USD per month
 export const TOP_UP_OPTIONS = [10, 20, 30]; // Available top-up amounts
 
 export type CostCheckResult = {
@@ -34,6 +34,10 @@ export type CostCheckResult = {
  */
 export async function checkCostLimit(clientId: string): Promise<CostCheckResult> {
   await connectDB();
+
+  const config = await getPricingConfig();
+  const COST_WARNING_THRESHOLD = config.costWarningThreshold;
+  const COST_BLOCK_THRESHOLD = config.costBlockThreshold;
 
   const client = await Client.findOne({ clientId }).select(
     'monthlyCostUsd costResetDate costWarningNotified email telegram isActive extraCreditsUsd extraCreditsExpiry'
@@ -64,7 +68,6 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
     const currentExtraCredits = client.extraCreditsUsd || 0;
 
     // Unused credits = extra credits - (cost spent above base limit)
-    // Example: extraCredits=20, cost=50 → used 10 of credits → carry over 10
     const creditsUsed = Math.max(0, currentCost - COST_BLOCK_THRESHOLD);
     const unusedCredits = Math.max(0, currentExtraCredits - creditsUsed);
 
@@ -77,7 +80,7 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
         monthlyCostUsd: 0,
         costResetDate: now,
         costWarningNotified: false,
-        extraCreditsUsd: unusedCredits, // Carry over unused credits!
+        extraCreditsUsd: unusedCredits,
         extraCreditsExpiry: unusedCredits > 0 ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) : null,
       }
     );
@@ -100,7 +103,7 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
   const extraCredits = client.extraCreditsUsd || 0;
   const effectiveLimit = COST_BLOCK_THRESHOLD + extraCredits;
 
-  // BLOCKED: Over effective limit (base $40 + extra credits)
+  // BLOCKED: Over effective limit (base threshold + extra credits)
   if (cost >= effectiveLimit) {
     // Atomically disable widget only if still active (prevents duplicate notifications)
     const disableResult = await Client.findOneAndUpdate(
@@ -110,7 +113,6 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
     );
 
     if (disableResult) {
-      // Only notify if we were the ones to disable it
       await sendCostBlockedNotification(client.email, client.telegram, cost, effectiveLimit).catch((err) =>
         console.error(`[CostGuard] Failed to send blocked notification for ${clientId}:`, err)
       );
@@ -129,7 +131,7 @@ export async function checkCostLimit(clientId: string): Promise<CostCheckResult>
     };
   }
 
-  // WARNING: Over $20/month (atomic update to prevent duplicate notifications)
+  // WARNING: Over warning threshold (atomic update to prevent duplicate notifications)
   if (cost >= COST_WARNING_THRESHOLD && !client.costWarningNotified) {
     const warnResult = await Client.findOneAndUpdate(
       { clientId, costWarningNotified: false },
@@ -197,6 +199,9 @@ export async function trackCost(
  */
 export async function resetMonthlyCosts(): Promise<number> {
   await connectDB();
+
+  const config = await getPricingConfig();
+  const COST_BLOCK_THRESHOLD = config.costBlockThreshold;
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -279,14 +284,14 @@ async function sendCostBlockedNotification(
       <h2 style="color: #ef4444;">🚫 Виджет отключен</h2>
       <p>Ваши расходы на AI API за текущий месяц составили <strong>$${currentCost.toFixed(2)}</strong>, что превышает лимит <strong>$${effectiveLimit}</strong>.</p>
       <p>Ваш AI-виджет был автоматически отключен.</p>
-      
+
       <div style="background: linear-gradient(135deg, #00d9ff 0%, #0066ff 100%); padding: 20px; border-radius: 12px; margin: 24px 0; text-align: center;">
         <p style="color: white; font-size: 16px; margin-bottom: 16px;">Хотите продолжить использование?</p>
         <a href="${topUpUrl}" style="display: inline-block; background: white; color: #0066ff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
           💳 Докупить кредиты $10/$20/$30
         </a>
       </div>
-      
+
       <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
       <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
     </div>

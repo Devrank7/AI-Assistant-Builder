@@ -161,6 +161,9 @@ function ClientCabinetContent() {
   const [spreadsheetId, setSpreadsheetId] = useState('');
   const [exportMessage, setExportMessage] = useState<string | null>(null);
 
+  // Pricing config
+  const [costBlockThreshold, setCostBlockThreshold] = useState(40);
+
   // --- Fetch detected channels ---
 
   const fetchDetectedChannels = async () => {
@@ -199,6 +202,17 @@ function ClientCabinetContent() {
         setData(result);
       } else {
         setError(result.error || 'Client not found');
+      }
+
+      // Fetch pricing config for dynamic thresholds
+      try {
+        const tiersRes = await fetch('/api/payments/tiers');
+        const tiersData = await tiersRes.json();
+        if (tiersData.success && tiersData.costLimits) {
+          setCostBlockThreshold(tiersData.costLimits.blockThreshold);
+        }
+      } catch {
+        /* non-critical */
       }
     } catch (err) {
       setError('Failed to fetch client data');
@@ -1372,16 +1386,20 @@ function ClientCabinetContent() {
                     <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 transition-colors hover:bg-white/[0.05]">
                       <div className="mb-2 flex items-end justify-between">
                         <p className="text-xs font-bold tracking-wider text-gray-500 uppercase">Credit Limit</p>
-                        <span className="rounded bg-white/10 px-2 py-0.5 text-xs text-white">$40.00</span>
+                        <span className="rounded bg-white/10 px-2 py-0.5 text-xs text-white">
+                          ${costBlockThreshold.toFixed(2)}
+                        </span>
                       </div>
                       <div className="relative mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-800">
                         <div
-                          className={`h-full rounded-full transition-all duration-1000 ${(client.monthlyCostUsd || 0) > 35 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]'}`}
-                          style={{ width: `${Math.min(((client.monthlyCostUsd || 0) / 40) * 100, 100)}%` }}
+                          className={`h-full rounded-full transition-all duration-1000 ${(client.monthlyCostUsd || 0) > costBlockThreshold * 0.875 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]'}`}
+                          style={{
+                            width: `${Math.min(((client.monthlyCostUsd || 0) / costBlockThreshold) * 100, 100)}%`,
+                          }}
                         />
                       </div>
                       <p className="mt-3 text-right text-[10px] text-gray-500">
-                        {(((client.monthlyCostUsd || 0) / 40) * 100).toFixed(1)}% used
+                        {(((client.monthlyCostUsd || 0) / costBlockThreshold) * 100).toFixed(1)}% used
                       </p>
                     </div>
                   </div>

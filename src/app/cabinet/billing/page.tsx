@@ -31,6 +31,7 @@ export default function BillingPage() {
   const [selectedTier, setSelectedTier] = useState<string>('monthly');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('wayforpay');
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
+  const [baseMonthlyPrice, setBaseMonthlyPrice] = useState(65);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -50,6 +51,9 @@ export default function BillingPage() {
       const tiersData = await tiersRes.json();
       if (tiersData.success) {
         setTiers(tiersData.tiers);
+        if (tiersData.pricing?.baseMonthlyPrice) {
+          setBaseMonthlyPrice(tiersData.pricing.baseMonthlyPrice);
+        }
         const providers: string[] = tiersData.availableProviders || [];
         setAvailableProviders(providers);
         // Auto-select first available provider
@@ -262,10 +266,10 @@ export default function BillingPage() {
                 {tier.discount > 0 && (
                   <div className="mt-2">
                     <span className="text-sm font-semibold text-green-400">
-                      Экономия ${Math.round(50 * 12 - tier.totalPrice)}
+                      Экономия ${Math.round(baseMonthlyPrice * 12 - tier.totalPrice)}
                     </span>
                     <br />
-                    <span className="text-xs text-gray-500 line-through">${50 * tier.months}</span>
+                    <span className="text-xs text-gray-500 line-through">${baseMonthlyPrice * tier.months}</span>
                   </div>
                 )}
                 <p className="mt-2 text-sm text-gray-500">${tier.pricePerMonth}/мес</p>
@@ -281,18 +285,18 @@ export default function BillingPage() {
               <h3 className="mb-2 text-xl font-semibold text-white">{selectedTierData?.labelRu || '1 месяц'}</h3>
               <p className="text-gray-400">
                 {selectedTierData?.discount
-                  ? `Вы экономите $${Math.round(50 * 12 - (selectedTierData?.totalPrice || 0))} (${Math.round(selectedTierData.discount * 100)}%)`
+                  ? `Вы экономите $${Math.round(baseMonthlyPrice * 12 - (selectedTierData?.totalPrice || 0))} (${Math.round(selectedTierData.discount * 100)}%)`
                   : 'Стандартная цена'}
               </p>
               {paymentMethod === 'wayforpay' && (
                 <p className="mt-1 text-sm text-green-400">
-                  После оплаты подписка продлевается автоматически ($50/мес)
+                  После оплаты подписка продлевается автоматически (${baseMonthlyPrice}/мес)
                 </p>
               )}
             </div>
 
             <div className="text-center md:text-right">
-              <p className="mb-2 text-4xl font-bold text-white">${selectedTierData?.totalPrice || 50}</p>
+              <p className="mb-2 text-4xl font-bold text-white">${selectedTierData?.totalPrice || baseMonthlyPrice}</p>
               <p className="text-sm text-gray-400">
                 {paymentMethod === 'wayforpay' ? '💳 Картой' : '🪙 Криптовалютой'}
               </p>
@@ -320,7 +324,7 @@ export default function BillingPage() {
                 Обработка...
               </span>
             ) : (
-              `Оплатить $${selectedTierData?.totalPrice || 50}`
+              `Оплатить $${selectedTierData?.totalPrice || baseMonthlyPrice}`
             )}
           </button>
 

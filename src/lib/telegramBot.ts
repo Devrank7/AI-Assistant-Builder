@@ -12,6 +12,7 @@ import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
 import { routeMessage } from '@/lib/channelRouter';
 import { runBeforeAI, runAfterAIResponse, buildScriptContext, buildPreprocessContext } from '@/lib/scriptRunner';
+import { getPricingConfig } from '@/lib/pricingConfig';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -126,6 +127,8 @@ async function handleStatusCommand(chatId: number): Promise<void> {
     return;
   }
 
+  const pricingConfig = await getPricingConfig();
+
   const statusEmoji: Record<string, string> = {
     trial: '🆓',
     active: '✅',
@@ -144,7 +147,7 @@ async function handleStatusCommand(chatId: number): Promise<void> {
 
   const cost = client.monthlyCostUsd || 0;
   const extraCredits = client.extraCreditsUsd || 0;
-  const effectiveLimit = 40 + extraCredits;
+  const effectiveLimit = pricingConfig.costBlockThreshold + extraCredits;
   const remaining = effectiveLimit - cost;
 
   let nextPayment = '—';
@@ -168,6 +171,8 @@ async function handleStatusCommand(chatId: number): Promise<void> {
  * Handle /help command
  */
 async function handleHelpCommand(chatId: number): Promise<void> {
+  const pricingConfig = await getPricingConfig();
+
   await sendMessage(
     chatId,
     `📖 <b>Команды бота WinBix AI</b>\n\n` +
@@ -177,8 +182,8 @@ async function handleHelpCommand(chatId: number): Promise<void> {
       `<b>AI-чат:</b>\n` +
       `Просто напишите любое сообщение, и AI-ассистент ответит вам.\n\n` +
       `<b>Уведомления:</b>\n` +
-      `• ⚠️ Предупреждение при достижении $20\n` +
-      `• 🚫 Блокировка при $40 (можно докупить кредиты)\n` +
+      `• ⚠️ Предупреждение при достижении $${pricingConfig.costWarningThreshold}\n` +
+      `• 🚫 Блокировка при $${pricingConfig.costBlockThreshold} (можно докупить кредиты)\n` +
       `• ⏰ Напоминания об оплате\n` +
       `• ✅ Подтверждения платежей\n\n` +
       `Поддержка: @chatbotfusion`

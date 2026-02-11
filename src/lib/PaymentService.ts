@@ -11,7 +11,7 @@ import { createCryptomusProvider } from './paymentProviders/cryptomus';
 import { createWayForPayProvider } from './paymentProviders/wayforpay';
 import Client, { PaymentMethod } from '@/models/Client';
 import connectDB from '@/lib/mongodb';
-import { calculatePrepaymentPrice, getSubscriptionTier, isValidPrepaymentMonths } from '@/lib/pricing';
+import { getDynamicPrepaymentPrice, getSubscriptionTier, isValidPrepaymentMonths } from '@/lib/pricing';
 
 class PaymentService {
   private providers: Map<string, PaymentProvider> = new Map();
@@ -85,7 +85,7 @@ class PaymentService {
     }
 
     // Calculate prepayment price (includes annual discount)
-    const pricing = calculatePrepaymentPrice(months);
+    const pricing = await getDynamicPrepaymentPrice(months);
 
     // Create subscription with provider
     const result = await provider.createSubscription(
@@ -175,7 +175,7 @@ class PaymentService {
     const nextPaymentDate = new Date(baseDate);
     nextPaymentDate.setMonth(nextPaymentDate.getMonth() + prepaidMonths);
 
-    const pricing = calculatePrepaymentPrice(prepaidMonths);
+    const pricing = await getDynamicPrepaymentPrice(prepaidMonths);
 
     await Client.updateOne(
       { clientId },

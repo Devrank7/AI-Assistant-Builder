@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { checkCostLimit, TOP_UP_OPTIONS } from '@/lib/costGuard';
+import { getPricingConfig } from '@/lib/pricingConfig';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,13 +17,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'clientId is required' }, { status: 400 });
     }
 
-    const result = await checkCostLimit(clientId);
+    const [result, config] = await Promise.all([checkCostLimit(clientId), getPricingConfig()]);
 
     return NextResponse.json({
       success: true,
       credits: {
         used: result.monthlyCostUsd,
-        baseLimit: 40,
+        baseLimit: config.costBlockThreshold,
         extraCredits: result.extraCreditsUsd,
         effectiveLimit: result.effectiveLimit,
         remaining: result.remainingCredits,

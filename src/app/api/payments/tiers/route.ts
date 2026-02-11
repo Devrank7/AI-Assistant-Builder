@@ -5,7 +5,8 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getAllTiers, BASE_MONTHLY_PRICE, ANNUAL_DISCOUNT } from '@/lib/pricing';
+import { getDynamicTiers } from '@/lib/pricing';
+import { getPricingConfig } from '@/lib/pricingConfig';
 import { getPaymentService } from '@/lib/PaymentService';
 
 /**
@@ -13,7 +14,7 @@ import { getPaymentService } from '@/lib/PaymentService';
  */
 export async function GET() {
   try {
-    const tiers = getAllTiers();
+    const [tiers, config] = await Promise.all([getDynamicTiers(), getPricingConfig()]);
     const paymentService = getPaymentService();
     const availableProviders = paymentService.getAvailableProviders();
 
@@ -23,9 +24,13 @@ export async function GET() {
       availableProviders,
       recommended: 'annual',
       pricing: {
-        baseMonthlyPrice: BASE_MONTHLY_PRICE,
-        annualDiscount: ANNUAL_DISCOUNT,
-        annualSavings: BASE_MONTHLY_PRICE * 12 * ANNUAL_DISCOUNT,
+        baseMonthlyPrice: config.baseMonthlyPrice,
+        annualDiscount: config.annualDiscount,
+        annualSavings: Math.round(config.baseMonthlyPrice * 12 * config.annualDiscount * 100) / 100,
+      },
+      costLimits: {
+        warningThreshold: config.costWarningThreshold,
+        blockThreshold: config.costBlockThreshold,
       },
       meta: {
         currency: 'USD',

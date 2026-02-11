@@ -7,9 +7,10 @@ interface BillingTabProps {
   client: IClient;
   daysUntilPayment: number;
   onClientUpdate?: () => void;
+  monthlyPrice?: number;
 }
 
-export default function BillingTab({ client, daysUntilPayment, onClientUpdate }: BillingTabProps) {
+export default function BillingTab({ client, daysUntilPayment, onClientUpdate, monthlyPrice = 65 }: BillingTabProps) {
   const [extensionMonths, setExtensionMonths] = useState(1);
   const [extending, setExtending] = useState(false);
   const [extensionMessage, setExtensionMessage] = useState<string | null>(null);
@@ -146,7 +147,7 @@ export default function BillingTab({ client, daysUntilPayment, onClientUpdate }:
           </h3>
           <p className="mb-4 text-gray-400">
             Для продолжения работы виджета после триал-периода необходимо привязать способ оплаты. Ежемесячная подписка
-            составляет <strong className="text-white">$50 USD</strong>.
+            составляет <strong className="text-white">${monthlyPrice} USD</strong>.
           </p>
           <div className="flex gap-3">
             <button
@@ -216,7 +217,7 @@ export default function BillingTab({ client, daysUntilPayment, onClientUpdate }:
               {client.lastPaymentDate ? (
                 <tr className="border-b border-white/5">
                   <td className="py-3 text-white">{new Date(client.lastPaymentDate).toLocaleDateString('ru-RU')}</td>
-                  <td className="py-3 text-white">${client.lastPrepaymentAmount || 50}.00</td>
+                  <td className="py-3 text-white">${client.lastPrepaymentAmount || monthlyPrice}.00</td>
                   <td className="py-3 text-gray-400">{formatPaymentMethod(client.paymentMethod)}</td>
                   <td className="py-3">
                     <span className="text-green-400">✓ Успешно</span>

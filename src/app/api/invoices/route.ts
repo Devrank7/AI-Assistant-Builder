@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Invoice, { generateInvoiceNumber } from '@/models/Invoice';
 import Client from '@/models/Client';
 import { generateInvoiceHTML } from '@/lib/invoiceGenerator';
-import { SUBSCRIPTION_AMOUNT } from '@/lib/paymentProviders/types';
+import { getPricingConfig } from '@/lib/pricingConfig';
 
 /**
  * GET /api/invoices?clientId=xxx
@@ -91,11 +91,13 @@ export async function POST(request: NextRequest) {
     }
 
     const invoiceNumber = await generateInvoiceNumber();
+    const config = await getPricingConfig();
+    const subscriptionAmount = config.baseMonthlyPrice;
 
     const invoice = await Invoice.create({
       clientId,
       invoiceNumber,
-      amount: SUBSCRIPTION_AMOUNT,
+      amount: subscriptionAmount,
       currency: 'USD',
       status: 'pending',
       periodStart: new Date(periodStart),
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
         requestsCount: client.requests,
         costBreakdown: {
           apiCost: client.monthlyCostUsd || 0,
-          subscriptionFee: SUBSCRIPTION_AMOUNT,
+          subscriptionFee: subscriptionAmount,
         },
       },
     });

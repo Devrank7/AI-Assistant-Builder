@@ -9,6 +9,7 @@ import {
   getTierByMonths,
   isValidPrepaymentMonths,
   calculateNextPaymentDate,
+  buildSubscriptionTiers,
   BASE_MONTHLY_PRICE,
   ANNUAL_DISCOUNT,
   SUBSCRIPTION_TIERS,
@@ -18,39 +19,68 @@ describe('Pricing Library', () => {
   describe('calculatePrepaymentPrice', () => {
     it('should calculate 1 month price correctly', () => {
       const result = calculatePrepaymentPrice(1);
-      expect(result.total).toBe(50);
-      expect(result.perMonth).toBe(50);
+      expect(result.total).toBe(65);
+      expect(result.perMonth).toBe(65);
       expect(result.savings).toBe(0);
       expect(result.discount).toBe(0);
     });
 
     it('should calculate 3 months price correctly (no discount)', () => {
       const result = calculatePrepaymentPrice(3);
-      expect(result.total).toBe(150);
-      expect(result.perMonth).toBe(50);
+      expect(result.total).toBe(195);
+      expect(result.perMonth).toBe(65);
       expect(result.savings).toBe(0);
       expect(result.discount).toBe(0);
     });
 
     it('should calculate 6 months price correctly (no discount)', () => {
       const result = calculatePrepaymentPrice(6);
-      expect(result.total).toBe(300);
-      expect(result.perMonth).toBe(50);
+      expect(result.total).toBe(390);
+      expect(result.perMonth).toBe(65);
       expect(result.savings).toBe(0);
       expect(result.discount).toBe(0);
     });
 
     it('should calculate 12 months price with 15% discount', () => {
       const result = calculatePrepaymentPrice(12);
-      expect(result.total).toBe(510);
-      expect(result.perMonth).toBe(42.5);
-      expect(result.savings).toBe(90);
+      expect(result.total).toBe(663);
+      expect(result.perMonth).toBe(55.25);
+      expect(result.savings).toBe(117);
       expect(result.discount).toBe(0.15);
     });
 
     it('should apply annual discount for 12+ months', () => {
       const result = calculatePrepaymentPrice(24);
       expect(result.discount).toBe(0.15);
+    });
+
+    it('should accept custom base price and discount', () => {
+      const result = calculatePrepaymentPrice(12, 100, 0.2);
+      expect(result.total).toBe(960);
+      expect(result.perMonth).toBe(80);
+      expect(result.savings).toBe(240);
+      expect(result.discount).toBe(0.2);
+    });
+  });
+
+  describe('buildSubscriptionTiers', () => {
+    it('should build tiers with default params', () => {
+      const tiers = buildSubscriptionTiers();
+      expect(tiers.monthly.totalPrice).toBe(65);
+      expect(tiers.quarterly.totalPrice).toBe(195);
+      expect(tiers.semi_annual.totalPrice).toBe(390);
+      expect(tiers.annual.totalPrice).toBe(663);
+      expect(tiers.annual.pricePerMonth).toBe(55.25);
+    });
+
+    it('should build tiers with custom params', () => {
+      const tiers = buildSubscriptionTiers(100, 0.2);
+      expect(tiers.monthly.totalPrice).toBe(100);
+      expect(tiers.quarterly.totalPrice).toBe(300);
+      expect(tiers.semi_annual.totalPrice).toBe(600);
+      expect(tiers.annual.totalPrice).toBe(960);
+      expect(tiers.annual.pricePerMonth).toBe(80);
+      expect(tiers.annual.discount).toBe(0.2);
     });
   });
 
@@ -87,7 +117,7 @@ describe('Pricing Library', () => {
       const tier = getTierByMonths(12);
       expect(tier).not.toBeNull();
       expect(tier?.id).toBe('annual');
-      expect(tier?.totalPrice).toBe(510);
+      expect(tier?.totalPrice).toBe(663);
     });
 
     it('should return null for invalid months', () => {
@@ -123,7 +153,7 @@ describe('Pricing Library', () => {
 
   describe('Constants', () => {
     it('should have correct BASE_MONTHLY_PRICE', () => {
-      expect(BASE_MONTHLY_PRICE).toBe(50);
+      expect(BASE_MONTHLY_PRICE).toBe(65);
     });
 
     it('should have correct ANNUAL_DISCOUNT', () => {

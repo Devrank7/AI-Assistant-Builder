@@ -4,9 +4,15 @@ interface UpgradePromptProps {
   daysLeft: number;
   trialProgress: number;
   onSetupPayment: () => void;
+  monthlyPrice?: number;
 }
 
-export default function UpgradePrompt({ daysLeft, trialProgress, onSetupPayment }: UpgradePromptProps) {
+export default function UpgradePrompt({
+  daysLeft,
+  trialProgress,
+  onSetupPayment,
+  monthlyPrice = 65,
+}: UpgradePromptProps) {
   const isUrgent = daysLeft <= 3;
   const isExpired = daysLeft <= 0;
 
@@ -28,7 +34,7 @@ export default function UpgradePrompt({ daysLeft, trialProgress, onSetupPayment 
                 onClick={onSetupPayment}
                 className="rounded-xl bg-red-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-500/20 transition-all hover:bg-red-700"
               >
-                Возобновить подписку — $50/мес
+                Возобновить подписку — ${monthlyPrice}/мес
               </button>
             </div>
           </div>
@@ -92,7 +98,7 @@ export default function UpgradePrompt({ daysLeft, trialProgress, onSetupPayment 
                   : 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-purple-500/20 hover:opacity-90'
               }`}
             >
-              Настроить оплату — $50/мес
+              Настроить оплату — ${monthlyPrice}/мес
             </button>
           </div>
         </div>
