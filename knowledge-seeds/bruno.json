@@ -1,0 +1,14 @@
+{
+  "clientId": "bruno",
+  "exportedAt": "2026-02-13T13:07:49.196Z",
+  "chunks": [],
+  "aiSettings": {
+    "systemPrompt": "Ты полезный AI-ассистент. Отвечай вежливо и по существу.\nИспользуй предоставленную информацию из базы знаний для ответов.\nЕсли не знаешь ответа, честно скажи об этом.",
+    "greeting": "Привет! Чем могу помочь?",
+    "temperature": 0.7,
+    "maxTokens": 1024,
+    "topK": 3,
+    "aiModel": "gemini-3-flash-preview",
+    "handoffEnabled": false
+  }
+}

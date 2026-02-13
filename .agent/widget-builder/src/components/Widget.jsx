@@ -95,7 +95,7 @@ export function Widget({ config }) {
     const showQuickReplies = messages.filter((m) => m.role === 'user').length === 0;
 
     return (
-        <div className={`fixed z-50 flex flex-col gap-4 antialiased ${positionClasses}`} style={{ fontFamily: "-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif", ...dragStyle }}>
+        <div className={`fixed z-50 flex flex-col gap-4 antialiased ${positionClasses}`} style={{ fontFamily: "\'Montserrat\', -apple-system, BlinkMacSystemFont, sans-serif", ...dragStyle }}>
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -103,26 +103,25 @@ export function Widget({ config }) {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                        className="relative w-[85vw] max-w-[360px] h-[60vh] max-h-[520px] sm:w-[360px] sm:h-[520px] rounded-3xl overflow-hidden flex flex-col bg-white shadow-2xl shadow-black/15 border border-gray-100"
+                        className="relative w-[85vw] max-w-[355px] h-[60vh] max-h-[515px] sm:w-[355px] sm:h-[515px] rounded-3xl overflow-hidden flex flex-col bg-[#1a1a1a] shadow-2xl shadow-black/40 border border-[#333333]"
                         role="dialog"
                         aria-label="Chat widget"
                     >
                         {/* HEADER */}
                         <div className="relative px-5 py-4 flex items-center justify-between overflow-hidden ">
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#00d084] via-[#00b878] to-[#0693e3]" />
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#dc1000] via-[#c20e00] to-[#a80c00]" />
 
                             <div className="relative flex items-center gap-3">
                                 <div className="relative">
-                                    <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10">
+                                    <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10">
                                         <Sparkles size={18} className="text-white" />
                                     </div>
                                     {!isOffline && (
-                                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#7ee8c0] border-[2.5px] border-[#00d084] shadow-sm" />
+                                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#f07060] border-[2.5px] border-[#dc1000] shadow-sm" />
                                     )}
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-[14px] text-white tracking-tight leading-tight">{config.bot.name}</h3>
+                                    <h3 className="font-semibold text-[13.5px] text-white tracking-tight leading-tight">{config.bot.name}</h3>
                                     <p className="text-[11px] text-white/65 font-medium">{isOffline ? 'Офлайн' : 'Онлайн — відповідаю миттєво'}</p>
                                 </div>
                             </div>
@@ -139,7 +138,7 @@ export function Widget({ config }) {
                         </div>
 
                         {/* MESSAGES */}
-                        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 scrollbar-hide bg-gradient-to-b from-gray-50/80 to-white" aria-live="polite">
+                        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 scrollbar-hide bg-gradient-to-b from-[#1a1a1a] to-[#232323]" aria-live="polite">
                             <ChatMessage role="assistant" content={config.bot.greeting} onImageClick={setExpandedImage} />
                             {messages.map((msg, idx) => (
                                 <div key={idx}>
@@ -156,7 +155,7 @@ export function Widget({ config }) {
                             {isTyping && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-1.5 items-center ml-10 py-2">
                                     {[0, 1, 2].map((i) => (
-                                        <motion.span key={i} className="w-2 h-2 bg-[#00d084] rounded-full"
+                                        <motion.span key={i} className="w-2 h-2 bg-[#dc1000] rounded-full"
                                             animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.8, 0.3] }}
                                             transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }}
                                         />
@@ -169,9 +168,9 @@ export function Widget({ config }) {
                         {/* IMAGE PREVIEW */}
                         <AnimatePresence>
                             {selectedImage && (
-                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-4 overflow-hidden bg-white border-t border-gray-50">
+                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-4 overflow-hidden bg-[#1a1a1a] border-[#333333]">
                                     <div className="relative inline-block my-2.5">
-                                        <img src={selectedImage.previewUrl} alt="" className="h-16 w-auto rounded-xl border border-gray-200 object-cover shadow-sm" />
+                                        <img src={selectedImage.previewUrl} alt="" className="h-16 w-auto rounded-xl border border-[#333333] object-cover shadow-sm" />
                                         <button onClick={removeSelectedImage} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors">
                                             <X size={10} />
                                         </button>
@@ -181,12 +180,12 @@ export function Widget({ config }) {
                         </AnimatePresence>
 
                         {/* INPUT */}
-                        <div className="px-4 py-3.5 border-t border-gray-100 bg-white space-y-2.5">
+                        <div className="px-4 py-3.5 border-t border-[#333333] bg-[#1a1a1a] space-y-2.5">
                             {showQuickReplies && <QuickReplies options={config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                             <form onSubmit={handleSubmit} className="flex items-end gap-2">
                                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                                 <button type="button" onClick={() => fileInputRef.current?.click()}
-                                    className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#7ee8c0] bg-[#e6faf2] text-[#00b070] shadow-sm' : 'border-gray-200 text-gray-400 hover:text-[#00b070] hover:border-[#7ee8c0] hover:bg-[#e6faf2]'}`}
+                                    className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#5a2a2a] bg-[#2a1515] text-[#f07060] shadow-sm' : 'border-[#333333] text-[#888888] hover:text-[#f07060] hover:border-[#5a2a2a] hover:bg-[#2a1515]'}`}
                                     aria-label="Upload photo">
                                     <ImagePlus size={16} />
                                 </button>
@@ -200,11 +199,11 @@ export function Widget({ config }) {
                                 <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                                     placeholder={selectedImage ? 'Опишіть проблему...' : 'Задайте питання...'}
                                     rows={1}
-                                    className="flex-1 min-w-0 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl py-2.5 pl-3.5 pr-3.5 border border-gray-200 focus:outline-none focus:border-[#00d084] focus:ring-2 focus:ring-[#ccf5e5] focus:bg-white transition-all resize-none text-[13.5px] leading-relaxed"
+                                    className="flex-1 min-w-0 bg-[#1f1f1f] text-[#e5e5e5] placeholder-[#888888] rounded-xl py-2.5 pl-3.5 pr-3.5 border border-[#333333] focus:outline-none focus:border-[#dc1000] focus:ring-2 focus:ring-[#3a1a1a] focus:bg-[#282828] transition-all resize-none text-[13.5px] leading-relaxed"
                                     style={{ maxHeight: '100px' }}
                                 />
                                 <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
-                                    className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#00d084] text-white flex items-center justify-center hover:bg-[#00b070] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#00d084]/25">
+                                    className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#dc1000] text-white flex items-center justify-center hover:bg-[#c20e00] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#dc1000]/25">
                                     <Send size={16} />
                                 </button>
                             </form>
@@ -230,14 +229,14 @@ export function Widget({ config }) {
 
             {/* TOGGLE BUTTON */}
             <motion.button
-                whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(0, 208, 132, 0.35)' }}
+                whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(220, 16, 0, 0.35)' }}
                 whileTap={isDragging ? {} : { scale: 0.92 }}
                 onClick={() => { if (!isDragging) setIsOpen(!isOpen); }}
                 onDoubleClick={resetPosition}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#00d084]/30 bg-gradient-to-br from-[#00d084] via-[#00b878] to-[#0693e3] border border-white/10"
+                className="w-[56px] h-[56px] rounded-[20px] flex items-center justify-center text-white shadow-lg shadow-[#dc1000]/30 bg-gradient-to-br from-[#dc1000] via-[#c20e00] to-[#a80c00] border border-white/10"
                 aria-label={isOpen ? 'Close chat' : 'Open chat'}
             >
                 <AnimatePresence mode="wait">

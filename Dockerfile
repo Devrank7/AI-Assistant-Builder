@@ -38,6 +38,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/widgets ./widgets
 COPY --from=builder --chown=nextjs:nodejs /app/quickwidgets ./quickwidgets
+COPY --from=builder --chown=nextjs:nodejs /app/knowledge-seeds ./knowledge-seeds
 
 USER nextjs
 

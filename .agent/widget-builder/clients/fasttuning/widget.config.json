@@ -2,19 +2,19 @@
   "clientId": "fasttuning",
   "bot": {
     "name": "Fasttuning AI",
-    "greeting": "Привіт! Я — AI-асистент **Fasttuning** 🏎️\n\nДопоможу дізнатися про чіп тюнінг вашого авто, ціни та можливості збільшення потужності.\n\nОберіть тему або задайте своє питання!",
+    "greeting": "Вітаємо у **Fasttuning**! 🏎️\n\nЯ — AI-помічник. Розкажу про чіп-тюнінг, видалення DPF/EGR, ціни та терміни.\n\nОберіть тему!",
     "tone": "professional_friendly"
   },
   "design": {
-    "style": "dark",
+    "style": "dark_blue",
     "position": "bottom-right"
   },
   "features": {
     "streaming": true,
-    "imageUpload": true,
+    "imageUpload": false,
     "quickReplies": {
       "enabled": true,
-      "starters": ["🔧 Чіп тюнінг для мого авто", "💰 Ціни на послуги", "📞 Записатись на діагностику"]
+      "starters": ["⚡ Чіп-тюнінг — вартість", "🔧 Видалення DPF/EGR", "📅 Запис на діагностику"]
     },
     "feedback": true,
     "sound": true,

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { seedKnowledgeIfNeeded } from './seedKnowledge';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-widget-admin';
 
@@ -46,6 +47,9 @@ async function connectDB(): Promise<typeof mongoose> {
         .dropIndex('clientToken_1')
         .catch(() => {});
     }
+
+    // Seed knowledge from JSON files if DB is empty for any client
+    seedKnowledgeIfNeeded().catch((err) => console.warn('[Seed] Knowledge seed failed:', err));
   } catch (e) {
     cached.promise = null;
     throw e;

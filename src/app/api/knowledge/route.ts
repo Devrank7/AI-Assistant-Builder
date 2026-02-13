@@ -24,7 +24,9 @@ export async function GET(request: NextRequest) {
     }
 
     await connectDB();
-    const chunks = await KnowledgeChunk.find({ clientId }).select('text source createdAt _id').sort({ createdAt: -1 });
+    const includeEmbeddings = searchParams.get('includeEmbeddings') === 'true';
+    const selectFields = includeEmbeddings ? 'text source embedding createdAt _id' : 'text source createdAt _id';
+    const chunks = await KnowledgeChunk.find({ clientId }).select(selectFields).sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, chunks });
   } catch (error) {

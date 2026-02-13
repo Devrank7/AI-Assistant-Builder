@@ -14,7 +14,7 @@ export default function QuickReplies({ options, onSelect }) {
                     whileHover={{ scale: 1.02, x: 2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => onSelect(option)}
-                    className="w-full px-3 py-1.5 rounded-xl border border-[#7ee8c0] bg-gradient-to-r from-[#e6faf2] to-[#ccf5e5]/50 text-[11.5px] font-medium text-[#00905c] hover:from-[#ccf5e5] hover:to-[#b3f0d8]/50 hover:border-[#4edda8] hover:shadow-sm transition-all duration-200 cursor-pointer text-left"
+                    className="w-full px-3 py-1.5 rounded-xl border border-[#4a2222] bg-gradient-to-r from-[#2a1515] to-[#331c1c]/50 text-[11.5px] font-medium text-[#f07060] hover:from-[#3a2020] hover:to-[#4a2828]/50 hover:border-[#dc1000] hover:shadow-sm transition-all duration-200 cursor-pointer text-left"
                 >
                     {option}
                 </motion.button>
