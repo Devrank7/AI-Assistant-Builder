@@ -38,6 +38,14 @@ async function connectDB(): Promise<typeof mongoose> {
 
   try {
     cached.conn = await cached.promise;
+
+    // Drop legacy unique index on clientToken (was unique, now just indexed)
+    const db = cached.conn.connection.db;
+    if (db) {
+      db.collection('clients')
+        .dropIndex('clientToken_1')
+        .catch(() => {});
+    }
   } catch (e) {
     cached.promise = null;
     throw e;
