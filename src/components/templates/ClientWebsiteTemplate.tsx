@@ -24,6 +24,9 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
       return () => {
         document.body.removeChild(script);
         document.querySelectorAll('ai-chat-widget').forEach((el) => el.remove());
+        // Clear widget globals so next client starts fresh
+        (window as Record<string, unknown>).__WIDGET_CSS__ = undefined;
+        (window as Record<string, unknown>).__WIDGET_CONFIG__ = undefined;
       };
     }
   }, [scriptUrl]);

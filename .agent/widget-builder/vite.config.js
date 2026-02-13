@@ -21,7 +21,7 @@ export default defineConfig({
         cssInjectedByJsPlugin({
             injectCodeFunction: function(cssCode) {
                 try {
-                    window.__WIDGET_CSS__ = (window.__WIDGET_CSS__ || '') + cssCode;
+                    window.__WIDGET_CSS__ = cssCode;
                 } catch (e) {
                     console.error('AIWidget: CSS injection error', e);
                 }

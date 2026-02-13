@@ -6,6 +6,7 @@ const BUILDER_ROOT = path.resolve(__dirname, '..');
 const PROJECT_ROOT = path.resolve(BUILDER_ROOT, '../..');
 const CLIENTS_DIR = path.join(BUILDER_ROOT, 'clients');
 const WIDGETS_DIR = path.join(PROJECT_ROOT, 'widgets');
+const QUICK_WIDGETS_DIR = path.join(PROJECT_ROOT, 'quickwidgets');
 const DIST_DIR = path.join(BUILDER_ROOT, 'dist');
 
 // Read mass config
@@ -79,6 +80,15 @@ for (const client of toBuild) {
             path.join(DIST_DIR, 'script.js'),
             path.join(widgetOutDir, 'script.js')
         );
+
+        // 6. Also copy to quickwidgets directory if it exists
+        const quickOutDir = path.join(QUICK_WIDGETS_DIR, client.clientId);
+        if (fs.existsSync(quickOutDir)) {
+            fs.copyFileSync(
+                path.join(DIST_DIR, 'script.js'),
+                path.join(quickOutDir, 'script.js')
+            );
+        }
 
         built++;
         console.log(`  ✅ ${client.clientId} → widgets/${client.clientId}/script.js`);
