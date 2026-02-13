@@ -1,0 +1,24 @@
+{
+  "clientId": "jstuning",
+  "bot": {
+    "name": "JS Tuning AI",
+    "greeting": "Привіт! Я — AI-помічник **JS Tuning** 🔮\n\nДопоможу з послугами нашої авто студії: чіп тюнінг, тонування, детейлінг, захисна плівка.\n\nОберіть тему або напишіть ваше питання!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["🔮 Послуги та ціни", "🚗 Тонування вікон", "📅 Записатись"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

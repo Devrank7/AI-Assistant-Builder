@@ -1,0 +1,17 @@
+{
+  "name": "Digital Dental Clinic",
+  "clientId": "ddc",
+  "username": "ddc",
+  "email": "info@ddc.clinic",
+  "website": "http://ddc.clinic/",
+  "phone": null,
+  "addresses": ["Hetmana Pavla Skoropadskoho St, 9А, Kyiv, Ukraine, 01004"],
+  "instagram": null,
+  "clientType": "quick",
+  "niche": "dental",
+  "rating": 4.9,
+  "reviews": 125,
+  "features": ["streaming", "quick-replies", "feedback"],
+  "createdAt": "2026-02-12T16:49:55.618Z",
+  "version": "2.0.0"
+}

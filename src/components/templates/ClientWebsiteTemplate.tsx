@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 
 interface ClientWebsiteTemplateProps {
@@ -11,6 +11,8 @@ interface ClientWebsiteTemplateProps {
 export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientWebsiteTemplateProps) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
+  const iframeLoadedRef = useRef(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (scriptUrl) {
@@ -25,6 +27,38 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
       };
     }
   }, [scriptUrl]);
+
+  // Handle iframe load — only trigger state change once to avoid re-render loops
+  const handleIframeLoad = useCallback(() => {
+    if (!iframeLoadedRef.current) {
+      iframeLoadedRef.current = true;
+      setIframeLoaded(true);
+    }
+  }, []);
+
+  const handleIframeError = useCallback(() => {
+    setIframeError(true);
+  }, []);
+
+  // Block detection: check once after timeout if iframe content is empty/blocked
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (iframeLoadedRef.current) return; // Already loaded successfully
+      try {
+        const iframe = iframeRef.current;
+        if (iframe) {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (!iframeDoc || iframeDoc.body.innerHTML === '') {
+            setIframeError(true);
+          }
+        }
+      } catch {
+        // Cross-origin error means the site loaded but we can't access it (which is fine)
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [websiteUrl]);
 
   return (
     <div className="relative min-h-screen bg-gray-900">
@@ -125,44 +159,15 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
         </div>
       )}
 
-      {/* Iframe */}
+      {/* Iframe — no sandbox to let client sites load naturally without script failures */}
       <iframe
+        ref={iframeRef}
         src={websiteUrl}
         className="h-screen w-full border-0"
-        onLoad={() => setIframeLoaded(true)}
-        onError={() => setIframeError(true)}
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+        onLoad={handleIframeLoad}
+        onError={handleIframeError}
         title="Client Website Preview"
       />
-
-      {/* Fallback timeout for iframe blocking */}
-      <IframeBlockDetector onBlocked={() => setIframeError(true)} websiteUrl={websiteUrl} />
     </div>
   );
-}
-
-// Component to detect if iframe is blocked
-function IframeBlockDetector({ onBlocked, websiteUrl }: { onBlocked: () => void; websiteUrl: string }) {
-  useEffect(() => {
-    // Check after a delay if the iframe content is accessible
-    const timer = setTimeout(() => {
-      try {
-        const iframe = document.querySelector('iframe');
-        if (iframe) {
-          // Try to access iframe content - will throw if blocked
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (!iframeDoc || iframeDoc.body.innerHTML === '') {
-            onBlocked();
-          }
-        }
-      } catch {
-        // Cross-origin error means the site loaded but we can't access it (which is fine)
-        // Only call onBlocked if we detect actual blocking
-      }
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [onBlocked, websiteUrl]);
-
-  return null;
 }

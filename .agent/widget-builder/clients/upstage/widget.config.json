@@ -1,0 +1,24 @@
+{
+  "clientId": "upstage",
+  "bot": {
+    "name": "UPstage AI",
+    "greeting": "Вітаю! Я — AI-асистент **UPstage** 🏁\n\nДопоможу дізнатися про чіп тюнінг, Stage оптимізацію та діагностику для вашого авто.\n\nОберіть тему або вкажіть марку авто!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "light",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["⚡ Stage 1/2/3 тюнінг", "💰 Ціни та діагностика", "📍 Адреса та контакти"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

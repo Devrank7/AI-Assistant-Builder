@@ -1,0 +1,24 @@
+{
+  "clientId": "dentiplex",
+  "bot": {
+    "name": "DENTIPLEX AI",
+    "greeting": "Привіт! Я — AI-помічник **DENTIPLEX** 👋\n\nВідповім на ваші питання про стоматологічні послуги, ціни та допоможу записатись на зручний час.\n\nНапишіть питання!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_green",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["🦷 Прайс-лист", "📅 Записатись на прийом", "⭐ Наші акції"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

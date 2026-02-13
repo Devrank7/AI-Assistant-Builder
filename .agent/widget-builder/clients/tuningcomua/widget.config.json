@@ -1,0 +1,24 @@
+{
+  "clientId": "tuningcomua",
+  "bot": {
+    "name": "Tuning AI",
+    "greeting": "Вітаю! Я — AI-консультант **Tuning.com.ua** 🛒\n\nДопоможу підібрати тюнінг аксесуари для вашого авто: фаркопи, автобагажники, обладнання та інше.\n\nОберіть тему або напишіть марку авто!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "light",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["🔍 Підібрати аксесуари", "📦 Доставка та оплата", "📞 Зв'язатись з менеджером"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

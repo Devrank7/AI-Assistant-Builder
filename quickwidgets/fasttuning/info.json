@@ -1,0 +1,17 @@
+{
+  "name": "Fasttuning",
+  "clientId": "fasttuning",
+  "username": "fasttuning",
+  "email": "fasttuning.kiev@gmail.com",
+  "website": "http://fasttuning.kiev.ua/",
+  "phone": "+380979368751",
+  "addresses": ["Elektrykiv St, 19А, Kyiv, Ukraine, 04071"],
+  "instagram": null,
+  "clientType": "quick",
+  "niche": "car_tuning",
+  "rating": 4.8,
+  "reviews": null,
+  "features": ["streaming", "quick-replies", "feedback"],
+  "createdAt": "2026-02-12T16:49:55.618Z",
+  "version": "2.0.0"
+}

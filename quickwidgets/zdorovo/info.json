@@ -1,0 +1,17 @@
+{
+  "name": "ZDÓROVO Dental Clinic",
+  "clientId": "zdorovo",
+  "username": "zdorovo",
+  "email": "zdorovodc@gmail.com",
+  "website": "https://www.zdorovo-dent.com.ua/",
+  "phone": "+380663588864",
+  "addresses": ["Yevhena Konovaltsia St, 34а, Kyiv, Ukraine, 01133"],
+  "instagram": null,
+  "clientType": "quick",
+  "niche": "dental",
+  "rating": 5,
+  "reviews": 163,
+  "features": ["streaming", "quick-replies", "feedback"],
+  "createdAt": "2026-02-12T16:49:55.618Z",
+  "version": "2.0.0"
+}

@@ -12,6 +12,8 @@ Read leads from a Google Sheets spreadsheet and mass-create Quick Widgets for ea
 **Input**: Optional spreadsheet URL/ID, optional limit
 **Output**: Multiple Quick Widgets deployed + sheet updated + Telegram report sent
 
+**IMPORTANT**: Each widget uses the **pre-built premium design template** via `theme.json` + `generate-single-theme.js`. The AI agent visits each site, extracts colors/theme, creates a theme config, and runs the generator. No manual JSX/CSS writing.
+
 ---
 
 ## 2. INPUT PARSING
@@ -125,15 +127,19 @@ For each valid lead, follow the **`create-quick-widget`** skill process (see `.a
 
 ### 5.1 Per-Lead Steps
 
-1. **WebFetch homepage** → extract brand, colors, fonts, business type, nav links
-2. **Crawl key pages** (up to 5-8 pages) → extract content for knowledge base
-3. **Auto-generate config** — bot name, greeting, quick replies, design
-4. **Write component files** — `index.css`, `Widget.jsx`, `ChatMessage.jsx`, `QuickReplies.jsx`, `useChat.js`
-5. **Build widget**: `node .agent/widget-builder/scripts/build.js <client_id>`
-6. **Deploy**: copy to `quickwidgets/<client_id>/script.js`
-7. **Write `info.json`** to `quickwidgets/<client_id>/info.json` with `clientType: "quick"`
-8. **Upload knowledge** via `POST /api/knowledge`
-9. **Set AI settings** via `PUT /api/ai-settings/<client_id>`
+1. **Visit website & analyze visual design** → use WebFetch (or browser/screenshot if available) to inspect the site's actual CSS/DOM: extract exact hex colors from headers/buttons/links, font-family, Google Fonts URL, button border-radius, dark/light theme, and overall layout feel (compact/standard/premium/rounded/angular). See `create-quick-widget` Phase 1 (Section 3) for the detailed visual analysis guide.
+2. **Crawl key pages** (up to 5-8 pages) → extract content for knowledge base and AI context
+3. **Create theme.json** — derive ~50 color/layout parameters from the site's actual extracted colors and visual style (see `create-quick-widget` Section 5.3 for full schema, color derivation guide, layout selection table, and examples)
+4. **Write widget.config.json** — bot name, greeting, quick replies, design
+5. **Run theme generator**: `node .agent/widget-builder/scripts/generate-single-theme.js <client_id>` (generates all 6 source files)
+6. **Build widget**: `node .agent/widget-builder/scripts/build.js <client_id>`
+7. **Deploy**: copy to `quickwidgets/<client_id>/script.js`
+8. **Write `info.json`** to `quickwidgets/<client_id>/info.json` with `clientType: "quick"`
+9. **Upload knowledge** via `POST /api/knowledge` (ALL scraped content from the site)
+10. **Set AI settings** via `PUT /api/ai-settings/<client_id>` (system prompt built from all site content)
+
+**DO NOT write JSX or CSS files manually.** The theme generator handles all 6 source files from `theme.json`.
+**DO NOT guess colors.** Every hex code in theme.json must come from the actual site CSS/DOM analysis.
 
 ### 5.2 After Each Successful Widget
 
@@ -153,9 +159,9 @@ If a lead fails (site unreachable, build error, etc.):
 
 ---
 
-## 6. PHASE 4 — UPDATE SPREADSHEET
+## 6. PHASE 4 — UPDATE SOURCE SPREADSHEET
 
-After ALL leads are processed, batch-update the `hasWidget` column.
+After ALL leads are processed, batch-update the `hasWidget` column in the **source spreadsheet** (the one leads were read from).
 
 ### 6.1 Find the hasWidget Column
 
@@ -180,6 +186,66 @@ curl -s -X POST "http://localhost:3000/api/integrations/sheets/update" \
 ```
 
 **IMPORTANT**: The values array must align with the actual row positions. Use empty strings `""` for rows that were skipped or failed.
+
+---
+
+## 6B. PHASE 4B — ADD LEADS TO "Проверенные лиды" SPREADSHEET
+
+**MANDATORY**: After processing, all successfully created leads MUST also be added to today's "Проверенные лиды" spreadsheet. This is the master tracking table for all demo widgets.
+
+### 6B.1 Find Today's "Проверенные лиды" Spreadsheet
+
+Get today's date in `DD.MM.YYYY` format and search:
+
+```bash
+curl -s "http://localhost:3000/api/integrations/sheets/search?name=DD.MM.YYYY%20Проверенные%20лиды" \
+  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
+```
+
+If not found, try fallback:
+
+```bash
+curl -s "http://localhost:3000/api/integrations/sheets/search?name=DD.MM.YYYY%20Квалифицированные%20лиды" \
+  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
+```
+
+If neither found — **skip this step** but warn the user that no "Проверенные лиды" spreadsheet was found for today.
+
+**NOTE**: If the source spreadsheet (from Phase 1) IS already the "Проверенные лиды" sheet, skip this step — the hasWidget column was already updated in Phase 4.
+
+### 6B.2 Read Current Data to Find Next Empty Row
+
+```bash
+curl -s "http://localhost:3000/api/integrations/sheets/read?spreadsheetId=VERIFIED_SPREADSHEET_ID" \
+  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
+```
+
+Count existing rows to determine the next empty row number.
+
+### 6B.3 Batch Append All Successful Leads
+
+Write all successfully created leads to the next empty rows. Match the spreadsheet's column structure:
+
+```bash
+curl -s -X POST "http://localhost:3000/api/integrations/sheets/update" \
+  -H "Content-Type: application/json" \
+  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
+  -d '{
+    "spreadsheetId": "VERIFIED_SPREADSHEET_ID",
+    "range": "Sheet1!A<NEXT_ROW>:D<LAST_ROW>",
+    "values": [
+      ["email1@example.com", "https://site1.com", "username1", "TRUE"],
+      ["email2@example.com", "https://site2.com", "username2", "TRUE"]
+    ]
+  }'
+```
+
+**IMPORTANT**:
+
+- Adjust column range to match the actual spreadsheet headers
+- Only add **successful** leads (not failed ones)
+- Set `hasWidget` to `TRUE` for all entries
+- Don't duplicate leads that are already in the spreadsheet — check before appending
 
 ---
 
@@ -225,7 +291,8 @@ After everything is done, output a summary to the user:
 - Failed: N leads
 - Skipped: N leads (no email/website or already has widget)
 
-📋 Sheet updated: hasWidget column marked for N leads
+📋 Source sheet updated: hasWidget column marked for N leads
+📋 "Проверенные лиды" sheet: N leads added
 📨 Telegram report sent
 
 Successful widgets:
@@ -300,6 +367,8 @@ Body: { systemPrompt, greeting, temperature, maxTokens, topK }
 
 - **DO NOT** ask user for design preferences — auto-detect everything from the site
 - **DO NOT** stop processing on individual lead failures — continue to next lead
+- **DO NOT** write JSX or CSS files manually — use `theme.json` + `generate-single-theme.js`
+- **DO** visit each site and extract colors/theme/content before creating the widget
 - **DO** update the spreadsheet even if some leads failed
 - **DO** send Telegram report even if all leads failed
 - Follow all constraints from `create-quick-widget` skill (Preact, Tailwind v3, Shadow DOM, etc.)

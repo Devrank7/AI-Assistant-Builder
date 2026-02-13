@@ -1,0 +1,17 @@
+{
+  "name": "MED-DEO",
+  "clientId": "meddeo",
+  "username": "meddeo",
+  "email": "clinic@med-deo.com.ua",
+  "website": "https://med-deo.com.ua/",
+  "phone": "+380443949094",
+  "addresses": ["Irpinska St, 78А, Kyiv, Ukraine, 03179"],
+  "instagram": null,
+  "clientType": "quick",
+  "niche": "dental",
+  "rating": 4.6,
+  "reviews": 1800,
+  "features": ["streaming", "quick-replies", "feedback"],
+  "createdAt": "2026-02-12T16:49:55.618Z",
+  "version": "2.0.0"
+}

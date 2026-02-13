@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWidgetFile } from '@/lib/widgetScanner';
+import { getWidgetFile, getQuickWidgetFile } from '@/lib/widgetScanner';
 import path from 'path';
 
 const MIME_TYPES: Record<string, string> = {
@@ -40,7 +40,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Если путь к файлу не указан, возвращаем script.js по умолчанию
     const targetFile = filePath || 'script.js';
 
-    const fileContent = getWidgetFile(clientFolder, targetFile);
+    // Try regular widgets first, then quickwidgets as fallback
+    const fileContent = getWidgetFile(clientFolder, targetFile) || getQuickWidgetFile(clientFolder, targetFile);
 
     if (!fileContent) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });

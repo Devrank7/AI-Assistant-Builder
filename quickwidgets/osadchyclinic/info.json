@@ -1,0 +1,17 @@
+{
+  "name": "Стоматологія Осадчого",
+  "clientId": "osadchyclinic",
+  "username": "osadchyclinic",
+  "email": "osadchyclinic@gmail.com",
+  "website": "https://osadchyclinic.com.ua/",
+  "phone": "+380984619991",
+  "addresses": ["Sichovykh Striltsiv St, 37/41, Kyiv, Ukraine, 04053"],
+  "instagram": null,
+  "clientType": "quick",
+  "niche": "dental",
+  "rating": 4.7,
+  "reviews": 236,
+  "features": ["streaming", "quick-replies", "feedback"],
+  "createdAt": "2026-02-12T16:49:55.618Z",
+  "version": "2.0.0"
+}

@@ -1,0 +1,24 @@
+{
+  "clientId": "gtuning",
+  "bot": {
+    "name": "G-TUNING AI",
+    "greeting": "Вітаю! Я — AI-консультант **G-TUNING** 🚘\n\nДопоможу підібрати рішення для вашого автомобіля: чіп тюнінг, Stage оптимізація, діагностика.\n\nНапишіть марку авто або оберіть тему!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["⚡ Stage 1/2/3 оптимізація", "🔍 Підбір під мій авто", "📍 Як доїхати"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

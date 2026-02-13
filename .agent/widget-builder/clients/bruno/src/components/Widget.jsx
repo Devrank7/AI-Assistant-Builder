@@ -5,6 +5,7 @@ import ChatMessage from './ChatMessage';
 import MessageFeedback from './MessageFeedback';
 import QuickReplies from './QuickReplies';
 import useChat from '../hooks/useChat';
+import useDrag from '../hooks/useDrag';
 
 const POSITION_MAP = {
     'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 items-end',
@@ -24,6 +25,7 @@ export function Widget({ config }) {
 
     const position = config.design?.position || 'bottom-right';
     const positionClasses = POSITION_MAP[position] || POSITION_MAP['bottom-right'];
+    const { offset, isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle } = useDrag(config.clientId);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,7 +82,7 @@ export function Widget({ config }) {
     const showQuickReplies = messages.filter((m) => m.role === 'user').length === 0;
 
     return (
-        <div className={`fixed z-50 flex flex-col gap-4 antialiased ${positionClasses}`} style={{ fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+        <div className={`fixed z-50 flex flex-col gap-4 antialiased ${positionClasses}`} style={{ fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif", ...dragStyle }}>
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -173,25 +175,23 @@ export function Widget({ config }) {
                         {/* INPUT */}
                         <div className="px-4 py-3.5 border-t border-gray-100 bg-white space-y-2.5">
                             {showQuickReplies && <QuickReplies options={config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
-                            <form onSubmit={handleSubmit} className="flex items-end gap-2">
+                            <form onSubmit={handleSubmit} className="flex items-center gap-2">
                                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                                 <button type="button" onClick={() => fileInputRef.current?.click()}
-                                    className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-green-300 bg-green-50 text-green-600 shadow-sm' : 'border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-300 hover:bg-green-50/50'}`}
+                                    className={`flex-shrink-0 p-2 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-green-300 bg-green-50 text-green-600 shadow-sm' : 'border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-300 hover:bg-green-50/50'}`}
                                     aria-label="Upload photo">
                                     <ImagePlus size={16} />
                                 </button>
-                                <div className="relative flex-1">
-                                    <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
+                                <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                                         placeholder={selectedImage ? 'Опишите проблему...' : 'Задайте вопрос...'}
                                         rows={1}
-                                        className="w-full bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl py-2.5 pl-3.5 pr-11 border border-gray-200 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 focus:bg-white transition-all resize-none text-[13.5px] leading-relaxed"
+                                        className="flex-1 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl py-2.5 pl-3.5 pr-3.5 border border-gray-200 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 focus:bg-white transition-all resize-none text-[13.5px] leading-relaxed"
                                         style={{ maxHeight: '100px' }}
                                     />
                                     <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
-                                        className="absolute right-1.5 bottom-1.5 p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg text-white hover:from-green-600 hover:to-emerald-700 active:scale-95 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed shadow-sm">
+                                        className="flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600  text-white hover:from-green-600 hover:to-emerald-700 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm">
                                         <Send size={14} />
                                     </button>
-                                </div>
                             </form>
                         </div>
 
@@ -213,11 +213,15 @@ export function Widget({ config }) {
                 )}
             </AnimatePresence>
 
-            {/* TOGGLE BUTTON */}
+            {/* TOGGLE BUTTON — draggable */}
             <motion.button
-                whileHover={{ scale: 1.08, boxShadow: '0 8px 30px rgba(22, 163, 74, 0.35)' }}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => setIsOpen(!isOpen)}
+                whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(22, 163, 74, 0.35)' }}
+                whileTap={isDragging ? {} : { scale: 0.92 }}
+                onClick={() => { if (!isDragging) setIsOpen(!isOpen); }}
+                onDoubleClick={resetPosition}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
                 className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-green-600/30 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 border border-white/10"
                 aria-label={isOpen ? 'Close chat' : 'Open chat'}
             >

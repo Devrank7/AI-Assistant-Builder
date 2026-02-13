@@ -1,0 +1,17 @@
+{
+  "name": "Tuning.com.ua",
+  "clientId": "tuningcomua",
+  "username": "tuningcomua",
+  "email": "shop@tuning.com.ua",
+  "website": "https://tuning.com.ua/",
+  "phone": "+380679201050",
+  "addresses": ["Stetsenka St, 47, Kyiv, Ukraine, 04128"],
+  "instagram": null,
+  "clientType": "quick",
+  "niche": "car_tuning",
+  "rating": 4.8,
+  "reviews": null,
+  "features": ["streaming", "quick-replies", "feedback"],
+  "createdAt": "2026-02-12T16:49:55.618Z",
+  "version": "2.0.0"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Smile Lab",
+  "clientId": "smilelab",
+  "username": "smilelab",
+  "email": "zakaz@newdelhi.com.ua",
+  "website": "https://smilelab.kiev.ua/",
+  "phone": null,
+  "addresses": ["Oleksandra Dovzhenka St, 3, Kyiv, Ukraine, 03057"],
+  "instagram": null,
+  "clientType": "quick",
+  "niche": "dental",
+  "rating": 4.9,
+  "reviews": 193,
+  "features": ["streaming", "quick-replies", "feedback"],
+  "createdAt": "2026-02-12T16:49:55.618Z",
+  "version": "2.0.0"
+}
