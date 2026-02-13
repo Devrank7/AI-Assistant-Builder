@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 
 /* ─── Floating Orb Component ─── */
@@ -207,19 +208,39 @@ export default function LandingPage() {
             </div>
 
             <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl">
-              Winbix <span className="gradient-text">AI</span>
+              WinBix <span className="gradient-text">AI</span>
             </h1>
-            <p className="mx-auto max-w-lg text-xl leading-relaxed text-gray-400">
-              Intelligent AI-powered chat widgets with RAG knowledge base, multi-model support, and real-time analytics
+            <p className="mx-auto max-w-xl text-xl leading-relaxed text-gray-400">
+              AI-ассистенты для вашего бизнеса, которые работают 24/7. Отвечают клиентам, записывают на приём и
+              увеличивают продажи — пока вы спите.
             </p>
+
+            {/* About Button */}
+            <div className="mt-8">
+              <Link
+                href="/about"
+                className="group relative inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-8 py-4 text-lg font-medium text-white backdrop-blur-sm transition-all duration-500 hover:border-cyan-500/40 hover:bg-white/[0.08] hover:shadow-lg hover:shadow-cyan-500/20"
+              >
+                <span className="relative z-10">O компании</span>
+                <svg
+                  className="relative z-10 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              </Link>
+            </div>
 
             {/* Feature Badges */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <FeatureBadge icon="✦" label="Powerful AI" />
+              <FeatureBadge icon="✦" label="AI 24/7" />
               <FeatureBadge icon="◉" label="RAG System" />
-              <FeatureBadge icon="⚡" label="Multi-Model" />
-              <FeatureBadge icon="📊" label="Analytics" />
-              <FeatureBadge icon="🔒" label="Secure" />
+              <FeatureBadge icon="⚡" label="+30 записей/мес" />
+              <FeatureBadge icon="📊" label="Аналитика" />
+              <FeatureBadge icon="🔒" label="Безопасно" />
             </div>
           </div>
 

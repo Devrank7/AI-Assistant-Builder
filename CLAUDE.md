@@ -1,7 +1,5 @@
 # Agent Instructions
 
-> This file is mirrored across CLAUDE.md, AGENTS.md, and GEMINI.md so the same instructions load in any AI environment.
-
 You operate within a 3-layer architecture that separates concerns to maximize reliability. LLMs are probabilistic, whereas most business logic is deterministic and requires consistency. This system fixes that mismatch.
 
 ## The 3-Layer Architecture
@@ -64,11 +62,12 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 
 ## Execution Scripts
 
-| Script                     | Command                                                                   | Purpose                                               |
-| -------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `generate-single-theme.js` | `node .agent/widget-builder/scripts/generate-single-theme.js <client_id>` | Generate all 6 source files from `theme.json`         |
-| `build.js`                 | `node .agent/widget-builder/scripts/build.js <client_id>`                 | Build widget → `.agent/widget-builder/dist/script.js` |
-| `mass-build.js`            | `node .agent/widget-builder/scripts/mass-build.js`                        | Batch build from `mass-build-configs.json`            |
+| Script                      | Command                                                                   | Purpose                                                         |
+| --------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `generate-single-theme.js`  | `node .agent/widget-builder/scripts/generate-single-theme.js <client_id>` | Generate all 6 source files from `theme.json`                   |
+| `build.js`                  | `node .agent/widget-builder/scripts/build.js <client_id>`                 | Build widget → `.agent/widget-builder/dist/script.js`           |
+| `mass-build.js`             | `node .agent/widget-builder/scripts/mass-build.js`                        | Batch build from `mass-build-configs.json`                      |
+| `export-knowledge-seeds.js` | `node scripts/export-knowledge-seeds.js`                                  | Export all client knowledge + AI settings to `knowledge-seeds/` |
 
 **Critical rule:** Never write JSX or CSS manually for widgets. Always create `theme.json` → run `generate-single-theme.js` → run `build.js`.
 
@@ -134,6 +133,7 @@ Errors are learning opportunities. When something breaks:
     mass-quick-widgets/SKILL.md
     create-start-messages/SKILL.md
     create-widget/SKILL.md
+    upload-widget-knowledge/SKILL.md
     create-telegram-bot-assistant/SKILL.md
     create-whatsapp-assistant/SKILL.md
     create-instagram-assistant/SKILL.md
@@ -148,16 +148,22 @@ Errors are learning opportunities. When something breaks:
     niche_beauty_salon_addon.md
   workflows/                  # High-level workflow guides
 
-src/                          # Next.js application
-  app/api/                    # API routes (auth, chat, payments, integrations, webhooks)
-  app/admin/                  # Admin panel
-  app/demo/[template]/        # Demo pages (Dental, Construction, Hotel, ClientWebsite)
-  app/cabinet/                # Client self-service portal
-  lib/                        # Core libraries (MongoDB, AI, payments, integrations)
-  components/                 # React components
+scripts/                        # Standalone Node.js scripts
+  export-knowledge-seeds.js     # Export knowledge + AI settings to knowledge-seeds/
 
-quickwidgets/<clientId>/      # Deployed quick/demo widgets (script.js + info.json)
-widgets/<clientId>/           # Deployed production widgets
+src/                            # Next.js application
+  app/api/                      # API routes (auth, chat, payments, integrations, webhooks)
+  app/admin/                    # Admin panel
+  app/demo/[template]/          # Demo pages (Dental, Construction, Hotel, ClientWebsite)
+  app/cabinet/                  # Client self-service portal
+  lib/                          # Core libraries (MongoDB, AI, payments, integrations)
+    exportSeed.ts               # Export client knowledge to seed JSON files
+    seedKnowledge.ts            # Import seed JSON into MongoDB on startup
+  components/                   # React components
+
+knowledge-seeds/<clientId>.json # Portable knowledge snapshots (committed to git)
+quickwidgets/<clientId>/        # Deployed quick/demo widgets (script.js + info.json)
+widgets/<clientId>/             # Deployed production widgets
 ```
 
 ### Deliverables vs Intermediates
@@ -193,6 +199,38 @@ Widget source files are generated, not hand-written. `theme.json` → `generate-
 
 ---
 
+## Knowledge Seeds Pipeline
+
+Knowledge seeds allow portable, git-committed snapshots of each client's knowledge base and AI settings. This solves the problem of knowledge living only in MongoDB — seeds travel with the Docker image.
+
+```
+1. Upload knowledge via API (POST /api/knowledge) — stored in MongoDB
+2. Export: node scripts/export-knowledge-seeds.js
+   → Reads knowledgechunks + aisettings from MongoDB
+   → Writes knowledge-seeds/<clientId>.json for each client
+3. Commit to git → included in Docker build (Dockerfile COPY)
+4. On production startup: seedKnowledge.ts checks each seed file
+   → If client has no knowledge in DB, imports from seed
+   → Idempotent — won't overwrite existing data
+```
+
+**When to export:** After uploading knowledge to any client locally, run the export script so seeds stay in sync with MongoDB.
+
+---
+
+## Client Sync & Orphan Cleanup
+
+The `GET /api/clients` endpoint syncs the filesystem with MongoDB:
+
+1. Scans `widgets/` and `quickwidgets/` directories for client folders
+2. Creates new DB records for any folder with `info.json` that doesn't exist in DB
+3. **Deletes orphaned clients** — if a client exists in DB but has no widget folder, the client and all related data (knowledgechunks, aisettings, chatlogs) are automatically removed
+4. Returns all clients sorted by creation date
+
+**To remove a client:** Simply delete their folder from `widgets/` or `quickwidgets/`. The next `GET /api/clients` call will clean up all DB records.
+
+---
+
 ## API Reference (Internal)
 
 All API calls require `Cookie: admin_token=${ADMIN_SECRET_TOKEN}` from `.env.local`.
@@ -203,10 +241,16 @@ All API calls require `Cookie: admin_token=${ADMIN_SECRET_TOKEN}` from `.env.loc
 | `/api/integrations/sheets/update`                | POST     | Update spreadsheet cells                                |
 | `/api/integrations/sheets/search?name=query`     | GET      | Search spreadsheets by name                             |
 | `/api/telegram/notify`                           | POST     | Send Telegram notification (supports multiple chat IDs) |
-| `/api/knowledge`                                 | POST     | Upload knowledge base content                           |
+| `/api/knowledge`                                 | GET/POST | List/upload knowledge chunks                            |
 | `/api/ai-settings/<clientId>`                    | PUT      | Configure AI system prompt and params                   |
 | `/api/chat/stream`                               | POST     | Stream AI chat response                                 |
-| `/api/clients`                                   | GET/POST | List/create clients                                     |
+| `/api/clients`                                   | GET      | List clients (syncs filesystem → DB, cleans orphans)    |
+| `/api/clients/[id]/delete`                       | DELETE   | Delete a quick widget client + all related data         |
+| `/api/knowledge/[id]`                            | DELETE   | Delete a knowledge chunk                                |
+| `/api/auth/login`                                | POST     | Admin login                                             |
+| `/api/webhooks/telegram`                         | POST     | Telegram bot webhook handler                            |
+| `/api/webhooks/whatsapp`                         | POST     | WhatsApp (WHAPI) webhook handler                        |
+| `/api/webhooks/instagram`                        | POST     | Instagram webhook handler                               |
 
 **Google Sheets API notes:**
 
@@ -235,6 +279,8 @@ All API calls require `Cookie: admin_token=${ADMIN_SECRET_TOKEN}` from `.env.loc
 5. **WebFetch on Ukrainian sites**: Many are WordPress/Elementor/React SPAs — JS-rendered content may not appear. Try WP REST API (`/wp-json/wp/v2/pages`), sitemaps (`/sitemap.xml`), or alternative URL patterns.
 6. **Demo link encoding**: Website URLs in demo links must be `encodeURIComponent()`-encoded.
 7. **Service account**: `service_account.json` must be in project root and the spreadsheet must be shared with the service account email.
+8. **Shared hooks override**: `build.js` copies client `src/` over shared `src/` with `force: true`. If a client directory contains `src/hooks/useChat.js`, it will **overwrite** the shared version. Never put hooks in client directories — they belong only in `.agent/widget-builder/src/hooks/`.
+9. **Knowledge seeds must be re-exported**: After uploading knowledge via API, run `node scripts/export-knowledge-seeds.js` so the seed files stay in sync. Otherwise the Docker image will have stale knowledge.
 
 ---
 

@@ -82,15 +82,30 @@ export async function GET() {
       }
     }
 
-    // Log orphaned clients (without widget folders) but DON'T delete them
+    // Remove orphaned clients (in DB but no widget folder) and their related data
     const orphanedClients = await Client.find({
       clientId: { $nin: Array.from(foundClientIds) },
     }).select('clientId username');
 
     if (orphanedClients.length > 0) {
-      console.warn(
-        `⚠️ Found ${orphanedClients.length} clients without widget folders: ${orphanedClients.map((c) => c.clientId).join(', ')}`
-      );
+      const mongoose = await import('mongoose');
+      const db = mongoose.connection.db;
+
+      for (const orphan of orphanedClients) {
+        console.log(`🗑️ Removing orphaned client: ${orphan.clientId} (no widget folder found)`);
+
+        if (db) {
+          await Promise.allSettled([
+            db.collection('knowledgechunks').deleteMany({ clientId: orphan.clientId }),
+            db.collection('aisettings').deleteMany({ clientId: orphan.clientId }),
+            db.collection('chatlogs').deleteMany({ clientId: orphan.clientId }),
+          ]);
+        }
+
+        await Client.deleteOne({ clientId: orphan.clientId });
+      }
+
+      console.log(`🗑️ Cleaned up ${orphanedClients.length} orphaned clients`);
     }
 
     // Return all clients from DB
