@@ -23,8 +23,12 @@ export function getWidgetsDirectory(): string {
 }
 
 export function ensureWidgetsDirectory(): void {
-  if (!fs.existsSync(WIDGETS_DIR)) {
-    fs.mkdirSync(WIDGETS_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(WIDGETS_DIR)) {
+      fs.mkdirSync(WIDGETS_DIR, { recursive: true });
+    }
+  } catch (error) {
+    console.warn('Could not create widgets directory:', error);
   }
 }
 
@@ -232,8 +236,12 @@ export function getQuickWidgetsDirectory(): string {
 }
 
 export function ensureQuickWidgetsDirectory(): void {
-  if (!fs.existsSync(QUICK_WIDGETS_DIR)) {
-    fs.mkdirSync(QUICK_WIDGETS_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(QUICK_WIDGETS_DIR)) {
+      fs.mkdirSync(QUICK_WIDGETS_DIR, { recursive: true });
+    }
+  } catch (error) {
+    console.warn('Could not create quickwidgets directory:', error);
   }
 }
 
