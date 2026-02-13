@@ -5,6 +5,7 @@ import { defaultSystemPrompt } from '@/models/AISettings'; // Fix import if need
 import { invalidatePromptCache } from '@/lib/gemini';
 import { getModelIds, GEMINI_MODELS } from '@/lib/models'; // Ensure this exists or mock/fix
 import { verifyAdminOrClient } from '@/lib/auth';
+import { exportClientSeed } from '@/lib/exportSeed';
 
 // GET - Get AI settings for a client
 export async function GET(request: NextRequest, { params }: { params: Promise<{ clientId: string }> }) {
@@ -95,6 +96,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (updateData.systemPrompt) {
       await invalidatePromptCache(clientId);
     }
+
+    // Auto-export seed file on local so it deploys with the code
+    exportClientSeed(clientId).catch(() => {});
 
     return NextResponse.json({ success: true, settings });
   } catch (error) {

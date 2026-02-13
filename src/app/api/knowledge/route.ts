@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
 import { generateEmbedding, splitTextIntoChunks } from '@/lib/gemini';
 import { verifyAdminOrClient } from '@/lib/auth';
+import { exportClientSeed } from '@/lib/exportSeed';
 
 // GET - List knowledge chunks for a client
 export async function GET(request: NextRequest) {
@@ -79,6 +80,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Auto-export seed file on local so it deploys with the code
+    exportClientSeed(clientId).catch(() => {});
+
     return NextResponse.json({
       success: true,
       message: `Created ${createdChunks.length} knowledge chunks`,
@@ -124,6 +128,9 @@ export async function DELETE(request: NextRequest) {
     if (!result) {
       return NextResponse.json({ success: false, error: 'Chunk not found' }, { status: 404 });
     }
+
+    // Re-export seed file after deletion
+    exportClientSeed(clientId).catch(() => {});
 
     return NextResponse.json({ success: true, message: 'Chunk deleted' });
   } catch (error) {
