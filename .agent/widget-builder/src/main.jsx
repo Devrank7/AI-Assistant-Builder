@@ -20,6 +20,11 @@ class AIChatWidget extends HTMLElement {
             document.head.appendChild(fontLink);
         }
 
+        // Clear previous shadow DOM content (handles re-mount after SPA navigation)
+        while (this.shadowRoot.firstChild) {
+            this.shadowRoot.removeChild(this.shadowRoot.firstChild);
+        }
+
         const container = document.createElement('div');
         container.id = 'widget-root';
 
@@ -30,6 +35,14 @@ class AIChatWidget extends HTMLElement {
 
         render(h(Widget, { config: window.__WIDGET_CONFIG__ }), container);
     }
+
+    disconnectedCallback() {
+        // Unmount Preact tree to prevent memory leaks
+        const container = this.shadowRoot?.getElementById('widget-root');
+        if (container) {
+            render(null, container);
+        }
+    }
 }
 
 if (!customElements.get('ai-chat-widget')) {
@@ -37,9 +50,9 @@ if (!customElements.get('ai-chat-widget')) {
 }
 
 function mountWidget() {
-    if (!document.querySelector('ai-chat-widget')) {
-        document.body.appendChild(document.createElement('ai-chat-widget'));
-    }
+    // Remove any stale widget from a previous client (SPA navigation)
+    document.querySelectorAll('ai-chat-widget').forEach(el => el.remove());
+    document.body.appendChild(document.createElement('ai-chat-widget'));
 }
 
 if (document.readyState === 'loading') {

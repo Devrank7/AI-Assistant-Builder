@@ -20,15 +20,15 @@ function DemoContent() {
   if (template === 'client-website') {
     if (!websiteUrl) {
       return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-gray-900">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Website URL Required</h1>
+            <h1 className="mb-4 text-4xl font-bold text-white">Website URL Required</h1>
             <p className="text-gray-400">No website URL was provided for preview.</p>
           </div>
         </div>
       );
     }
-    return <ClientWebsiteTemplate scriptUrl={scriptUrl} websiteUrl={websiteUrl} />;
+    return <ClientWebsiteTemplate key={clientId} scriptUrl={scriptUrl} websiteUrl={websiteUrl} />;
   }
 
   const templates: Record<string, React.ComponentType<{ scriptUrl: string }>> = {
@@ -41,25 +41,27 @@ function DemoContent() {
 
   if (!TemplateComponent) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-900">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Template Not Found</h1>
+          <h1 className="mb-4 text-4xl font-bold text-white">Template Not Found</h1>
           <p className="text-gray-400">The requested template does not exist.</p>
         </div>
       </div>
     );
   }
 
-  return <TemplateComponent scriptUrl={scriptUrl} />;
+  return <TemplateComponent key={clientId} scriptUrl={scriptUrl} />;
 }
 
 export default function DemoPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gray-900">
+          <div className="h-16 w-16 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent" />
+        </div>
+      }
+    >
       <DemoContent />
     </Suspense>
   );
