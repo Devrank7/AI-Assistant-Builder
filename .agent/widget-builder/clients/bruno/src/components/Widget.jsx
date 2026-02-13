@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles } from 'lucide-preact';
+import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles, Mic, MicOff } from 'lucide-preact';
 import ChatMessage from './ChatMessage';
 import MessageFeedback from './MessageFeedback';
 import QuickReplies from './QuickReplies';
 import useChat from '../hooks/useChat';
 import useDrag from '../hooks/useDrag';
+import useVoice from '../hooks/useVoice';
 
 const POSITION_MAP = {
     'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 items-end',
@@ -26,6 +27,18 @@ export function Widget({ config }) {
     const position = config.design?.position || 'bottom-right';
     const positionClasses = POSITION_MAP[position] || POSITION_MAP['bottom-right'];
     const { offset, isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle } = useDrag(config.clientId);
+    const { isListening, isSupported: voiceSupported, transcript, startListening, stopListening } = useVoice('uk-UA');
+
+    const handleVoiceToggle = useCallback(() => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening((finalText) => {
+                setInputValue(prev => prev ? prev + ' ' + finalText : finalText);
+                if (inputRef.current) inputRef.current.focus();
+            });
+        }
+    }, [isListening, startListening, stopListening]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -182,6 +195,13 @@ export function Widget({ config }) {
                                     aria-label="Upload photo">
                                     <ImagePlus size={16} />
                                 </button>
+                                {voiceSupported && config.features?.voiceInput !== false && (
+                                    <button type="button" onClick={handleVoiceToggle}
+                                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-red-400 bg-red-50 text-red-500 animate-pulse' : 'border-gray-200 text-gray-400 hover:text-gray-500 hover:border-gray-300 hover:bg-gray-50'}`}
+                                        aria-label={isListening ? 'Stop recording' : 'Voice input'}>
+                                        {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                                    </button>
+                                )}
                                 <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                                         placeholder={selectedImage ? 'Опишите проблему...' : 'Задайте вопрос...'}
                                         rows={1}

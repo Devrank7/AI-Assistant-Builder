@@ -18,7 +18,6 @@ function formatRelativeTime(timestamp) {
 function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick }) {
     const isBot = role === 'assistant';
     const [copied, setCopied] = useState(false);
-    const [logoErr, setLogoErr] = useState(false);
 
     const handleCopy = useCallback(async () => {
         try {
@@ -38,12 +37,8 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         >
             {/* Bot Avatar */}
             {isBot && (
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#d4eede] to-[#c5e7d3] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#a3d4b8]/50 overflow-hidden p-0.5">
-                    {!logoErr ? (
-                        <img src="https://www.google.com/s2/favicons?domain=dentline.com.ua&sz=32" alt="" className="w-full h-full object-contain rounded-sm" onError={() => setLogoErr(true)} />
-                    ) : (
-                        <Sparkles size={13} className="text-[#2d8659]" />
-                    )}
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#d4eede] to-[#c5e7d3] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#a3d4b8]/50">
+                    <Sparkles size={13} className="text-[#2d8659]" />
                 </div>
             )}
 

@@ -56,6 +56,7 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 | `create-telegram-bot-assistant` | `.agent/skills/create-telegram-bot-assistant/SKILL.md` | Set up Telegram bot channel                   |
 | `create-whatsapp-assistant`     | `.agent/skills/create-whatsapp-assistant/SKILL.md`     | Set up WhatsApp channel                       |
 | `create-instagram-assistant`    | `.agent/skills/create-instagram-assistant/SKILL.md`    | Set up Instagram channel                      |
+| `upload-widget-knowledge`       | `.agent/skills/upload-widget-knowledge/SKILL.md`       | Crawl site & populate AI knowledge + prompt   |
 
 **Always read the skill file before executing.** Skills contain the exact steps, API calls, constraints, and edge cases.
 
@@ -70,6 +71,16 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 | `mass-build.js`            | `node .agent/widget-builder/scripts/mass-build.js`                        | Batch build from `mass-build-configs.json`            |
 
 **Critical rule:** Never write JSX or CSS manually for widgets. Always create `theme.json` → run `generate-single-theme.js` → run `build.js`.
+
+### Shared Widget Hooks (NOT overwritten during build)
+
+| Hook          | File                                          | Purpose                                                               |
+| ------------- | --------------------------------------------- | --------------------------------------------------------------------- |
+| `useChat.js`  | `.agent/widget-builder/src/hooks/useChat.js`  | Chat logic, streaming, embedded MP3 notification sound                |
+| `useVoice.js` | `.agent/widget-builder/src/hooks/useVoice.js` | Web Speech API voice input (mic button, speech-to-text transcription) |
+| `useDrag.js`  | `.agent/widget-builder/src/hooks/useDrag.js`  | Draggable toggle button position                                      |
+
+These hooks live in the shared `src/hooks/` directory and are never overwritten by per-client builds. The generated `Widget.jsx` template already imports and uses all three hooks.
 
 ---
 

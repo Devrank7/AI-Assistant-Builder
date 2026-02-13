@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles } from 'lucide-preact';
+import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles, Mic, MicOff } from 'lucide-preact';
 import ChatMessage from './ChatMessage';
 import MessageFeedback from './MessageFeedback';
 import QuickReplies from './QuickReplies';
 import useChat from '../hooks/useChat';
 import useDrag from '../hooks/useDrag';
+import useVoice from '../hooks/useVoice';
 
 const POSITION_MAP = {
     'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 items-end',
@@ -19,7 +20,6 @@ export function Widget({ config }) {
     const [inputValue, setInputValue] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [expandedImage, setExpandedImage] = useState(null);
-    const [headerLogoErr, setHeaderLogoErr] = useState(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -27,6 +27,18 @@ export function Widget({ config }) {
     const position = config.design?.position || 'bottom-right';
     const positionClasses = POSITION_MAP[position] || POSITION_MAP['bottom-right'];
     const { offset, isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle } = useDrag(config.clientId);
+    const { isListening, isSupported: voiceSupported, transcript, startListening, stopListening } = useVoice('uk-UA');
+
+    const handleVoiceToggle = useCallback(() => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening((finalText) => {
+                setInputValue(prev => prev ? prev + ' ' + finalText : finalText);
+                if (inputRef.current) inputRef.current.focus();
+            });
+        }
+    }, [isListening, startListening, stopListening]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -102,12 +114,8 @@ export function Widget({ config }) {
 
                             <div className="relative flex items-center gap-3">
                                 <div className="relative">
-                                    <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10 overflow-hidden p-1.5">
-                                        {!headerLogoErr ? (
-                                            <img src="https://www.google.com/s2/favicons?domain=dentify.com.ua&sz=64" alt="" className="w-full h-full object-contain rounded" crossOrigin="anonymous" onError={() => setHeaderLogoErr(true)} />
-                                        ) : (
-                                            <Sparkles size={18} className="text-white" />
-                                        )}
+                                    <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10">
+                                        <Sparkles size={18} className="text-white" />
                                     </div>
                                     {!isOffline && (
                                         <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#e6d98a] border-[2.5px] border-[#C1A01E] shadow-sm" />
@@ -182,6 +190,13 @@ export function Widget({ config }) {
                                     aria-label="Upload photo">
                                     <ImagePlus size={16} />
                                 </button>
+                                {voiceSupported && config.features?.voiceInput !== false && (
+                                    <button type="button" onClick={handleVoiceToggle}
+                                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-red-400 bg-red-50 text-red-500 animate-pulse' : 'border-gray-200 text-gray-400 hover:text-gray-500 hover:border-gray-300 hover:bg-gray-50'}`}
+                                        aria-label={isListening ? 'Stop recording' : 'Voice input'}>
+                                        {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                                    </button>
+                                )}
                                 <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                                     placeholder={selectedImage ? 'Опишіть проблему...' : 'Задайте питання...'}
                                     rows={1}

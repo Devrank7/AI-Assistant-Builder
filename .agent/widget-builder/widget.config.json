@@ -1,12 +1,12 @@
 {
-  "clientId": "fasttuning",
+  "clientId": "zdorovo",
   "bot": {
-    "name": "Fasttuning AI",
-    "greeting": "Привіт! Я — AI-асистент **Fasttuning** 🏎️\n\nДопоможу дізнатися про чіп тюнінг вашого авто, ціни та можливості збільшення потужності.\n\nОберіть тему або задайте своє питання!",
+    "name": "ZDÓROVO AI",
+    "greeting": "Вітаємо у **ZDÓROVO Dental Clinic**! 👋\n\nЯ — AI-помічник клініки. Працюю 24/7 — відповім на ваші питання, допоможу з записом.\n\nНапишіть або оберіть тему!",
     "tone": "professional_friendly"
   },
   "design": {
-    "style": "dark",
+    "style": "dark_green",
     "position": "bottom-right"
   },
   "features": {
@@ -14,7 +14,7 @@
     "imageUpload": true,
     "quickReplies": {
       "enabled": true,
-      "starters": ["🔧 Чіп тюнінг для мого авто", "💰 Ціни на послуги", "📞 Записатись на діагностику"]
+      "starters": ["🦷 Ціни на лікування", "📅 Найближчий вільний час", "⚡ Екстрена допомога"]
     },
     "feedback": true,
     "sound": true,

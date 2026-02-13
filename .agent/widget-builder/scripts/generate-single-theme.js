@@ -205,16 +205,17 @@ function genWidget(c) {
     const imgPreviewBg = c.isDark ? `bg-[${c.surfaceBg}] border-[${c.surfaceBorder}]` : 'bg-white border-t border-gray-50';
     const imgPreviewBorder = c.isDark ? `border-[${c.surfaceBorder}]` : 'border-gray-200';
     const shine = c.hasShine ? `\n                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />` : '';
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${c.domain}&sz=64`;
+    // Default: use Sparkles icon instead of favicon (avoids CORS/CSP issues)
 
     return `import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles } from 'lucide-preact';
+import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles, Mic, MicOff } from 'lucide-preact';
 import ChatMessage from './ChatMessage';
 import MessageFeedback from './MessageFeedback';
 import QuickReplies from './QuickReplies';
 import useChat from '../hooks/useChat';
 import useDrag from '../hooks/useDrag';
+import useVoice from '../hooks/useVoice';
 
 const POSITION_MAP = {
     'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 items-end',
@@ -228,7 +229,6 @@ export function Widget({ config }) {
     const [inputValue, setInputValue] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [expandedImage, setExpandedImage] = useState(null);
-    const [headerLogoErr, setHeaderLogoErr] = useState(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -236,6 +236,18 @@ export function Widget({ config }) {
     const position = config.design?.position || 'bottom-right';
     const positionClasses = POSITION_MAP[position] || POSITION_MAP['bottom-right'];
     const { offset, isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle } = useDrag(config.clientId);
+    const { isListening, isSupported: voiceSupported, transcript, startListening, stopListening } = useVoice('uk-UA');
+
+    const handleVoiceToggle = useCallback(() => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening((finalText) => {
+                setInputValue(prev => prev ? prev + ' ' + finalText : finalText);
+                if (inputRef.current) inputRef.current.focus();
+            });
+        }
+    }, [isListening, startListening, stopListening]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -310,12 +322,8 @@ export function Widget({ config }) {
 
                             <div className="relative flex items-center gap-3">
                                 <div className="relative">
-                                    <div className="w-10 h-10 ${c.avatarHeaderRound} bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10 overflow-hidden p-1.5">
-                                        {!headerLogoErr ? (
-                                            <img src="${faviconUrl}" alt="" className="w-full h-full object-contain rounded" crossOrigin="anonymous" onError={() => setHeaderLogoErr(true)} />
-                                        ) : (
-                                            <Sparkles size={18} className="text-white" />
-                                        )}
+                                    <div className="w-10 h-10 ${c.avatarHeaderRound} bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10">
+                                        <Sparkles size={18} className="text-white" />
                                     </div>
                                     {!isOffline && (
                                         <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[${c.onlineDotBg}] border-[2.5px] border-[${c.onlineDotBorder}] shadow-sm" />
@@ -390,6 +398,13 @@ export function Widget({ config }) {
                                     aria-label="Upload photo">
                                     <ImagePlus size={16} />
                                 </button>
+                                {voiceSupported && config.features?.voiceInput !== false && (
+                                    <button type="button" onClick={handleVoiceToggle}
+                                        className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${isListening ? 'border-[${c.imgActiveBorder}] bg-[${c.imgActiveBg}] text-[${c.imgActiveText}] shadow-sm animate-pulse' : '${c.isDark ? `border-[${c.surfaceBorder}] text-[${c.textSecondary}]` : 'border-gray-200 text-gray-400'} hover:text-[${c.imgHoverText}] hover:border-[${c.imgHoverBorder}] hover:bg-[${c.imgHoverBg}]'}\`}
+                                        aria-label={isListening ? 'Stop recording' : 'Voice input'}>
+                                        {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                                    </button>
+                                )}
                                 <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                                     placeholder="Ask a question..."
                                     rows={1}
@@ -462,7 +477,6 @@ function genChatMessage(c) {
     const userMsgClasses = c.isDark
         ? `bg-[${c.chipFrom}] text-[${c.textPrimary}] border border-[${c.chipBorder}] rounded-br-md shadow-sm`
         : `bg-gradient-to-r from-[${c.chipFrom}] to-[${c.chipTo}] text-gray-700 border border-[${c.chipBorder}]/50 rounded-br-md shadow-sm`;
-    const faviconSmall = `https://www.google.com/s2/favicons?domain=${c.domain}&sz=32`;
 
     return `import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
@@ -484,7 +498,6 @@ function formatRelativeTime(timestamp) {
 function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick }) {
     const isBot = role === 'assistant';
     const [copied, setCopied] = useState(false);
-    const [logoErr, setLogoErr] = useState(false);
 
     const handleCopy = useCallback(async () => {
         try {
@@ -504,12 +517,8 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         >
             {/* Bot Avatar */}
             {isBot && (
-                <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50 overflow-hidden p-0.5">
-                    {!logoErr ? (
-                        <img src="${faviconSmall}" alt="" className="w-full h-full object-contain rounded-sm" onError={() => setLogoErr(true)} />
-                    ) : (
-                        <Sparkles size={13} className="text-[${c.avatarIcon}]" />
-                    )}
+                <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50">
+                    <Sparkles size={13} className="text-[${c.avatarIcon}]" />
                 </div>
             )}
 

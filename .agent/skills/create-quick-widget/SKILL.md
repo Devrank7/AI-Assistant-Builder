@@ -298,6 +298,7 @@ Create `.agent/widget-builder/clients/<client_id>/widget.config.json`:
     },
     "feedback": true,
     "sound": true,
+    "voiceInput": true,
     "leads": false,
     "integrations": {}
   }
@@ -607,6 +608,19 @@ This reads `theme.json` and generates:
 - `src/components/QuickReplies.jsx` — Quick reply chips with animations
 - `src/components/MessageFeedback.jsx` — Thumbs up/down feedback
 
+**Built-in shared features (NOT generated per-client, already in shared `src/hooks/`):**
+
+- `src/hooks/useChat.js` — Chat logic + embedded MP3 notification sound (plays when AI responds while tab is hidden)
+- `src/hooks/useVoice.js` — Web Speech API voice input (mic button auto-appears in supported browsers)
+- `src/hooks/useDrag.js` — Draggable widget toggle button
+
+These hooks are shared across all widgets and are NOT overwritten during build. The generated Widget.jsx already imports and uses `useVoice` — a mic button appears between the image upload button and textarea. When the user clicks the mic, their speech is transcribed and inserted into the text input.
+
+**Feature flags in widget.config.json:**
+
+- `features.sound` — notification sound on AI response (default: enabled)
+- `features.voiceInput` — mic button for speech-to-text (default: enabled, auto-hidden if browser doesn't support Web Speech API)
+
 **DO NOT manually edit the generated files.** If you need to change colors, edit `theme.json` and re-run the generator.
 
 ### 5.5 Build & Deploy
@@ -642,7 +656,7 @@ Write `quickwidgets/<client_id>/info.json` (**NOT** `widgets/`):
   "addresses": ["<address from site or empty>"],
   "instagram": null,
   "clientType": "quick",
-  "features": ["streaming", "quick-replies", "feedback"],
+  "features": ["streaming", "quick-replies", "feedback", "sound", "voice-input"],
   "createdAt": "<ISO date>",
   "version": "2.0.0"
 }
