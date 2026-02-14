@@ -1,5 +1,5 @@
 /**
- * Get current client data (from cookie)
+ * Get / Update current client data (from cookie)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -36,6 +36,38 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching client data:', error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+/**
+ * PATCH /api/clients/me — update client preferences (emailNotifications, etc.)
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const auth = await verifyClient(request);
+    if (!auth.authenticated || auth.role !== 'client') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    await connectDB();
+
+    // Only allow updating safe fields
+    const allowedFields: Record<string, unknown> = {};
+    if (typeof body.emailNotifications === 'boolean') {
+      allowedFields.emailNotifications = body.emailNotifications;
+    }
+
+    if (Object.keys(allowedFields).length === 0) {
+      return NextResponse.json({ success: false, error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    await Client.updateOne({ clientId: auth.clientId }, { $set: allowedFields });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error updating client preferences:', error);
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }

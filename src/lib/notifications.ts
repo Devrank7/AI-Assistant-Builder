@@ -4,6 +4,45 @@
  * Handles Email and Telegram notifications for payment reminders.
  */
 
+import connectDB from '@/lib/mongodb';
+import Client from '@/models/Client';
+
+/**
+ * Check if client has email notifications enabled.
+ * Returns true if client allows emails (or if client not found — send anyway for safety).
+ */
+export async function isEmailAllowed(clientIdentifier: { email?: string; clientId?: string }): Promise<boolean> {
+  try {
+    await connectDB();
+    const query = clientIdentifier.clientId
+      ? { clientId: clientIdentifier.clientId }
+      : { email: clientIdentifier.email };
+    const client = await Client.findOne(query).select('emailNotifications').lean();
+    // If client not found or field not set, default to allowing emails
+    if (!client) return true;
+    return client.emailNotifications !== false;
+  } catch {
+    return true; // On error, don't block important emails
+  }
+}
+
+/**
+ * Generate unsubscribe footer HTML for emails.
+ */
+export function getUnsubscribeFooter(clientToken?: string): string {
+  if (!clientToken) return '';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  return `
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee; text-align: center;">
+      <p style="color: #999; font-size: 11px;">
+        <a href="${baseUrl}/api/unsubscribe?token=${clientToken}" style="color: #999; text-decoration: underline;">Отписаться от уведомлений</a>
+        &nbsp;|&nbsp;
+        <a href="${baseUrl}/cabinet" style="color: #999; text-decoration: underline;">Настройки уведомлений</a>
+      </p>
+    </div>
+  `;
+}
+
 /**
  * Send email notification
  */
@@ -87,7 +126,8 @@ export async function sendPaymentReminder(
   email: string,
   telegram: string | undefined,
   daysUntilPayment: number,
-  paymentUrl: string
+  paymentUrl: string,
+  clientToken?: string
 ): Promise<void> {
   const subject =
     daysUntilPayment > 0
@@ -97,7 +137,8 @@ export async function sendPaymentReminder(
   const daysText =
     daysUntilPayment > 0 ? `is due in <strong>${daysUntilPayment} days</strong>` : `is <strong>due now</strong>`;
 
-  const emailHtml = `
+  if (await isEmailAllowed({ email })) {
+    const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Payment Reminder</h2>
             <p>Your WinBix AI subscription payment ${daysText}.</p>
@@ -107,10 +148,11 @@ export async function sendPaymentReminder(
             </a>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
+            ${getUnsubscribeFooter(clientToken)}
         </div>
     `;
-
-  await sendEmail(email, subject, emailHtml);
+    await sendEmail(email, subject, emailHtml);
+  }
 
   if (telegram) {
     const daysTelegramText = daysUntilPayment > 0 ? `is due in <b>${daysUntilPayment} days</b>` : `is <b>due now</b>`;
@@ -135,11 +177,13 @@ export async function sendPaymentFailedNotice(
   telegram: string | undefined,
   gracePeriodDays: number,
   paymentUrl: string,
-  amount: number = 50
+  amount: number = 50,
+  clientToken?: string
 ): Promise<void> {
   const subject = `❌ Payment Failed - Action Required`;
 
-  const emailHtml = `
+  if (await isEmailAllowed({ email })) {
+    const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #e74c3c;">Payment Failed</h2>
             <p>We were unable to process your WinBix AI subscription payment.</p>
@@ -149,10 +193,11 @@ export async function sendPaymentFailedNotice(
             </a>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
+            ${getUnsubscribeFooter(clientToken)}
         </div>
     `;
-
-  await sendEmail(email, subject, emailHtml);
+    await sendEmail(email, subject, emailHtml);
+  }
 
   if (telegram) {
     const telegramMsg = `
@@ -176,11 +221,13 @@ export async function sendSuspensionNotice(
   email: string,
   telegram: string | undefined,
   reactivateUrl: string,
-  amount: number = 50
+  amount: number = 50,
+  clientToken?: string
 ): Promise<void> {
   const subject = `🚫 Service Suspended`;
 
-  const emailHtml = `
+  if (await isEmailAllowed({ email })) {
+    const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #e74c3c;">Service Suspended</h2>
             <p>Your WinBix AI service has been suspended due to non-payment.</p>
@@ -190,10 +237,11 @@ export async function sendSuspensionNotice(
             </a>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
+            ${getUnsubscribeFooter(clientToken)}
         </div>
     `;
-
-  await sendEmail(email, subject, emailHtml);
+    await sendEmail(email, subject, emailHtml);
+  }
 
   if (telegram) {
     const telegramMsg = `
@@ -215,7 +263,8 @@ export async function sendPaymentSuccessNotice(
   email: string,
   telegram: string | undefined,
   nextPaymentDate: Date,
-  amount: number = 50
+  amount: number = 50,
+  clientToken?: string
 ): Promise<void> {
   const subject = `✅ Payment Successful`;
 
@@ -225,17 +274,19 @@ export async function sendPaymentSuccessNotice(
     day: 'numeric',
   });
 
-  const emailHtml = `
+  if (await isEmailAllowed({ email })) {
+    const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #27ae60;">Payment Successful!</h2>
             <p>Thank you! Your WinBix AI subscription payment of <strong>$${amount}</strong> has been processed.</p>
             <p>Next payment date: <strong>${formattedDate}</strong></p>
             <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #666; font-size: 12px;">WinBix AI Team</p>
+            ${getUnsubscribeFooter(clientToken)}
         </div>
     `;
-
-  await sendEmail(email, subject, emailHtml);
+    await sendEmail(email, subject, emailHtml);
+  }
 
   if (telegram) {
     const telegramMsg = `

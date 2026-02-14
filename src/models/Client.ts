@@ -54,6 +54,9 @@ export interface IClient extends Document {
   externalCustomerId: string | null; // NowPayments invoice ID / other providers
   wayforpayRecToken: string | null; // WayForPay recurring token
 
+  // Notification preferences
+  emailNotifications: boolean; // false = unsubscribed from all emails
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -213,6 +216,12 @@ const ClientSchema = new Schema<IClient>(
     extraCreditsExpiry: {
       type: Date,
       default: null,
+    },
+
+    // Notification preferences
+    emailNotifications: {
+      type: Boolean,
+      default: true, // Opt-in by default; client can unsubscribe
     },
 
     // Provider-specific IDs

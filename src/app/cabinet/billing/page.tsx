@@ -36,6 +36,7 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Get clientId from URL or session
   const clientId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('clientId') : null;
@@ -309,11 +310,39 @@ export default function BillingPage() {
             </div>
           )}
 
+          {/* Terms & Privacy Agreement */}
+          <label className="mt-6 flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-gray-600 bg-gray-700 accent-cyan-500"
+            />
+            <span className="text-sm leading-relaxed text-gray-400">
+              Я соглашаюсь с{' '}
+              <Link
+                href="/terms"
+                target="_blank"
+                className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
+              >
+                Условиями использования
+              </Link>{' '}
+              и{' '}
+              <Link
+                href="/privacy"
+                target="_blank"
+                className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
+              >
+                Политикой конфиденциальности
+              </Link>
+            </span>
+          </label>
+
           <button
             onClick={handleSubscribe}
-            disabled={processing || !clientId}
-            className={`mt-6 w-full rounded-xl py-4 text-lg font-semibold transition-all duration-300 ${
-              processing || !clientId
+            disabled={processing || !clientId || !termsAccepted}
+            className={`mt-4 w-full rounded-xl py-4 text-lg font-semibold transition-all duration-300 ${
+              processing || !clientId || !termsAccepted
                 ? 'cursor-not-allowed bg-gray-600 text-gray-400'
                 : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30 hover:from-cyan-400 hover:to-blue-500 hover:shadow-cyan-500/50'
             }`}

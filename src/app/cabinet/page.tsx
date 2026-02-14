@@ -80,6 +80,7 @@ type TabType =
   | 'history'
   | 'billing'
   | 'embed'
+  | 'settings'
   | 'channel-instagram'
   | 'channel-whatsapp'
   | 'channel-telegram';
@@ -164,6 +165,13 @@ function ClientCabinetContent() {
   // Pricing config
   const [costBlockThreshold, setCostBlockThreshold] = useState(40);
 
+  // Settings
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   // --- Fetch detected channels ---
 
   const fetchDetectedChannels = async () => {
@@ -200,6 +208,7 @@ function ClientCabinetContent() {
 
       if (result.success) {
         setData(result);
+        setEmailNotifications(result.client.emailNotifications !== false);
       } else {
         setError(result.error || 'Client not found');
       }
@@ -548,6 +557,7 @@ function ClientCabinetContent() {
     ...dynamicChannelTabs,
     { id: 'billing', label: 'Billing', icon: '💳' },
     { id: 'embed', label: 'Install', icon: '🔌' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
   return (
@@ -1423,6 +1433,132 @@ function ClientCabinetContent() {
                       Secure payments
                     </p>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* SETTINGS TAB */}
+            {activeTab === 'settings' && (
+              <div className="mx-auto max-w-2xl space-y-6">
+                {/* Email Notifications */}
+                <div className="card-premium p-6">
+                  <h3 className="mb-6 flex items-center gap-3 text-lg font-bold text-white">
+                    <span className="rounded-lg bg-white/5 p-2">📧</span> Email-уведомления
+                  </h3>
+                  <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <div>
+                      <p className="font-medium text-white">Получать email-уведомления</p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Напоминания об оплате, предупреждения о расходах, статус подписки
+                      </p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const newVal = !emailNotifications;
+                        setEmailNotifications(newVal);
+                        setSettingsSaving(true);
+                        try {
+                          const res = await fetch('/api/clients/me', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ emailNotifications: newVal }),
+                          });
+                          const result = await res.json();
+                          if (result.success) {
+                            setSettingsMessage(newVal ? 'Уведомления включены' : 'Уведомления отключены');
+                          } else {
+                            setEmailNotifications(!newVal);
+                            setSettingsMessage('Ошибка сохранения');
+                          }
+                        } catch {
+                          setEmailNotifications(!newVal);
+                          setSettingsMessage('Ошибка сохранения');
+                        } finally {
+                          setSettingsSaving(false);
+                          setTimeout(() => setSettingsMessage(null), 3000);
+                        }
+                      }}
+                      disabled={settingsSaving}
+                      className={`relative h-7 w-12 flex-shrink-0 rounded-full transition-colors duration-200 ${emailNotifications ? 'bg-[var(--neon-cyan)]' : 'bg-gray-600'}`}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform duration-200 ${emailNotifications ? 'translate-x-5' : 'translate-x-0'}`}
+                      />
+                    </button>
+                  </div>
+                  {settingsMessage && (
+                    <p className="mt-3 text-sm font-medium text-[var(--neon-cyan)]">{settingsMessage}</p>
+                  )}
+                </div>
+
+                {/* Delete My Data */}
+                <div className="card-premium border border-red-500/20 p-6">
+                  <h3 className="mb-4 flex items-center gap-3 text-lg font-bold text-white">
+                    <span className="rounded-lg bg-red-500/10 p-2">🗑️</span> Удаление данных
+                  </h3>
+                  <p className="mb-4 text-sm leading-relaxed text-gray-400">
+                    Вы можете удалить все свои данные в соответствии с GDPR. Это действие удалит вашу историю чатов,
+                    базу знаний, аналитику и все связанные данные. Аккаунт и виджет будут деактивированы.
+                    <strong className="text-red-400"> Это действие необратимо.</strong>
+                  </p>
+
+                  {!deleteConfirm ? (
+                    <button
+                      onClick={() => setDeleteConfirm(true)}
+                      className="rounded-xl border border-red-500/30 bg-red-500/10 px-6 py-2.5 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/20"
+                    >
+                      Удалить мои данные
+                    </button>
+                  ) : (
+                    <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+                      <p className="mb-4 text-sm font-bold text-red-400">
+                        Вы уверены? Все данные будут безвозвратно удалены.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={async () => {
+                            setDeleting(true);
+                            try {
+                              const res = await fetch('/api/clients/me/data', { method: 'DELETE' });
+                              const result = await res.json();
+                              if (result.success) {
+                                alert('Ваши данные удалены. Вы будете перенаправлены на главную страницу.');
+                                router.push('/');
+                              } else {
+                                alert('Ошибка: ' + (result.error || 'Не удалось удалить данные'));
+                              }
+                            } catch {
+                              alert('Ошибка при удалении данных');
+                            } finally {
+                              setDeleting(false);
+                              setDeleteConfirm(false);
+                            }
+                          }}
+                          disabled={deleting}
+                          className="rounded-xl bg-red-500 px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-red-600 disabled:opacity-50"
+                        >
+                          {deleting ? 'Удаление...' : 'Да, удалить всё'}
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(false)}
+                          className="rounded-xl border border-white/10 bg-white/5 px-6 py-2.5 text-sm text-gray-400 transition-all hover:bg-white/10"
+                        >
+                          Отмена
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Legal Links */}
+                <div className="flex items-center justify-center gap-4 py-4 text-xs text-gray-600">
+                  <Link href="/privacy" className="transition-colors hover:text-gray-400">
+                    Политика конфиденциальности
+                  </Link>
+                  <span>|</span>
+                  <Link href="/terms" className="transition-colors hover:text-gray-400">
+                    Условия использования
+                  </Link>
                 </div>
               </div>
             )}

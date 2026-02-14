@@ -45,4 +45,7 @@ const ChatLogSchema = new Schema(
 ChatLogSchema.index({ clientId: 1, createdAt: -1 });
 ChatLogSchema.index({ clientId: 1, sessionId: 1 });
 
+// TTL index: auto-delete chat logs after 365 days (GDPR data retention)
+ChatLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 365 * 24 * 60 * 60 });
+
 export default mongoose.models.ChatLog || mongoose.model<IChatLog>('ChatLog', ChatLogSchema);

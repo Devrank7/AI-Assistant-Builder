@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 interface UpgradePromptProps {
   daysLeft: number;
   trialProgress: number;
@@ -36,6 +38,16 @@ export default function UpgradePrompt({
               >
                 Возобновить подписку — ${monthlyPrice}/мес
               </button>
+              <p className="mt-3 text-xs text-gray-500">
+                Оплачивая, вы соглашаетесь с{' '}
+                <Link href="/terms" target="_blank" className="text-gray-400 underline hover:text-gray-300">
+                  Условиями
+                </Link>{' '}
+                и{' '}
+                <Link href="/privacy" target="_blank" className="text-gray-400 underline hover:text-gray-300">
+                  Политикой конфиденциальности
+                </Link>
+              </p>
             </div>
           </div>
         </div>
@@ -100,6 +112,16 @@ export default function UpgradePrompt({
             >
               Настроить оплату — ${monthlyPrice}/мес
             </button>
+            <p className="mt-3 text-xs text-gray-500">
+              Оплачивая, вы соглашаетесь с{' '}
+              <Link href="/terms" target="_blank" className="text-gray-400 underline hover:text-gray-300">
+                Условиями
+              </Link>{' '}
+              и{' '}
+              <Link href="/privacy" target="_blank" className="text-gray-400 underline hover:text-gray-300">
+                Политикой конфиденциальности
+              </Link>
+            </p>
           </div>
         </div>
       </div>

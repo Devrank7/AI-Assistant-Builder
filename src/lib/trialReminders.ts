@@ -11,7 +11,7 @@
 import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
 import { TRIAL_DAYS, GRACE_PERIOD_DAYS } from '@/lib/paymentProviders/types';
-import { sendEmail, sendTelegram } from '@/lib/notifications';
+import { sendEmail, sendTelegram, isEmailAllowed, getUnsubscribeFooter } from '@/lib/notifications';
 
 interface TrialCheckResult {
   totalChecked: number;
@@ -42,7 +42,9 @@ export async function checkTrialReminders(): Promise<TrialCheckResult> {
   try {
     const clientsToCheck = await Client.find({
       subscriptionStatus: { $in: ['trial', 'past_due'] },
-    }).select('clientId email telegram startDate trialActivatedAt isActive username subscriptionStatus gracePeriodEnd');
+    }).select(
+      'clientId clientToken email telegram startDate trialActivatedAt isActive username subscriptionStatus gracePeriodEnd'
+    );
 
     result.totalChecked = clientsToCheck.length;
 
@@ -62,7 +64,7 @@ export async function checkTrialReminders(): Promise<TrialCheckResult> {
           if (now > new Date(client.gracePeriodEnd)) {
             // Grace period expired — suspend
             await Client.updateOne({ clientId: client.clientId }, { isActive: false, subscriptionStatus: 'suspended' });
-            await sendTrialExpiredEmail(client.email, client.telegram, client.username);
+            await sendTrialExpiredEmail(client.email, client.telegram, client.username, client.clientToken);
             result.suspended++;
           }
           continue;
@@ -88,16 +90,16 @@ export async function checkTrialReminders(): Promise<TrialCheckResult> {
               gracePeriodEnd: graceEnd,
             }
           );
-          await sendGracePeriodStartedEmail(client.email, client.telegram, client.username);
+          await sendGracePeriodStartedEmail(client.email, client.telegram, client.username, client.clientToken);
           result.gracePeriodStarted++;
         } else if (daysLeft === 1) {
-          await sendTrialReminderEmail(client.email, client.telegram, client.username, 1);
+          await sendTrialReminderEmail(client.email, client.telegram, client.username, 1, client.clientToken);
           result.reminders1d++;
         } else if (daysLeft === 3) {
-          await sendTrialReminderEmail(client.email, client.telegram, client.username, 3);
+          await sendTrialReminderEmail(client.email, client.telegram, client.username, 3, client.clientToken);
           result.reminders3d++;
         } else if (daysLeft === 7) {
-          await sendTrialReminderEmail(client.email, client.telegram, client.username, 7);
+          await sendTrialReminderEmail(client.email, client.telegram, client.username, 7, client.clientToken);
           result.reminders7d++;
         }
       } catch (err) {
@@ -136,27 +138,30 @@ export function getTrialProgress(startDate: Date, trialActivatedAt?: Date | null
 async function sendGracePeriodStartedEmail(
   email: string,
   telegram: string | undefined,
-  username: string
+  username: string,
+  clientToken?: string
 ): Promise<void> {
   const subject = `⚠️ Ваш пробный период истек. Начался Grace Period (${GRACE_PERIOD_DAYS} дня)`;
 
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
-      <h2 style="color: #f59e0b;">⚠️ Пробный период истек</h2>
-      <p style="color: #d1d5db;">Привет, ${username}!</p>
-      <p style="color: #d1d5db;">Ваши 30 дней бесплатного использования подошли к концу.</p>
-      <p style="color: #fff; font-weight: bold;">У вас есть ${GRACE_PERIOD_DAYS} дня (Grace Period), чтобы оплатить подписку, иначе виджет будет отключен.</p>
-      <div style="margin: 24px 0;">
-        <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
-           style="display: inline-block; background: #f59e0b; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
-          Оплатить подписку
-        </a>
+  if (await isEmailAllowed({ email })) {
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
+        <h2 style="color: #f59e0b;">⚠️ Пробный период истек</h2>
+        <p style="color: #d1d5db;">Привет, ${username}!</p>
+        <p style="color: #d1d5db;">Ваши 30 дней бесплатного использования подошли к концу.</p>
+        <p style="color: #fff; font-weight: bold;">У вас есть ${GRACE_PERIOD_DAYS} дня (Grace Period), чтобы оплатить подписку, иначе виджет будет отключен.</p>
+        <div style="margin: 24px 0;">
+          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
+             style="display: inline-block; background: #f59e0b; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
+            Оплатить подписку
+          </a>
+        </div>
+        <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
+        ${getUnsubscribeFooter(clientToken)}
       </div>
-      <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
-    </div>
-  `;
-
-  await sendEmail(email, subject, html);
+    `;
+    await sendEmail(email, subject, html);
+  }
 
   if (telegram) {
     const msg = `⚠️ <b>Пробный период истек</b>\n\nПривет, ${username}! Начался Grace Period (${GRACE_PERIOD_DAYS} дня). Оплатите подписку, чтобы избежать отключения.`;
@@ -168,29 +173,32 @@ async function sendTrialReminderEmail(
   email: string,
   telegram: string | undefined,
   username: string,
-  daysLeft: number
+  daysLeft: number,
+  clientToken?: string
 ): Promise<void> {
   const subject = `⏰ Ваш trial заканчивается через ${daysLeft} ${getDayWord(daysLeft)}`;
   const urgency = daysLeft === 1 ? 'color: #ef4444;' : daysLeft === 3 ? 'color: #f59e0b;' : 'color: #06b6d4;';
 
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
-      <h2 style="${urgency}">⏰ Trial заканчивается через ${daysLeft} ${getDayWord(daysLeft)}</h2>
-      <p style="color: #d1d5db;">Привет, ${username}!</p>
-      <p style="color: #d1d5db;">Ваш бесплатный период использования WinBix AI заканчивается через <strong style="color: #fff;">${daysLeft} ${getDayWord(daysLeft)}</strong>.</p>
-      <p style="color: #d1d5db;">Чтобы продолжить работу вашего AI-виджета, настройте оплату в вашем кабинете.</p>
-      <div style="margin: 24px 0;">
-        <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
-           style="display: inline-block; background: linear-gradient(135deg, #06b6d4, #a855f7); color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
-          Перейти в кабинет
-        </a>
+  if (await isEmailAllowed({ email })) {
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
+        <h2 style="${urgency}">⏰ Trial заканчивается через ${daysLeft} ${getDayWord(daysLeft)}</h2>
+        <p style="color: #d1d5db;">Привет, ${username}!</p>
+        <p style="color: #d1d5db;">Ваш бесплатный период использования WinBix AI заканчивается через <strong style="color: #fff;">${daysLeft} ${getDayWord(daysLeft)}</strong>.</p>
+        <p style="color: #d1d5db;">Чтобы продолжить работу вашего AI-виджета, настройте оплату в вашем кабинете.</p>
+        <div style="margin: 24px 0;">
+          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
+             style="display: inline-block; background: linear-gradient(135deg, #06b6d4, #a855f7); color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
+            Перейти в кабинет
+          </a>
+        </div>
+        <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
+        <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
+        ${getUnsubscribeFooter(clientToken)}
       </div>
-      <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
-      <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
-    </div>
-  `;
-
-  await sendEmail(email, subject, html);
+    `;
+    await sendEmail(email, subject, html);
+  }
 
   if (telegram) {
     const msg = `⏰ <b>Trial заканчивается через ${daysLeft} ${getDayWord(daysLeft)}</b>\n\nПривет, ${username}! Настройте оплату, чтобы виджет продолжил работу.`;
@@ -198,27 +206,34 @@ async function sendTrialReminderEmail(
   }
 }
 
-async function sendTrialExpiredEmail(email: string, telegram: string | undefined, username: string): Promise<void> {
+async function sendTrialExpiredEmail(
+  email: string,
+  telegram: string | undefined,
+  username: string,
+  clientToken?: string
+): Promise<void> {
   const subject = '🚫 Ваш trial период закончился';
 
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
-      <h2 style="color: #ef4444;">🚫 Trial период закончился</h2>
-      <p style="color: #d1d5db;">Привет, ${username}!</p>
-      <p style="color: #d1d5db;">Ваш бесплатный период использования WinBix AI истёк. Виджет был приостановлен.</p>
-      <p style="color: #d1d5db;">Настройте оплату, чтобы возобновить работу.</p>
-      <div style="margin: 24px 0;">
-        <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
-           style="display: inline-block; background: #ef4444; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
-          Возобновить подписку
-        </a>
+  if (await isEmailAllowed({ email })) {
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0f; color: #fff; padding: 32px; border-radius: 16px;">
+        <h2 style="color: #ef4444;">🚫 Trial период закончился</h2>
+        <p style="color: #d1d5db;">Привет, ${username}!</p>
+        <p style="color: #d1d5db;">Ваш бесплатный период использования WinBix AI истёк. Виджет был приостановлен.</p>
+        <p style="color: #d1d5db;">Настройте оплату, чтобы возобновить работу.</p>
+        <div style="margin: 24px 0;">
+          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
+             style="display: inline-block; background: #ef4444; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
+            Возобновить подписку
+          </a>
+        </div>
+        <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
+        <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
+        ${getUnsubscribeFooter(clientToken)}
       </div>
-      <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
-      <p style="color: #6b7280; font-size: 12px;">WinBix AI Team</p>
-    </div>
-  `;
-
-  await sendEmail(email, subject, html);
+    `;
+    await sendEmail(email, subject, html);
+  }
 
   if (telegram) {
     const msg = `🚫 <b>Trial закончился</b>\n\nПривет, ${username}! Ваш виджет приостановлен. Настройте оплату для возобновления.`;
