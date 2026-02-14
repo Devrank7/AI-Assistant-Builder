@@ -1,0 +1,12 @@
+{
+  "name": "Головна",
+  "clientId": "demo-recodent-com-ua-fffb2a",
+  "username": "demo-recodent-com-ua-fffb2a",
+  "email": "",
+  "website": "https://recodent.com.ua/",
+  "clientType": "quick",
+  "features": ["streaming", "quick-replies", "feedback", "sound", "voice-input"],
+  "createdAt": "2026-02-14T18:32:57.459Z",
+  "version": "2.0.0",
+  "selfService": true
+}

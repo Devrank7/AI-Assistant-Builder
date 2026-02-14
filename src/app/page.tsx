@@ -4,6 +4,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from '@/i18n/useTranslation';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 /* ─── Floating Orb Component ─── */
 function FloatingOrb({
@@ -96,6 +98,8 @@ function FeatureBadge({ icon, label }: { icon: string; label: string }) {
 
 export default function LandingPage() {
   const router = useRouter();
+  const { t } = useTranslation('home');
+  const { t: tc } = useTranslation('common');
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showClientModal, setShowClientModal] = useState(false);
   const [adminToken, setAdminToken] = useState('');
@@ -105,7 +109,7 @@ export default function LandingPage() {
 
   const handleAdminLogin = useCallback(async () => {
     if (!adminToken.trim()) {
-      setError('Please enter admin token');
+      setError(t('admin.modal.error.empty'));
       return;
     }
 
@@ -124,18 +128,18 @@ export default function LandingPage() {
       if (data.success) {
         router.push('/admin');
       } else {
-        setError(data.error || 'Invalid admin token');
+        setError(data.error || t('admin.modal.error.invalid'));
       }
     } catch {
-      setError('Authentication failed');
+      setError(t('auth.failed'));
     } finally {
       setLoading(false);
     }
-  }, [adminToken, router]);
+  }, [adminToken, router, t]);
 
   const handleClientLogin = useCallback(async () => {
     if (!clientToken.trim()) {
-      setError('Please enter your access token');
+      setError(t('client.modal.error.empty'));
       return;
     }
 
@@ -154,14 +158,14 @@ export default function LandingPage() {
       if (data.success) {
         router.push(`/cabinet?token=${encodeURIComponent(clientToken)}`);
       } else {
-        setError(data.error || 'Invalid client token');
+        setError(data.error || t('client.modal.error.invalid'));
       }
     } catch {
-      setError('Authentication failed');
+      setError(t('auth.failed'));
     } finally {
       setLoading(false);
     }
-  }, [clientToken, router]);
+  }, [clientToken, router, t]);
 
   const closeModals = () => {
     setShowAdminModal(false);
@@ -210,10 +214,7 @@ export default function LandingPage() {
             <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl">
               WinBix <span className="gradient-text">AI</span>
             </h1>
-            <p className="mx-auto max-w-xl text-xl leading-relaxed text-gray-400">
-              AI-ассистенты для вашего бизнеса, которые работают 24/7. Отвечают клиентам, записывают на приём и
-              увеличивают продажи — пока вы спите.
-            </p>
+            <p className="mx-auto max-w-xl text-xl leading-relaxed text-gray-400">{t('hero.tagline')}</p>
 
             {/* About Button */}
             <div className="mt-8">
@@ -221,7 +222,7 @@ export default function LandingPage() {
                 href="/about"
                 className="group relative inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-8 py-4 text-lg font-medium text-white backdrop-blur-sm transition-all duration-500 hover:border-cyan-500/40 hover:bg-white/[0.08] hover:shadow-lg hover:shadow-cyan-500/20"
               >
-                <span className="relative z-10">O компании</span>
+                <span className="relative z-10">{t('hero.about')}</span>
                 <svg
                   className="relative z-10 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
                   fill="none"
@@ -236,11 +237,11 @@ export default function LandingPage() {
 
             {/* Feature Badges */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <FeatureBadge icon="✦" label="AI 24/7" />
-              <FeatureBadge icon="◉" label="RAG System" />
-              <FeatureBadge icon="⚡" label="+30 записей/мес" />
-              <FeatureBadge icon="📊" label="Аналитика" />
-              <FeatureBadge icon="🔒" label="Безопасно" />
+              <FeatureBadge icon="✦" label={t('badge.ai')} />
+              <FeatureBadge icon="◉" label={t('badge.rag')} />
+              <FeatureBadge icon="⚡" label={t('badge.records')} />
+              <FeatureBadge icon="📊" label={t('badge.analytics')} />
+              <FeatureBadge icon="🔒" label={t('badge.secure')} />
             </div>
           </div>
 
@@ -273,14 +274,12 @@ export default function LandingPage() {
                 </div>
 
                 <h2 className="mb-3 text-2xl font-bold text-white transition-colors group-hover:text-purple-300">
-                  Admin Panel
+                  {t('admin.title')}
                 </h2>
-                <p className="mb-6 leading-relaxed text-gray-400">
-                  Full management dashboard to oversee all clients, widgets, and system analytics
-                </p>
+                <p className="mb-6 leading-relaxed text-gray-400">{t('admin.desc')}</p>
 
                 <div className="flex items-center text-sm font-medium text-purple-400 group-hover:text-purple-300">
-                  <span>Enter Admin Token</span>
+                  <span>{t('admin.enter')}</span>
                   <svg
                     className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-2"
                     fill="none"
@@ -320,14 +319,12 @@ export default function LandingPage() {
                 </div>
 
                 <h2 className="mb-3 text-2xl font-bold text-white transition-colors group-hover:text-cyan-300">
-                  Client Cabinet
+                  {t('client.title')}
                 </h2>
-                <p className="mb-6 leading-relaxed text-gray-400">
-                  View widget details, usage statistics, knowledge base, and integration setup
-                </p>
+                <p className="mb-6 leading-relaxed text-gray-400">{t('client.desc')}</p>
 
                 <div className="flex items-center text-sm font-medium text-cyan-400 group-hover:text-cyan-300">
-                  <span>Enter Your Token</span>
+                  <span>{t('client.enter')}</span>
                   <svg
                     className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-2"
                     fill="none"
@@ -346,13 +343,14 @@ export default function LandingPage() {
 
           {/* Footer */}
           <div className="flex flex-col items-center justify-center gap-3 text-sm text-gray-600">
+            <LanguageSwitcher />
             <div className="flex gap-4">
               <Link href="/privacy" className="text-gray-500 transition-colors hover:text-gray-300">
-                Политика конфиденциальности
+                {tc('nav.privacy')}
               </Link>
               <span className="text-gray-700">&middot;</span>
               <Link href="/terms" className="text-gray-500 transition-colors hover:text-gray-300">
-                Условия использования
+                {tc('nav.terms')}
               </Link>
             </div>
             <p>&copy; {new Date().getFullYear()} WinBix AI</p>
@@ -401,8 +399,8 @@ export default function LandingPage() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-white">Admin Access</h2>
-                  <p className="mt-2 text-sm text-gray-400">Enter your secret admin token to continue</p>
+                  <h2 className="text-2xl font-bold text-white">{t('admin.modal.title')}</h2>
+                  <p className="mt-2 text-sm text-gray-400">{t('admin.modal.desc')}</p>
                 </div>
 
                 {error && (
@@ -422,7 +420,7 @@ export default function LandingPage() {
                       value={adminToken}
                       onChange={(e) => setAdminToken(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
-                      placeholder="Enter admin token..."
+                      placeholder={t('admin.modal.placeholder')}
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-gray-500 transition-all focus:border-purple-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
                       autoFocus
                     />
@@ -437,10 +435,10 @@ export default function LandingPage() {
                     {loading ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        <span>Verifying...</span>
+                        <span>{t('auth.verifying')}</span>
                       </div>
                     ) : (
-                      'Access Admin Panel'
+                      t('admin.modal.button')
                     )}
                   </motion.button>
                 </div>
@@ -491,8 +489,8 @@ export default function LandingPage() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-white">Client Cabinet</h2>
-                  <p className="mt-2 text-sm text-gray-400">Enter your access token to view your dashboard</p>
+                  <h2 className="text-2xl font-bold text-white">{t('client.modal.title')}</h2>
+                  <p className="mt-2 text-sm text-gray-400">{t('client.modal.desc')}</p>
                 </div>
 
                 {error && (
@@ -512,7 +510,7 @@ export default function LandingPage() {
                       value={clientToken}
                       onChange={(e) => setClientToken(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleClientLogin()}
-                      placeholder="Enter your access token..."
+                      placeholder={t('client.modal.placeholder')}
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder-gray-500 transition-all focus:border-cyan-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-cyan-500/20 focus:outline-none"
                       autoFocus
                     />
@@ -527,10 +525,10 @@ export default function LandingPage() {
                     {loading ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        <span>Verifying...</span>
+                        <span>{t('auth.verifying')}</span>
                       </div>
                     ) : (
-                      'Access My Cabinet'
+                      t('client.modal.button')
                     )}
                   </motion.button>
                 </div>

@@ -30,6 +30,7 @@ export const RATE_LIMITS = {
   api: { windowMs: 60 * 1000, maxRequests: 100 },
   upload: { windowMs: 60 * 1000, maxRequests: 10 },
   webhook: { windowMs: 60 * 1000, maxRequests: 50 },
+  demoGenerate: { windowMs: 60 * 60 * 1000, maxRequests: 3 },
 } as const;
 
 export function checkRateLimit(key: string, config: RateLimitConfig) {

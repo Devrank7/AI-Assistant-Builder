@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ToastProvider } from '@/components/ui/Toast';
+import ClientLanguageProvider from '@/i18n/ClientProvider';
 import CookieConsent from '@/components/CookieConsent';
 import './globals.css';
 
@@ -33,8 +34,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-[#0a0a0f] text-white antialiased`}
         suppressHydrationWarning
       >
-        <ToastProvider>{children}</ToastProvider>
-        <CookieConsent />
+        <ClientLanguageProvider>
+          <ToastProvider>{children}</ToastProvider>
+          <CookieConsent />
+        </ClientLanguageProvider>
       </body>
     </html>
   );

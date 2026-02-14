@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export default function CookieConsent() {
+  const { t } = useTranslation('common');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -30,12 +32,12 @@ export default function CookieConsent() {
     <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-white/[0.08] bg-[#0a0a0f]/95 p-4 backdrop-blur-xl md:p-6">
       <div className="mx-auto flex max-w-4xl flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
         <p className="text-sm leading-relaxed text-gray-400">
-          Мы используем cookies для корректной работы сервиса. Продолжая использование сайта, вы соглашаетесь с нашей{' '}
+          {t('cookie.text')}{' '}
           <Link
             href="/privacy"
             className="text-[var(--neon-cyan)] underline underline-offset-2 transition-colors hover:text-white"
           >
-            Политикой конфиденциальности
+            {t('cookie.link')}
           </Link>
           .
         </p>
@@ -43,7 +45,7 @@ export default function CookieConsent() {
           onClick={accept}
           className="flex-shrink-0 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-cyan-500/25"
         >
-          Принять
+          {t('cookie.accept')}
         </button>
       </div>
     </div>

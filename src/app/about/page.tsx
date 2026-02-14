@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import WidgetGenerator from '@/components/WidgetGenerator';
+import { useTranslation } from '@/i18n/useTranslation';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 /* ─── Floating Orb ─── */
 function FloatingOrb({
@@ -126,6 +129,9 @@ function Section({
 }
 
 export default function AboutPage() {
+  const { t } = useTranslation('about');
+  const { t: tc } = useTranslation('common');
+
   return (
     <div className="bg-gradient-animated relative min-h-screen overflow-hidden">
       {/* Background effects */}
@@ -151,12 +157,15 @@ export default function AboutPage() {
           </div>
           <span className="text-lg font-bold">WinBix AI</span>
         </Link>
-        <Link
-          href="/"
-          className="rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-gray-300 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-        >
-          На главную
-        </Link>
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher />
+          <Link
+            href="/"
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-gray-300 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+          >
+            {tc('nav.home')}
+          </Link>
+        </div>
       </nav>
 
       {/* Content */}
@@ -174,8 +183,7 @@ export default function AboutPage() {
               WinBix <span className="gradient-text">AI</span>
             </h1>
             <p className="mx-auto max-w-2xl text-xl leading-relaxed text-gray-400 md:text-2xl">
-              Мы создаём AI-ассистентов, которые превращают ваш сайт в машину продаж.{' '}
-              <span className="text-white">24 часа в сутки. 7 дней в неделю. Без выходных.</span>
+              {t('hero.subtitle')} <span className="text-white">{t('hero.highlight')}</span>
             </p>
           </motion.div>
         </Section>
@@ -186,12 +194,11 @@ export default function AboutPage() {
         <Section className="pb-24">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-              Сколько клиентов вы <span className="text-red-400">теряете</span> каждую ночь?
+              {t('problem.title.before')}
+              <span className="text-red-400">{t('problem.title.accent')}</span>
+              {t('problem.title.after')}
             </h2>
-            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-400">
-              Ваш сайт работает 24/7. А ваш менеджер — нет. Клиент заходит в 23:00, не находит ответ на свой вопрос, и
-              уходит к конкуренту. Знакомо? Мы это исправили.
-            </p>
+            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-400">{t('problem.desc')}</p>
           </div>
 
           {/* Metrics */}
@@ -206,8 +213,8 @@ export default function AboutPage() {
               <div className="mb-4 text-5xl font-bold text-[var(--neon-cyan)]">
                 +<AnimatedCounter target={30} suffix="-40" />
               </div>
-              <p className="text-lg font-medium text-white">записей в месяц</p>
-              <p className="mt-2 text-sm text-gray-500">дополнительно к вашим текущим</p>
+              <p className="text-lg font-medium text-white">{t('metrics.records.label')}</p>
+              <p className="mt-2 text-sm text-gray-500">{t('metrics.records.sub')}</p>
             </motion.div>
 
             <motion.div
@@ -218,8 +225,8 @@ export default function AboutPage() {
               className="glass group rounded-2xl border-white/5 p-8 text-center transition-all duration-500 hover:border-purple-500/30 hover:bg-white/[0.06]"
             >
               <div className="mb-4 text-5xl font-bold text-[var(--neon-purple)]">24/7</div>
-              <p className="text-lg font-medium text-white">без перерывов</p>
-              <p className="mt-2 text-sm text-gray-500">отвечает мгновенно в любое время</p>
+              <p className="text-lg font-medium text-white">{t('metrics.uptime.label')}</p>
+              <p className="mt-2 text-sm text-gray-500">{t('metrics.uptime.sub')}</p>
             </motion.div>
 
             <motion.div
@@ -233,8 +240,8 @@ export default function AboutPage() {
                 &lt;
                 <AnimatedCounter target={3} />с
               </div>
-              <p className="text-lg font-medium text-white">время ответа</p>
-              <p className="mt-2 text-sm text-gray-500">быстрее любого менеджера</p>
+              <p className="text-lg font-medium text-white">{t('metrics.speed.label')}</p>
+              <p className="mt-2 text-sm text-gray-500">{t('metrics.speed.sub')}</p>
             </motion.div>
           </div>
         </Section>
@@ -245,11 +252,10 @@ export default function AboutPage() {
         <Section className="pb-24">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-              Как это <span className="gradient-text">работает</span>
+              {t('how.title.before')}
+              <span className="gradient-text">{t('how.title.accent')}</span>
             </h2>
-            <p className="mx-auto max-w-xl text-lg text-gray-400">
-              Три простых шага — и ваш сайт начинает продавать за вас
-            </p>
+            <p className="mx-auto max-w-xl text-lg text-gray-400">{t('how.desc')}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -264,11 +270,8 @@ export default function AboutPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 text-2xl font-bold text-[var(--neon-cyan)]">
                 01
               </div>
-              <h3 className="mb-3 text-xl font-bold text-white">Анализируем ваш бизнес</h3>
-              <p className="leading-relaxed text-gray-400">
-                Изучаем ваш сайт, услуги, цены и целевую аудиторию. Понимаем, какие вопросы задают ваши клиенты чаще
-                всего.
-              </p>
+              <h3 className="mb-3 text-xl font-bold text-white">{t('how.step1.title')}</h3>
+              <p className="leading-relaxed text-gray-400">{t('how.step1.desc')}</p>
             </motion.div>
 
             {/* Step 2 */}
@@ -282,11 +285,8 @@ export default function AboutPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 text-2xl font-bold text-[var(--neon-purple)]">
                 02
               </div>
-              <h3 className="mb-3 text-xl font-bold text-white">Создаём AI-ассистента</h3>
-              <p className="leading-relaxed text-gray-400">
-                Обучаем его на базе знаний вашего бизнеса. Он знает ваши услуги, цены, расписание — и говорит на языке
-                ваших клиентов.
-              </p>
+              <h3 className="mb-3 text-xl font-bold text-white">{t('how.step2.title')}</h3>
+              <p className="leading-relaxed text-gray-400">{t('how.step2.desc')}</p>
             </motion.div>
 
             {/* Step 3 */}
@@ -300,13 +300,24 @@ export default function AboutPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-500/5 text-2xl font-bold text-[var(--neon-pink)]">
                 03
               </div>
-              <h3 className="mb-3 text-xl font-bold text-white">Устанавливаем за 5 минут</h3>
-              <p className="leading-relaxed text-gray-400">
-                Одна строчка кода на вашем сайте — и AI-ассистент начинает работать. Отвечает клиентам, записывает на
-                приём, собирает заявки.
-              </p>
+              <h3 className="mb-3 text-xl font-bold text-white">{t('how.step3.title')}</h3>
+              <p className="leading-relaxed text-gray-400">{t('how.step3.desc')}</p>
             </motion.div>
           </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════ */}
+        {/* TRY IT YOURSELF */}
+        {/* ═══════════════════════════════════════════ */}
+        <Section className="pb-24">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
+              {t('try.title.before')}
+              <span className="gradient-text">{t('try.title.accent')}</span>
+            </h2>
+            <p className="mx-auto max-w-xl text-lg text-gray-400">{t('try.desc')}</p>
+          </div>
+          <WidgetGenerator />
         </Section>
 
         {/* ═══════════════════════════════════════════ */}
@@ -315,45 +326,20 @@ export default function AboutPage() {
         <Section className="pb-24">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-              Ваш новый <span className="gradient-text">менеджер</span>
+              {t('features.title.before')}
+              <span className="gradient-text">{t('features.title.accent')}</span>
             </h2>
-            <p className="mx-auto max-w-xl text-lg text-gray-400">
-              Он не устаёт, не берёт отпуск и не опаздывает. Вот что он умеет:
-            </p>
+            <p className="mx-auto max-w-xl text-lg text-gray-400">{t('features.desc')}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {[
-              {
-                icon: '💬',
-                title: 'Отвечает на вопросы клиентов',
-                desc: 'Знает всё о ваших услугах, ценах и расписании. Отвечает мгновенно — днём и ночью.',
-              },
-              {
-                icon: '📋',
-                title: 'Записывает на приём',
-                desc: 'Собирает контактные данные и заявки. Вы получаете готового клиента утром.',
-              },
-              {
-                icon: '🌐',
-                title: 'Говорит на любом языке',
-                desc: 'Украинский, русский, английский, польский — подстраивается под вашу аудиторию.',
-              },
-              {
-                icon: '📊',
-                title: 'Показывает аналитику',
-                desc: 'Вы видите, сколько людей обратились, какие вопросы задают, и что можно улучшить.',
-              },
-              {
-                icon: '🎨',
-                title: 'Выглядит как часть вашего сайта',
-                desc: 'Мы подбираем цвета, шрифты и стиль под ваш бренд. Виджет вписывается идеально.',
-              },
-              {
-                icon: '🔗',
-                title: 'Работает во всех каналах',
-                desc: 'Сайт, Telegram, WhatsApp, Instagram — один ассистент для всех каналов.',
-              },
+              { icon: '💬', title: t('features.chat.title'), desc: t('features.chat.desc') },
+              { icon: '📋', title: t('features.booking.title'), desc: t('features.booking.desc') },
+              { icon: '🌐', title: t('features.lang.title'), desc: t('features.lang.desc') },
+              { icon: '📊', title: t('features.analytics.title'), desc: t('features.analytics.desc') },
+              { icon: '🎨', title: t('features.design.title'), desc: t('features.design.desc') },
+              { icon: '🔗', title: t('features.channels.title'), desc: t('features.channels.desc') },
             ].map((item, i) => (
               <motion.div
                 key={item.title}
@@ -376,42 +362,170 @@ export default function AboutPage() {
         </Section>
 
         {/* ═══════════════════════════════════════════ */}
+        {/* CRM / CALENDAR INTEGRATIONS */}
+        {/* ═══════════════════════════════════════════ */}
+        <Section className="pb-24">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
+              {t('integrations.title.before')}
+              <span className="gradient-text">{t('integrations.title.accent')}</span>
+            </h2>
+            <p className="mx-auto max-w-2xl text-lg text-gray-400">{t('integrations.desc')}</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {/* CRM */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="glass group relative overflow-hidden rounded-2xl border-white/5 p-8 transition-all duration-500 hover:border-cyan-500/30 hover:bg-white/[0.06]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <div className="relative z-10">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/20 to-cyan-500/5">
+                  <svg
+                    className="h-7 w-7 text-[var(--neon-cyan)]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-3.06a4.5 4.5 0 00-6.364-6.364L4.5 8.257m9.86-3.06l4.5 4.5"
+                    />
+                  </svg>
+                </div>
+                <h3 className="mb-3 text-xl font-bold text-white">{t('integrations.crm.title')}</h3>
+                <p className="leading-relaxed text-gray-400">{t('integrations.crm.desc')}</p>
+              </div>
+            </motion.div>
+
+            {/* Calendar */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="glass group relative overflow-hidden rounded-2xl border-white/5 p-8 transition-all duration-500 hover:border-purple-500/30 hover:bg-white/[0.06]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <div className="relative z-10">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5">
+                  <svg
+                    className="h-7 w-7 text-[var(--neon-purple)]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="mb-3 text-xl font-bold text-white">{t('integrations.calendar.title')}</h3>
+                <p className="leading-relaxed text-gray-400">{t('integrations.calendar.desc')}</p>
+              </div>
+            </motion.div>
+
+            {/* Auto-booking — special accent card */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="glass group relative overflow-hidden rounded-2xl border-2 border-[var(--neon-cyan)]/20 p-8 transition-all duration-500 hover:border-[var(--neon-cyan)]/40 hover:bg-white/[0.06]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--neon-cyan)]/5 via-[var(--neon-purple)]/5 to-transparent" />
+              <div className="relative z-10">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--neon-cyan)]/20 to-[var(--neon-purple)]/10">
+                  <svg
+                    className="h-7 w-7 text-[var(--neon-cyan)]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="mb-3 text-xl font-bold text-white">{t('integrations.booking.title')}</h3>
+                <p className="leading-relaxed text-gray-400">{t('integrations.booking.desc')}</p>
+                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--neon-cyan)]/10 px-3 py-1 text-xs font-medium text-[var(--neon-cyan)]">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--neon-cyan)]" />
+                  AI-powered
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════ */}
         {/* FOUNDERS */}
         {/* ═══════════════════════════════════════════ */}
         <Section className="pb-24">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-              Команда <span className="gradient-text">WinBix</span>
+              {t('team.title.before')}
+              <span className="gradient-text">{t('team.title.accent')}</span>
             </h2>
-            <p className="mx-auto max-w-2xl text-lg text-gray-400">
-              Три предпринимателя, одна миссия — сделать AI доступным для каждого бизнеса
-            </p>
+            <p className="mx-auto max-w-2xl text-lg text-gray-400">{t('team.desc')}</p>
           </div>
 
           <div className="glass mx-auto max-w-3xl rounded-2xl border-white/5 p-8 md:p-12">
             <p className="mb-8 text-lg leading-relaxed text-gray-300">
-              Мы — <span className="font-semibold text-white">Даниил</span>,{' '}
-              <span className="font-semibold text-white">Миша</span> и{' '}
-              <span className="font-semibold text-white">Серёжа</span>. Три предпринимателя, которые увидели одну и ту
-              же проблему: бизнесы теряют десятки клиентов каждый месяц просто потому, что некому ответить на вопрос в
-              нерабочее время.
+              {t('team.bio1')
+                .split(/\{(daniil|misha|serzha)\}/g)
+                .map((part, i) => {
+                  if (part === 'daniil')
+                    return (
+                      <span key={i} className="font-semibold text-white">
+                        {t('team.daniil')}
+                      </span>
+                    );
+                  if (part === 'misha')
+                    return (
+                      <span key={i} className="font-semibold text-white">
+                        {t('team.misha')}
+                      </span>
+                    );
+                  if (part === 'serzha')
+                    return (
+                      <span key={i} className="font-semibold text-white">
+                        {t('team.serzha')}
+                      </span>
+                    );
+                  return <span key={i}>{part}</span>;
+                })}
             </p>
             <p className="mb-8 text-lg leading-relaxed text-gray-300">
-              Мы создали <span className="font-semibold text-[var(--neon-cyan)]">WinBix AI</span>, чтобы решить эту
-              проблему раз и навсегда. Наш AI-ассистент — это не просто чат-бот. Это полноценный менеджер, который знает
-              ваш бизнес изнутри, умеет отвечать на сложные вопросы и доводит клиента до записи.
+              {t('team.bio2')
+                .split(/\{winbix\}/g)
+                .map((part, i, arr) => (
+                  <span key={i}>
+                    {part}
+                    {i < arr.length - 1 && <span className="font-semibold text-[var(--neon-cyan)]">WinBix AI</span>}
+                  </span>
+                ))}
             </p>
-            <p className="text-lg leading-relaxed text-gray-300">
-              Мы уже помогли десяткам бизнесов автоматизировать общение с клиентами. И каждый день наша система
-              становится умнее.
-            </p>
+            <p className="text-lg leading-relaxed text-gray-300">{t('team.bio3')}</p>
 
             {/* Founder avatars */}
             <div className="mt-10 flex flex-wrap items-center justify-center gap-8">
               {[
-                { name: 'Даниил', role: 'Co-founder', gradient: 'from-cyan-500 to-blue-600' },
-                { name: 'Миша', role: 'Co-founder', gradient: 'from-purple-500 to-pink-600' },
-                { name: 'Серёжа', role: 'Co-founder', gradient: 'from-pink-500 to-orange-500' },
+                { name: t('team.daniil'), role: 'Co-founder', gradient: 'from-cyan-500 to-blue-600' },
+                { name: t('team.misha'), role: 'Co-founder', gradient: 'from-purple-500 to-pink-600' },
+                { name: t('team.serzha'), role: 'Co-founder', gradient: 'from-pink-500 to-orange-500' },
               ].map((founder) => (
                 <div key={founder.name} className="text-center">
                   <div
@@ -433,9 +547,10 @@ export default function AboutPage() {
         <Section className="pb-24">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-              Наши <span className="gradient-text">кейсы</span>
+              {t('cases.title.before')}
+              <span className="gradient-text">{t('cases.title.accent')}</span>
             </h2>
-            <p className="mx-auto max-w-xl text-lg text-gray-400">Реальные результаты наших клиентов</p>
+            <p className="mx-auto max-w-xl text-lg text-gray-400">{t('cases.desc')}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -485,23 +600,22 @@ export default function AboutPage() {
                         d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
                       />
                     </svg>
-                    <p className="mt-2 text-sm text-gray-600">Скриншот скоро</p>
+                    <p className="mt-2 text-sm text-gray-600">{t('cases.screenshot')}</p>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-6">
-                  <div className={`mb-3 text-sm font-bold ${cs.accentColor}`}>Кейс {cs.number}</div>
-                  <h3 className="mb-2 text-lg font-bold text-white">Название бизнеса</h3>
-                  <p className="mb-4 text-sm leading-relaxed text-gray-400">
-                    Описание результатов и то, как AI-ассистент помог увеличить количество записей и автоматизировать
-                    общение с клиентами.
-                  </p>
+                  <div className={`mb-3 text-sm font-bold ${cs.accentColor}`}>
+                    {t('cases.case')} {cs.number}
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-white">{t('cases.name')}</h3>
+                  <p className="mb-4 text-sm leading-relaxed text-gray-400">{t('cases.body')}</p>
 
                   {/* Feedback quote */}
                   <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
-                    <p className="text-sm text-gray-400 italic">&ldquo;Отзыв клиента будет здесь...&rdquo;</p>
-                    <p className="mt-2 text-xs text-gray-600">— Имя, должность</p>
+                    <p className="text-sm text-gray-400 italic">&ldquo;{t('cases.quote')}&rdquo;</p>
+                    <p className="mt-2 text-xs text-gray-600">{t('cases.author')}</p>
                   </div>
                 </div>
               </motion.div>
@@ -519,12 +633,10 @@ export default function AboutPage() {
 
             <div className="relative z-10">
               <h2 className="mb-4 text-3xl font-bold text-white md:text-5xl">
-                Хотите <span className="gradient-text">так же</span>?
+                {t('cta.title.before')}
+                <span className="gradient-text">{t('cta.title.accent')}</span>?
               </h2>
-              <p className="mx-auto mb-10 max-w-xl text-lg text-gray-400">
-                Мы создадим AI-ассистента для вашего бизнеса за 24 часа. Бесплатная демо-версия — чтобы вы увидели
-                результат до оплаты.
-              </p>
+              <p className="mx-auto mb-10 max-w-xl text-lg text-gray-400">{t('cta.desc')}</p>
 
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <a
@@ -533,7 +645,7 @@ export default function AboutPage() {
                   rel="noopener noreferrer"
                   className="group relative inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)] px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/30"
                 >
-                  <span>Написать в Telegram</span>
+                  <span>{t('cta.telegram')}</span>
                   <svg
                     className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
                     fill="none"
@@ -548,7 +660,7 @@ export default function AboutPage() {
                   href="/"
                   className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-8 py-4 text-lg font-medium text-gray-300 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
                 >
-                  Попробовать демо
+                  {t('cta.demo')}
                 </Link>
               </div>
             </div>
@@ -560,16 +672,18 @@ export default function AboutPage() {
         {/* ═══════════════════════════════════════════ */}
         <div className="glow-line mt-8 mb-8 h-px" />
         <footer className="flex flex-col items-center justify-between gap-4 text-sm text-gray-600 md:flex-row">
-          <p>&copy; {new Date().getFullYear()} WinBix AI. Все права защищены.</p>
+          <p>
+            &copy; {new Date().getFullYear()} WinBix AI. {tc('footer.rights')}
+          </p>
           <div className="flex gap-4">
             <Link href="/privacy" className="text-gray-500 transition-colors hover:text-gray-300">
-              Конфиденциальность
+              {tc('footer.privacy')}
             </Link>
             <Link href="/terms" className="text-gray-500 transition-colors hover:text-gray-300">
-              Условия
+              {tc('footer.terms')}
             </Link>
             <Link href="/" className="text-gray-500 transition-colors hover:text-gray-300">
-              На главную
+              {tc('footer.home')}
             </Link>
           </div>
         </footer>

@@ -34,6 +34,20 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   // Handle iframe load — only trigger state change once to avoid re-render loops
   const handleIframeLoad = useCallback(() => {
     if (!iframeLoadedRef.current) {
+      // Check if iframe content is actually accessible (CSP frame-ancestors may block it)
+      try {
+        const iframe = iframeRef.current;
+        if (iframe) {
+          const doc = iframe.contentDocument || iframe.contentWindow?.document;
+          // If document is empty or about:blank, CSP likely blocked framing
+          if (doc && (doc.body?.innerHTML === '' || doc.URL === 'about:blank')) {
+            setIframeError(true);
+            return;
+          }
+        }
+      } catch {
+        // Cross-origin error = site loaded in iframe but we can't access DOM (this is fine)
+      }
       iframeLoadedRef.current = true;
       setIframeLoaded(true);
     }

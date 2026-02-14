@@ -982,3 +982,23 @@ main {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), var(--neon-cyan), rgba(255, 255, 255, 0.1), transparent);
   margin: 32px 0;
 }
+
+/* === RTL SUPPORT (Arabic) === */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .glow-line::after {
+  left: 10%;
+  right: 10%;
+}
+
+/* Flip flex-row layouts for RTL */
+[dir="rtl"] .flex-row-reverse-rtl {
+  flex-direction: row-reverse;
+}
+
+/* Table alignment */
+[dir="rtl"] .table-premium th {
+  text-align: right;
+}

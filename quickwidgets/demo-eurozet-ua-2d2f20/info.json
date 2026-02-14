@@ -1,0 +1,12 @@
+{
+  "name": "Сучасна стоматологія для всієї родини в Києві.",
+  "clientId": "demo-eurozet-ua-2d2f20",
+  "username": "demo-eurozet-ua-2d2f20",
+  "email": "",
+  "website": "https://eurozet.ua/?utm_source=google&utm_medium=cpc&utm_campaign=Max.Perf-(Stomat-Klinika)-DARNICA&utm_content=&utm_term=&gad_source=1&gad_campaignid=23069079513&gbraid=0AAAABBnrkE84pPgwP70GDlH7ulz42Zrzw&gclid=Cj0KCQiA18DMBhDeARIsABtYwT3E4DmKMOU__-lM9pINfI-R5qpMz4LCAPcDdyl9BPEuCW7Za6CAM-saArv0EALw_wcB",
+  "clientType": "quick",
+  "features": ["streaming", "quick-replies", "feedback", "sound", "voice-input"],
+  "createdAt": "2026-02-14T18:06:48.077Z",
+  "version": "2.0.0",
+  "selfService": true
+}
