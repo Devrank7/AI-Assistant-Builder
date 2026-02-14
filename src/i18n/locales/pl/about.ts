@@ -105,8 +105,8 @@ const about: Record<string, string> = {
   'cta.title.after': '?',
   'cta.desc':
     'Stworzymy asystenta AI dla Twojego biznesu w 24 godziny. Darmowa wersja demo — abyś zobaczył wyniki przed zapłatą.',
-  'cta.telegram': 'Napisz na Telegramie',
-  'cta.demo': 'Wypróbuj demo',
+  'cta.instagram': 'Napisz na Instagramie',
+  'cta.email': 'Wyślij e-mail',
 };
 
 export default about;

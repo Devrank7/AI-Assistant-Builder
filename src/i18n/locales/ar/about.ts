@@ -97,8 +97,8 @@ const about: Record<string, string> = {
   'cta.title.accent': 'نفس النتيجة',
   'cta.title.after': '؟',
   'cta.desc': 'سننشئ مساعد AI لعملك في 24 ساعة. نسخة تجريبية مجانية — لترى النتائج قبل الدفع.',
-  'cta.telegram': 'راسلنا على تيليجرام',
-  'cta.demo': 'جرّب النسخة التجريبية',
+  'cta.instagram': 'راسلنا على إنستجرام',
+  'cta.email': 'أرسل لنا بريداً إلكترونياً',
 };
 
 export default about;

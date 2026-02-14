@@ -106,8 +106,8 @@ const about: Record<string, string> = {
   'cta.title.after': '?',
   'cta.desc':
     "We'll create an AI assistant for your business in 24 hours. Free demo version — so you can see results before paying.",
-  'cta.telegram': 'Message us on Telegram',
-  'cta.demo': 'Try the demo',
+  'cta.instagram': 'Message us on Instagram',
+  'cta.email': 'Send us an email',
 };
 
 export default about;

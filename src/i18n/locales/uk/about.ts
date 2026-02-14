@@ -103,8 +103,8 @@ const about: Record<string, string> = {
   'cta.title.after': '?',
   'cta.desc':
     'Ми створимо AI-асистента для вашого бізнесу за 24 години. Безкоштовна демо-версія — щоб ви побачили результат до оплати.',
-  'cta.telegram': 'Написати в Telegram',
-  'cta.demo': 'Спробувати демо',
+  'cta.instagram': 'Написати в Instagram',
+  'cta.email': 'Написати на пошту',
 };
 
 export default about;
