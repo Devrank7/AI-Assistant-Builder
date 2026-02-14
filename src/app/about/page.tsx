@@ -561,9 +561,17 @@ export default function AboutPage() {
         <div className="glow-line mt-8 mb-8 h-px" />
         <footer className="flex flex-col items-center justify-between gap-4 text-sm text-gray-600 md:flex-row">
           <p>&copy; {new Date().getFullYear()} WinBix AI. Все права защищены.</p>
-          <Link href="/" className="text-gray-500 transition-colors hover:text-gray-300">
-            На главную
-          </Link>
+          <div className="flex gap-4">
+            <Link href="/privacy" className="text-gray-500 transition-colors hover:text-gray-300">
+              Конфиденциальность
+            </Link>
+            <Link href="/terms" className="text-gray-500 transition-colors hover:text-gray-300">
+              Условия
+            </Link>
+            <Link href="/" className="text-gray-500 transition-colors hover:text-gray-300">
+              На главную
+            </Link>
+          </div>
         </footer>
       </div>
     </div>

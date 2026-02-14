@@ -98,6 +98,14 @@ export default function AdminDashboard() {
               <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)]" />
               <span className="text-sm text-gray-500">WinBix AI</span>
             </div>
+            <div className="flex gap-4 text-sm">
+              <a href="/privacy" className="text-gray-500 transition-colors hover:text-gray-300">
+                Конфиденциальность
+              </a>
+              <a href="/terms" className="text-gray-500 transition-colors hover:text-gray-300">
+                Условия
+              </a>
+            </div>
             <p className="text-sm text-gray-600">&copy; {new Date().getFullYear()} All rights reserved</p>
           </div>
         </div>

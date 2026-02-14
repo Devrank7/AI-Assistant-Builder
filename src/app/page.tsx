@@ -345,9 +345,18 @@ export default function LandingPage() {
           <div className="glow-line mt-16 mb-8 h-px" />
 
           {/* Footer */}
-          <p className="text-center text-sm text-gray-600">
-            &copy; {new Date().getFullYear()} WinBix AI &middot; Powered by WinBix AI
-          </p>
+          <div className="flex flex-col items-center justify-center gap-3 text-sm text-gray-600">
+            <div className="flex gap-4">
+              <Link href="/privacy" className="text-gray-500 transition-colors hover:text-gray-300">
+                Политика конфиденциальности
+              </Link>
+              <span className="text-gray-700">&middot;</span>
+              <Link href="/terms" className="text-gray-500 transition-colors hover:text-gray-300">
+                Условия использования
+              </Link>
+            </div>
+            <p>&copy; {new Date().getFullYear()} WinBix AI</p>
+          </div>
         </div>
       </div>
 
