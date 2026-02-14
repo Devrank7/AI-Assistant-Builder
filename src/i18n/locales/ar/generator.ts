@@ -22,8 +22,8 @@ const generator: Record<string, string> = {
   'success.embed': 'كود التضمين',
   'success.copy': 'نسخ',
   'success.copied': 'تم النسخ!',
-  'success.training': 'الذكاء الاصطناعي يتعلم عن عملك...',
-  'success.trained': 'الذكاء الاصطناعي جاهز بسياق عملك!',
+  'success.training': 'الذكاء الاصطناعي يدرس موقعك...',
+  'success.trained': 'الذكاء الاصطناعي جاهز بسياق موقعك!',
   'success.another': 'إنشاء أداة أخرى',
 };
 

@@ -16,6 +16,15 @@ const common: Record<string, string> = {
     'Używamy plików cookies w celu zapewnienia prawidłowego działania serwisu. Kontynuując korzystanie ze strony, zgadzasz się z naszą',
   'cookie.link': 'Polityką prywatności',
   'cookie.accept': 'Akceptuję',
+
+  // Demo iframe error
+  'demo.iframeError.title': 'Twoja strona nie może być wyświetlona',
+  'demo.iframeError.desc':
+    'Strona ma zabezpieczenia uniemożliwiające osadzanie. Wybierz szablon demo, aby zobaczyć swój widget:',
+  'demo.iframeError.dental': 'Klinika stomatologiczna',
+  'demo.iframeError.construction': 'Firma budowlana',
+  'demo.iframeError.hotel': 'Hotel',
+  'demo.iframeError.openDirect': 'Lub otwórz stronę bezpośrednio',
 };
 
 export default common;

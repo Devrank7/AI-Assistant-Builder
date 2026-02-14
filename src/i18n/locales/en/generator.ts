@@ -22,8 +22,8 @@ const generator: Record<string, string> = {
   'success.embed': 'Embed Code',
   'success.copy': 'Copy',
   'success.copied': 'Copied!',
-  'success.training': 'AI is learning about your business...',
-  'success.trained': 'AI is ready with your business context!',
+  'success.training': 'AI is studying your site...',
+  'success.trained': 'AI is ready with your site context!',
   'success.another': 'Generate another widget',
 };
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface ClientWebsiteTemplateProps {
   scriptUrl: string;
@@ -9,10 +10,14 @@ interface ClientWebsiteTemplateProps {
 }
 
 export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientWebsiteTemplateProps) {
+  const { t } = useTranslation('common');
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const iframeLoadedRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Extract clientId from scriptUrl: "/widgets/{clientId}/script.js"
+  const clientId = scriptUrl.split('/')[2] || '';
 
   useEffect(() => {
     if (scriptUrl) {
@@ -46,7 +51,11 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
           }
         }
       } catch {
-        // Cross-origin error = site loaded in iframe but we can't access DOM (this is fine)
+        // Cross-origin SecurityError — browser blocked DOM access.
+        // This happens both for "refused to connect" and X-Frame-Options / CSP blocks.
+        // Show the template picker as fallback.
+        setIframeError(true);
+        return;
       }
       iframeLoadedRef.current = true;
       setIframeLoaded(true);
@@ -70,7 +79,8 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
           }
         }
       } catch {
-        // Cross-origin error means the site loaded but we can't access it (which is fine)
+        // Cross-origin error after timeout — site likely blocked framing
+        setIframeError(true);
       }
     }, 5000);
 
@@ -118,10 +128,10 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
         </div>
       )}
 
-      {/* Error State */}
+      {/* Error State — Template Picker */}
       {iframeError && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900">
-          <div className="max-w-lg px-6 text-center">
+          <div className="max-w-2xl px-6 text-center">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10">
               <svg className="h-10 w-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -132,46 +142,95 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
                 />
               </svg>
             </div>
-            <h2 className="mb-3 text-2xl font-bold text-white">Cannot Load Website</h2>
-            <p className="mb-6 text-gray-400">
-              This website cannot be displayed in preview mode due to security restrictions (X-Frame-Options). This is
-              normal - the widget will still work when installed directly on the site.
-            </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <a
-                href={websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 rounded-lg bg-green-500 px-6 py-3 font-medium text-white transition-colors hover:bg-green-600"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-                Open Website Directly
-              </a>
-              <button
-                onClick={() => window.history.back()}
-                className="rounded-lg bg-gray-700 px-6 py-3 font-medium text-white transition-colors hover:bg-gray-600"
-              >
-                Go Back
-              </button>
+            <h2 className="mb-3 text-2xl font-bold text-white">{t('demo.iframeError.title')}</h2>
+            <p className="mb-8 text-gray-400">{t('demo.iframeError.desc')}</p>
+
+            {/* Template Cards */}
+            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {[
+                {
+                  template: 'dental',
+                  label: t('demo.iframeError.dental'),
+                  color: 'cyan',
+                  borderHover: 'hover:border-cyan-500/40',
+                  iconBg: 'from-cyan-500/20 to-cyan-500/5',
+                  iconColor: 'text-cyan-400',
+                  icon: (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z"
+                    />
+                  ),
+                },
+                {
+                  template: 'construction',
+                  label: t('demo.iframeError.construction'),
+                  color: 'orange',
+                  borderHover: 'hover:border-orange-500/40',
+                  iconBg: 'from-orange-500/20 to-orange-500/5',
+                  iconColor: 'text-orange-400',
+                  icon: (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"
+                    />
+                  ),
+                },
+                {
+                  template: 'hotel',
+                  label: t('demo.iframeError.hotel'),
+                  color: 'purple',
+                  borderHover: 'hover:border-purple-500/40',
+                  iconBg: 'from-purple-500/20 to-purple-500/5',
+                  iconColor: 'text-purple-400',
+                  icon: (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"
+                    />
+                  ),
+                },
+              ].map((item) => (
+                <a
+                  key={item.template}
+                  href={`/demo/${item.template}?client=${clientId}`}
+                  className={`group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all duration-300 ${item.borderHover} hover:bg-white/[0.06]`}
+                >
+                  <div
+                    className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.iconBg}`}
+                  >
+                    <svg className={`h-7 w-7 ${item.iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {item.icon}
+                    </svg>
+                  </div>
+                  <p className="font-semibold text-white">{item.label}</p>
+                </a>
+              ))}
             </div>
 
-            {/* Widget Preview Box */}
-            <div className="mt-8 rounded-xl border border-gray-700 bg-gray-800 p-6">
-              <p className="mb-4 text-sm text-gray-400">
-                The widget is still loaded and visible in the bottom-right corner
-              </p>
-              <div className="flex items-center justify-center gap-2 text-green-400">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
-                <span className="text-sm font-medium">Widget Active</span>
-              </div>
-            </div>
+            {/* Secondary: open website directly */}
+            <a
+              href={websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-300"
+            >
+              {t('demo.iframeError.openDirect')}
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
           </div>
         </div>
       )}

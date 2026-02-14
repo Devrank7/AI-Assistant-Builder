@@ -22,8 +22,8 @@ const generator: Record<string, string> = {
   'success.embed': 'Код для вставки',
   'success.copy': 'Копіювати',
   'success.copied': 'Скопійовано!',
-  'success.training': 'AI вивчає ваш бізнес...',
-  'success.trained': 'AI готовий з контекстом вашого бізнесу!',
+  'success.training': 'AI вивчає ваш сайт...',
+  'success.trained': 'AI готовий з контекстом вашого сайту!',
   'success.another': 'Згенерувати ще один віджет',
 };
 
