@@ -519,25 +519,6 @@ export default function AboutPage() {
                 ))}
             </p>
             <p className="text-lg leading-relaxed text-gray-300">{t('team.bio3')}</p>
-
-            {/* Founder avatars */}
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-8">
-              {[
-                { name: t('team.daniil'), role: 'Co-founder', gradient: 'from-cyan-500 to-blue-600' },
-                { name: t('team.misha'), role: 'Co-founder', gradient: 'from-purple-500 to-pink-600' },
-                { name: t('team.serzha'), role: 'Co-founder', gradient: 'from-pink-500 to-orange-500' },
-              ].map((founder) => (
-                <div key={founder.name} className="text-center">
-                  <div
-                    className={`mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${founder.gradient} text-2xl font-bold text-white shadow-lg`}
-                  >
-                    {founder.name[0]}
-                  </div>
-                  <p className="font-semibold text-white">{founder.name}</p>
-                  <p className="text-sm text-gray-500">{founder.role}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </Section>
 

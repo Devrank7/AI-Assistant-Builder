@@ -52,6 +52,19 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
     checkFrameable();
   }, [websiteUrl]);
 
+  // Timeout fallback: if iframe onLoad never fires (e.g. slow resources, hanging
+  // scripts on client sites), remove the loading spinner after 8 seconds so the
+  // user can see whatever has already rendered in the iframe.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!iframeLoadedRef.current && !iframeError) {
+        iframeLoadedRef.current = true;
+        setIframeLoaded(true);
+      }
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [iframeError]);
+
   // Handle iframe load — only trigger state change once to avoid re-render loops
   const handleIframeLoad = useCallback(() => {
     if (!iframeLoadedRef.current) {
