@@ -36,10 +36,26 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
     }
   }, [scriptUrl]);
 
+  // Server-side pre-check: detect unreachable sites and iframe-blocking headers
+  useEffect(() => {
+    const checkFrameable = async () => {
+      try {
+        const res = await fetch(`/api/check-frameable?url=${encodeURIComponent(websiteUrl)}`);
+        const data = await res.json();
+        if ((!data.reachable || !data.frameable) && !iframeLoadedRef.current) {
+          setIframeError(true);
+        }
+      } catch {
+        // If check itself fails, let the iframe try to load
+      }
+    };
+    checkFrameable();
+  }, [websiteUrl]);
+
   // Handle iframe load — only trigger state change once to avoid re-render loops
   const handleIframeLoad = useCallback(() => {
     if (!iframeLoadedRef.current) {
-      // Check if iframe content is actually accessible (CSP frame-ancestors may block it)
+      // Check if iframe content is actually accessible (same-origin)
       try {
         const iframe = iframeRef.current;
         if (iframe) {
@@ -51,11 +67,9 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
           }
         }
       } catch {
-        // Cross-origin SecurityError — browser blocked DOM access.
-        // This happens both for "refused to connect" and X-Frame-Options / CSP blocks.
-        // Show the template picker as fallback.
-        setIframeError(true);
-        return;
+        // Cross-origin error — can't access DOM. This is normal for legitimate
+        // cross-origin sites. The /api/check-frameable call handles detection
+        // of blocked/unreachable sites separately.
       }
       iframeLoadedRef.current = true;
       setIframeLoaded(true);
@@ -65,27 +79,6 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   const handleIframeError = useCallback(() => {
     setIframeError(true);
   }, []);
-
-  // Block detection: check once after timeout if iframe content is empty/blocked
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (iframeLoadedRef.current) return; // Already loaded successfully
-      try {
-        const iframe = iframeRef.current;
-        if (iframe) {
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (!iframeDoc || iframeDoc.body.innerHTML === '') {
-            setIframeError(true);
-          }
-        }
-      } catch {
-        // Cross-origin error after timeout — site likely blocked framing
-        setIframeError(true);
-      }
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [websiteUrl]);
 
   return (
     <div className="relative min-h-screen bg-gray-900">

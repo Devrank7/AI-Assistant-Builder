@@ -6,7 +6,7 @@ const generator: Record<string, string> = {
   'form.dark.title': 'Темна тема',
   'form.dark.desc': 'Використовувати темний фон для віджету',
   'form.submit': 'Згенерувати віджет',
-  'form.note': 'Займає ~10 секунд. Реєстрація не потрібна.',
+  'form.note': 'Займає ~30 секунд. Реєстрація не потрібна.',
 
   // Progress
   'progress.0': 'Аналізуємо ваш сайт...',

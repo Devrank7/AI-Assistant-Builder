@@ -6,7 +6,7 @@ const generator: Record<string, string> = {
   'form.dark.title': 'Ciemny motyw',
   'form.dark.desc': 'Użyj ciemnego tła dla widgetu',
   'form.submit': 'Wygeneruj widget',
-  'form.note': 'Zajmuje ~10 sekund. Bez rejestracji.',
+  'form.note': 'Zajmuje ~30 sekund. Bez rejestracji.',
 
   // Progress
   'progress.0': 'Analizujemy Twoją stronę...',

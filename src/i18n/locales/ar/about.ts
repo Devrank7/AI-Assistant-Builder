@@ -35,7 +35,7 @@ const about: Record<string, string> = {
   // Try it
   'try.title.before': 'جرّب ',
   'try.title.accent': 'الآن',
-  'try.desc': 'أدخل عنوان موقعك — وخلال 10 ثوانٍ سترى كيف سيبدو مساعد AI على موقعك',
+  'try.desc': 'أدخل عنوان موقعك — وخلال 30 ثانية سترى كيف سيبدو مساعد AI على موقعك',
 
   // Assistant capabilities
   'features.title.before': 'مديرك ',

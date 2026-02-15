@@ -6,7 +6,7 @@ const generator: Record<string, string> = {
   'form.dark.title': 'المظهر الداكن',
   'form.dark.desc': 'استخدام خلفية داكنة للأداة',
   'form.submit': 'إنشاء الأداة',
-  'form.note': 'يستغرق ~10 ثوانٍ. بدون تسجيل.',
+  'form.note': 'يستغرق ~30 ثانية. بدون تسجيل.',
 
   // Progress
   'progress.0': 'جارٍ تحليل موقعك...',
