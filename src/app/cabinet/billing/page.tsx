@@ -373,8 +373,8 @@ export default function BillingPage() {
           </p>
           <p className="mt-2">
             Вопросы?{' '}
-            <a href="mailto:chatbotfusion@gmail.com" className="text-cyan-400 hover:underline">
-              chatbotfusion@gmail.com
+            <a href="mailto:winbix.ai@gmail.com" className="text-cyan-400 hover:underline">
+              winbix.ai@gmail.com
             </a>
           </p>
         </div>

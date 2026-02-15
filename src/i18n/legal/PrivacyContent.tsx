@@ -160,6 +160,48 @@ function RuContent() {
         <li>Соблюдения требований законодательства</li>
       </ul>
 
+      <SubTitle>4.1 Правовые основания обработки (Статья 6 GDPR)</SubTitle>
+      <div className="my-4 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-gray-300">
+              <th className="py-2 pr-4">Цель обработки</th>
+              <th className="py-2">Правовое основание</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-400">
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Предоставление и поддержка сервиса AI-ассистента</td>
+              <td className="py-2">Исполнение договора (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Обработка запросов и генерация ответов AI</td>
+              <td className="py-2">Исполнение договора (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Управление учётными записями и подписками</td>
+              <td className="py-2">Исполнение договора (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Аналитика и улучшение качества ответов AI</td>
+              <td className="py-2">Законный интерес (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Обработка платежей и выставление счетов</td>
+              <td className="py-2">Исполнение договора (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Техническая поддержка и безопасность</td>
+              <td className="py-2">Законный интерес (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Соблюдение требований законодательства</td>
+              <td className="py-2">Юридическое обязательство (Art. 6(1)(c))</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <SectionTitle>5. Передача данных третьим сторонам</SectionTitle>
       <p>
         Мы передаём данные третьим сторонам исключительно для обеспечения работы сервиса. Мы не продаём и не передаём
@@ -466,6 +508,48 @@ function EnContent() {
         <li>Compliance with legal requirements</li>
       </ul>
 
+      <SubTitle>4.1 Legal Basis for Processing (Article 6 GDPR)</SubTitle>
+      <div className="my-4 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-gray-300">
+              <th className="py-2 pr-4">Processing Purpose</th>
+              <th className="py-2">Legal Basis</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-400">
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Providing and supporting the AI assistant service</td>
+              <td className="py-2">Performance of a contract (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Processing requests and generating AI responses</td>
+              <td className="py-2">Performance of a contract (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Managing client accounts and subscriptions</td>
+              <td className="py-2">Performance of a contract (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Analytics and improving AI response quality</td>
+              <td className="py-2">Legitimate interest (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Processing payments and invoicing</td>
+              <td className="py-2">Performance of a contract (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Technical support and security</td>
+              <td className="py-2">Legitimate interest (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Compliance with legal requirements</td>
+              <td className="py-2">Legal obligation (Art. 6(1)(c))</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <SectionTitle>5. Data Transfer to Third Parties</SectionTitle>
       <p>
         We transfer data to third parties exclusively for service operation. We do not sell or transfer data for
@@ -769,6 +853,48 @@ function UkContent() {
         <li>Технічної підтримки та забезпечення безпеки</li>
         <li>Дотримання законодавчих вимог</li>
       </ul>
+
+      <SubTitle>4.1 Правові підстави обробки (Стаття 6 GDPR)</SubTitle>
+      <div className="my-4 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-gray-300">
+              <th className="py-2 pr-4">Мета обробки</th>
+              <th className="py-2">Правова підстава</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-400">
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Надання та підтримка сервісу AI-асистента</td>
+              <td className="py-2">Виконання договору (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Обробка запитів та генерація відповідей AI</td>
+              <td className="py-2">Виконання договору (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Управління обліковими записами та підписками</td>
+              <td className="py-2">Виконання договору (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Аналітика та покращення якості відповідей AI</td>
+              <td className="py-2">Законний інтерес (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Обробка платежів та виставлення рахунків</td>
+              <td className="py-2">Виконання договору (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Технічна підтримка та безпека</td>
+              <td className="py-2">Законний інтерес (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Дотримання законодавчих вимог</td>
+              <td className="py-2">Юридичне зобов&apos;язання (Art. 6(1)(c))</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <SectionTitle>5. Передача даних третім сторонам</SectionTitle>
       <p>
@@ -1075,6 +1201,48 @@ function PlContent() {
         <li>Spełniania wymogów prawnych</li>
       </ul>
 
+      <SubTitle>4.1 Podstawy prawne przetwarzania (Artykuł 6 RODO)</SubTitle>
+      <div className="my-4 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-gray-300">
+              <th className="py-2 pr-4">Cel przetwarzania</th>
+              <th className="py-2">Podstawa prawna</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-400">
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Świadczenie i wspieranie usługi asystenta AI</td>
+              <td className="py-2">Wykonanie umowy (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Przetwarzanie zapytań i generowanie odpowiedzi AI</td>
+              <td className="py-2">Wykonanie umowy (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Zarządzanie kontami klientów i subskrypcjami</td>
+              <td className="py-2">Wykonanie umowy (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Analityka i poprawa jakości odpowiedzi AI</td>
+              <td className="py-2">Uzasadniony interes (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Przetwarzanie płatności i wystawianie faktur</td>
+              <td className="py-2">Wykonanie umowy (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Wsparcie techniczne i bezpieczeństwo</td>
+              <td className="py-2">Uzasadniony interes (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">Spełnianie wymogów prawnych</td>
+              <td className="py-2">Obowiązek prawny (Art. 6(1)(c))</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <SectionTitle>5. Przekazywanie danych stronom trzecim</SectionTitle>
       <p>
         Przekazujemy dane stronom trzecim wyłącznie w celu zapewnienia działania usługi. Nie sprzedajemy ani nie
@@ -1379,6 +1547,48 @@ function ArContent() {
         <li>الدعم التقني والأمان</li>
         <li>الامتثال للمتطلبات القانونية</li>
       </ul>
+
+      <SubTitle>4.1 الأسس القانونية للمعالجة (المادة 6 من GDPR)</SubTitle>
+      <div className="my-4 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-gray-300">
+              <th className="py-2 pr-4">غرض المعالجة</th>
+              <th className="py-2">الأساس القانوني</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-400">
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">تقديم ودعم خدمة مساعد الذكاء الاصطناعي</td>
+              <td className="py-2">تنفيذ العقد (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">معالجة الطلبات وإنشاء ردود الذكاء الاصطناعي</td>
+              <td className="py-2">تنفيذ العقد (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">إدارة حسابات العملاء والاشتراكات</td>
+              <td className="py-2">تنفيذ العقد (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">التحليلات وتحسين جودة ردود الذكاء الاصطناعي</td>
+              <td className="py-2">المصلحة المشروعة (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">معالجة المدفوعات وإصدار الفواتير</td>
+              <td className="py-2">تنفيذ العقد (Art. 6(1)(b))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">الدعم التقني والأمان</td>
+              <td className="py-2">المصلحة المشروعة (Art. 6(1)(f))</td>
+            </tr>
+            <tr className="border-b border-white/5">
+              <td className="py-2 pr-4">الامتثال للمتطلبات القانونية</td>
+              <td className="py-2">الالتزام القانوني (Art. 6(1)(c))</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <SectionTitle>5. نقل البيانات إلى أطراف ثالثة</SectionTitle>
       <p>ننقل البيانات إلى أطراف ثالثة حصريًا لضمان عمل الخدمة. نحن لا نبيع أو ننقل البيانات لأغراض إعلانية.</p>

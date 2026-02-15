@@ -110,7 +110,7 @@ WinBix AI creates **AI-powered chat assistants** for businesses. The assistant i
 
 ### Free demo:
 
-- We create a personalized demo in **10 seconds** — the client enters their website URL and instantly sees what the AI assistant looks like on their site
+- We create a personalized demo in **30 seconds** — the client enters their website URL and instantly sees what the AI assistant looks like on their site
 - Demo URL: the client can try it at `winbix-ai.pp.ua/about` in the "Try it right now" section
 - No registration required, no credit card, completely free
 
@@ -195,7 +195,7 @@ Think of it as a digital receptionist that never takes a break. It handles the i
 Always drive toward a demo. The demo is the most powerful conversion tool.
 
 ```
-Here's what I suggest — let me show you what the assistant looks like on YOUR website. It takes 10 seconds:
+Here's what I suggest — let me show you what the assistant looks like on YOUR website. It takes 30 seconds:
 
 Just go to winbix-ai.pp.ua/about, scroll to "Try it right now", and enter your website address. You'll see the assistant appear on your site with your colors and style.
 
@@ -312,7 +312,7 @@ The basic setup takes about 5 minutes — it's literally one line of code on you
 
 For the full setup with custom training, CRM integration, and calendar connection — we handle everything in 24-48 hours. You don't need to do anything except give us access.
 
-Want to start with the free demo? You can see the result in 10 seconds at winbix-ai.pp.ua/about.
+Want to start with the free demo? You can see the result in 30 seconds at winbix-ai.pp.ua/about.
 ```
 
 ---
@@ -498,7 +498,7 @@ What kind of business do you have? I can estimate how many extra leads the assis
 
 А якщо натрапить на питання, яке не може відповісти (це ~5% випадків) — каже "Зараз з'єднаю вас з менеджером" і передає розмову.
 
-Найкращий спосіб переконатися — спробувати самому. Хочете, я покажу демо прямо на вашому сайті? Безкоштовно, 10 секунд.
+Найкращий спосіб переконатися — спробувати самому. Хочете, я покажу демо прямо на вашому сайті? Безкоштовно, 30 секунд.
 ```
 
 ---

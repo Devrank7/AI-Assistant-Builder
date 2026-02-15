@@ -1,30 +1,30 @@
 const generator: Record<string, string> = {
   // Form
-  'form.url.label': 'Website URL',
+  'form.url.label': 'URL сайта',
   'form.url.placeholder': 'https://your-website.com',
-  'form.color.label': 'Brand Color',
-  'form.dark.title': 'Dark Theme',
-  'form.dark.desc': 'Use dark background for widget',
-  'form.submit': 'Generate Widget',
-  'form.note': 'Takes ~30 seconds. No registration required.',
+  'form.color.label': 'Цвет бренда',
+  'form.dark.title': 'Тёмная тема',
+  'form.dark.desc': 'Использовать тёмный фон для виджета',
+  'form.submit': 'Сгенерировать виджет',
+  'form.note': 'Занимает ~30 секунд. Регистрация не нужна.',
 
   // Progress
-  'progress.0': 'Analyzing your website...',
-  'progress.1': 'Generating color palette...',
-  'progress.2': 'Building widget components...',
-  'progress.3': 'Compiling and optimizing...',
-  'progress.4': 'Almost done...',
+  'progress.0': 'Анализируем ваш сайт...',
+  'progress.1': 'Генерируем цветовую палитру...',
+  'progress.2': 'Создаём компоненты виджета...',
+  'progress.3': 'Компилируем и оптимизируем...',
+  'progress.4': 'Почти готово...',
 
   // Success
-  'success.title': 'Widget is ready!',
-  'success.desc': 'Your AI assistant has been generated. Click below to see the preview.',
-  'success.preview': 'Open Preview',
-  'success.embed': 'Embed Code',
-  'success.copy': 'Copy',
-  'success.copied': 'Copied!',
+  'success.title': 'Виджет готов!',
+  'success.desc': 'Ваш AI-ассистент сгенерирован. Нажмите ниже, чтобы увидеть превью.',
+  'success.preview': 'Открыть превью',
+  'success.embed': 'Код для вставки',
+  'success.copy': 'Копировать',
+  'success.copied': 'Скопировано!',
   'success.training': 'AI изучает ваш сайт...',
   'success.trained': 'AI готов с контекстом вашего сайта!',
-  'success.another': 'Generate another widget',
+  'success.another': 'Сгенерировать ещё один виджет',
 };
 
 export default generator;
