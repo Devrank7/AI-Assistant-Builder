@@ -23,6 +23,9 @@ ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
 
 RUN npm run build
 
+# Install widget-builder dependencies (vite etc. are devDependencies but needed at runtime for widget generation)
+RUN cd .agent/widget-builder && npm ci --include=dev
+
 # Stage 3: Production
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -39,6 +42,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/widgets ./widgets
 COPY --from=builder --chown=nextjs:nodejs /app/quickwidgets ./quickwidgets
 COPY --from=builder --chown=nextjs:nodejs /app/knowledge-seeds ./knowledge-seeds
+COPY --from=builder --chown=nextjs:nodejs /app/.agent/widget-builder ./.agent/widget-builder
 
 USER nextjs
 
