@@ -1,0 +1,15 @@
+{
+  "clientId": "ziasnagging",
+  "botName": "Zia Luxury AI",
+  "welcomeMessage": "Welcome to Zia Luxury Property Observer! We provide certified property snagging & inspection services across Dubai and the UAE. How can I assist you today?",
+  "inputPlaceholder": "Ask about our services...",
+  "quickReplies": ["Book an inspection", "View our services", "Get a quote"],
+  "avatar": {
+    "type": "initials",
+    "initials": "ZL"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}

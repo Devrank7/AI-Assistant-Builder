@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 34 Real Estate Valuation — Premium Blue Theme */
+:host {
+    --aw-primary: #007CBB;
+    --aw-accent: #004DA8;
+    --aw-bg: #ffffff;
+    --aw-text: #374151;
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+*:focus-visible {
+    outline: 2px solid rgba(0, 124, 187, 0.35);
+    outline-offset: 2px;
+}
+button:focus-visible {
+    outline: 2px solid rgba(0, 124, 187, 0.35);
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+button, a, input, textarea {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

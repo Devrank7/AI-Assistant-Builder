@@ -109,7 +109,7 @@ export function Widget({ config }) {
                     >
                         {/* HEADER */}
                         <div className="relative px-5 py-4 flex items-center justify-between overflow-hidden ">
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#2563EB] via-[#3b73ed] to-[#4a25eb]" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#059669] via-[#1ea178] to-[#057b96]" />
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
 
                             <div className="relative flex items-center gap-3">
@@ -118,11 +118,11 @@ export function Widget({ config }) {
                                         <Sparkles size={18} className="text-white" />
                                     </div>
                                     {!isOffline && (
-                                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#bed0f9] border-[2.5px] border-[#2563EB] shadow-sm" />
+                                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#b4e0d2] border-[2.5px] border-[#059669] shadow-sm" />
                                     )}
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-[14px] text-white tracking-tight leading-tight">{config.bot.name}</h3>
+                                    <h3 className="font-semibold text-[14px] text-white tracking-tight leading-tight">{config.botName || config.bot?.name}</h3>
                                     <p className="text-[11px] text-white/65 font-medium">{isOffline ? 'Offline' : 'Online'}</p>
                                 </div>
                             </div>
@@ -140,7 +140,7 @@ export function Widget({ config }) {
 
                         {/* MESSAGES */}
                         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 scrollbar-hide bg-gradient-to-b from-gray-50/80 to-white" aria-live="polite">
-                            <ChatMessage role="assistant" content={config.bot.greeting} onImageClick={setExpandedImage} />
+                            <ChatMessage role="assistant" content={config.welcomeMessage || config.bot?.greeting} onImageClick={setExpandedImage} />
                             {messages.map((msg, idx) => (
                                 <div key={idx}>
                                     <ChatMessage
@@ -156,7 +156,7 @@ export function Widget({ config }) {
                             {isTyping && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-1.5 items-center ml-10 py-2">
                                     {[0, 1, 2].map((i) => (
-                                        <motion.span key={i} className="w-2 h-2 bg-[#7ca1f3] rounded-full"
+                                        <motion.span key={i} className="w-2 h-2 bg-[#69c0a5] rounded-full"
                                             animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.8, 0.3] }}
                                             transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }}
                                         />
@@ -182,17 +182,17 @@ export function Widget({ config }) {
 
                         {/* INPUT */}
                         <div className="px-4 py-3.5 border-t border-gray-100 bg-white space-y-2.5">
-                            {showQuickReplies && <QuickReplies options={config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
+                            {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                             <form onSubmit={handleSubmit} className="flex items-end gap-2">
                                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                                 <button type="button" onClick={() => fileInputRef.current?.click()}
-                                    className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#7ca1f3] bg-[#e9effd] text-[#2563EB] shadow-sm' : 'border-gray-200 text-gray-400 hover:text-[#2563EB] hover:border-[#7ca1f3] hover:bg-[#e9effd]'}`}
+                                    className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#69c0a5] bg-[#e6f5f0] text-[#059669] shadow-sm' : 'border-gray-200 text-gray-400 hover:text-[#059669] hover:border-[#69c0a5] hover:bg-[#e6f5f0]'}`}
                                     aria-label="Upload photo">
                                     <ImagePlus size={16} />
                                 </button>
                                 {voiceSupported && config.features?.voiceInput !== false && (
                                     <button type="button" onClick={handleVoiceToggle}
-                                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#7ca1f3] bg-[#e9effd] text-[#2563EB] shadow-sm animate-pulse' : 'border-gray-200 text-gray-400 hover:text-[#2563EB] hover:border-[#7ca1f3] hover:bg-[#e9effd]'}`}
+                                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#69c0a5] bg-[#e6f5f0] text-[#059669] shadow-sm animate-pulse' : 'border-gray-200 text-gray-400 hover:text-[#059669] hover:border-[#69c0a5] hover:bg-[#e6f5f0]'}`}
                                         aria-label={isListening ? 'Stop recording' : 'Voice input'}>
                                         {isListening ? <MicOff size={16} /> : <Mic size={16} />}
                                     </button>
@@ -200,11 +200,11 @@ export function Widget({ config }) {
                                 <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                                     placeholder="Ask a question..."
                                     rows={1}
-                                    className="flex-1 min-w-0 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl py-2.5 pl-3.5 pr-3.5 border border-gray-200 focus:outline-none focus:border-[#7ca1f3] focus:ring-2 focus:ring-[#e9effd] focus:bg-white transition-all resize-none text-[13.5px] leading-relaxed"
+                                    className="flex-1 min-w-0 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl py-2.5 pl-3.5 pr-3.5 border border-gray-200 focus:outline-none focus:border-[#69c0a5] focus:ring-2 focus:ring-[#e6f5f0] focus:bg-white transition-all resize-none text-[13.5px] leading-relaxed"
                                     style={{ maxHeight: '100px' }}
                                 />
                                 <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
-                                    className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#2563EB] text-white flex items-center justify-center hover:bg-[#1e51c1] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#2563EB]/25">
+                                    className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#059669] text-white flex items-center justify-center hover:bg-[#047b56] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#059669]/25">
                                     <Send size={16} />
                                 </button>
                             </form>
@@ -230,14 +230,14 @@ export function Widget({ config }) {
 
             {/* TOGGLE BUTTON */}
             <motion.button
-                whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(37, 99, 235, 0.35)' }}
+                whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(5, 150, 105, 0.35)' }}
                 whileTap={isDragging ? {} : { scale: 0.92 }}
                 onClick={() => { if (!isDragging) setIsOpen(!isOpen); }}
                 onDoubleClick={resetPosition}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#2563EB]/30 bg-gradient-to-br from-[#2563EB] via-[#3b73ed] to-[#4a25eb] border border-white/10"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#059669]/30 bg-gradient-to-br from-[#059669] via-[#1ea178] to-[#057b96] border border-white/10"
                 aria-label={isOpen ? 'Close chat' : 'Open chat'}
             >
                 <AnimatePresence mode="wait">

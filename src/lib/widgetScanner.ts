@@ -285,7 +285,18 @@ export function readQuickWidgetInfo(folderName: string): ClientInfo | null {
   try {
     if (fs.existsSync(infoPath)) {
       const content = fs.readFileSync(infoPath, 'utf-8');
-      return JSON.parse(content) as ClientInfo;
+      const raw = JSON.parse(content);
+      // Quick widget info.json uses "name" instead of "username"
+      return {
+        username: raw.username || raw.name || folderName,
+        email: raw.email || '',
+        website: raw.website || '',
+        phone: raw.phone,
+        addresses: raw.addresses,
+        instagram: raw.instagram,
+        clientToken: raw.clientToken,
+        clientType: raw.clientType || 'quick',
+      } as ClientInfo;
     }
   } catch (error) {
     console.error(`Error reading info.json for quick widget ${folderName}:`, error);

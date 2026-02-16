@@ -1,8 +1,8 @@
 {
-  "clientId": "demo-21st-dev-ed3d8f",
+  "clientId": "demo-recodent-com-ua-fffb2a",
   "bot": {
-    "name": "21st AI",
-    "greeting": "Hi there! 👋 How can I help you?",
+    "name": "Головна AI",
+    "greeting": "Вітаємо! 👋 Я — AI-помічник **Головна**. Чим можу допомогти?",
     "tone": "professional_friendly"
   },
   "design": {
@@ -14,7 +14,7 @@
     "imageUpload": true,
     "quickReplies": {
       "enabled": true,
-      "starters": ["Tell me about your company", "What services do you offer?", "How can I contact you?"]
+      "starters": ["Розкажіть про компанію", "Які послуги ви надаєте?", "Як з вами зв'язатися?"]
     },
     "feedback": true,
     "sound": true,

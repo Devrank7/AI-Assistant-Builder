@@ -1,178 +1,132 @@
 ---
 name: mass-quick-widgets
-description: Mass-create demo Quick Widgets from Google Sheets lead data. Reads leads, builds widgets, updates sheet, sends Telegram report.
+description: Batch-create demo widgets from Google Sheets leads. Reads leads, builds widgets sequentially, updates sheet, sends Telegram report.
 ---
 
-# Mass Quick Widget Builder Skill
+# Mass Quick Widget Builder
 
-## 1. PURPOSE
+## Purpose
 
-Read leads from a Google Sheets spreadsheet and mass-create Quick Widgets for each lead using the `create-quick-widget` skill process. After processing, update the spreadsheet to mark completed leads and send a summary report to Telegram.
+Read leads from a Google Sheets spreadsheet and create a Quick Widget for each lead. After processing, update the spreadsheet and send a Telegram report.
 
 **Input**: Optional spreadsheet URL/ID, optional limit
-**Output**: Multiple Quick Widgets deployed + sheet updated + Telegram report sent
+**Output**: Multiple deployed widgets + sheet updated + Telegram report
 
-**IMPORTANT**: Each widget uses the **pre-built premium design template** via `theme.json` + `generate-single-theme.js`. The AI agent visits each site, extracts colors/theme, creates a theme config, and runs the generator. No manual JSX/CSS writing.
-
----
-
-## 2. INPUT PARSING
-
-Extract optional parameters from the user's message:
-
-```
-- spreadsheetUrl or spreadsheetId (optional — if not given, auto-search by today's date)
-- limit (optional — max number of leads to process, default: all)
-- sheetName (optional — tab name, default: first sheet)
-```
+Each widget is built using the `create-quick-widget` skill process (see `.agent/skills/create-quick-widget/SKILL.md`).
 
 ---
 
-## 3. PHASE 1 — FIND SPREADSHEET
+## CRITICAL RULES
 
-### 3.1 If URL/ID Provided
+1. **SEQUENTIAL BUILDS ONLY** — The build script copies client source to a shared directory. Running two builds in parallel corrupts both widgets. Process leads ONE AT A TIME: analyze → config → generate → build → deploy → next lead.
 
-Extract the spreadsheet ID from the URL:
+2. **Never guess colors** — Every hex code in theme.json must come from actual site CSS.
 
-- Full URL format: `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit`
-- Or just the ID string directly
+3. **Never stop on failure** — If a lead fails, log it and continue to the next one.
 
-### 3.2 If No URL/ID Provided — Auto-Search
+4. **Use flat config format** — widget.config.json uses `botName`, `welcomeMessage`, `quickReplies` (NOT nested `bot.name`). See `create-quick-widget/CONFIG_REFERENCE.md`.
 
-Get today's date in DD.MM.YYYY format. Then search using the API:
+5. **info.json MUST have `username`** — Without it, the admin panel crashes. See `create-quick-widget/CONFIG_REFERENCE.md#infojson-schema`.
+
+---
+
+## Phase 1 — Find Spreadsheet
+
+### If URL/ID provided
+
+Extract spreadsheet ID from URL: `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit`
+
+### If not provided — auto-search
+
+Get today's date in `DD.MM.YYYY` format:
 
 ```bash
-# Search for today's verified leads spreadsheet
 curl -s "http://localhost:3000/api/integrations/sheets/search?name=DD.MM.YYYY%20Проверенные%20лиды" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
 ```
 
-If no results, try the fallback name:
-
-```bash
-# Fallback: search for qualified leads
-curl -s "http://localhost:3000/api/integrations/sheets/search?name=DD.MM.YYYY%20Квалифицированные%20лиды" \
-  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
-```
-
-Response format:
-
-```json
-{
-  "success": true,
-  "spreadsheets": [{ "id": "SPREADSHEET_ID", "name": "09.02.2026 Проверенные лиды" }]
-}
-```
-
-If neither found → ask the user for the spreadsheet URL.
+Fallback: try `Квалифицированные лиды`. If neither found, ask user for the URL.
 
 ---
 
-## 4. PHASE 2 — READ LEADS
+## Phase 2 — Read & Filter Leads
 
-### 4.1 Read Sheet Data
+### Read sheet data
 
 ```bash
 curl -s "http://localhost:3000/api/integrations/sheets/read?spreadsheetId=SPREADSHEET_ID" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
 ```
 
-Response format:
-
-```json
-{
-  "success": true,
-  "headers": ["email", "website", "username", "hasWidget"],
-  "rows": [
-    { "email": "info@example.com", "website": "https://example.com", "username": "example", "hasWidget": "" },
-    { "email": "test@test.com", "website": "https://test.com", "username": "", "hasWidget": "TRUE" }
-  ]
-}
-```
-
-### 4.2 Filter Leads
-
-From the response, filter leads:
-
-1. **Skip** rows where `email` AND `website` are both empty
-2. **Skip** rows where `hasWidget` column value is `TRUE` (case-insensitive) — these leads already have a widget created. Only process leads where `hasWidget` is empty, `FALSE`, or any value other than `TRUE`.
-3. **Apply limit** if specified by the user
-
-**Example filtering logic:**
+### Filter leads
 
 ```
 for each row:
-  if row.hasWidget?.toUpperCase() === 'TRUE' → SKIP (already has widget)
+  if row.hasWidget?.toUpperCase() === 'TRUE' → SKIP (already done)
   if row.email is empty AND row.website is empty → SKIP (no data)
-  otherwise → PROCESS this lead
+  otherwise → PROCESS
 ```
 
-### 4.3 Derive Username (if missing)
+Apply user's limit if specified.
 
-If the `username` column is empty for a row:
+### Derive username (if missing)
 
-- Check if the email domain is generic:
-  `gmail.com, outlook.com, yahoo.com, hotmail.com, mail.ru, yandex.ru, ukr.net, icloud.com`
-  → Use part before `@` as username
-- Otherwise → use email domain without TLD as username
-  - Example: `info@dental-smile.com` → `dental-smile`
+If `username` column is empty:
 
-**Convert username to clientId**: lowercase, replace spaces with hyphens, remove special characters.
+- Generic email domains (gmail.com, outlook.com, yahoo.com, hotmail.com, mail.ru, yandex.ru, ukr.net, icloud.com) → use part before `@`
+- Otherwise → use email domain without TLD (e.g., `info@dental-smile.com` → `dental-smile`)
+- Convert to clientId: lowercase, hyphens instead of spaces, remove special chars
 
 ---
 
-## 5. PHASE 3 — PROCESS EACH LEAD
+## Phase 3 — Process Each Lead (SEQUENTIAL)
 
-For each valid lead, follow the **`create-quick-widget`** skill process (see `.agent/skills/create-quick-widget/SKILL.md`):
+**Process ONE lead at a time.** Complete the full cycle before starting the next.
 
-### 5.1 Per-Lead Steps
+### Per-lead workflow
 
-1. **Visit website & analyze visual design** → use WebFetch (or browser/screenshot if available) to inspect the site's actual CSS/DOM: extract exact hex colors from headers/buttons/links, font-family, Google Fonts URL, button border-radius, dark/light theme, and overall layout feel (compact/standard/premium/rounded/angular). See `create-quick-widget` Phase 1 (Section 3) for the detailed visual analysis guide.
-2. **Crawl key pages** (up to 5-8 pages) → extract content for knowledge base and AI context
-3. **Create theme.json** — derive ~50 color/layout parameters from the site's actual extracted colors and visual style (see `create-quick-widget` Section 5.3 for full schema, color derivation guide, layout selection table, and examples)
-4. **Write widget.config.json** — bot name, greeting, quick replies, design
-5. **Run theme generator**: `node .agent/widget-builder/scripts/generate-single-theme.js <client_id>` (generates all 6 source files)
-6. **Build widget**: `node .agent/widget-builder/scripts/build.js <client_id>`
-7. **Deploy**: copy to `quickwidgets/<client_id>/script.js`
-8. **Write `info.json`** to `quickwidgets/<client_id>/info.json` with `clientType: "quick"`
-9. **Upload knowledge** via `POST /api/knowledge` (ALL scraped content from the site)
-10. **Set AI settings** via `PUT /api/ai-settings/<client_id>` (system prompt built from all site content)
+For each lead, follow `create-quick-widget` skill phases 1-4:
 
-**DO NOT write JSX or CSS files manually.** The theme generator handles all 6 source files from `theme.json`.
-**DO NOT guess colors.** Every hex code in theme.json must come from the actual site CSS/DOM analysis.
+1. **Analyze site** — WebFetch homepage, extract colors/fonts/content
+2. **Crawl pages** — Visit 5-8 pages for knowledge base
+3. **Write configs**:
+   - `widget.config.json` — **flat format** with `botName`, `welcomeMessage`, `quickReplies`
+   - `theme.json` — 50+ color/layout fields from actual site CSS
+4. **Generate** — `node .agent/widget-builder/scripts/generate-single-theme.js <clientId>`
+5. **Build** — `node .agent/widget-builder/scripts/build.js <clientId>`
+6. **Validate** — Check `dist/script.js` exists and is 200-600KB
+7. **Deploy** — Copy to `quickwidgets/<clientId>/script.js`
+8. **Write info.json** — `quickwidgets/<clientId>/info.json` with `username` field
+9. **Upload knowledge** — `POST /api/knowledge`
+10. **Set AI settings** — `PUT /api/ai-settings/<clientId>`
 
-### 5.2 After Each Successful Widget
+### After each lead
 
-Immediately mark the lead in the tracking list as successful. Track:
+Track results:
 
-- `successes`: array of `{ username, website }`
-- `failures`: array of `{ username, website, error }`
-- `skipped`: count of skipped rows
+- `successes`: `[{ username, website }]`
+- `failures`: `[{ username, website, error }]`
+- `skipped`: count
 
-### 5.3 Error Handling
+### Error handling
 
-If a lead fails (site unreachable, build error, etc.):
+If any step fails for a lead:
 
-- Log the error
+- Log the error with details
 - Add to `failures` list
-- **Continue to next lead** — do NOT stop on failure
+- **Continue to next lead immediately**
 
 ---
 
-## 6. PHASE 4 — UPDATE SOURCE SPREADSHEET
+## Phase 4 — Update Source Spreadsheet
 
-After ALL leads are processed, batch-update the `hasWidget` column in the **source spreadsheet** (the one leads were read from).
+After ALL leads are processed, update the `hasWidget` column.
 
-### 6.1 Find the hasWidget Column
+### Find hasWidget column
 
-If `hasWidget` column doesn't exist in headers, it needs to be added. Determine the column letter:
+Count headers to find the column index. If missing, use next column after last header.
 
-- Count headers to find the index
-- If missing, use the next column after the last header
-
-### 6.2 Batch Update
-
-For all successfully processed leads, set `hasWidget` to `TRUE`:
+### Batch update
 
 ```bash
 curl -s -X POST "http://localhost:3000/api/integrations/sheets/update" \
@@ -180,91 +134,60 @@ curl -s -X POST "http://localhost:3000/api/integrations/sheets/update" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
   -d '{
     "spreadsheetId": "SPREADSHEET_ID",
-    "range": "Sheet1!D2:D50",
+    "range": "D2:D50",
     "values": [["TRUE"], [""], ["TRUE"], ["TRUE"]]
   }'
 ```
 
-**IMPORTANT**: The values array must align with the actual row positions. Use empty strings `""` for rows that were skipped or failed.
+Values array must align with actual row positions. Use empty strings `""` for skipped/failed rows.
+
+**Sheets API note**: Range format uses NO sheet name prefix (`D2:D50`, not `Sheet1!D2:D50`).
 
 ---
 
-## 6B. PHASE 4B — ADD LEADS TO "Проверенные лиды" SPREADSHEET
+## Phase 4B — Add to "Проверенные лиды" Spreadsheet
 
-**MANDATORY**: After processing, all successfully created leads MUST also be added to today's "Проверенные лиды" spreadsheet. This is the master tracking table for all demo widgets.
+If the source spreadsheet is NOT already the "Проверенные лиды" sheet, add successful leads there too.
 
-### 6B.1 Find Today's "Проверенные лиды" Spreadsheet
-
-Get today's date in `DD.MM.YYYY` format and search:
+### Find today's spreadsheet
 
 ```bash
 curl -s "http://localhost:3000/api/integrations/sheets/search?name=DD.MM.YYYY%20Проверенные%20лиды" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
 ```
 
-If not found, try fallback:
+If not found → skip but warn user.
 
-```bash
-curl -s "http://localhost:3000/api/integrations/sheets/search?name=DD.MM.YYYY%20Квалифицированные%20лиды" \
-  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
-```
-
-If neither found — **skip this step** but warn the user that no "Проверенные лиды" spreadsheet was found for today.
-
-**NOTE**: If the source spreadsheet (from Phase 1) IS already the "Проверенные лиды" sheet, skip this step — the hasWidget column was already updated in Phase 4.
-
-### 6B.2 Read Current Data to Find Next Empty Row
-
-```bash
-curl -s "http://localhost:3000/api/integrations/sheets/read?spreadsheetId=VERIFIED_SPREADSHEET_ID" \
-  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}"
-```
-
-Count existing rows to determine the next empty row number.
-
-### 6B.3 Batch Append All Successful Leads
-
-Write all successfully created leads to the next empty rows. Match the spreadsheet's column structure:
+### Read current data, find next empty row, batch append
 
 ```bash
 curl -s -X POST "http://localhost:3000/api/integrations/sheets/update" \
   -H "Content-Type: application/json" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
   -d '{
-    "spreadsheetId": "VERIFIED_SPREADSHEET_ID",
-    "range": "Sheet1!A<NEXT_ROW>:D<LAST_ROW>",
+    "spreadsheetId": "VERIFIED_ID",
+    "range": "A<ROW>:D<LAST>",
     "values": [
-      ["email1@example.com", "https://site1.com", "username1", "TRUE"],
-      ["email2@example.com", "https://site2.com", "username2", "TRUE"]
+      ["email1", "https://site1.com", "username1", "TRUE"],
+      ["email2", "https://site2.com", "username2", "TRUE"]
     ]
   }'
 ```
 
-**IMPORTANT**:
-
-- Adjust column range to match the actual spreadsheet headers
-- Only add **successful** leads (not failed ones)
-- Set `hasWidget` to `TRUE` for all entries
-- Don't duplicate leads that are already in the spreadsheet — check before appending
+Only add **successful** leads. Don't duplicate existing entries.
 
 ---
 
-## 7. PHASE 5 — TELEGRAM REPORT
-
-Send a summary report via Telegram. The API supports multiple chat IDs — set `TELEGRAM_REPORT_CHAT_ID` as comma-separated values (e.g. `123456,789012`) or pass an array in the body:
+## Phase 5 — Telegram Report
 
 ```bash
 curl -s -X POST "http://localhost:3000/api/telegram/notify" \
   -H "Content-Type: application/json" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
-  -d '{
-    "message": "<report HTML>"
-  }'
+  -d '{"message": "<report HTML>"}'
 ```
 
-The report will be sent to ALL chat IDs configured in `TELEGRAM_REPORT_CHAT_ID`. You can also override with `"chatId": ["123", "456"]` in the body.
-
-### 7.1 Report Template
+### Report template
 
 ```html
 📊 <b>Mass Quick Widget Report</b> 📅 Date: DD.MM.YYYY 📋 Sheet:
@@ -279,9 +202,7 @@ The report will be sent to ALL chat IDs configured in `TELEGRAM_REPORT_CHAT_ID`.
 
 ---
 
-## 8. COMPLETION
-
-After everything is done, output a summary to the user:
+## Completion Output
 
 ```
 ✅ Mass Quick Widget creation complete!
@@ -289,88 +210,58 @@ After everything is done, output a summary to the user:
 📊 Results:
 - Created: N widgets
 - Failed: N leads
-- Skipped: N leads (no email/website or already has widget)
+- Skipped: N (no data or already has widget)
 
-📋 Source sheet updated: hasWidget column marked for N leads
-📋 "Проверенные лиды" sheet: N leads added
+📋 Source sheet: hasWidget updated for N leads
+📋 "Проверенные лиды": N leads added
 📨 Telegram report sent
 
-Successful widgets:
-1. <username> — <website>
-2. <username> — <website>
-
-Failed leads:
-1. <username> — <website> (error)
+Successful: 1. username — website  2. username — website
+Failed: 1. username — website (error)
 ```
 
 ---
 
-## 9. API REFERENCE
+## Validation Per Widget
 
-### Read Sheet
+Before deploying each widget, verify (see `create-quick-widget/VALIDATION.md`):
 
-```
-GET /api/integrations/sheets/read?spreadsheetId=ID&range=A:Z
-Cookie: admin_token=<token>
-→ { success, headers: string[], rows: object[] }
-```
-
-### Update Sheet
-
-```
-POST /api/integrations/sheets/update
-Cookie: admin_token=<token>
-Body: { spreadsheetId, range, values: string[][] }
-→ { success, updatedCells }
-```
-
-### Search Spreadsheets
-
-```
-GET /api/integrations/sheets/search?name=query
-Cookie: admin_token=<token>
-→ { success, spreadsheets: [{ id, name }] }
-```
-
-### Telegram Notify (supports multiple chats)
-
-```
-POST /api/telegram/notify
-Cookie: admin_token=<token>
-Body: { message, chatId?: string | string[], botToken? }
-→ { success, sent: number, total: number, failed: string[] }
-```
-
-`TELEGRAM_REPORT_CHAT_ID` env var supports comma-separated IDs (e.g. `123456,789012`).
-
-### Knowledge Upload (existing)
-
-```
-POST /api/knowledge
-Cookie: admin_token=<token>
-Body: { clientId, text, source }
-→ { success }
-```
-
-### AI Settings (existing)
-
-```
-PUT /api/ai-settings/<clientId>
-Cookie: admin_token=<token>
-Body: { systemPrompt, greeting, temperature, maxTokens, topK }
-→ { success }
-```
+- [ ] widget.config.json has `clientId`, `botName`, `welcomeMessage`, `quickReplies`
+- [ ] theme.json passed generator validation
+- [ ] Build completed without errors
+- [ ] `dist/script.js` is 200-600KB
+- [ ] info.json has `username` field
+- [ ] Knowledge upload returned success
+- [ ] AI settings returned success
 
 ---
 
-## 10. KEY CONSTRAINTS
+## API Reference
 
-- **DO NOT** ask user for design preferences — auto-detect everything from the site
-- **DO NOT** stop processing on individual lead failures — continue to next lead
-- **DO NOT** write JSX or CSS files manually — use `theme.json` + `generate-single-theme.js`
-- **DO** visit each site and extract colors/theme/content before creating the widget
-- **DO** update the spreadsheet even if some leads failed
-- **DO** send Telegram report even if all leads failed
-- Follow all constraints from `create-quick-widget` skill (Preact, Tailwind v3, Shadow DOM, etc.)
-- Deploy to `quickwidgets/` (NOT `widgets/`)
-- Use `clientType: "quick"` in `info.json`
+| Endpoint                                         | Method | Purpose                                                                        |
+| ------------------------------------------------ | ------ | ------------------------------------------------------------------------------ |
+| `/api/integrations/sheets/search?name=query`     | GET    | Find spreadsheet by name                                                       |
+| `/api/integrations/sheets/read?spreadsheetId=ID` | GET    | Read sheet data                                                                |
+| `/api/integrations/sheets/update`                | POST   | Update cells (body: `{spreadsheetId, range, values}`)                          |
+| `/api/telegram/notify`                           | POST   | Send report (body: `{message}`)                                                |
+| `/api/knowledge`                                 | POST   | Upload knowledge (body: `{clientId, text, source}`)                            |
+| `/api/ai-settings/<clientId>`                    | PUT    | Set AI config (body: `{systemPrompt, greeting, temperature, maxTokens, topK}`) |
+
+All requests need `Cookie: admin_token=${ADMIN_SECRET_TOKEN}`.
+
+**Sheets API notes**:
+
+- Range format: no sheet name prefix (`D2:D50`, not `Sheet1!D2:D50`)
+- Default grid is 26 columns (A-Z). Column AA+ needs grid expansion via batchUpdate first.
+
+---
+
+## Key Constraints
+
+- **Sequential builds** — ONE build at a time, never parallel
+- **Deploy to `quickwidgets/`** — not `widgets/`
+- **Flat config format** — `botName`, not `bot.name`
+- **info.json needs `username`** — or admin panel breaks
+- **Never stop on failure** — log error, continue to next lead
+- **Always send Telegram report** — even if all leads failed
+- **Always update spreadsheet** — even if some leads failed

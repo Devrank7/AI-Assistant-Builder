@@ -1,0 +1,15 @@
+{
+  "clientId": "smilepointmc",
+  "botName": "Smile Point AI",
+  "welcomeMessage": "Welcome to **Smile Point Medical Center**! We provide advanced dental care in Al Warqa, Dubai, with precision and compassion. How can I help you today?",
+  "inputPlaceholder": "Ask about dental services, appointments, or pricing...",
+  "quickReplies": ["Book an appointment", "Our dental services", "Insurance & pricing"],
+  "avatar": {
+    "type": "initials",
+    "initials": "SP"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}

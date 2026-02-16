@@ -330,7 +330,7 @@ export function Widget({ config }) {
                                     )}
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold ${c.nameSize} text-white tracking-tight leading-tight">{config.bot.name}</h3>
+                                    <h3 className="font-semibold ${c.nameSize} text-white tracking-tight leading-tight">{config.botName || config.bot?.name}</h3>
                                     <p className="text-[11px] text-white/65 font-medium">{isOffline ? 'Offline' : 'Online'}</p>
                                 </div>
                             </div>
@@ -348,7 +348,7 @@ export function Widget({ config }) {
 
                         {/* MESSAGES */}
                         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 scrollbar-hide ${chatBg}" aria-live="polite">
-                            <ChatMessage role="assistant" content={config.bot.greeting} onImageClick={setExpandedImage} />
+                            <ChatMessage role="assistant" content={config.welcomeMessage || config.bot?.greeting} onImageClick={setExpandedImage} />
                             {messages.map((msg, idx) => (
                                 <div key={idx}>
                                     <ChatMessage
@@ -390,7 +390,7 @@ export function Widget({ config }) {
 
                         {/* INPUT */}
                         <div className="px-4 py-3.5 border-t ${inputAreaBorder} ${inputAreaBg} space-y-2.5">
-                            {showQuickReplies && <QuickReplies options={config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
+                            {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                             <form onSubmit={handleSubmit} className="flex items-end gap-2">
                                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                                 <button type="button" onClick={() => fileInputRef.current?.click()}

@@ -1,0 +1,20 @@
+{
+  "clientId": "mirabellaproperties",
+  "bot": {
+    "name": "Mirabella AI",
+    "greeting": "Welcome to Mirabella Properties! I'm your personal property assistant for Jumeirah Golf Estates and other premium Dubai communities. How can I help you today?",
+    "tone": "professional_friendly",
+    "language": "en"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "quickReplies": {
+      "starters": ["Properties for sale", "Jumeirah Golf Estates", "Book a consultation"]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "clientId": "xlcr",
+  "bot": {
+    "name": "XLCR AI",
+    "greeting": "Welcome to XLCR Real Estate! We specialize in off-plan investment and luxury homes in Dubai. How can I assist you today?",
+    "tone": "professional_friendly",
+    "language": "en"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "quickReplies": {
+      "starters": ["Off-plan investments", "View developments", "Contact an advisor"]
+    }
+  }
+}

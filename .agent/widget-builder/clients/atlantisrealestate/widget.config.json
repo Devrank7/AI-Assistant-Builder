@@ -1,0 +1,15 @@
+{
+  "clientId": "atlantisrealestate",
+  "botName": "Atlantis RE AI",
+  "welcomeMessage": "Hello! Welcome to Atlantis Real Estate. I can help you explore luxury properties in Dubai, Abu Dhabi, and Sharjah, investment opportunities with guaranteed ROI, or connect you with a consultant. How can I assist you?",
+  "inputPlaceholder": "Ask about properties & investments...",
+  "quickReplies": ["Investment properties", "Off-plan projects", "Book a consultation"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AR"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "clientId": "mcconeproperties",
+  "botName": "McCone AI",
+  "welcomeMessage": "Welcome to **McCone Properties**!\n\nI'm your AI property assistant. I can help you find properties for sale or rent in Dubai, explore off-plan projects, learn about mortgage options, or connect you with one of our expert agents.\n\nHow can I help you today?",
+  "inputPlaceholder": "Ask about properties, investments, or consultations...",
+  "quickReplies": ["Properties for sale in Dubai", "Off-plan investment projects", "Book a free consultation"],
+  "avatar": {
+    "type": "initials",
+    "initials": "MC"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}

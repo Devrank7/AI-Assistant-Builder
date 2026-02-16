@@ -1,0 +1,19 @@
+{
+  "clientId": "ariesclinic",
+  "botName": "Aries Clinic AI",
+  "welcomeMessage": "Welcome to Aries Aesthetic and Dental Clinic! \ud83c\udfaf How can we help you today? Ask about our dental treatments, aesthetic procedures, or book a consultation.",
+  "inputPlaceholder": "Ask about treatments, pricing, or booking...",
+  "quickReplies": [
+    "What dental services do you offer?",
+    "Tell me about aesthetic treatments",
+    "How do I book an appointment?"
+  ],
+  "avatar": {
+    "type": "initials",
+    "initials": "AC"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}

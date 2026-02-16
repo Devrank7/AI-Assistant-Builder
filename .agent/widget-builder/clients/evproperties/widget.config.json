@@ -1,0 +1,15 @@
+{
+  "clientId": "evproperties",
+  "botName": "Elite Venture AI",
+  "welcomeMessage": "Welcome to **Elite Venture Properties**!\n\nI'm your AI property assistant. I can help you explore premier Dubai properties, learn about investment opportunities, find off-plan and ready-to-move options, or connect you with our team.\n\nHow can I assist you today?",
+  "inputPlaceholder": "Ask about Dubai properties...",
+  "quickReplies": ["Featured projects in Dubai", "Investment opportunities", "Book a consultation"],
+  "avatar": {
+    "type": "initials",
+    "initials": "EV"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}
