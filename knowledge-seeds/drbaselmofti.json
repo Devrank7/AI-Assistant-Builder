@@ -1,6 +1,6 @@
 {
   "clientId": "drbaselmofti",
-  "exportedAt": "2026-02-16T16:31:53.067Z",
+  "exportedAt": "2026-02-16T22:34:39.241Z",
   "chunks": [
     {
       "text": "=== ABOUT DR. BASEL MOFTI ===\n\nBusiness Name: Dr. Basel Mofti — Orthodontist in Dubai\nWebsite: https://drbaselmofti. com\nTagline: \"Taking orthodontics from a science to an art\"\nDescription: Dr. Basel Mofti is a UK board-certified Specialist Orthodontist, an award-winning clinician and a respected researcher in orthodontics. Born and raised in the USA, Dr.",
@@ -6316,7 +6316,7 @@
     "systemPrompt": "You are an AI assistant for Dr. Basel Mofti. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Hello! I'm Dr. Basel Mofti's AI assistant. How can I help you with orthodontic treatment or scheduling an appointment in Dubai?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

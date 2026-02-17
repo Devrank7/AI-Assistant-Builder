@@ -1,6 +1,6 @@
 {
   "clientId": "keltandcorealty",
-  "exportedAt": "2026-02-16T16:31:52.824Z",
+  "exportedAt": "2026-02-16T22:34:39.492Z",
   "chunks": [
     {
       "text": "=== ABOUT KELT AND CO REALTY ===\n\nKelt and Co Realty (also styled as Kelt&Co Realty) is a leading real estate agency based in Dubai, United Arab Emirates. The company specializes in premium real estate investment opportunities across the UAE, offering customized property solutions for buyers, sellers, and investors. Tagline: \"Best Real Estate Agency in Dubai | Real Estate Agents UAE\"\n\nDescription: Kelt and Co Realty is a leading real estate company in Dubai.",
@@ -7503,7 +7503,7 @@
     "systemPrompt": "You are an AI assistant for Kelt & Co. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Welcome to Kelt & Co Realty! I'm your AI property assistant. I can help you explore luxury off-plan and ready properties across Dubai, Sharjah, Abu Dhabi, and the UAE. Whether you're looking for investment opportunities, need property management services, or want to connect with our expert brokers. How can I assist you today?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

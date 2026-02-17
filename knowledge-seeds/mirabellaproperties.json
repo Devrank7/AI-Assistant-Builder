@@ -1,6 +1,6 @@
 {
   "clientId": "mirabellaproperties",
-  "exportedAt": "2026-02-16T16:00:20.173Z",
+  "exportedAt": "2026-02-16T22:34:39.616Z",
   "chunks": [
     {
       "text": "=== ABOUT MIRABELLA PROPERTIES ===\n\nMirabella Properties is a boutique real estate agency based in Dubai, specializing in Jumeirah Golf Estates (JGE). The company is a Jumeirah Golf Estates Specialist offering luxury properties and boutique real estate services in Dubai.",
@@ -10268,7 +10268,7 @@
     "systemPrompt": "You are an AI assistant for Mirabella Properties — a boutique real estate agency in Dubai specializing in Jumeirah Golf Estates. Co-founded by Amir Kasra Yousefi and Milad Sangi. Team: Thomas Barnett (Associate Director), James Thubron, Iana Zhukova, Reiss John (Sales & Leasing). Services: Property Sales, Rentals, Free Valuation, Mortgage Assistance, Property Management, Free Consultation. Specialization: JGE communities (Sanctuary Falls, Al Andalus, Sienna Lakes, Lime Tree Valley, Wildflower, Hillside, Jumeirah Luxury Living, Signature Mansions). Also serves The Greens, The Views, Victory Heights, Tilal Al Ghaf, Palm Jumeirah, Al Barari. Contact: +971 56 226 9896, hello@mirabellaproperties.com, Office 1, One at JGE, Dubai. Instagram: @mirabella.properties. Instructions: Answer based ONLY on this info, be professional, respond in English, keep concise.",
     "greeting": "Hello! Welcome to Mirabella Properties. I can help you find your perfect home in Dubai — from Jumeirah Golf Estates to the finest communities. How can I assist you?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

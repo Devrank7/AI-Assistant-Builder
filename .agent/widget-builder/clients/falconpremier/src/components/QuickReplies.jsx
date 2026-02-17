@@ -1,22 +1,30 @@
 import { motion } from 'framer-motion';
+import { MessageCircle } from 'lucide-preact';
 
 export default function QuickReplies({ options, onSelect }) {
     if (!options || options.length === 0) return null;
 
     return (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
             {options.map((option, idx) => (
                 <motion.button
                     key={idx}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.08, type: 'spring', stiffness: 400, damping: 28 }}
-                    whileHover={{ scale: 1.02, x: 2 }}
-                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: 0.1 + idx * 0.07, type: 'spring', stiffness: 380, damping: 26 }}
+                    whileHover={{ scale: 1.015, y: -1 }}
+                    whileTap={{ scale: 0.985 }}
                     onClick={() => onSelect(option)}
-                    className="w-full px-3 py-1.5 rounded-xl border border-[#c79751] bg-gradient-to-r from-[#fdf8f0] to-[#f5e8d0]/50 text-[11.5px] font-medium text-[#0f0f0f] hover:from-[#f5e8d0] hover:to-[#eddbb5]/50 hover:border-[#b8883f] hover:shadow-sm transition-all duration-200 cursor-pointer text-left"
+                    className="group relative w-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer text-left shadow-sm hover:shadow-md bg-white/80 border-[#c79751] hover:border-[#b8883f] hover:bg-[#f5e8d0]/40 group-hover:shadow-[0_2px_16px_rgba(199,151,81,0.10)]"
+                    style={{ backdropFilter: 'blur(8px)' }}
                 >
-                    {option}
+                    <div className="relative flex items-center gap-3 px-3.5 py-2.5">
+                        <span className="flex-shrink-0 w-7 h-7 rounded-xl bg-gradient-to-br from-[#0f0f0f]/[0.12] to-[#0f0f0f]/[0.05] flex items-center justify-center shadow-sm">
+                            <MessageCircle size={13} className="text-[#0f0f0f]" />
+                        </span>
+                        <span className="text-[12px] font-medium leading-snug text-[#0f0f0f]">{option}</span>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#0f0f0f]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 </motion.button>
             ))}
         </div>

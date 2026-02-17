@@ -99,12 +99,20 @@ http://localhost:3000/demo/client-website?client=<clientId>&website=<encoded_web
 
 The widget should:
 
-1. Show the toggle button in bottom-right corner
-2. Open when clicked
-3. Display the bot name in the header
-4. Show the welcome message
-5. Display quick reply buttons
-6. Accept text input
+1. Show the toggle button in bottom-right corner with breathing animation
+2. Open when clicked (smooth spring animation)
+3. Display the bot name in the header with gradient background
+4. Show the welcome message with typewriter effect
+5. Display quick reply buttons (3-4 cards with icons)
+6. Accept text input with auto-resize textarea
+7. Show contact bar below header (Call/Email/Website buttons) if `contacts` configured
+8. Show proactive nudge bubble after ~8 seconds (if widget not opened)
+9. Have voice input mic button (if browser supports Web Speech API)
+10. Show TTS speaker icon on hover over bot messages
+11. Have header menu (⋮) with: New Chat, Mute/Unmute, Font Size, Export Chat
+12. Support image upload via photo button
+13. Display SVG chat pattern in message area background
+14. On mobile: open as bottom sheet with swipe-to-close
 
 ---
 
@@ -119,3 +127,7 @@ The widget should:
 | Quick replies don't appear                     | `quickReplies` field missing or wrong path         | Use flat format: `quickReplies: [...]` not nested      |
 | Dark theme but light colors                    | `isDark: false` when should be `true`              | Check body background color of site                    |
 | Multiple builds corrupt each other             | Parallel builds sharing same src/ directory        | **Always build sequentially, one at a time**           |
+| Contact bar doesn't appear                     | `contacts` missing from widget.config.json         | Add `contacts: { phone, email, website }` from site    |
+| Proactive nudge never appears                  | `features.proactive` set to `false`                | Set `proactive: { delay: 8, message: "..." }`          |
+| Widget styles persist between clients          | Old `customElements.define` was shared             | Fixed: each widget gets unique tag `ai-chat-{id}`      |
+| Bottom padding missing (no white chin)         | `.safe-area-bottom` CSS overriding `pb-3`          | Fixed: uses `margin-bottom` not `padding-bottom`       |

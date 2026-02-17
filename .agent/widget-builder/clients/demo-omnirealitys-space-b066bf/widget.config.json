@@ -1,0 +1,33 @@
+{
+  "clientId": "demo-omnirealitys-space-b066bf",
+  "botName": "Omni Reality AI",
+  "welcomeMessage": "Hi there! 👋 I'm the **Omni Reality** AI assistant. How can I help you?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Tell me about your company", "What services do you offer?", "How can I contact you?"],
+  "avatar": {
+    "type": "initials",
+    "initials": "OR"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "👋 Hi there! Need any help?"
+    }
+  },
+  "contacts": {
+    "phone": "+971555778866",
+    "website": "https://omnirealitys.space/"
+  }
+}

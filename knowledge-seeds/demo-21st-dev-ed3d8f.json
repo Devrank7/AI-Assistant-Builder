@@ -1,6 +1,6 @@
 {
   "clientId": "demo-21st-dev-ed3d8f",
-  "exportedAt": "2026-02-15T09:56:19.291Z",
+  "exportedAt": "2026-02-16T22:34:38.950Z",
   "chunks": [
     {
       "text": "21st\n\n21st 1Code new Calm Claude Code GUI Components Main Feed Best of the Week Marketing Blocks Announcements 10 Backgrounds 33 Borders 12 Calls to Action 34 Clients 16 Comparisons 6 Docks 6 Features 36 Footers 14 Heroes 73 Hooks 31 Images 26 Maps 2 Navigation Menus 11 Pricing Sections 17 Scroll Areas 24 Shaders 15 Testimonials 15 Texts 58 Videos 9 UI Components Accordions 40 AI Chats 30 Alerts 23 Avatars 17 Badges 25 Buttons 130 Calendars 34 Cards 79 Carousels 16 Checkboxes 19 Date Pickers 12 Dialogs / Modals 37 Dropdowns 25 Empty States 1 File Trees 2 File Uploads 7 Forms 23 Icons 10 Inputs 102 Links 13 Menus 18 Notifications 5 Numbers 18 Paginations 20 Popovers 23 Radio Groups 22 Selects 62 Sidebars 10 Sign Ins 4 Sign ups 4 Sliders 45 Spinner Loaders 21 Tables 30 Tabs 38 Tags 6 Text Areas 22 Toasts 2 Toggles 12 Tooltips 28 Screens Themes Legacy tools Magic MCP <path d=\"M16 18H19C20.",
@@ -3169,7 +3169,7 @@
     "systemPrompt": "You are an AI assistant for \"21st\". Answer questions based on the provided knowledge base. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English.",
     "greeting": "Привет! Чем могу помочь?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

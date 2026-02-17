@@ -50,6 +50,8 @@ interface SiteMetadata {
   description: string;
   language: string;
   rawHtml: string;
+  phone: string;
+  email: string;
 }
 
 async function fetchSiteMetadata(url: string): Promise<SiteMetadata> {
@@ -58,6 +60,8 @@ async function fetchSiteMetadata(url: string): Promise<SiteMetadata> {
     description: '',
     language: 'en',
     rawHtml: '',
+    phone: '',
+    email: '',
   };
 
   try {
@@ -102,11 +106,17 @@ async function fetchSiteMetadata(url: string): Promise<SiteMetadata> {
       html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["']/i);
     const langMatch = html.match(/<html[^>]+lang=["']([^"']+)["']/i);
 
+    // Extract phone and email from HTML
+    const phoneMatch = html.match(/href=["']tel:([^"']+)["']/i);
+    const emailMatch = html.match(/href=["']mailto:([^"'?]+)["'?]/i);
+
     return {
       title: (titleMatch?.[1] || ogTitleMatch?.[1] || '').trim(),
       description: (descMatch?.[1] || '').trim(),
       language: (langMatch?.[1] || 'en').split('-')[0].toLowerCase(),
       rawHtml: html,
+      phone: (phoneMatch?.[1] || '').trim(),
+      email: (emailMatch?.[1] || '').trim(),
     };
   } catch {
     return defaults;
@@ -218,12 +228,40 @@ async function fetchPageText(url: string): Promise<string> {
   }
 }
 
-// --- Background Knowledge Upload ---
+// --- Set AI System Prompt (synchronous — must complete before user interacts) ---
+async function setAISettings(clientId: string, brandName: string, language: string): Promise<void> {
+  let systemPrompt: string;
+  if (language === 'uk') {
+    systemPrompt = `Ти — AI-асистент компанії "${brandName}". Відповідай на основі наданої бази знань. Будь ввічливим, корисним та професійним. Якщо не знаєш відповіді — порадь зв'язатися з компанією напряму. Відповідай українською мовою. ВАЖЛИВО: ти представляєш ТІЛЬКИ компанію "${brandName}", ніяку іншу.`;
+  } else if (language === 'ru') {
+    systemPrompt = `Ты — AI-ассистент компании "${brandName}". Отвечай на основе предоставленной базы знаний. Будь вежливым, полезным и профессиональным. Если не знаешь ответа — предложи связаться с компанией напрямую. Отвечай на русском языке. ВАЖНО: ты представляешь ТОЛЬКО компанию "${brandName}", никакую другую.`;
+  } else if (language === 'pl') {
+    systemPrompt = `Jesteś asystentem AI firmy "${brandName}". Odpowiadaj na podstawie dostarczonej bazy wiedzy. Bądź uprzejmy, pomocny i profesjonalny. Jeśli nie znasz odpowiedzi — zasugeruj bezpośredni kontakt z firmą. Odpowiadaj po polsku. WAŻNE: reprezentujesz TYLKO firmę "${brandName}", żadną inną.`;
+  } else if (language === 'ar') {
+    systemPrompt = `أنت مساعد AI لشركة "${brandName}". أجب بناءً على قاعدة المعرفة المقدمة. كن مهذبًا ومفيدًا ومحترفًا. إذا لم تعرف الإجابة، اقترح التواصل مع الشركة مباشرة. أجب باللغة العربية. مهم: أنت تمثل فقط شركة "${brandName}"، لا شركة أخرى.`;
+  } else {
+    systemPrompt = `You are an AI assistant for "${brandName}". Answer questions based on the provided knowledge base. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. IMPORTANT: You represent ONLY "${brandName}", no other company.`;
+  }
+
+  await AISettings.findOneAndUpdate(
+    { clientId },
+    {
+      $set: {
+        systemPrompt,
+        temperature: 0.7,
+        maxTokens: 2048,
+        topK: 5,
+      },
+    },
+    { upsert: true }
+  );
+}
+
+// --- Background Knowledge Upload (embeddings only — AI prompt already set) ---
 async function uploadKnowledgeBackground(
   clientId: string,
   brandName: string,
   websiteUrl: string,
-  language: string,
   homepageHtml: string
 ): Promise<void> {
   try {
@@ -276,34 +314,7 @@ async function uploadKnowledgeBackground(
       }
     }
 
-    // 5. Set AI system prompt
-    let systemPrompt: string;
-    if (language === 'uk') {
-      systemPrompt = `Ти — AI-асистент компанії "${brandName}". Відповідай на основі наданої бази знань. Будь ввічливим, корисним та професійним. Якщо не знаєш відповіді — порадь зв'язатися з компанією напряму. Відповідай українською мовою.`;
-    } else if (language === 'ru') {
-      systemPrompt = `Ты — AI-ассистент компании "${brandName}". Отвечай на основе предоставленной базы знаний. Будь вежливым, полезным и профессиональным. Если не знаешь ответа — предложи связаться с компанией напрямую. Отвечай на русском языке.`;
-    } else if (language === 'pl') {
-      systemPrompt = `Jesteś asystentem AI firmy "${brandName}". Odpowiadaj na podstawie dostarczonej bazy wiedzy. Bądź uprzejmy, pomocny i profesjonalny. Jeśli nie znasz odpowiedzi — zasugeruj bezpośredni kontakt z firmą. Odpowiadaj po polsku.`;
-    } else if (language === 'ar') {
-      systemPrompt = `أنت مساعد AI لشركة "${brandName}". أجب بناءً على قاعدة المعرفة المقدمة. كن مهذبًا ومفيدًا ومحترفًا. إذا لم تعرف الإجابة، اقترح التواصل مع الشركة مباشرة. أجب باللغة العربية.`;
-    } else {
-      systemPrompt = `You are an AI assistant for "${brandName}". Answer questions based on the provided knowledge base. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English.`;
-    }
-
-    await AISettings.findOneAndUpdate(
-      { clientId },
-      {
-        $set: {
-          systemPrompt,
-          temperature: 0.7,
-          maxTokens: 1024,
-          topK: 5,
-        },
-      },
-      { upsert: true }
-    );
-
-    // 6. Export seed (dev → production sync)
+    // 5. Export seed (dev → production sync)
     try {
       const { exportClientSeed } = await import('@/lib/exportSeed');
       await exportClientSeed(clientId);
@@ -391,6 +402,11 @@ export async function POST(request: NextRequest) {
       brandName,
       greeting,
       language: lang,
+      contacts: {
+        phone: metadata.phone || undefined,
+        email: metadata.email || undefined,
+        website: websiteUrl,
+      },
     });
 
     // 7. Write config files
@@ -454,7 +470,7 @@ export async function POST(request: NextRequest) {
     };
     fs.writeFileSync(path.join(qwDir, 'info.json'), JSON.stringify(infoJson, null, 2));
 
-    // 11. Create Client record in MongoDB
+    // 11. Create Client record + Set AI system prompt (SYNCHRONOUS — must complete before user interacts)
     try {
       await connectDB();
       const existing = await Client.findOne({ clientId });
@@ -474,13 +490,14 @@ export async function POST(request: NextRequest) {
           subscriptionStatus: 'active',
         });
       }
+      // Set AI system prompt NOW — so the AI knows who it represents from the first interaction
+      await setAISettings(clientId, brandName, lang);
     } catch (dbError) {
       console.error('[GenerateDemo] DB error (non-fatal):', dbError);
-      // Widget still works without DB record — client scan will pick it up
     }
 
-    // 12. Fire-and-forget: upload knowledge in background
-    uploadKnowledgeBackground(clientId, brandName, websiteUrl, lang, metadata.rawHtml).catch((err) => {
+    // 12. Fire-and-forget: upload knowledge embeddings in background
+    uploadKnowledgeBackground(clientId, brandName, websiteUrl, metadata.rawHtml).catch((err) => {
       console.error('[GenerateDemo] Background knowledge upload error:', err);
     });
 

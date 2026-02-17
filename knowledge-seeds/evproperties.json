@@ -1,6 +1,6 @@
 {
   "clientId": "evproperties",
-  "exportedAt": "2026-02-16T16:31:52.994Z",
+  "exportedAt": "2026-02-16T22:34:39.334Z",
   "chunks": [
     {
       "text": "# Elite Venture Properties — Knowledge Base\n\n## Company Overview\n\n**Elite Venture Properties** is a Dubai-based real estate agency specializing in premier residential and investment properties across Dubai. The company is led by CEO **Mr. Umair**, who brings over eight years of industry expertise, and is positioned as a trusted partner for navigating Dubai's dynamic property landscape.",
@@ -6713,7 +6713,7 @@
     "systemPrompt": "You are an AI assistant for Elite Venture. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Welcome to Elite Venture Properties! I'm your AI property assistant. I can help you explore premier Dubai properties, learn about investment opportunities, find off-plan and ready-to-move options, or connect you with our team. How can I assist you today?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

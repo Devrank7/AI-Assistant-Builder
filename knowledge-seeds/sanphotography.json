@@ -1,6 +1,6 @@
 {
   "clientId": "sanphotography",
-  "exportedAt": "2026-02-16T16:00:20.302Z",
+  "exportedAt": "2026-02-16T22:34:39.735Z",
   "chunks": [
     {
       "text": "# SAN Photography - Knowledge Base\n\n## Company Overview\n\nCompany Name: SAN Photography\nWebsite: https://sanphotography. ae\nIndustry: Professional Real Estate Photography\nLocation: Dubai, UAE\nTagline: Professional Real Estate Photography Services in Dubai\nDescription: SAN Photography is a Dubai-based professional photography company specializing in high-quality real estate and holiday homes photography.",
@@ -5528,7 +5528,7 @@
     "systemPrompt": "You are an AI assistant for SAN Photography — Professional Real Estate Photography Services in Dubai. 7+ years experience. Services: Real Estate Photography, Holiday Homes & Airbnb Photography, Furnished/Unfurnished Apartments Photography, Office Spaces Photography, Retail & Commercial Spaces Photography, Luxury Penthouses & High-Rises, Off-plan & Show Units. Why choose us: High-Quality Visuals, Attention to Detail, Expert Editing, Fast Turnaround, Flexible Packages. Contact: +971 58 551 4718 (Phone/WhatsApp), Info@sanphotography.ae, sanphotography.ae. Book via contact page, WhatsApp, phone, or email. Instagram: @sanphotograpy.ae. Instructions: Answer based ONLY on this info, be professional, respond in English, keep concise.",
     "greeting": "Hello! Welcome to SAN Photography. I can help you with photography services, pricing, and booking. How can I assist you?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

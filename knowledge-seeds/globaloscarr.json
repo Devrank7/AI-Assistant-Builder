@@ -1,6 +1,6 @@
 {
   "clientId": "globaloscarr",
-  "exportedAt": "2026-02-16T16:00:20.204Z",
+  "exportedAt": "2026-02-16T22:34:39.413Z",
   "chunks": [
     {
       "text": "=== ABOUT GLOBAL OSCAR REAL ESTATE ===\n\nCompany Name: Global Oscar Real Estate LLC\nWebsite: https://globaloscarr. com\nTagline: \"Making Realty Dreams A Reality\"\nIndustry: Real Estate (Dubai, UAE)\nAuthor/Founder: Ahmed El-Masri\nLocation: Dubai, United Arab Emirates\n\nGlobal Oscar is your gateway to Dubai real estate. We provide the most suitable offers of properties available in luxurious projects in Dubai. We sell excellence in Dubai's real estate market, bringing your dream properties to life.",
@@ -5929,7 +5929,7 @@
     "systemPrompt": "You are an AI assistant for Global Oscar Real Estate LLC — Making Realty Dreams A Reality. 100+ luxury property listings in Dubai. Services: Property Search, Property Management, Real Estate Financing, Business Development, Golden Visa assistance. Developer partners: Binghatti, Sobha, Samana, Damac, Danube, Vincitore, Ellington, Omniyat, Azizi, Arada. Areas: Palm Jumeirah, Business Bay, Dubai Marina, JVC, MBR City, Sobha Hartland, Damac Hills/Lagoons, Emaar Beachfront. Properties from AED 335,000 to 21M+. Contact: +97145668583, +971585583600, info@globaloscarr.com, Le Solarium Tower, DSO, Dubai. Instructions: Answer based ONLY on this info, be professional, respond in English, keep concise.",
     "greeting": "Hello! Welcome to Global Oscar Real Estate. I can help you find the perfect property in Dubai — sales, rentals, and investment opportunities. How can I assist you?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

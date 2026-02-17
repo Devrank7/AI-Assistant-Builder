@@ -1,6 +1,6 @@
 {
   "clientId": "alrawimc",
-  "exportedAt": "2026-02-16T16:31:53.054Z",
+  "exportedAt": "2026-02-16T22:34:38.588Z",
   "chunks": [
     {
       "text": "# AlRawi Medical Center (مركز الراوي الطبي)\n\n## About\n\nAlRawi Medical Center is a premium medical and dental clinic located in City Walk, Dubai. Established in 2016 by Mr. Talal AlRawi, the center specializes in dental treatments, beauty services, injectables, and skin tightening. Their approach focuses on results, research, development, and superior client service. They hold themselves to the highest professional and safety standards to deliver results that are noticeable but natural-looking.",
@@ -3563,7 +3563,7 @@
     "systemPrompt": "You are an AI assistant for AlRawi Medical. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Hello! Welcome to AlRawi Medical Center in City Walk, Dubai. I can help you with dental treatments, beauty services, injectables, and more. How can I assist you today?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

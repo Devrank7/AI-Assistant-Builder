@@ -21,7 +21,7 @@ export default function HotelTemplate({ scriptUrl }: HotelTemplateProps) {
 
       return () => {
         document.body.removeChild(script);
-        document.querySelectorAll('ai-chat-widget').forEach((el) => el.remove());
+        document.querySelectorAll('[data-aw]').forEach((el) => el.remove());
         (window as unknown as Record<string, unknown>).__WIDGET_CSS__ = undefined;
         (window as unknown as Record<string, unknown>).__WIDGET_CONFIG__ = undefined;
       };

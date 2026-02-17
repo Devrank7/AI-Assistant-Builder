@@ -153,7 +153,7 @@ AIWidget/
 │   │   │   ├── widget.config.json    # Widget behavior config
 │   │   │   └── src/components/       # Client-specific component overrides
 │   │   ├── scripts/                  # Build scripts
-│   │   │   ├── generate-single-theme.js  # theme.json → 6 source files
+│   │   │   ├── generate-single-theme.js  # theme.json → 7 source files
 │   │   │   ├── build.js              # Vite build → single script.js
 │   │   │   └── mass-build.js         # Batch build all clients
 │   │   ├── dist/                     # Build output (script.js)
@@ -235,7 +235,7 @@ Widget behavior settings:
 node .agent/widget-builder/scripts/generate-single-theme.js <clientId>
 ```
 
-Reads `theme.json` → generates 6 files: `index.css`, `main.jsx`, `Widget.jsx`, `ChatMessage.jsx`, `QuickReplies.jsx`, `MessageFeedback.jsx`
+Reads `theme.json` → generates 7 files: `index.css`, `main.jsx`, `Widget.jsx`, `ChatMessage.jsx`, `QuickReplies.jsx`, `MessageFeedback.jsx`, `RichBlocks.jsx`
 
 ### Step 5: Build Widget
 

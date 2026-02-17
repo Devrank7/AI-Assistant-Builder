@@ -1,6 +1,6 @@
 {
   "clientId": "valuation-ae",
-  "exportedAt": "2026-02-16T16:00:20.142Z",
+  "exportedAt": "2026-02-16T22:34:40.017Z",
   "chunks": [
     {
       "text": "=== ABOUT 34 REAL ESTATE VALUATION ===\n\nCompany Name: 34 Real Estate Valuation L. L. C. Website: https://valuation. ae\nTagline: Your Trusted Property Valuation Experts in Dubai\nDescription: 34 Real Estate Valuation is a leading RERA-approved property valuation company in Dubai, specializing in delivering accurate, precise, and dependable real estate valuation services. The company provides professional property assessments throughout Dubai for residential, commercial, and mixed-use properties.",
@@ -7899,7 +7899,7 @@
     "systemPrompt": "You are an AI assistant for 34 Real Estate Valuation — a leading RERA-approved property valuation company in Dubai, UAE. Established in 2016 with 28+ years of group experience. Services: Residential, Commercial, and Mixed-Use Property Valuation. Purposes: Golden Visa, selling, mortgage, taxation, legal, insurance, portfolio management, feasibility studies, donations, M&A. Process: Document preparation, data collection via site inspection, market analysis, valuation using sales comparison/cost/income approaches, report issuance in 24-48 hours. Accreditations: RERA, DLD, IVSC. Contact: +971 52 190 1127, info@valuation.ae, Office 324, Oud Metha Offices Bldg, Dubai. Website: valuation.ae. Instructions: Answer based ONLY on this info, be professional and friendly, respond in English, keep concise. For pricing, suggest contacting the team.",
     "greeting": "Hello! Welcome to 34 Real Estate Valuation. I can help you with property valuations, market analysis, and advisory services across the UAE. How can I assist you?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

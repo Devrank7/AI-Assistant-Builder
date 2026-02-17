@@ -30,27 +30,55 @@ This file is embedded into the widget at build time via Vite's `define` plugin. 
     "sound": true,
     "voiceInput": true,
     "feedback": true,
-    "streaming": true
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Welcome to Example Clinic! Need help?"
+    }
+  },
+  "contacts": {
+    "phone": "+971501234567",
+    "email": "info@example.com",
+    "website": "https://example.com"
   }
 }
 ```
 
 ### Field Reference
 
-| Field                 | Type       | Required | Description                                        |
-| --------------------- | ---------- | -------- | -------------------------------------------------- |
-| `clientId`            | `string`   | YES      | Unique identifier, lowercase with hyphens          |
-| `botName`             | `string`   | YES      | Display name in widget header                      |
-| `welcomeMessage`      | `string`   | YES      | First message shown, supports **markdown**         |
-| `inputPlaceholder`    | `string`   | no       | Textarea placeholder text                          |
-| `quickReplies`        | `string[]` | YES      | 3-4 quick reply buttons shown before first message |
-| `avatar.type`         | `string`   | no       | `"initials"` or `"icon"`                           |
-| `avatar.initials`     | `string`   | no       | 2-letter initials for avatar                       |
-| `design.position`     | `string`   | no       | `"bottom-right"` (default) or `"bottom-left"`      |
-| `features.sound`      | `boolean`  | no       | Notification sound on AI response (default: true)  |
-| `features.voiceInput` | `boolean`  | no       | Mic button for speech-to-text (default: true)      |
-| `features.feedback`   | `boolean`  | no       | Thumbs up/down on messages (default: true)         |
-| `features.streaming`  | `boolean`  | no       | SSE streaming for responses (default: true)        |
+| Field                        | Type             | Required | Description                                         |
+| ---------------------------- | ---------------- | -------- | --------------------------------------------------- |
+| `clientId`                   | `string`         | YES      | Unique identifier, lowercase with hyphens           |
+| `botName`                    | `string`         | YES      | Display name in widget header                       |
+| `welcomeMessage`             | `string`         | YES      | First message shown, supports **markdown**          |
+| `inputPlaceholder`           | `string`         | no       | Textarea placeholder text                           |
+| `quickReplies`               | `string[]`       | YES      | 3-4 quick reply buttons shown before first message  |
+| `avatar.type`                | `string`         | no       | `"initials"` or `"icon"`                            |
+| `avatar.initials`            | `string`         | no       | 2-letter initials for avatar                        |
+| `design.position`            | `string`         | no       | `"bottom-right"` (default) or `"bottom-left"`       |
+| `features.sound`             | `boolean`        | no       | Notification sound on AI response (default: true)   |
+| `features.voiceInput`        | `boolean`        | no       | Mic button for speech-to-text (default: true)       |
+| `features.feedback`          | `boolean`        | no       | Thumbs up/down on messages (default: true)          |
+| `features.streaming`         | `boolean`        | no       | SSE streaming for responses (default: true)         |
+| `features.proactive`         | `object/boolean` | no       | Proactive nudge bubble config (default: enabled)    |
+| `features.proactive.delay`   | `number`         | no       | Seconds before showing nudge (default: 8)           |
+| `features.proactive.message` | `string`         | no       | Custom nudge message (default: truncated welcome)   |
+| `features.tts`               | `boolean`        | no       | Text-to-speech on bot messages (default: true)      |
+| `features.autoLang`          | `boolean`        | no       | Auto language detection for UI (default: true)      |
+| `features.richCards`         | `boolean`        | no       | Rich cards/carousel from AI (default: true)         |
+| `features.leadForm`          | `boolean`        | no       | In-chat lead capture form (default: true)           |
+| `features.memory`            | `boolean`        | no       | Conversation memory across sessions (default: true) |
+| `contacts`                   | `object`         | no       | Contact bar with action buttons (see below)         |
+| `contacts.phone`             | `string`         | no       | Phone number for "Call" button                      |
+| `contacts.email`             | `string`         | no       | Email for "Email" button                            |
+| `contacts.website`           | `string`         | no       | Website URL for "Website" button                    |
+
+**IMPORTANT**: Always include `contacts` when phone, email, or website were found during site analysis. This enables the contact bar below the header with Call/Email/Website action buttons. Omitting `contacts` means users can't quickly reach the business.
 
 ### How Widget.jsx Reads Config
 

@@ -64,7 +64,7 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 
 | Script                      | Command                                                                   | Purpose                                                         |
 | --------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `generate-single-theme.js`  | `node .agent/widget-builder/scripts/generate-single-theme.js <client_id>` | Generate all 6 source files from `theme.json`                   |
+| `generate-single-theme.js`  | `node .agent/widget-builder/scripts/generate-single-theme.js <client_id>` | Generate all 7 source files from `theme.json`                   |
 | `build.js`                  | `node .agent/widget-builder/scripts/build.js <client_id>`                 | Build widget → `.agent/widget-builder/dist/script.js`           |
 | `mass-build.js`             | `node .agent/widget-builder/scripts/mass-build.js`                        | Batch build from `mass-build-configs.json`                      |
 | `export-knowledge-seeds.js` | `node scripts/export-knowledge-seeds.js`                                  | Export all client knowledge + AI settings to `knowledge-seeds/` |
@@ -73,13 +73,16 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 
 ### Shared Widget Hooks (NOT overwritten during build)
 
-| Hook          | File                                          | Purpose                                                               |
-| ------------- | --------------------------------------------- | --------------------------------------------------------------------- |
-| `useChat.js`  | `.agent/widget-builder/src/hooks/useChat.js`  | Chat logic, streaming, embedded MP3 notification sound                |
-| `useVoice.js` | `.agent/widget-builder/src/hooks/useVoice.js` | Web Speech API voice input (mic button, speech-to-text transcription) |
-| `useDrag.js`  | `.agent/widget-builder/src/hooks/useDrag.js`  | Draggable toggle button position                                      |
+| Hook              | File                                              | Purpose                                                               |
+| ----------------- | ------------------------------------------------- | --------------------------------------------------------------------- |
+| `useChat.js`      | `.agent/widget-builder/src/hooks/useChat.js`      | Chat logic, streaming, embedded MP3 notification sound                |
+| `useVoice.js`     | `.agent/widget-builder/src/hooks/useVoice.js`     | Web Speech API voice input (mic button, speech-to-text transcription) |
+| `useDrag.js`      | `.agent/widget-builder/src/hooks/useDrag.js`      | Draggable toggle button position                                      |
+| `useProactive.js` | `.agent/widget-builder/src/hooks/useProactive.js` | Proactive nudge bubble (shows after delay when widget is closed)      |
+| `useLanguage.js`  | `.agent/widget-builder/src/hooks/useLanguage.js`  | Auto language detection, dynamic UI strings (en/uk/ru/ar)             |
+| `useTTS.js`       | `.agent/widget-builder/src/hooks/useTTS.js`       | Text-to-speech on bot messages (Web Speech Synthesis API)             |
 
-These hooks live in the shared `src/hooks/` directory and are never overwritten by per-client builds. The generated `Widget.jsx` template already imports and uses all three hooks.
+These hooks live in the shared `src/hooks/` directory and are never overwritten by per-client builds. The generated `Widget.jsx` template already imports and uses all six hooks.
 
 ---
 
@@ -87,7 +90,7 @@ These hooks live in the shared `src/hooks/` directory and are never overwritten 
 
 ### 1. Check for scripts first
 
-Before writing code, check `.agent/widget-builder/scripts/` per your skill. Only create new scripts if none exist. The theme generator produces all 6 widget source files from a single `theme.json` — don't duplicate this work.
+Before writing code, check `.agent/widget-builder/scripts/` per your skill. Only create new scripts if none exist. The theme generator produces all 7 widget source files from a single `theme.json` — don't duplicate this work.
 
 ### 2. Self-anneal when things break
 
@@ -173,7 +176,7 @@ widgets/<clientId>/             # Deployed production widgets
 
 ### Key Principle
 
-Widget source files are generated, not hand-written. `theme.json` → `generate-single-theme.js` → 6 source files → `build.js` → `script.js`. The final `script.js` gets copied to `quickwidgets/<clientId>/` or `widgets/<clientId>/`.
+Widget source files are generated, not hand-written. `theme.json` → `generate-single-theme.js` → 7 source files → `build.js` → `script.js`. The final `script.js` gets copied to `quickwidgets/<clientId>/` or `widgets/<clientId>/`.
 
 ---
 

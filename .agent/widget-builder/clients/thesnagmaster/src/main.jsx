@@ -32,14 +32,17 @@ class AIChatWidget extends HTMLElement {
     }
 }
 
-if (!customElements.get('ai-chat-widget')) {
-    customElements.define('ai-chat-widget', AIChatWidget);
+const _aw_tag = 'ai-chat-' + (window.__WIDGET_CONFIG__?.clientId || 'widget').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+if (!customElements.get(_aw_tag)) {
+    customElements.define(_aw_tag, AIChatWidget);
 }
 
 function mountWidget() {
-    if (!document.querySelector('ai-chat-widget')) {
-        document.body.appendChild(document.createElement('ai-chat-widget'));
-    }
+    // Remove any previous widget instances from other clients
+    document.querySelectorAll('[data-aw]').forEach(el => el.remove());
+    const el = document.createElement(_aw_tag);
+    el.setAttribute('data-aw', '1');
+    document.body.appendChild(el);
 }
 
 if (document.readyState === 'loading') {

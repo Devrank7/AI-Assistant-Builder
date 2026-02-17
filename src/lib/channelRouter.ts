@@ -110,7 +110,7 @@ async function getAIConfig(clientId: string): Promise<AIConfig> {
     model: resolvedModel.id,
     systemPrompt: settingsDoc?.systemPrompt || defaultSystemPrompt,
     temperature: settingsDoc?.temperature || 0.7,
-    maxTokens: settingsDoc?.maxTokens || 1024,
+    maxTokens: settingsDoc?.maxTokens || 2048,
     topK: settingsDoc?.topK || 3,
     handoffEnabled: settingsDoc?.handoffEnabled ?? false,
   };
@@ -384,7 +384,49 @@ export async function routeMessageStream(input: RouteMessageInput): Promise<{
     },
   });
 
-  const textPrompt = fullSystemPrompt + `\n\nUser question: ${input.message}`;
+  // Enhance prompt for website channel: page context + follow-up suggestions
+  let enhancedPrompt = fullSystemPrompt;
+  if (input.channel === 'website') {
+    // Inject page context if available
+    const pc = input.metadata?.pageContext as Record<string, unknown> | undefined;
+    if (pc) {
+      let pageInfo = '\n\nPage context (the user is currently viewing this page):';
+      if (pc.title) pageInfo += `\nPage title: ${pc.title}`;
+      if (pc.path) pageInfo += `\nURL path: ${pc.path}`;
+      if (pc.description) pageInfo += `\nPage description: ${pc.description}`;
+      if (Array.isArray(pc.headings) && pc.headings.length > 0)
+        pageInfo += `\nMain headings: ${pc.headings.join(', ')}`;
+      enhancedPrompt += pageInfo;
+    }
+    // Rich blocks: instruct AI to use structured formats when appropriate
+    enhancedPrompt += `\n\nRICH CONTENT FORMATTING:
+When listing 2+ services, properties, rooms, team members, or products, format as a carousel:
+:::carousel
+---
+title: Item Name
+description: Brief description (1 sentence)
+button: Action Label | https://link
+---
+title: Another Item
+description: Brief description
+button: Action Label | https://link
+:::
+
+When the user shows clear intent to book, schedule, or request a quote, and you need their contact info, use a form:
+:::form
+name: Your name
+phone: Phone number
+email: Email
+submit: Submit
+:::
+Only use :::form ONCE per conversation. Use plain text for normal responses.`;
+
+    // Instruct AI to generate follow-up suggestions
+    enhancedPrompt +=
+      '\n\nIMPORTANT: At the very end of your response, suggest exactly 3 brief follow-up questions the user might want to ask next. Format them EXACTLY as: [SUGGESTIONS]question 1|question 2|question 3[/SUGGESTIONS]. Keep each question under 50 characters. Do not include this format anywhere else in your response.';
+  }
+
+  const textPrompt = enhancedPrompt + `\n\nUser question: ${input.message}`;
   const contentInput = input.image?.data
     ? [{ text: textPrompt }, { inlineData: { data: input.image.data, mimeType: input.image.mimeType || 'image/jpeg' } }]
     : textPrompt;

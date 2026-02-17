@@ -1,7 +1,7 @@
 import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { User, Copy, Check, RotateCcw, ZoomIn, Sparkles } from 'lucide-preact';
+import { User, Copy, Check, RotateCcw, ZoomIn, Sparkles, Volume2, VolumeX } from 'lucide-preact';
 
 function formatRelativeTime(timestamp) {
     if (!timestamp) return '';
@@ -15,7 +15,7 @@ function formatRelativeTime(timestamp) {
     return `${Math.floor(hours / 24)}d`;
 }
 
-function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick }) {
+function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick, onSpeak, isSpeaking }) {
     const isBot = role === 'assistant';
     const [copied, setCopied] = useState(false);
 
@@ -62,7 +62,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                               ? 'bg-white text-gray-700 border border-gray-100 shadow-sm rounded-bl-md'
                               : 'bg-gradient-to-r from-[#FFFBF0] to-[#FFF5E0] text-gray-700 border border-[#FFD580]/50 rounded-br-md shadow-sm'
                     }`}>
-                        <div className="max-w-none [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
+                        <div className="max-w-none msg-text [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
@@ -87,6 +87,13 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                     {isBot && !isError && content && (
                         <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-[#FCA311] transition-all duration-200" aria-label="Copy">
                             {copied ? <Check size={11} className="text-[#FCA311]" /> : <Copy size={11} />}
+                        </button>
+                    )}
+                    {isBot && !isError && content && onSpeak && (
+                        <button onClick={() => onSpeak(content)}
+                            className={`p-0.5 transition-all duration-200 ${isSpeaking ? 'text-[#FCA311] opacity-100' : 'opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#FCA311]'}`}
+                            aria-label={isSpeaking ? 'Stop reading' : 'Read aloud'}>
+                            {isSpeaking ? <VolumeX size={11} /> : <Volume2 size={11} />}
                         </button>
                     )}
                     {isError && onRetry && (

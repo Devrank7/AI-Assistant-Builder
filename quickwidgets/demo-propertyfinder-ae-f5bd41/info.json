@@ -1,0 +1,12 @@
+{
+  "name": "Property Finder",
+  "clientId": "demo-propertyfinder-ae-f5bd41",
+  "username": "demo-propertyfinder-ae-f5bd41",
+  "email": "",
+  "website": "https://www.propertyfinder.ae/",
+  "clientType": "quick",
+  "features": ["streaming", "quick-replies", "feedback", "sound", "voice-input"],
+  "createdAt": "2026-02-17T10:03:13.001Z",
+  "version": "2.0.0",
+  "selfService": true
+}

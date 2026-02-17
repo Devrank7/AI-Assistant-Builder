@@ -1,6 +1,6 @@
 # theme.json Reference
 
-This file documents the complete schema for `theme.json` — the color/layout configuration that `generate-single-theme.js` uses to produce all 6 widget source files.
+This file documents the complete schema for `theme.json` — the color/layout configuration that `generate-single-theme.js` uses to produce all 7 widget source files.
 
 **Location**: `.agent/widget-builder/clients/<clientId>/theme.json`
 

@@ -1,6 +1,6 @@
 {
   "clientId": "spidubai",
-  "exportedAt": "2026-02-16T16:31:52.955Z",
+  "exportedAt": "2026-02-16T22:34:39.828Z",
   "chunks": [
     {
       "text": "# SPI Dubai\n\n## About\n\nSPI Dubai is a real estate agency in the United Arab Emirates with over 10 years of experience in real estate investments, including personal cases confirmed by market profitability and liquidity. The brand name stands for \"Smart Property Invest\" (SPI). Today SPI Dubai provides services in Europe, the CIS, as well as in the United Arab Emirates.",
@@ -6324,7 +6324,7 @@
     "systemPrompt": "You are an AI assistant for SPI Dubai. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Welcome to SPI Dubai — your trusted real estate agency in the UAE! With over 10 years of experience and 100+ unique properties, we help you make the best investment in Dubai. How can I assist you today?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

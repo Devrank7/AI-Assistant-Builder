@@ -159,44 +159,81 @@ export function generateWidgetConfig(input: {
   brandName: string;
   greeting: string;
   language: string;
+  contacts?: { phone?: string; email?: string; website?: string };
 }): Record<string, unknown> {
-  const { clientId, brandName, greeting, language } = input;
+  const { clientId, brandName, greeting, language, contacts } = input;
 
   const isUkrainian = language === 'uk' || language === 'uk-UA';
   const isRussian = language === 'ru' || language === 'ru-RU';
+  const isArabic = language === 'ar';
 
-  let starters: string[];
+  let quickReplies: string[];
+  let inputPlaceholder: string;
+  let nudgeMessage: string;
+
   if (isUkrainian) {
-    starters = ['Розкажіть про компанію', 'Які послуги ви надаєте?', "Як з вами зв'язатися?"];
+    quickReplies = ['Розкажіть про компанію', 'Які послуги ви надаєте?', "Як з вами зв'язатися?"];
+    inputPlaceholder = 'Задайте питання...';
+    nudgeMessage = '👋 Вітаємо! Потрібна допомога?';
   } else if (isRussian) {
-    starters = ['Расскажите о компании', 'Какие услуги вы предоставляете?', 'Как с вами связаться?'];
+    quickReplies = ['Расскажите о компании', 'Какие услуги вы предоставляете?', 'Как с вами связаться?'];
+    inputPlaceholder = 'Задайте вопрос...';
+    nudgeMessage = '👋 Привет! Нужна помощь?';
+  } else if (isArabic) {
+    quickReplies = ['أخبرني عن شركتكم', 'ما الخدمات التي تقدمونها؟', 'كيف يمكنني التواصل معكم؟'];
+    inputPlaceholder = 'اطرح سؤالاً...';
+    nudgeMessage = '👋 مرحباً! هل تحتاج مساعدة؟';
   } else {
-    starters = ['Tell me about your company', 'What services do you offer?', 'How can I contact you?'];
+    quickReplies = ['Tell me about your company', 'What services do you offer?', 'How can I contact you?'];
+    inputPlaceholder = 'Ask a question...';
+    nudgeMessage = '👋 Hi there! Need any help?';
   }
 
-  return {
+  const initials = brandName
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() || '')
+    .join('');
+
+  const config: Record<string, unknown> = {
     clientId,
-    bot: {
-      name: `${brandName} AI`,
-      greeting,
-      tone: 'professional_friendly',
+    botName: `${brandName} AI`,
+    welcomeMessage: greeting,
+    inputPlaceholder,
+    quickReplies,
+    avatar: {
+      type: 'initials',
+      initials: initials || 'AI',
     },
     design: {
-      style: 'auto_generated',
       position: 'bottom-right',
     },
     features: {
       streaming: true,
-      imageUpload: true,
-      quickReplies: {
-        enabled: true,
-        starters,
-      },
-      feedback: true,
       sound: true,
       voiceInput: true,
-      leads: true,
-      integrations: {},
+      feedback: true,
+      tts: true,
+      autoLang: true,
+      richCards: true,
+      leadForm: true,
+      memory: true,
+      proactive: {
+        delay: 8,
+        message: nudgeMessage,
+      },
     },
   };
+
+  // Add contacts if any were found
+  if (contacts && (contacts.phone || contacts.email || contacts.website)) {
+    const contactObj: Record<string, string> = {};
+    if (contacts.phone) contactObj.phone = contacts.phone;
+    if (contacts.email) contactObj.email = contacts.email;
+    if (contacts.website) contactObj.website = contacts.website;
+    config.contacts = contactObj;
+  }
+
+  return config;
 }

@@ -1,6 +1,6 @@
 {
   "clientId": "thesnagmaster",
-  "exportedAt": "2026-02-16T16:00:20.269Z",
+  "exportedAt": "2026-02-16T22:34:39.929Z",
   "chunks": [
     {
       "text": "# The Snag Master - Knowledge Base\n\n## Company Overview\n\n**Company Name:** The Snag Master Property Observer L. L. C. **Website:** https://thesnagmaster. ae\n**Tagline:** Property Inspection You Can Trust. **Title:** UAE's #1 RERA-Certified Property Snagging Company\n**Description:** The leading Snagging Company in the UAE offering comprehensive home inspection services. Our Civil Engineers with relevant UAE experience ensure your property is 100% defect-free.",
@@ -11851,7 +11851,7 @@
     "systemPrompt": "You are an AI assistant for The Snag Master Property Observer L.L.C. — UAE's #1 RERA-Certified Property Snagging Company. Services: Handover Inspection, Resale Property Inspection, Move-In/Out Inspection, Interior Fitout Inspection, DLP Inspection, MEP Inspection, Property Management Inspection, Water Damage Inspection, Commercial Inspections, Building Inspections, Reserve Fund Studies, Asset Tagging. All inspections by qualified Civil Engineers with 5+ years UAE experience. RERA Certified, InterNACHI Certified, DED Licensed. Clients save avg AED 81,345. 150+ snags in apartments, 265+ in villas. Reports in 24 hours. Coverage: All 7 UAE Emirates. Contact: +971 58 599 1704, connect@thesnagmaster.ae, OFF504-905 Warba Centre, Al Murqqabat, Dubai. Hours: Mon-Sat 9am-6pm. Instructions: Answer based ONLY on this info, be professional, respond in English, keep concise.",
     "greeting": "Hello! Welcome to The Snag Master. I can help you schedule a property inspection, explain our snagging services, or get a quote. How can I assist you?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

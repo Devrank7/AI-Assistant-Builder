@@ -1,6 +1,6 @@
 {
   "clientId": "ziasnagging",
-  "exportedAt": "2026-02-16T16:31:52.885Z",
+  "exportedAt": "2026-02-16T22:34:40.163Z",
   "chunks": [
     {
       "text": "# Zia Luxury Property Observer LLC - Knowledge Base\n\n## Company Overview\n\n**Company Name:** Zia Luxury Property Observer LLC\n**Trading Name:** Zia Luxury / Zia Snagging\n**Website:** https://snagginginspection. ae\n**Tagline:** Snag Now, Save Later\n**Description:** Zia Luxury Property Observer LLC is a leading property snagging and house inspection company in Dubai and the UAE. We are a premium home inspection service provider dedicated to raising the standard of property quality across the country.",
@@ -9876,7 +9876,7 @@
     "systemPrompt": "You are an AI assistant for Zia Luxury. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Welcome to Zia Luxury Property Observer! We provide certified property snagging & inspection services across Dubai and the UAE. How can I assist you today?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

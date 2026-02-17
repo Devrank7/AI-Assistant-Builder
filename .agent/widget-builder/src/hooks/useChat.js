@@ -25,6 +25,7 @@ function fileToBase64(file) {
 
 export default function useChat(config) {
     const storageKey = `aiwidget_${config.clientId}_messages`;
+    const sessionKey = `aiwidget_${config.clientId}_session`;
 
     const [messages, setMessages] = useState(() => {
         try {
@@ -37,8 +38,24 @@ export default function useChat(config) {
     const [isLoading, setIsLoading] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
     const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
-    const sessionIdRef = useRef(`session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+
+    // Persist session ID across page loads for conversation memory
+    const sessionIdRef = useRef(() => {
+        try {
+            const saved = localStorage.getItem(sessionKey);
+            if (saved) return saved;
+        } catch {}
+        const newId = `session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        try { localStorage.setItem(sessionKey, newId); } catch {}
+        return newId;
+    });
+    // Initialize sessionId (useRef with function needs manual init)
+    if (typeof sessionIdRef.current === 'function') {
+        sessionIdRef.current = sessionIdRef.current();
+    }
+
     const messagesRef = useRef(messages);
+    const isReturningUser = useRef(messages.length > 0).current;
 
     useEffect(() => {
         messagesRef.current = messages;
@@ -109,6 +126,18 @@ export default function useChat(config) {
             try {
                 const history = historyOverride !== undefined ? historyOverride : messagesRef.current;
 
+                // Collect page context for AI awareness
+                let pageContext = {};
+                try {
+                    pageContext.title = document.title || '';
+                    pageContext.url = window.location.href || '';
+                    pageContext.path = window.location.pathname || '';
+                    const metaDesc = document.querySelector('meta[name="description"]');
+                    if (metaDesc) pageContext.description = metaDesc.getAttribute('content') || '';
+                    const h1s = Array.from(document.querySelectorAll('h1')).map(h => h.textContent?.trim()).filter(Boolean);
+                    if (h1s.length) pageContext.headings = h1s.slice(0, 3);
+                } catch (e) {}
+
                 const body = {
                     clientId: config.clientId,
                     message: content,
@@ -116,6 +145,7 @@ export default function useChat(config) {
                         .filter((m) => !m.isError)
                         .map((m) => ({ role: m.role, content: m.content })),
                     sessionId: sessionIdRef.current,
+                    metadata: { pageContext },
                 };
 
                 // Add image data if present
@@ -157,11 +187,23 @@ export default function useChat(config) {
                                 const data = JSON.parse(payload);
                                 if (data.token) {
                                     botContent += data.token;
+                                    // Strip :::block syntax during streaming (complete + incomplete blocks)
+                                    const displayContent = botContent.replace(/:::(card|buttons|carousel|form)\n[\s\S]*?:::/g, '').replace(/:::(card|buttons|carousel|form)[\s\S]*$/g, '').trim();
                                     setMessages((prev) => {
                                         const newMsgs = [...prev];
                                         newMsgs[newMsgs.length - 1] = {
                                             ...newMsgs[newMsgs.length - 1],
-                                            content: botContent,
+                                            content: displayContent,
+                                        };
+                                        return newMsgs;
+                                    });
+                                }
+                                if (data.rich) {
+                                    setMessages((prev) => {
+                                        const newMsgs = [...prev];
+                                        newMsgs[newMsgs.length - 1] = {
+                                            ...newMsgs[newMsgs.length - 1],
+                                            richBlocks: data.rich,
                                         };
                                         return newMsgs;
                                     });
@@ -171,7 +213,26 @@ export default function useChat(config) {
                     }
                 }
 
-                if (config.features?.sound !== false) {
+                // Clean :::block syntax from final content (complete + incomplete/malformed blocks)
+                botContent = botContent.replace(/:::(card|buttons|carousel|form)\n[\s\S]*?:::/g, '').replace(/:::(card|buttons|carousel|form)[\s\S]*$/g, '').trim();
+
+                // Parse follow-up suggestions from response
+                const sugMatch = botContent.match(/\[SUGGESTIONS\](.*?)\[\/SUGGESTIONS\]/s);
+                if (sugMatch) {
+                    const suggestions = sugMatch[1].split('|').map(s => s.trim()).filter(Boolean).slice(0, 3);
+                    botContent = botContent.replace(/\[SUGGESTIONS\].*?\[\/SUGGESTIONS\]/s, '').trim();
+                    setMessages((prev) => {
+                        const newMsgs = [...prev];
+                        newMsgs[newMsgs.length - 1] = {
+                            ...newMsgs[newMsgs.length - 1],
+                            content: botContent,
+                            suggestions,
+                        };
+                        return newMsgs;
+                    });
+                }
+
+                if (config.features?.sound !== false && !window.__WIDGET_MUTED__) {
                     playNotificationSound();
                 }
             } catch (error) {
@@ -213,9 +274,12 @@ export default function useChat(config) {
         setMessages([]);
         try {
             localStorage.removeItem(storageKey);
+            localStorage.removeItem(sessionKey);
         } catch {}
-        sessionIdRef.current = `session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    }, [storageKey]);
+        const newId = `session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        sessionIdRef.current = newId;
+        try { localStorage.setItem(sessionKey, newId); } catch {}
+    }, [storageKey, sessionKey]);
 
     return {
         messages,
@@ -226,5 +290,6 @@ export default function useChat(config) {
         retryLastMessage,
         clearMessages,
         sessionId: sessionIdRef.current,
+        isReturningUser,
     };
 }

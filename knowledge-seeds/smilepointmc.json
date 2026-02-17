@@ -1,6 +1,6 @@
 {
   "clientId": "smilepointmc",
-  "exportedAt": "2026-02-16T16:31:53.097Z",
+  "exportedAt": "2026-02-16T22:34:39.800Z",
   "chunks": [
     {
       "text": "# Smile Point Medical Center (Smile Point MC)\n\n## About\n\nSmile Point MC is a leading dental clinic located in Al Warqa, Dubai, UAE. The clinic offers advanced dentistry, cosmetic treatments, and family dental care delivered with precision and compassion. **Tagline:** \"Your Road To a Healthier Smile\"\n\n**Key Facts:**\n- 10+ Years of Experience\n- 15+ Dental Experts\n- 4000+ Smiles Restored\n\nSmile Point provides world-class dental care with a personal touch, where comfort meets clinical excellence.",
@@ -2373,7 +2373,7 @@
     "systemPrompt": "You are an AI assistant for Smile Point. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Welcome to Smile Point Medical Center! We provide advanced dental care in Al Warqa, Dubai, with precision and compassion. How can I help you today?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

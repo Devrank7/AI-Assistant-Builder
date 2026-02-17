@@ -1,6 +1,6 @@
 {
   "clientId": "ariesclinic",
-  "exportedAt": "2026-02-16T16:31:53.105Z",
+  "exportedAt": "2026-02-16T22:34:38.688Z",
   "chunks": [
     {
       "text": "# Aries Aesthetic and Dental Clinic\n\n## About\nAries Aesthetic and Dental Clinic is a premium multi-specialty clinic located in Dubai, UAE. The clinic combines advanced aesthetic treatments with comprehensive dental care, offering patients a luxurious, all-in-one destination for beauty and dental wellness. The clinic is licensed under MOHAP (Ministry of Health and Prevention), license number W1LUAGE8-171025. At Aries, the story is one of passion, perseverance, and a shared vision.",
@@ -2374,7 +2374,7 @@
     "systemPrompt": "You are an AI assistant for Aries Clinic. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Welcome to Aries Aesthetic and Dental Clinic! 🎯 How can we help you today? Ask about our dental treatments, aesthetic procedures, or book a consultation.",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

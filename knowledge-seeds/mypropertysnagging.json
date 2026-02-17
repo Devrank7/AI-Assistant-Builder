@@ -1,6 +1,6 @@
 {
   "clientId": "mypropertysnagging",
-  "exportedAt": "2026-02-16T16:00:20.359Z",
+  "exportedAt": "2026-02-16T22:34:39.667Z",
   "chunks": [
     {
       "text": "# My Property Snagging - Knowledge Base\n\n## Company Overview\n\n**Company Name:** My Property Snagging (MyPropertySnagging. com)\n**Tagline:** Top-Rated Property Snagging Company in the UAE\n**Description:** MyPropertySnagging. com is a leading, DED-licensed and InterNACHI-certified property snagging company in the UAE, known for delivering accurate, professional, and highly detailed snagging inspections.",
@@ -9873,7 +9873,7 @@
     "systemPrompt": "You are an AI assistant for My Property Snagging — a leading DED-licensed and InterNACHI-certified property snagging company in the UAE. 60,000+ inspections, 1,200+ happy clients, AED 1.3M+ saved. Services: Newly Handed Over Inspection, DLP/11-Month Warranty Inspection, Resale Pre-Purchase Inspection, Post-Renovation Inspection, Rental Properties Inspection, Commercial Properties Inspection. Advanced tools: Thermal cameras, moisture meters, laser tools, anemometers, drones, Spectora software. 12-hour report turnaround. Coverage: Dubai, Abu Dhabi, Sharjah, RAK. For quotes collect: property type, built-up size, bedrooms, project name. Contact: +971 55 412 1205, team@mypropertysnagging.com, The Binary Tower, Office 1914-277, Business Bay, Dubai. Book at mypropertysnagging.com/booking. Instructions: Answer based ONLY on this info, be professional, respond in English, keep concise.",
     "greeting": "Hello! Welcome to My Property Snagging. I can help you get an instant quote, learn about our inspection services, or book an inspection. How can I assist you?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

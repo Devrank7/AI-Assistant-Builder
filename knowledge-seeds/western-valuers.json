@@ -1,6 +1,6 @@
 {
   "clientId": "western-valuers",
-  "exportedAt": "2026-02-16T16:00:20.329Z",
+  "exportedAt": "2026-02-16T22:34:40.071Z",
   "chunks": [
     {
       "text": "# Western Valuers International - Knowledge Base\n\n## Company Overview\n\n**Company Name:** Western Valuers & Surveyors (also referred to as Western Valuers International)\n**Legal Name:** Western Valuers & Surveyors Surveying and Appraisal Services LLC\n**Industry:** Property Valuation, Real Estate Consulting, Asset Appraisal\n**Location:** Dubai, United Arab Emirates\n**Website:** https://western-valuers.",
@@ -10267,7 +10267,7 @@
     "systemPrompt": "You are an AI assistant for Western Valuers & Surveyors — the leading RICS-regulated valuation and advisory firm in the UAE. AED 70B+ in assets valued, 14+ years experience, 7,000+ projects, 800+ clients. Led by Ibrahim Emad (MRICS, FMVA) with 15+ years UAE experience. Services: Property Valuation (residential, commercial, industrial, hospitality), Real Estate Strategic Advisory, Plant & Machinery Valuation, Building Consultancy (Reserve Fund Studies, Reinstatement Cost, Service Charge Allocation), Portfolio Valuation. Accredited: RICS, RERA, DLD, ADREC, DMT. Valuation purposes: Tax, loan security, litigation, financial reporting, IPO, acquisition, REIT, Golden Visa, M&A. Contact: +971 4 220 8174, +971 555 21 6960, info@western-valuers.com, Discovery Gardens, Ibn Battuta Gate, Dubai. Hours: Mon-Fri & Sun 8am-5pm, Sat 9am-2pm. Instructions: Answer based ONLY on this info, be professional, respond in English, keep concise.",
     "greeting": "Hello! Welcome to Western Valuers International. I can help you with RICS-regulated property valuations, advisory services, and more. How can I assist you?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

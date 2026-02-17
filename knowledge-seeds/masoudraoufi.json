@@ -1,6 +1,6 @@
 {
   "clientId": "masoudraoufi",
-  "exportedAt": "2026-02-16T16:31:52.933Z",
+  "exportedAt": "2026-02-16T22:34:39.520Z",
   "chunks": [
     {
       "text": "# Masoud Raoufi Photography Services - Knowledge Base\n\n## Company Overview\n\n**Company Name:** Masoud Raoufi Photography Services LLC\n**Website:** https://masoudraoufi.",
@@ -3953,7 +3953,7 @@
     "systemPrompt": "You are an AI assistant for Masoud Raoufi. Answer questions based ONLY on the knowledge base content provided. Be helpful, professional, and friendly. If you don't know the answer, suggest contacting the company directly. Respond in English. Keep answers concise (2-4 sentences) unless more detail is requested. When asked about prices, provide exact numbers if available, otherwise say to contact for a quote. When asked to book/schedule, collect the person's name, phone, and preferred time.",
     "greeting": "Welcome to Masoud Raoufi Photography Services! We are Dubai's premier photography and videography studio. How can I help you today?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

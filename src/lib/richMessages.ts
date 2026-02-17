@@ -49,7 +49,13 @@ export interface CarouselBlock {
   items: CardBlock[];
 }
 
-export type RichBlock = CardBlock | ButtonGroupBlock | CarouselBlock;
+export interface FormBlock {
+  type: 'form';
+  fields: Array<{ key: string; label: string }>;
+  submitLabel: string;
+}
+
+export type RichBlock = CardBlock | ButtonGroupBlock | CarouselBlock | FormBlock;
 
 export interface ParseResult {
   cleanText: string;
@@ -114,14 +120,35 @@ function parseCarousel(content: string): CarouselBlock {
   return { type: 'carousel', items };
 }
 
+function parseForm(content: string): FormBlock {
+  const fields: Array<{ key: string; label: string }> = [];
+  let submitLabel = 'Submit';
+  const lines = content.trim().split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('submit:')) {
+      submitLabel = trimmed.slice(7).trim();
+    } else if (trimmed.includes(':')) {
+      const key = trimmed.split(':')[0].trim().toLowerCase().replace(/\s+/g, '_');
+      const label = trimmed.split(':').slice(1).join(':').trim();
+      if (key && label) {
+        fields.push({ key, label });
+      }
+    }
+  }
+
+  return { type: 'form', fields, submitLabel };
+}
+
 /**
  * Parse rich blocks from AI response text.
- * Extracts :::card, :::buttons, :::carousel fenced blocks.
+ * Extracts :::card, :::buttons, :::carousel, :::form fenced blocks.
  * Returns clean text (without rich blocks) and parsed structured blocks.
  */
 export function parseRichBlocks(text: string): ParseResult {
   const richBlocks: RichBlock[] = [];
-  const blockRegex = /:::(card|buttons|carousel)\n([\s\S]*?):::/g;
+  const blockRegex = /:::(card|buttons|carousel|form)\n([\s\S]*?):::/g;
 
   const cleanText = text
     .replace(blockRegex, (_, blockType: string, content: string) => {
@@ -134,6 +161,9 @@ export function parseRichBlocks(text: string): ParseResult {
           break;
         case 'carousel':
           richBlocks.push(parseCarousel(content));
+          break;
+        case 'form':
+          richBlocks.push(parseForm(content));
           break;
       }
       return ''; // Remove block from text

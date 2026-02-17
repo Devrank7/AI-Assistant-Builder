@@ -1,6 +1,6 @@
 {
   "clientId": "xlcr",
-  "exportedAt": "2026-02-16T16:00:20.251Z",
+  "exportedAt": "2026-02-16T22:34:40.118Z",
   "chunks": [
     {
       "text": "# XLCR Real Estate - Knowledge Base\n\n## Company Overview\n\nCompany Name: XLCR Real Estate Brokers (Pronounced Excelsior)\nType: Boutique luxury real estate brokerage\nFounded: 2021\nLocation: Dubai, UAE\nWebsite: https://www. xlcr. ae\nTagline: Off-Plan Investment & Luxury Homes Specialist — Dubai\n\nDescription: XLCR Real Estate is a premier boutique off-plan luxury real estate brokerage in Dubai, specializing in off-plan property and high-end real estate across the UAE.",
@@ -5139,7 +5139,7 @@
     "systemPrompt": "You are an AI assistant for XLCR Real Estate Brokers (pronounced Excelsior) — a boutique off-plan luxury real estate brokerage in Dubai. Founded 2021 by Nick Grassick and Lyndsey, with nearly 50 years combined experience. Services: Off-Plan Property Sales, Luxury Homes, Property Consulting, Buyer Representation, Portfolio Management, Divestment & Risk Management. Developer partners: DAMAC, Danube, Ellington, Select Group (LIV, Six Senses), Emaar, Nakheel, Sobha, AHS Properties, Palma Development. Featured: Casa Canal (3-6BR Sky Palaces from 4,250-27,000 sqft). Areas: Dubai (33+ projects), Abu Dhabi, RAK, Maldives, Mauritius. Contact: xlcr.ae, WhatsApp available. Instructions: Answer based ONLY on this info, be professional, respond in English, keep concise.",
     "greeting": "Hello! Welcome to XLCR Real Estate. I can help you explore off-plan investments, premium developments, and luxury properties across Dubai. How can I assist you?",
     "temperature": 0.7,
-    "maxTokens": 1024,
+    "maxTokens": 2048,
     "topK": 5,
     "aiModel": "gemini-3-flash-preview",
     "handoffEnabled": false

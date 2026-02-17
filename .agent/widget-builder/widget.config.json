@@ -1,25 +1,15 @@
 {
-  "clientId": "demo-recodent-com-ua-fffb2a",
-  "bot": {
-    "name": "Головна AI",
-    "greeting": "Вітаємо! 👋 Я — AI-помічник **Головна**. Чим можу допомогти?",
-    "tone": "professional_friendly"
-  },
-  "design": {
-    "style": "auto_generated",
-    "position": "bottom-right"
+  "clientId": "ziasnagging",
+  "botName": "Zia Luxury AI",
+  "welcomeMessage": "Welcome to Zia Luxury Property Observer! We provide certified property snagging & inspection services across Dubai and the UAE. How can I assist you today?",
+  "inputPlaceholder": "Ask about our services...",
+  "quickReplies": ["Book an inspection", "View our services", "Get a quote"],
+  "avatar": {
+    "type": "initials",
+    "initials": "ZL"
   },
   "features": {
-    "streaming": true,
-    "imageUpload": true,
-    "quickReplies": {
-      "enabled": true,
-      "starters": ["Розкажіть про компанію", "Які послуги ви надаєте?", "Як з вами зв'язатися?"]
-    },
-    "feedback": true,
     "sound": true,
-    "voiceInput": true,
-    "leads": true,
-    "integrations": {}
+    "voiceInput": true
   }
 }
