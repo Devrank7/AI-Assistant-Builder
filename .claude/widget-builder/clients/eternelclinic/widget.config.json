@@ -1,0 +1,19 @@
+{
+  "clientId": "eternelclinic",
+  "botName": "Eternel Polyclinic AI",
+  "welcomeMessage": "Welcome to Eternel Polyclinic! We've been providing premium aesthetic and medical care in Dubai since 2005. How can we assist you today?",
+  "inputPlaceholder": "Ask about our services, doctors, or book a consultation...",
+  "quickReplies": [
+    "What aesthetic services do you offer?",
+    "Tell me about your medical services",
+    "How do I book an appointment?"
+  ],
+  "avatar": {
+    "type": "initials",
+    "initials": "EP"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}

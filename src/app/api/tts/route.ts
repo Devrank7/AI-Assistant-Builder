@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Google Cloud TTS voice mapping (high-quality voices per language)
+// Google Cloud TTS voice mapping — Chirp3-HD (newest, most natural voices)
 const VOICE_MAP: Record<string, { languageCode: string; name: string }> = {
-  en: { languageCode: 'en-US', name: 'en-US-Standard-C' },
-  ru: { languageCode: 'ru-RU', name: 'ru-RU-Standard-A' },
-  uk: { languageCode: 'uk-UA', name: 'uk-UA-Standard-A' },
-  ar: { languageCode: 'ar-XA', name: 'ar-XA-Standard-A' },
-  pl: { languageCode: 'pl-PL', name: 'pl-PL-Standard-A' },
-  de: { languageCode: 'de-DE', name: 'de-DE-Standard-A' },
-  fr: { languageCode: 'fr-FR', name: 'fr-FR-Standard-A' },
-  es: { languageCode: 'es-ES', name: 'es-ES-Standard-A' },
-  tr: { languageCode: 'tr-TR', name: 'tr-TR-Standard-A' },
-  he: { languageCode: 'he-IL', name: 'he-IL-Standard-A' },
+  en: { languageCode: 'en-US', name: 'en-US-Chirp3-HD-Kore' },
+  ru: { languageCode: 'ru-RU', name: 'ru-RU-Chirp3-HD-Kore' },
+  uk: { languageCode: 'uk-UA', name: 'uk-UA-Chirp3-HD-Kore' },
+  ar: { languageCode: 'ar-XA', name: 'ar-XA-Chirp3-HD-Kore' },
+  pl: { languageCode: 'pl-PL', name: 'pl-PL-Chirp3-HD-Kore' },
+  de: { languageCode: 'de-DE', name: 'de-DE-Chirp3-HD-Kore' },
+  fr: { languageCode: 'fr-FR', name: 'fr-FR-Chirp3-HD-Kore' },
+  es: { languageCode: 'es-ES', name: 'es-ES-Chirp3-HD-Kore' },
+  tr: { languageCode: 'tr-TR', name: 'tr-TR-Chirp3-HD-Kore' },
+  he: { languageCode: 'he-IL', name: 'he-IL-Chirp3-HD-Kore' },
 };
 
 const MAX_TEXT_LENGTH = 4000;
@@ -134,12 +134,9 @@ export async function POST(request: NextRequest) {
         voice: {
           languageCode: voice.languageCode,
           name: voice.name,
-          ssmlGender: 'FEMALE',
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: 0.95,
-          pitch: 1.0,
         },
       }),
     });

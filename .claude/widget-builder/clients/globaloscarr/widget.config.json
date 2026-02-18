@@ -1,0 +1,20 @@
+{
+  "clientId": "globaloscarr",
+  "bot": {
+    "name": "Global Oscar AI",
+    "greeting": "Welcome to Global Oscar Real Estate! Your gateway to luxury properties in Dubai. How can I assist you today?",
+    "tone": "professional_friendly",
+    "language": "en"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "quickReplies": {
+      "starters": ["Properties for sale", "Investment opportunities", "Contact an agent"]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "clientId": "demo-21st-dev-ed3d8f",
+  "bot": {
+    "name": "21st AI",
+    "greeting": "Hi there! 👋 How can I help you?",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "auto_generated",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["Tell me about your company", "What services do you offer?", "How can I contact you?"]
+    },
+    "feedback": true,
+    "sound": true,
+    "voiceInput": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

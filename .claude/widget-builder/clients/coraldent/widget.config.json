@@ -1,0 +1,24 @@
+{
+  "clientId": "coraldent",
+  "bot": {
+    "name": "Coral Dent AI",
+    "greeting": "Привіт! Я — AI-помічник **Корал Дент** 👋\n\nДопоможу з записом на імплантацію, протезування та інші послуги. Рейтинг 4.9, 435+ відгуків!\n\nЗадайте питання!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_green",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["🦷 Імплантація — вартість", "📅 Запис на консультацію", "💳 Розстрочка на лікування"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "clientId": "spvcme",
+  "botName": "SPVC AI",
+  "welcomeMessage": "Hello! Welcome to **SPVC Real Estate Valuation Services**. We are DLD and RERA approved property valuers in Dubai. How can I assist you today?",
+  "inputPlaceholder": "Ask about valuation services, quotes, or contact info...",
+  "quickReplies": ["Get a valuation quote", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "SP"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}

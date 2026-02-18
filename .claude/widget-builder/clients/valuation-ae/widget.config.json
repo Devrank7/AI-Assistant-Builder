@@ -1,0 +1,25 @@
+{
+  "clientId": "valuation-ae",
+  "bot": {
+    "name": "34 Valuation AI",
+    "greeting": "Hello! 👋 I'm the **34 Real Estate Valuation** AI assistant. How can I help you with property valuation in Dubai?",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "premium",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": false,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["Get a valuation quote", "Our services", "Contact us"]
+    },
+    "feedback": true,
+    "sound": true,
+    "voiceInput": true,
+    "leads": false,
+    "integrations": {}
+  }
+}

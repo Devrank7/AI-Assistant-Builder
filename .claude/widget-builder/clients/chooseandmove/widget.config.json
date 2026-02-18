@@ -1,0 +1,15 @@
+{
+  "clientId": "chooseandmove",
+  "botName": "Choose & Move AI",
+  "welcomeMessage": "Hello! I'm the **Choose and Move** assistant. How can I help you with your relocation, storage, or home services in Dubai?",
+  "inputPlaceholder": "Ask about our services...",
+  "quickReplies": ["Get a moving quote", "Storage options", "Our services"],
+  "avatar": {
+    "type": "initials",
+    "initials": "CM"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true
+  }
+}

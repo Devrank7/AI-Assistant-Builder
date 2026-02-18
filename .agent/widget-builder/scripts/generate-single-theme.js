@@ -884,7 +884,7 @@ function genChatMessage(c) {
     const copyDefault = c.isDark ? `text-[${c.textMuted}]` : 'text-gray-300';
     const imgBorder = c.isDark ? `border-[${c.surfaceBorder}]` : 'border-gray-200';
     const userMsgClasses = c.isDark
-        ? `bg-[${c.chipFrom}] text-[${c.textPrimary}] border border-[${c.chipBorder}] rounded-br-md shadow-sm`
+        ? `bg-gradient-to-r from-[${c.userMsgFrom}] to-[${c.userMsgTo}] text-white rounded-br-md shadow-sm`
         : `bg-gradient-to-r from-[${c.chipFrom}] to-[${c.chipTo}] text-gray-700 border border-[${c.chipBorder}]/50 rounded-br-md shadow-sm`;
 
     return `import { memo, useState, useCallback } from 'react';

@@ -1,0 +1,25 @@
+{
+  "clientId": "demo-recodent-com-ua-fffb2a",
+  "bot": {
+    "name": "Головна AI",
+    "greeting": "Вітаємо! 👋 Я — AI-помічник **Головна**. Чим можу допомогти?",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "auto_generated",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["Розкажіть про компанію", "Які послуги ви надаєте?", "Як з вами зв'язатися?"]
+    },
+    "feedback": true,
+    "sound": true,
+    "voiceInput": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "clientId": "bruno",
+  "bot": {
+    "name": "Bruno Auto AI",
+    "greeting": "Привет! Добро пожаловать в **Bruno Auto** - профессиональный автосервис.\n\nОтправьте фото проблемы с вашим авто или задайте вопрос - я помогу с диагностикой и ремонтом!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_green",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": [
+        "\ud83d\udd27 Сколько стоит диагностика?",
+        "\ud83d\ude97 Какие марки обслуживаете?",
+        "\ud83d\udcc5 Как записаться на ремонт?"
+      ]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

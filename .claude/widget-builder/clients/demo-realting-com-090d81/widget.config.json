@@ -1,0 +1,32 @@
+{
+  "clientId": "demo-realting-com-090d81",
+  "botName": "Риелторы в ОАЭ. Агенты по недвижимости в базе Realting AI",
+  "welcomeMessage": "Привет! 👋 Я — AI-ассистент **Риелторы в ОАЭ. Агенты по недвижимости в базе Realting**. Чем могу помочь?",
+  "inputPlaceholder": "Задайте вопрос...",
+  "quickReplies": ["Расскажите о компании", "Какие услуги вы предоставляете?", "Как с вами связаться?"],
+  "avatar": {
+    "type": "initials",
+    "initials": "РВ"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "👋 Привет! Нужна помощь?"
+    }
+  },
+  "contacts": {
+    "website": "https://realting.com/ru/united-arab-emirates/agents"
+  }
+}

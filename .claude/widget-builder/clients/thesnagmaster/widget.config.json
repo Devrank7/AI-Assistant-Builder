@@ -1,0 +1,20 @@
+{
+  "clientId": "thesnagmaster",
+  "bot": {
+    "name": "Snag Master AI",
+    "greeting": "Welcome to The Snag Master! We're the UAE's #1 RERA-certified property snagging company. How can I help you with property inspection?",
+    "tone": "professional_friendly",
+    "language": "en"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "quickReplies": {
+      "starters": ["Schedule an inspection", "Our services", "Get a quote"]
+    }
+  }
+}

@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Bruno Auto - Premium Green & White Theme */
+:host {
+    --aw-primary: #16a34a;
+    --aw-accent: #22c55e;
+    --aw-bg: #ffffff;
+    --aw-text: #374151;
+    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Smooth text rendering */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Focus indicators - green */
+*:focus-visible {
+    outline: 2px solid rgba(22, 163, 74, 0.35);
+    outline-offset: 2px;
+}
+
+button:focus-visible {
+    outline: 2px solid rgba(22, 163, 74, 0.35);
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+
+/* Smooth transitions globally */
+button, a, input, textarea {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
