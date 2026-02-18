@@ -6,6 +6,21 @@ import { IClient } from '@/models/Client';
 import ClientCard from './ClientCard';
 import { MotionList, MotionItem, AnimatedNumber, SkeletonCard } from '@/components/ui/motion';
 
+function groupByDate(clients: IClient[]): Map<string, IClient[]> {
+  const groups = new Map<string, IClient[]>();
+  for (const client of clients) {
+    const date = new Date(client.createdAt);
+    const key = date.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(client);
+  }
+  return groups;
+}
+
 export default function ClientList() {
   const [clients, setClients] = useState<IClient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -320,19 +335,32 @@ export default function ClientList() {
             Demo widgets for prospecting — no billing, no client cabinet
           </p>
 
-          {/* Quick Widgets Grid */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredQuick.map((client, index) => (
-              <motion.div
-                key={client.clientId}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <ClientCard client={client} isQuick />
-              </motion.div>
-            ))}
-          </div>
+          {/* Quick Widgets Grid — grouped by date */}
+          {Array.from(groupByDate(filteredQuick).entries()).map(([dateLabel, group]) => (
+            <div key={dateLabel} className="space-y-4">
+              {/* Date Section Header */}
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-gradient-to-r from-amber-500/20 to-transparent" />
+                <span className="text-xs font-medium tracking-wide text-amber-400/70">{dateLabel}</span>
+                <span className="text-xs text-gray-600">{group.length}</span>
+                <div className="h-px flex-1 bg-gradient-to-l from-amber-500/20 to-transparent" />
+              </div>
+
+              {/* Cards Grid */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {group.map((client, index) => (
+                  <motion.div
+                    key={client.clientId}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                  >
+                    <ClientCard client={client} isQuick />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
