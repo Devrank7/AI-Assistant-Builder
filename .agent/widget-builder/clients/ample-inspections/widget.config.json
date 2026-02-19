@@ -1,0 +1,34 @@
+{
+  "clientId": "ample-inspections",
+  "botName": "Ample Inspections AI",
+  "welcomeMessage": "Welcome to **Ample Inspections** — Dubai's Top Rated Property Snagging & Inspection Company! How can we assist you?",
+  "inputPlaceholder": "Ask about inspections...",
+  "quickReplies": ["Snagging inspection", "Handover inspection", "Building condition survey", "Get a quote"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AI"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need a professional property inspection in Dubai? Get a free quote today!"
+    }
+  },
+  "contacts": {
+    "phone": "+971501299155",
+    "email": "info@ampleinspections.com",
+    "website": "https://ampleinspections.com"
+  }
+}

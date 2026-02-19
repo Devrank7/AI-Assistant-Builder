@@ -1,0 +1,34 @@
+{
+  "clientId": "kore-dubai",
+  "botName": "KORE AI",
+  "welcomeMessage": "Welcome to **KORE Real Estate** — Premium Property Solutions in Dubai! How can we assist you?",
+  "inputPlaceholder": "Ask about properties...",
+  "quickReplies": ["Buy property", "Rent property", "Off-plan projects", "Sell my property"],
+  "avatar": {
+    "type": "initials",
+    "initials": "KR"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for premium property in Dubai? Let us help you find it!"
+    }
+  },
+  "contacts": {
+    "phone": "+971 4 585 2863",
+    "email": "info@koredubai.com",
+    "website": "https://koredubai.com"
+  }
+}

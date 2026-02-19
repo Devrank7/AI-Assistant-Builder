@@ -1,0 +1,34 @@
+{
+  "clientId": "royal-springs",
+  "botName": "Royal Springs AI",
+  "welcomeMessage": "Welcome to **Royal Springs Real Estate** — Your Trusted Partner in Dubai Real Estate since 2008! How can we assist you?",
+  "inputPlaceholder": "Ask about properties...",
+  "quickReplies": ["Buy a property", "Sell my property", "Rental services", "Investment advisory"],
+  "avatar": {
+    "type": "initials",
+    "initials": "RS"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for your dream property in Dubai? Let us help!"
+    }
+  },
+  "contacts": {
+    "phone": "+971 5850 800 96",
+    "email": "info@royalsprings.ae",
+    "website": "https://royalsprings.ae"
+  }
+}

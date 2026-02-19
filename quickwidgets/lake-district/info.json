@@ -1,0 +1,11 @@
+{
+  "clientId": "lake-district",
+  "username": "lake-district",
+  "name": "Lake District Real Estate",
+  "email": "info@lakedistrictuae.com",
+  "website": "https://lakedistrictuae.com",
+  "phone": "+971 4 498 3500",
+  "addresses": ["Office 2905, Westburry Office Tower, Business Bay, Dubai, UAE"],
+  "clientType": "quick",
+  "createdAt": "2026-02-19T07:00:00.000Z"
+}

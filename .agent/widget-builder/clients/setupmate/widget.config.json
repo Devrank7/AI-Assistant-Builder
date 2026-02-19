@@ -1,0 +1,34 @@
+{
+  "clientId": "setupmate",
+  "botName": "Setupmate AI",
+  "welcomeMessage": "Welcome to **Setupmate** — Grow Your Business the Right Way! How can we help you with your business setup?",
+  "inputPlaceholder": "Ask about company formation...",
+  "quickReplies": ["Freezone setup", "Mainland company", "Golden Visa", "Banking advisory"],
+  "avatar": {
+    "type": "initials",
+    "initials": "SM"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Thinking about starting a business in Dubai? We make company setup simple!"
+    }
+  },
+  "contacts": {
+    "phone": "+971542336600",
+    "email": "info@setupmate.com",
+    "website": "https://setupmate.com"
+  }
+}

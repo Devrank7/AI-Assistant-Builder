@@ -1,0 +1,11 @@
+{
+  "clientId": "property-check",
+  "username": "property-check",
+  "name": "Property Check",
+  "email": "checkmeout@propertycheck.me",
+  "website": "https://propertycheck.me",
+  "phone": "+9718002432563",
+  "addresses": ["213 Umm Suqeim St - Al Quoz Industrial Area 4 - Dubai, UAE"],
+  "clientType": "quick",
+  "createdAt": "2026-02-18T12:00:00.000Z"
+}

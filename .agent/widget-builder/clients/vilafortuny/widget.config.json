@@ -1,0 +1,34 @@
+{
+  "clientId": "vilafortuny",
+  "botName": "Vilafortuny AI",
+  "welcomeMessage": "Welcome to **Vilafortuny Laser Centre** — Advanced Dental & Cosmetic Care in Dubai! How can we help you?",
+  "inputPlaceholder": "Ask about treatments...",
+  "quickReplies": ["Cosmetic dentistry", "Laser treatments", "Plastic surgery", "Book a consultation"],
+  "avatar": {
+    "type": "initials",
+    "initials": "VF"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for advanced dental or cosmetic care? Book a consultation with our specialists!"
+    }
+  },
+  "contacts": {
+    "phone": "",
+    "email": "info@vilafortuny.com",
+    "website": "https://vilafortuny.com"
+  }
+}

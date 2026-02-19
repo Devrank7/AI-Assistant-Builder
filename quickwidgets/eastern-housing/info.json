@@ -1,0 +1,11 @@
+{
+  "clientId": "eastern-housing",
+  "username": "eastern-housing",
+  "name": "Eastern Housing UAE",
+  "email": "info@easternhousing.ae",
+  "website": "https://easternhousing.ae",
+  "phone": "+971 523 425 016",
+  "addresses": ["Office 3207, ParkLane Tower, Business Bay, Dubai, UAE"],
+  "clientType": "quick",
+  "createdAt": "2026-02-19T07:00:00.000Z"
+}
