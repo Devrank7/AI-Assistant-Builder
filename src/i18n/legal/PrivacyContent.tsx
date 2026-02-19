@@ -33,67 +33,16 @@ function RuContent() {
         Общим регламентом защиты данных Европейского Союза (GDPR) и другими применимыми нормативными актами.
       </p>
 
-      <SectionTitle>2. Какие данные мы собираем</SectionTitle>
-
-      <SubTitle>2.1 Данные учётной записи клиента</SubTitle>
-      <p>При регистрации на Платформе в качестве клиента мы можем собирать:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Название компании / имя пользователя</li>
-        <li>Электронный адрес</li>
-        <li>Номер телефона</li>
-        <li>Адрес веб-сайта</li>
-        <li>Физические адреса офисов / филиалов</li>
-        <li>Аккаунты в социальных сетях (Instagram и др.)</li>
-      </ul>
-
-      <SubTitle>2.2 Данные чата (конечные пользователи виджета)</SubTitle>
-      <p>Когда посетитель сайта клиента взаимодействует с AI-виджетом, мы собираем:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Текст сообщений чата</li>
-        <li>Идентификатор сессии (генерируется автоматически)</li>
-        <li>Временные метки сообщений</li>
-        <li>Загруженные изображения (при отправке через виджет)</li>
-      </ul>
-
-      <SubTitle>2.3 Технические данные</SubTitle>
-      <p>Автоматически собираемая техническая информация:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>IP-адрес</li>
-        <li>User-Agent (тип браузера, операционная система, устройство)</li>
-        <li>URL страницы, на которой установлен виджет</li>
-        <li>Канал обращения (сайт, Telegram, WhatsApp, Instagram)</li>
-      </ul>
-
-      <SubTitle>2.4 Данные лидов</SubTitle>
-      <p>Если посетитель оставляет контактные данные через виджет:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Имя</li>
-        <li>Электронный адрес</li>
-        <li>Номер телефона</li>
-        <li>Дополнительная информация, предоставленная пользователем (тип услуги, предпочтительная дата и т.д.)</li>
-      </ul>
-
-      <SubTitle>2.5 Платёжные данные</SubTitle>
+      <SectionTitle>2. Условия оплаты, расчётный цикл и приостановка сервиса</SectionTitle>
       <p>
-        Мы не храним данные платёжных карт. Оплата обрабатывается сторонними платёжными провайдерами (WayForPay,
-        Cryptomus, NowPayments). Мы сохраняем только:
+        Предоставление AI-виджета начинается с первоначального платежа, который покрывает разработку, настройку и
+        эксплуатацию виджета в течение первых тридцати (30) дней. По истечении этого начального периода дальнейшая
+        эксплуатация, обслуживание и техническая поддержка осуществляются на основе согласованной ежемесячной оплаты,
+        взимаемой каждые 30 дней. Клиенту предоставляется льготный период в пять (5) календарных дней после окончания
+        текущего 30-дневного расчётного цикла для осуществления платежа за продление. Неосуществление платежа в течение
+        этого 5-дневного льготного периода повлечёт автоматическую приостановку или деактивацию виджета на веб-сайте
+        Клиента до погашения задолженности.
       </p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Способ оплаты (название провайдера)</li>
-        <li>Сумма и статус платежа</li>
-        <li>Даты платежей</li>
-        <li>Номер счёта</li>
-      </ul>
-
-      <SubTitle>2.6 Аналитические данные</SubTitle>
-      <p>Мы собираем агрегированную статистику использования:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Количество обращений в чат</li>
-        <li>Среднее количество сообщений за сессию</li>
-        <li>Среднее время ответа AI</li>
-        <li>Почасовое распределение активности</li>
-        <li>Оценки ответов (положительные / отрицательные)</li>
-      </ul>
 
       <SectionTitle>3. Файлы cookie и локальное хранилище</SectionTitle>
 
@@ -381,67 +330,16 @@ function EnContent() {
         applicable regulations.
       </p>
 
-      <SectionTitle>2. What Data We Collect</SectionTitle>
-
-      <SubTitle>2.1 Client Account Data</SubTitle>
-      <p>When registering on the Platform as a client, we may collect:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Company name / username</li>
-        <li>Email address</li>
-        <li>Phone number</li>
-        <li>Website address</li>
-        <li>Physical addresses of offices / branches</li>
-        <li>Social media accounts (Instagram, etc.)</li>
-      </ul>
-
-      <SubTitle>2.2 Chat Data (widget end users)</SubTitle>
-      <p>When a client&apos;s website visitor interacts with the AI widget, we collect:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Chat message text</li>
-        <li>Session identifier (auto-generated)</li>
-        <li>Message timestamps</li>
-        <li>Uploaded images (when sent via widget)</li>
-      </ul>
-
-      <SubTitle>2.3 Technical Data</SubTitle>
-      <p>Automatically collected technical information:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>IP address</li>
-        <li>User-Agent (browser type, operating system, device)</li>
-        <li>URL of the page where the widget is installed</li>
-        <li>Communication channel (website, Telegram, WhatsApp, Instagram)</li>
-      </ul>
-
-      <SubTitle>2.4 Lead Data</SubTitle>
-      <p>If a visitor leaves contact data via the widget:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Name</li>
-        <li>Email address</li>
-        <li>Phone number</li>
-        <li>Additional information provided by the user (service type, preferred date, etc.)</li>
-      </ul>
-
-      <SubTitle>2.5 Payment Data</SubTitle>
+      <SectionTitle>2. Payment Terms, Billing Cycle, and Service Suspension</SectionTitle>
       <p>
-        We do not store payment card data. Payment is processed by third-party payment providers (WayForPay, Cryptomus,
-        NowPayments). We only save:
+        The provision of the AI widget begins with an initial payment, which covers the development, setup, and
+        operation of the widget for the first thirty (30) days. Following this initial period, continued operation,
+        maintenance, and technical support are subject to a recurring, agreed-upon monthly fee, billed every 30 days.
+        The Client is provided a grace period of five (5) calendar days following the expiration of their current 30-day
+        billing cycle to remit the renewal payment. Failure to process the payment within this 5-day grace period will
+        result in the automatic suspension or deactivation of the widget on the Client&apos;s website until the
+        outstanding balance is settled.
       </p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Payment method (provider name)</li>
-        <li>Amount and payment status</li>
-        <li>Payment dates</li>
-        <li>Invoice number</li>
-      </ul>
-
-      <SubTitle>2.6 Analytics Data</SubTitle>
-      <p>We collect aggregated usage statistics:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Number of chat inquiries</li>
-        <li>Average messages per session</li>
-        <li>Average AI response time</li>
-        <li>Hourly activity distribution</li>
-        <li>Response ratings (positive / negative)</li>
-      </ul>
 
       <SectionTitle>3. Cookies and Local Storage</SectionTitle>
 
@@ -727,67 +625,16 @@ function UkContent() {
         Загального регламенту захисту даних Європейського Союзу (GDPR) та інших застосовних нормативних актів.
       </p>
 
-      <SectionTitle>2. Які дані ми збираємо</SectionTitle>
-
-      <SubTitle>2.1 Дані облікового запису клієнта</SubTitle>
-      <p>При реєстрації на Платформі як клієнт ми можемо збирати:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Назва компанії / ім&apos;я користувача</li>
-        <li>Електронна адреса</li>
-        <li>Номер телефону</li>
-        <li>Адреса веб-сайту</li>
-        <li>Фізичні адреси офісів / філій</li>
-        <li>Акаунти в соціальних мережах (Instagram та ін.)</li>
-      </ul>
-
-      <SubTitle>2.2 Дані чату (кінцеві користувачі віджета)</SubTitle>
-      <p>Коли відвідувач сайту клієнта взаємодіє з AI-віджетом, ми збираємо:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Текст повідомлень у чаті</li>
-        <li>Ідентифікатор сесії (генерується автоматично)</li>
-        <li>Часові мітки повідомлень</li>
-        <li>Завантажені зображення (при надсиланні через віджет)</li>
-      </ul>
-
-      <SubTitle>2.3 Технічні дані</SubTitle>
-      <p>Автоматично зібрана технічна інформація:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>IP-адреса</li>
-        <li>User-Agent (тип браузера, операційна система, пристрій)</li>
-        <li>URL сторінки, на якій встановлено віджет</li>
-        <li>Канал звернення (сайт, Telegram, WhatsApp, Instagram)</li>
-      </ul>
-
-      <SubTitle>2.4 Дані лідів</SubTitle>
-      <p>Якщо відвідувач залишає контактні дані через віджет:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Ім&apos;я</li>
-        <li>Електронна адреса</li>
-        <li>Номер телефону</li>
-        <li>Додаткова інформація, надана користувачем (тип послуги, бажана дата тощо)</li>
-      </ul>
-
-      <SubTitle>2.5 Платіжні дані</SubTitle>
+      <SectionTitle>2. Умови оплати, розрахунковий цикл та призупинення сервісу</SectionTitle>
       <p>
-        Ми не зберігаємо дані платіжних карток. Оплата обробляється сторонніми платіжними провайдерами (WayForPay,
-        Cryptomus, NowPayments). Ми зберігаємо лише:
+        Надання AI-віджета починається з початкового платежу, який покриває розробку, налаштування та експлуатацію
+        віджета протягом перших тридцяти (30) днів. Після завершення цього початкового періоду подальша експлуатація,
+        обслуговування та технічна підтримка здійснюються на основі узгодженої щомісячної оплати, що стягується кожні 30
+        днів. Клієнту надається пільговий період у п&apos;ять (5) календарних днів після закінчення поточного 30-денного
+        розрахункового циклу для здійснення платежу за продовження. Нездійснення платежу протягом цього 5-денного
+        пільгового періоду призведе до автоматичного призупинення або деактивації віджета на веб-сайті Клієнта до
+        погашення заборгованості.
       </p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Спосіб оплати (назва провайдера)</li>
-        <li>Сума та статус платежу</li>
-        <li>Дати платежів</li>
-        <li>Номер рахунку</li>
-      </ul>
-
-      <SubTitle>2.6 Аналітичні дані</SubTitle>
-      <p>Ми збираємо агреговану статистику використання:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Кількість звернень у чат</li>
-        <li>Середня кількість повідомлень за сесію</li>
-        <li>Середній час відповіді AI</li>
-        <li>Погодинний розподіл активності</li>
-        <li>Оцінки відповідей (позитивні / негативні)</li>
-      </ul>
 
       <SectionTitle>3. Файли cookie та локальне сховище</SectionTitle>
 
@@ -1074,67 +921,16 @@ function PlContent() {
         ochronie danych UE (RODO) oraz innymi obowiązującymi przepisami.
       </p>
 
-      <SectionTitle>2. Jakie dane zbieramy</SectionTitle>
-
-      <SubTitle>2.1 Dane konta klienta</SubTitle>
-      <p>Podczas rejestracji na Platformie jako klient możemy zbierać:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Nazwa firmy / nazwa użytkownika</li>
-        <li>Adres e-mail</li>
-        <li>Numer telefonu</li>
-        <li>Adres strony internetowej</li>
-        <li>Adresy fizyczne biur / oddziałów</li>
-        <li>Konta w mediach społecznościowych (Instagram itp.)</li>
-      </ul>
-
-      <SubTitle>2.2 Dane czatu (użytkownicy końcowi widżetu)</SubTitle>
-      <p>Gdy odwiedzający stronę klienta wchodzi w interakcję z widżetem AI, zbieramy:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Tekst wiadomości czatu</li>
-        <li>Identyfikator sesji (generowany automatycznie)</li>
-        <li>Znaczniki czasu wiadomości</li>
-        <li>Przesłane obrazy (wysłane przez widżet)</li>
-      </ul>
-
-      <SubTitle>2.3 Dane techniczne</SubTitle>
-      <p>Automatycznie zbierane informacje techniczne:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Adres IP</li>
-        <li>User-Agent (typ przeglądarki, system operacyjny, urządzenie)</li>
-        <li>URL strony, na której zainstalowany jest widżet</li>
-        <li>Kanał komunikacji (strona internetowa, Telegram, WhatsApp, Instagram)</li>
-      </ul>
-
-      <SubTitle>2.4 Dane leadów</SubTitle>
-      <p>Jeśli odwiedzający pozostawi dane kontaktowe przez widżet:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Imię</li>
-        <li>Adres e-mail</li>
-        <li>Numer telefonu</li>
-        <li>Dodatkowe informacje podane przez użytkownika (rodzaj usługi, preferowana data itp.)</li>
-      </ul>
-
-      <SubTitle>2.5 Dane płatnicze</SubTitle>
+      <SectionTitle>2. Warunki płatności, cykl rozliczeniowy i zawieszenie usługi</SectionTitle>
       <p>
-        Nie przechowujemy danych kart płatniczych. Płatności są przetwarzane przez zewnętrznych dostawców usług
-        płatniczych (WayForPay, Cryptomus, NowPayments). Zapisujemy jedynie:
+        Świadczenie usługi widżetu AI rozpoczyna się od płatności początkowej, która obejmuje opracowanie, konfigurację
+        i działanie widżetu przez pierwsze trzydzieści (30) dni. Po upływie tego początkowego okresu dalsze działanie,
+        utrzymanie i wsparcie techniczne podlegają uzgodnionej cyklicznej opłacie miesięcznej, naliczanej co 30 dni.
+        Klientowi przysługuje okres karencji wynoszący pięć (5) dni kalendarzowych po wygaśnięciu bieżącego 30-dniowego
+        cyklu rozliczeniowego na dokonanie płatności za odnowienie. Niedokonanie płatności w ciągu tego 5-dniowego
+        okresu karencji spowoduje automatyczne zawieszenie lub dezaktywację widżetu na stronie internetowej Klienta do
+        momentu uregulowania zaległej kwoty.
       </p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Metoda płatności (nazwa dostawcy)</li>
-        <li>Kwota i status płatności</li>
-        <li>Daty płatności</li>
-        <li>Numer faktury</li>
-      </ul>
-
-      <SubTitle>2.6 Dane analityczne</SubTitle>
-      <p>Zbieramy zagregowane statystyki użytkowania:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>Liczba zapytań w czacie</li>
-        <li>Średnia liczba wiadomości na sesję</li>
-        <li>Średni czas odpowiedzi AI</li>
-        <li>Godzinowy rozkład aktywności</li>
-        <li>Oceny odpowiedzi (pozytywne / negatywne)</li>
-      </ul>
 
       <SectionTitle>3. Pliki cookie i pamięć lokalna</SectionTitle>
 
@@ -1421,67 +1217,14 @@ function ArContent() {
         واللائحة العامة لحماية البيانات في الاتحاد الأوروبي (GDPR)، والأنظمة الأخرى المعمول بها.
       </p>
 
-      <SectionTitle>2. ما البيانات التي نجمعها</SectionTitle>
-
-      <SubTitle>2.1 بيانات حساب العميل</SubTitle>
-      <p>عند التسجيل في المنصة كعميل، قد نجمع:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>اسم الشركة / اسم المستخدم</li>
-        <li>عنوان البريد الإلكتروني</li>
-        <li>رقم الهاتف</li>
-        <li>عنوان الموقع الإلكتروني</li>
-        <li>العناوين الفعلية للمكاتب / الفروع</li>
-        <li>حسابات وسائل التواصل الاجتماعي (Instagram وغيرها)</li>
-      </ul>
-
-      <SubTitle>2.2 بيانات الدردشة (المستخدمون النهائيون للويدجت)</SubTitle>
-      <p>عندما يتفاعل زائر موقع العميل مع ويدجت الذكاء الاصطناعي، نجمع:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>نص رسائل الدردشة</li>
-        <li>معرّف الجلسة (يُنشأ تلقائيًا)</li>
-        <li>الطوابع الزمنية للرسائل</li>
-        <li>الصور المرفوعة (عند إرسالها عبر الويدجت)</li>
-      </ul>
-
-      <SubTitle>2.3 البيانات التقنية</SubTitle>
-      <p>المعلومات التقنية المجمّعة تلقائيًا:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>عنوان IP</li>
-        <li>User-Agent (نوع المتصفح، نظام التشغيل، الجهاز)</li>
-        <li>عنوان URL للصفحة التي تم تثبيت الويدجت عليها</li>
-        <li>قناة الاتصال (الموقع الإلكتروني، Telegram، WhatsApp، Instagram)</li>
-      </ul>
-
-      <SubTitle>2.4 بيانات العملاء المحتملين</SubTitle>
-      <p>إذا ترك الزائر بيانات الاتصال عبر الويدجت:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>الاسم</li>
-        <li>عنوان البريد الإلكتروني</li>
-        <li>رقم الهاتف</li>
-        <li>معلومات إضافية قدمها المستخدم (نوع الخدمة، التاريخ المفضل، إلخ)</li>
-      </ul>
-
-      <SubTitle>2.5 بيانات الدفع</SubTitle>
+      <SectionTitle>2. شروط الدفع ودورة الفوترة وتعليق الخدمة</SectionTitle>
       <p>
-        نحن لا نخزن بيانات بطاقات الدفع. تتم معالجة الدفع بواسطة مزودي خدمات الدفع الخارجيين (WayForPay، Cryptomus،
-        NowPayments). نحتفظ فقط بـ:
+        يبدأ تقديم ويدجت الذكاء الاصطناعي بدفعة أولية تغطي تطوير الويدجت وإعداده وتشغيله خلال الثلاثين (30) يومًا
+        الأولى. بعد انتهاء هذه الفترة الأولية، يخضع استمرار التشغيل والصيانة والدعم الفني لرسوم شهرية متكررة ومتفق
+        عليها، يتم احتسابها كل 30 يومًا. يُمنح العميل فترة سماح مدتها خمسة (5) أيام تقويمية بعد انتهاء دورة الفوترة
+        الحالية البالغة 30 يومًا لتسديد دفعة التجديد. سيؤدي عدم معالجة الدفع خلال فترة السماح هذه البالغة 5 أيام إلى
+        تعليق أو إلغاء تفعيل الويدجت تلقائيًا على موقع العميل الإلكتروني حتى يتم تسوية الرصيد المستحق.
       </p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>طريقة الدفع (اسم المزود)</li>
-        <li>المبلغ وحالة الدفع</li>
-        <li>تواريخ الدفع</li>
-        <li>رقم الفاتورة</li>
-      </ul>
-
-      <SubTitle>2.6 البيانات التحليلية</SubTitle>
-      <p>نجمع إحصائيات الاستخدام المجمّعة:</p>
-      <ul className="ml-6 list-disc space-y-1">
-        <li>عدد الاستفسارات في الدردشة</li>
-        <li>متوسط الرسائل لكل جلسة</li>
-        <li>متوسط وقت استجابة الذكاء الاصطناعي</li>
-        <li>توزيع النشاط بالساعة</li>
-        <li>تقييمات الردود (إيجابية / سلبية)</li>
-      </ul>
 
       <SectionTitle>3. ملفات تعريف الارتباط والتخزين المحلي</SectionTitle>
 
