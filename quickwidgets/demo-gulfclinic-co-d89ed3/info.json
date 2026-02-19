@@ -1,0 +1,18 @@
+{
+  "name": "Gulfclinic",
+  "clientId": "demo-gulfclinic-co-d89ed3",
+  "username": "demo-gulfclinic-co-d89ed3",
+  "email": "",
+  "website": "https://www.gulfclinic.co",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-19T20:54:28.984Z",
+  "version": "2.0.0",
+  "selfService": true
+}

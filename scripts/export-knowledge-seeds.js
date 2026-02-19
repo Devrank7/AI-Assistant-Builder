@@ -55,7 +55,7 @@ async function main() {
         const clientId = client.clientId;
         try {
             // Fetch knowledge chunks
-            const knowledgeRes = await fetch(`${baseUrl}/api/knowledge?clientId=${clientId}&includeEmbeddings=true`, {
+            const knowledgeRes = await fetch(`${baseUrl}/api/knowledge?clientId=${clientId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const knowledgeData = await knowledgeRes.json();
@@ -80,7 +80,6 @@ async function main() {
                 exportedAt: new Date().toISOString(),
                 chunks: chunks.map(c => ({
                     text: c.text,
-                    embedding: c.embedding,
                     source: c.source || 'website',
                 })),
                 aiSettings: settings ? {

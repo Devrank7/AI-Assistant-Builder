@@ -6,7 +6,7 @@ import AISettings from '@/models/AISettings';
 const SEEDS_DIR = path.join(process.cwd(), 'knowledge-seeds');
 
 /**
- * Export a client's knowledge chunks (with embeddings) and AI settings
+ * Export a client's knowledge chunks (text only, no embeddings) and AI settings
  * to a JSON seed file. Only runs in non-production environments.
  *
  * Called automatically after knowledge upload or AI settings update
@@ -17,7 +17,7 @@ export async function exportClientSeed(clientId: string): Promise<void> {
   if (process.env.NODE_ENV === 'production') return;
 
   try {
-    const chunks = await KnowledgeChunk.find({ clientId }).select('text embedding source');
+    const chunks = await KnowledgeChunk.find({ clientId }).select('text source');
 
     const settings = await AISettings.findOne({ clientId });
 
@@ -28,7 +28,6 @@ export async function exportClientSeed(clientId: string): Promise<void> {
       exportedAt: new Date().toISOString(),
       chunks: chunks.map((c) => ({
         text: c.text,
-        embedding: c.embedding,
         source: c.source || 'website',
       })),
       aiSettings: settings

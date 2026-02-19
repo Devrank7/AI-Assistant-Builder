@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-preact';
 
@@ -18,6 +18,48 @@ function Card({ card, onAction }) {
                     </button>
                 )}
             </div>
+        </div>
+    );
+}
+
+function Carousel({ items, onAction }) {
+    const scrollRef = useRef(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+
+    const updateArrows = useCallback(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 2);
+        setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+    }, []);
+
+    const scroll = useCallback((dir) => {
+        const el = scrollRef.current;
+        if (!el) return;
+        el.scrollBy({ left: dir * 210, behavior: 'smooth' });
+    }, []);
+
+    return (
+        <div className="relative group">
+            <div ref={scrollRef} onScroll={updateArrows}
+                className="overflow-x-auto scrollbar-hide -mr-4 pr-4 scroll-smooth">
+                <div className="flex gap-2" style={{ minWidth: 'max-content' }}>
+                    {items.map((card, ci) => <Card key={ci} card={card} onAction={onAction} />)}
+                </div>
+            </div>
+            {canScrollLeft && (
+                <button onClick={() => scroll(-1)}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 border-gray-200 hover:bg-white shadow-md border flex items-center justify-center transition-all z-10">
+                    <ChevronLeft size={14} className="text-gray-600" />
+                </button>
+            )}
+            {canScrollRight && (
+                <button onClick={() => scroll(1)}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 border-gray-200 hover:bg-white shadow-md border flex items-center justify-center transition-all z-10">
+                    <ChevronRight size={14} className="text-gray-600" />
+                </button>
+            )}
         </div>
     );
 }
@@ -86,13 +128,7 @@ export default function RichBlocks({ blocks, onAction }) {
                     return <div key={idx} className="flex"><Card card={block} onAction={onAction} /></div>;
                 }
                 if (block.type === 'carousel') {
-                    return (
-                        <div key={idx} className="overflow-x-auto scrollbar-hide -mr-4 pr-4">
-                            <div className="flex gap-2" style={{ minWidth: 'max-content' }}>
-                                {block.items.map((card, ci) => <Card key={ci} card={card} onAction={onAction} />)}
-                            </div>
-                        </div>
-                    );
+                    return <Carousel key={idx} items={block.items} onAction={onAction} />;
                 }
                 if (block.type === 'button_group') {
                     return <ButtonGroup key={idx} buttons={block.buttons} onAction={onAction} />;

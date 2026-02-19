@@ -1,0 +1,18 @@
+{
+  "name": "Dental Clinic Dubai",
+  "clientId": "demo-pearldentalclinics-c-c5838c",
+  "username": "demo-pearldentalclinics-c-c5838c",
+  "email": "",
+  "website": "https://www.pearldentalclinics.com",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-19T20:54:23.311Z",
+  "version": "2.0.0",
+  "selfService": true
+}

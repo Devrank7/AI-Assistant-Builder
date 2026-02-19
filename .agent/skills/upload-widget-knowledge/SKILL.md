@@ -7,7 +7,7 @@ description: Crawl a client's website and populate their AI knowledge base + sys
 
 ## 1. PURPOSE
 
-Visit a client's website, crawl key pages, extract all business content, then upload it as knowledge base chunks and configure the AI system prompt. This ensures the widget's AI chatbot can answer questions about the business accurately.
+Deep-crawl a client's website (ALL pages, not just a few), upload all extracted content as knowledge base chunks, and configure the AI system prompt. This ensures the widget's AI chatbot can answer questions about the business accurately.
 
 **Input**: `clientId` + `website URL` (single client or list of clients)
 **Output**: Knowledge base populated + system prompt configured
@@ -20,119 +20,29 @@ Visit a client's website, crawl key pages, extract all business content, then up
 
 ---
 
-## 2. PHASE 1 — CRAWL WEBSITE
+## 2. PHASE 1 — DEEP CRAWL & UPLOAD KNOWLEDGE
 
-### 2.1 Homepage Analysis
+### 2.1 One-Command Deep Crawl
 
-Use WebFetch to load the client's website homepage. Extract:
+Use the deep-crawl API endpoint. It automatically:
 
-```
-Analyze this website thoroughly. Extract ALL business information:
-
-1. Company/brand name
-2. What type of business (dental, auto, hotel, restaurant, etc.)
-3. Language of the site (uk, ru, en, etc.)
-4. Full tagline or slogan
-5. ALL services listed (with descriptions and prices if visible)
-6. Phone number(s)
-7. Email address(es)
-8. Physical address(es)
-9. Working hours / schedule
-10. Team members / doctors / specialists (names, titles, experience)
-11. About the company (history, mission, values)
-12. Any guarantees, certifications, or achievements
-13. List ALL navigation links with full URLs for further crawling
-```
-
-### 2.2 Crawl Key Pages (5-8 pages)
-
-From the homepage navigation, visit these pages in priority order:
-
-1. **About / О нас / Про нас** — company history, team, mission
-2. **Services / Услуги / Послуги** — full service list with details
-3. **Pricing / Цены / Ціни** — prices for services
-4. **FAQ / Вопросы / Запитання** — frequently asked questions
-5. **Contact / Контакти** — detailed contact info, map, hours
-6. **Team / Команда** — doctor/specialist profiles
-7. **Gallery / Portfolio** — examples of work (if relevant)
-8. **Reviews / Отзывы** — testimonials (summary only)
-
-For each page, extract with this prompt:
-
-```
-Extract ALL useful business information from this page:
-- Headings and subheadings
-- Service descriptions with prices if available
-- FAQ questions and answers
-- Contact information (phone, email, address, hours)
-- Team member names, titles, and specializations
-- Any key facts, guarantees, achievements, or unique selling points
-- Any specific procedures, technologies, or brands mentioned
-Format as clean structured text. Include ALL details — prices, durations, specifics.
-```
-
-### 2.3 WordPress Fallback
-
-Many Ukrainian sites use WordPress. If WebFetch returns mostly CSS/scripts instead of content:
-
-1. Try WP REST API: `<website>/wp-json/wp/v2/pages?per_page=20`
-2. Try sitemap: `<website>/sitemap.xml`
-3. Try individual page URLs found in navigation
-
-### 2.4 Compile All Content
-
-After crawling all pages, compile a single comprehensive text document:
-
-```
-=== ABOUT <BRAND NAME> ===
-<Company description, history, mission>
-
-=== SERVICES ===
-<All services with descriptions and prices>
-
-=== TEAM ===
-<All team members with titles and specializations>
-
-=== PRICING ===
-<All prices and packages>
-
-=== FAQ ===
-<All frequently asked questions and answers>
-
-=== CONTACT INFORMATION ===
-Phone: <phones>
-Email: <emails>
-Address: <addresses>
-Working hours: <schedule>
-Website: <url>
-
-=== ADDITIONAL INFORMATION ===
-<Guarantees, certifications, technologies, brands, etc.>
-```
-
-**Important:**
-
-- Include ALL specific details (exact prices, exact hours, exact addresses)
-- Include brand/product names mentioned (implant systems, equipment brands, etc.)
-- Include team member names and their specializations
-- Content should be in the SAME LANGUAGE as the website
-
----
-
-## 3. PHASE 2 — UPLOAD KNOWLEDGE
-
-### 3.1 Upload via API
-
-Send ALL compiled content as a single POST to the knowledge endpoint. The API automatically splits text into 500-character chunks and generates embeddings.
+- Parses robots.txt and sitemap.xml
+- Tries WordPress REST API (`/wp-json/wp/v2/pages` + `/posts`)
+- BFS-crawls all discovered links (up to 50 pages, 800K chars)
+- Deduplicates boilerplate (nav, footer, sidebar)
+- Extracts JSON-LD structured data (for SPA sites)
+- Chunks text into 500-char pieces with Gemini embeddings
+- Replaces existing knowledge by default
 
 ```bash
-curl -s -X POST "http://localhost:3000/api/knowledge" \
+curl -s -X POST "http://localhost:3000/api/knowledge/deep-crawl" \
   -H "Content-Type: application/json" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
   -d '{
     "clientId": "<clientId>",
-    "text": "<all compiled content>",
-    "source": "website"
+    "websiteUrl": "<website URL>",
+    "brandName": "<Brand Name>",
+    "replace": true
   }'
 ```
 
@@ -141,12 +51,24 @@ curl -s -X POST "http://localhost:3000/api/knowledge" \
 ```json
 {
   "success": true,
-  "message": "Created N knowledge chunks",
-  "chunks": [...]
+  "message": "Crawled 28 pages, created 145 knowledge chunks",
+  "crawl": {
+    "totalPages": 28,
+    "totalChars": 342000,
+    "durationMs": 45000,
+    "strategies": ["sitemap", "html-crawl"],
+    "pageUrls": ["https://example.com", "https://example.com/about", ...]
+  },
+  "knowledge": {
+    "totalChunks": 145,
+    "savedChunks": 145,
+    "failedChunks": 0,
+    "replaced": true
+  }
 }
 ```
 
-### 3.2 Verify Upload
+### 2.2 Verify Upload
 
 ```bash
 curl -s "http://localhost:3000/api/knowledge?clientId=<clientId>" \
@@ -155,32 +77,36 @@ curl -s "http://localhost:3000/api/knowledge?clientId=<clientId>" \
 
 Check that chunks were created (should be > 0).
 
+### 2.3 Homepage Analysis (for system prompt)
+
+Use WebFetch to load the homepage **only** to gather info for the system prompt:
+
+```
+Analyze this website. Extract:
+1. Company/brand name
+2. Business type (dental, auto, hotel, restaurant, etc.)
+3. Language of the site (uk, ru, en, etc.)
+4. Brief company description (1-2 sentences)
+5. Key services offered
+6. Phone, email, address, working hours
+```
+
+This is a quick read — the deep crawl already handled the full content extraction.
+
 ---
 
-## 4. PHASE 3 — SET AI SYSTEM PROMPT
+## 3. PHASE 2 — SET AI SYSTEM PROMPT
 
-### 4.1 Compose System Prompt
+### 3.1 Compose System Prompt
 
-Build a system prompt from all gathered content. The prompt defines who the AI is and what it knows.
+Build a system prompt from the homepage analysis. Keep it concise — the AI will find details in the knowledge base via RAG.
 
 **Template:**
 
 ```
 You are an AI assistant for <Brand Name> — <brief description of the business>.
 
-<IMPORTANT CONTEXT FROM WEBSITE — include everything relevant:>
-
-Company information:
-<All extracted text from About page>
-
-Services:
-<All services with descriptions and prices>
-
-Team:
-<Key team members and their specializations>
-
-FAQ:
-<All FAQ content>
+Key services: <main services>
 
 Contact information:
 - Phone: <phone(s)>
@@ -189,7 +115,7 @@ Contact information:
 - Working hours: <schedule>
 
 Instructions:
-- Answer questions based ONLY on the information above
+- Answer questions based on the knowledge base provided via RAG
 - Be helpful, professional, and friendly
 - If you don't know the answer, suggest contacting the company directly
 - Respond in <detected language of the site>
@@ -198,7 +124,7 @@ Instructions:
 - When asked to book/schedule, collect the person's name, phone, and preferred time, then confirm you'll pass it to the team
 ```
 
-### 4.2 Upload System Prompt
+### 3.2 Upload System Prompt
 
 ```bash
 curl -s -X PUT "http://localhost:3000/api/ai-settings/<clientId>" \
@@ -215,23 +141,13 @@ curl -s -X PUT "http://localhost:3000/api/ai-settings/<clientId>" \
 
 **Note:** Read the greeting from the existing `widget.config.json` at `.agent/widget-builder/clients/<clientId>/widget.config.json` to keep it consistent.
 
-### 4.3 Save Knowledge Locally
-
-Save the compiled knowledge to the client's directory for reference:
-
-```bash
-mkdir -p .agent/widget-builder/clients/<clientId>/knowledge/
-```
-
-Write the compiled content to `.agent/widget-builder/clients/<clientId>/knowledge/context.md`.
-
 ---
 
-## 5. BATCH MODE
+## 4. BATCH MODE
 
 When processing multiple clients at once:
 
-### 5.1 Input
+### 4.1 Input
 
 A list of `{ clientId, website }` pairs. Can come from:
 
@@ -239,36 +155,43 @@ A list of `{ clientId, website }` pairs. Can come from:
 - Google Sheets (clients with `hasWidget=TRUE`)
 - The `quickwidgets/` directory (scan for existing widgets)
 
-### 5.2 Parallel Processing
+### 4.2 Processing
 
-For efficiency, process clients in parallel batches of 4-5 using subagents. Each subagent handles the full crawl → upload → configure flow for its assigned clients.
+For each client, call the deep-crawl endpoint. Process sequentially (the endpoint handles concurrency internally) or in batches of 2-3 clients.
 
-### 5.3 Error Handling
+```bash
+# For each client:
+curl -s -X POST "http://localhost:3000/api/knowledge/deep-crawl" \
+  -H "Content-Type: application/json" \
+  -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
+  -d '{"clientId":"<clientId>","websiteUrl":"<website>","brandName":"<name>","replace":true}'
+```
 
-- If a site is unreachable → log failure, skip to next
-- If WebFetch returns no content → try WordPress fallback
-- If knowledge upload fails → retry once, then log failure
+### 4.3 Error Handling
+
+- If a site is unreachable → the API returns status 422 with error details, skip to next
+- If knowledge upload partially fails → check `failedChunks` in response
 - **Never stop the batch** — continue to next client on failure
 
-### 5.4 Tracking
+### 4.4 Tracking
 
 Track results:
 
-- `successes`: array of `{ clientId, website, chunksCreated, promptLength }`
+- `successes`: array of `{ clientId, website, totalPages, savedChunks }`
 - `failures`: array of `{ clientId, website, error }`
 
 ---
 
-## 6. COMPLETION
+## 5. COMPLETION
 
-### 6.1 Verify All Clients
+### 5.1 Verify All Clients
 
 After processing, verify each client has:
 
 - Knowledge chunks > 0
 - System prompt length > 100 characters
 
-### 6.2 Report
+### 5.2 Report
 
 Output summary:
 
@@ -280,7 +203,7 @@ Results:
 - Failed: N clients
 
 Successful:
-1. <clientId> — <website> (N chunks, prompt N chars)
+1. <clientId> — <website> (N pages crawled, N chunks)
 2. ...
 
 Failed:
@@ -289,9 +212,20 @@ Failed:
 
 ---
 
-## 7. API REFERENCE
+## 6. API REFERENCE
 
-### Upload Knowledge
+### Deep Crawl & Upload Knowledge (PRIMARY METHOD)
+
+```
+POST /api/knowledge/deep-crawl
+Cookie: admin_token=<token>
+Body: { clientId, websiteUrl, brandName?, replace? }
+→ { success, message, crawl: { totalPages, totalChars, strategies, pageUrls }, knowledge: { savedChunks, failedChunks } }
+```
+
+Automatically crawls ALL pages (sitemap + WP API + BFS), chunks text, generates embeddings, and uploads to DB.
+
+### Manual Upload Knowledge (fallback)
 
 ```
 POST /api/knowledge
@@ -300,7 +234,7 @@ Body: { clientId, text, source }
 → { success, message, chunks[] }
 ```
 
-Text is automatically split into 500-char chunks with Gemini embeddings.
+Use only if deep-crawl fails and you need to upload manually scraped content.
 
 ### Read Knowledge
 
@@ -319,22 +253,15 @@ Body: { systemPrompt, greeting, temperature, maxTokens, topK }
 → { success, settings }
 ```
 
-### Read Widget Config (local file)
-
-```
-.agent/widget-builder/clients/<clientId>/widget.config.json
-→ { clientId, bot: { name, greeting, tone }, design, features }
-```
-
 ---
 
-## 8. KEY CONSTRAINTS
+## 7. KEY CONSTRAINTS
 
 - **DO NOT** invent or guess business information — only use content extracted from the actual website
 - **DO NOT** skip the knowledge upload step — the AI is useless without it
-- **DO** save knowledge locally to `knowledge/context.md` for future reference
+- **DO** use the deep-crawl endpoint as the primary method — it gets ALL pages automatically
 - **DO** use the same language as the website for the system prompt
-- **DO** include ALL specific details (prices, hours, addresses, team names)
 - **DO** read the existing `widget.config.json` to get the greeting for AI settings
 - Maximum system prompt size: keep under 8000 characters (Gemini context limit considerations)
-- Knowledge text has no hard limit — the API auto-chunks it
+- Knowledge text has no hard limit — the deep-crawl endpoint auto-chunks it
+- The deep-crawl endpoint crawls up to 50 pages and 800K chars with a 3-minute timeout

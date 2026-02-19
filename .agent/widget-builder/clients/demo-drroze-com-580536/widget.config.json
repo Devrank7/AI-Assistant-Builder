@@ -1,0 +1,32 @@
+{
+  "clientId": "demo-drroze-com-580536",
+  "botName": "BioHealth and BioDental Clinics AI",
+  "welcomeMessage": "Hi there! 👋 I'm the **BioHealth and BioDental Clinics** AI assistant. How can I help you?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Tell me about your company", "What services do you offer?", "How can I contact you?"],
+  "avatar": {
+    "type": "initials",
+    "initials": "BA"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "👋 Hi there! Need any help?"
+    }
+  },
+  "contacts": {
+    "website": "https://drroze.com"
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import WidgetGenerator from '@/components/WidgetGenerator';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -520,6 +521,61 @@ export default function AboutPage() {
             </p>
             <p className="text-lg leading-relaxed text-gray-300">{t('team.bio3')}</p>
           </div>
+
+          {/* Founder Photos */}
+          <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center gap-8 sm:flex-row sm:justify-center">
+            {/* Misha */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="group relative"
+            >
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-cyan-500/40 via-purple-500/40 to-pink-500/40 opacity-60 blur-sm transition-all duration-300 group-hover:opacity-100 group-hover:blur-md" />
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a1a]">
+                <Image
+                  src="/team/OwnerMichel.jpg"
+                  alt="Миша — Co-Founder WinBix AI"
+                  width={280}
+                  height={320}
+                  className="h-[320px] w-[280px] object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-5 pt-16 pb-5">
+                  <p className="text-lg font-bold text-white">{t('team.misha')}</p>
+                  <p className="text-sm font-medium text-[var(--neon-cyan)]">Co-Founder</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Danya */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="group relative"
+            >
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-cyan-500/40 via-purple-500/40 to-pink-500/40 opacity-60 blur-sm transition-all duration-300 group-hover:opacity-100 group-hover:blur-md" />
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a1a]">
+                <Image
+                  src="/team/OwnerDanya.jpg"
+                  alt="Даня — Co-Founder WinBix AI"
+                  width={280}
+                  height={320}
+                  className="h-[320px] w-[280px] object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-5 pt-16 pb-5">
+                  <p className="text-lg font-bold text-white">{t('team.daniil')}</p>
+                  <p className="text-sm font-medium text-[var(--neon-cyan)]">Co-Founder</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            {t('team.misha')} & {t('team.daniil')} — Founders of WinBix AI
+          </p>
         </Section>
 
         {/* ═══════════════════════════════════════════ */}

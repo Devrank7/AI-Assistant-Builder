@@ -34,15 +34,9 @@ CONTENT: 8. Brand name 9. Business type 10. Language
 17. Brief company description
 ```
 
-### 1.2 Crawl Key Pages
+### 1.2 Check Key Pages (for theme/config only)
 
-Visit 5-8 pages from navigation (About, Services, Pricing, FAQ, Contact). Per-page prompt:
-
-```
-Extract ALL text content: headings, service descriptions, prices,
-FAQ Q&A, contact info, hours, key facts, guarantees.
-Format as clean structured text.
-```
+Optionally visit 1-2 key pages (About, Services) via WebFetch **only** to extract design info (colors, fonts) or contact details not found on the homepage. Do NOT manually scrape for knowledge — Phase 4 uses the deep-crawl API which automatically crawls ALL pages (up to 50) server-side.
 
 ### 1.3 Light vs Dark
 
@@ -68,6 +62,7 @@ Schema: [CONFIG_REFERENCE.md](./CONFIG_REFERENCE.md). Quick replies by business 
 - `contacts` object with phone, email, and website from site analysis (enables the contact bar below the header)
 - `features.proactive` with a short nudge message (appears after 8s to engage visitors)
 - All features default to `true` — only set to `false` if you have a reason to disable
+- `welcomeMessage` (greeting) must be **180 characters or less** — it gets truncated automatically but write it short from the start
 
 ### 2.3 Write theme.json
 
@@ -102,18 +97,20 @@ Write `quickwidgets/<clientId>/info.json`.
 
 ## Phase 4 — Knowledge Base & AI
 
-### 4.1 Save & Upload Knowledge
+### 4.1 Deep Crawl & Upload Knowledge
 
-Write all scraped content to `.agent/widget-builder/clients/<clientId>/knowledge/context.md`.
-
-Upload:
+Use the deep-crawl endpoint to automatically crawl ALL pages (up to 50) and upload everything as knowledge chunks. This replaces manual WebFetch scraping — the server-side crawler uses sitemap.xml, WordPress API, and BFS link discovery to get ALL content.
 
 ```bash
-curl -X POST http://localhost:3000/api/knowledge \
+curl -X POST http://localhost:3000/api/knowledge/deep-crawl \
   -H "Content-Type: application/json" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
-  -d '{"clientId":"<clientId>","text":"<knowledge text>","source":"quick-widget-builder"}'
+  -d '{"clientId":"<clientId>","websiteUrl":"<website URL>","brandName":"<Brand Name>","replace":true}'
 ```
+
+The response includes crawl stats (pages found, chars extracted, strategies used) and knowledge upload results (chunks created). Verify that `savedChunks > 0` in the response.
+
+**Note:** This replaces the old manual approach of WebFetch-crawling 5-8 pages. The deep crawler gets ALL pages automatically.
 
 ### 4.2 Set AI Settings
 

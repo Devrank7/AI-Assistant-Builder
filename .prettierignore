@@ -8,3 +8,7 @@ public
 *.min.js
 *.min.css
 package-lock.json
+knowledge-seeds
+quickwidgets
+widgets
+.agent/widget-builder/dist

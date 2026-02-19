@@ -1,0 +1,18 @@
+{
+  "name": "Crowns Polyclinic Co LLC",
+  "clientId": "demo-crownspolyclinic-com-9d366c",
+  "username": "demo-crownspolyclinic-com-9d366c",
+  "email": "",
+  "website": "http://www.crownspolyclinic.com",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-19T20:55:14.575Z",
+  "version": "2.0.0",
+  "selfService": true
+}

@@ -161,7 +161,8 @@ export function generateWidgetConfig(input: {
   language: string;
   contacts?: { phone?: string; email?: string; website?: string };
 }): Record<string, unknown> {
-  const { clientId, brandName, greeting, language, contacts } = input;
+  const { clientId, brandName, greeting: rawGreeting, language, contacts } = input;
+  const greeting = rawGreeting.length > 180 ? rawGreeting.slice(0, 177) + '...' : rawGreeting;
 
   const isUkrainian = language === 'uk' || language === 'uk-UA';
   const isRussian = language === 'ru' || language === 'ru-RU';
