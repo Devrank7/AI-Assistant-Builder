@@ -16,6 +16,12 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   const iframeLoadedRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  // Reload-loop detection: track rapid consecutive iframe load events
+  const loadCountRef = useRef(0);
+  const loadWindowStartRef = useRef(0);
+  const RELOAD_LOOP_THRESHOLD = 3; // max loads within time window
+  const RELOAD_LOOP_WINDOW_MS = 5000; // 5 second window
+
   // Extract clientId from scriptUrl: "/widgets/{clientId}/script.js"
   const clientId = scriptUrl.split('/')[2] || '';
 
@@ -65,8 +71,29 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
     return () => clearTimeout(timer);
   }, [iframeError]);
 
-  // Handle iframe load — only trigger state change once to avoid re-render loops
+  // Handle iframe load — detect reload loops (e.g. LiteSpeed Cache lazy loader)
+  // and trigger error state if the iframe reloads too many times in quick succession.
   const handleIframeLoad = useCallback(() => {
+    const now = Date.now();
+
+    // Reset counter if outside the detection window
+    if (now - loadWindowStartRef.current > RELOAD_LOOP_WINDOW_MS) {
+      loadCountRef.current = 0;
+      loadWindowStartRef.current = now;
+    }
+
+    loadCountRef.current += 1;
+
+    // Reload loop detected — show fallback
+    if (loadCountRef.current >= RELOAD_LOOP_THRESHOLD) {
+      setIframeError(true);
+      // Stop the iframe from continuing to reload
+      if (iframeRef.current) {
+        iframeRef.current.src = 'about:blank';
+      }
+      return;
+    }
+
     if (!iframeLoadedRef.current) {
       // Check if iframe content is actually accessible (same-origin)
       try {
