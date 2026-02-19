@@ -13,6 +13,9 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   const { t } = useTranslation('common');
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
+  const [screenshotMode, setScreenshotMode] = useState(false);
+  const [screenshotLoaded, setScreenshotLoaded] = useState(false);
+  const [screenshotSrc, setScreenshotSrc] = useState('');
   const iframeLoadedRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -161,8 +164,8 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
         </div>
       )}
 
-      {/* Error State — Template Picker */}
-      {iframeError && (
+      {/* Error State — Template Picker (hidden during screenshot mode) */}
+      {iframeError && !screenshotMode && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900">
           <div className="max-w-2xl px-6 text-center">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10">
@@ -179,7 +182,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
             <p className="mb-8 text-gray-400">{t('demo.iframeError.desc')}</p>
 
             {/* Template Cards */}
-            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 {
                   template: 'dental',
@@ -245,6 +248,34 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
                   <p className="font-semibold text-white">{item.label}</p>
                 </a>
               ))}
+
+              {/* Screenshot preview card */}
+              <button
+                onClick={() => {
+                  setScreenshotSrc(`/quickwidgets/${clientId}/preview.png`);
+                  setScreenshotLoaded(false);
+                  setScreenshotMode(true);
+                }}
+                className="group rounded-2xl border border-green-500/30 bg-green-500/[0.05] p-6 transition-all duration-300 hover:border-green-500/50 hover:bg-green-500/[0.1]"
+              >
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-green-500/20 to-green-500/5">
+                  <svg className="h-7 w-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"
+                    />
+                  </svg>
+                </div>
+                <p className="font-semibold text-green-300">{t('demo.iframeError.screenshot')}</p>
+              </button>
             </div>
 
             {/* Secondary: open website directly */}
@@ -265,6 +296,55 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
               </svg>
             </a>
           </div>
+        </div>
+      )}
+
+      {/* Screenshot Mode — full-page screenshot as background with live widget */}
+      {screenshotMode && (
+        <div className="absolute inset-0 z-10 bg-gray-900">
+          {/* Back button */}
+          <button
+            onClick={() => {
+              setScreenshotMode(false);
+              setScreenshotLoaded(false);
+            }}
+            className="fixed top-16 left-4 z-[9999] flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-sm text-white backdrop-blur-sm transition-colors hover:bg-black/90"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            {t('demo.screenshotMode.back')}
+          </button>
+
+          {/* Loading spinner while screenshot loads */}
+          {!screenshotLoaded && (
+            <div className="flex h-screen w-full items-center justify-center">
+              <div className="text-center">
+                <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
+                <p className="text-lg text-white">{t('demo.screenshotMode.loading')}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Screenshot image */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={screenshotSrc}
+            alt="Website screenshot"
+            className={`h-screen w-full object-cover object-top ${screenshotLoaded ? 'block' : 'hidden'}`}
+            onLoad={() => setScreenshotLoaded(true)}
+            onError={() => {
+              // If cached preview fails, try thum.io external service
+              const thumbUrl = `https://image.thum.io/get/width/1440/crop/900/${websiteUrl}`;
+              if (screenshotSrc !== thumbUrl) {
+                setScreenshotSrc(thumbUrl);
+              } else {
+                // Both sources failed — go back to template picker
+                setScreenshotMode(false);
+                setScreenshotLoaded(false);
+              }
+            }}
+          />
         </div>
       )}
 

@@ -20,6 +20,8 @@ import AISettings from '@/models/AISettings';
 import { generateEmbedding, splitTextIntoChunks } from '@/lib/gemini';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rateLimit';
 import { generateThemeJson, generateWidgetConfig } from '@/lib/themeGenerator';
+import { crawlWebsite } from '@/lib/crawler';
+import { withRetry } from '@/lib/retry';
 
 // --- Paths ---
 const PROJECT_ROOT = process.cwd();
@@ -123,111 +125,6 @@ async function fetchSiteMetadata(url: string): Promise<SiteMetadata> {
   }
 }
 
-// --- Text Content Extraction ---
-function extractTextContent(html: string, maxLength: number = 12000): string {
-  let text = html;
-  // Remove script/style/noscript blocks (keep nav/footer — they contain contacts, hours, addresses)
-  text = text.replace(/<(script|style|noscript|svg|head)[^>]*>[\s\S]*?<\/\1>/gi, ' ');
-  // Remove all HTML tags
-  text = text.replace(/<[^>]+>/g, ' ');
-  // Decode common HTML entities
-  text = text
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&mdash;/g, '—')
-    .replace(/&ndash;/g, '–')
-    .replace(/&laquo;/g, '«')
-    .replace(/&raquo;/g, '»')
-    .replace(/&#\d+;/g, '');
-  // Collapse whitespace
-  text = text.replace(/\s+/g, ' ').trim();
-  return text.slice(0, maxLength);
-}
-
-// --- Subpage Discovery ---
-function discoverSubpageUrls(html: string, baseUrl: string, maxUrls: number = 2): string[] {
-  const urlObj = new URL(baseUrl);
-  const baseHost = urlObj.hostname;
-
-  // Priority keywords for useful business pages
-  const priorityPatterns = [
-    /about|o-nas|pro-nas|about-us|company/i,
-    /services|uslugi|poslugy|pricing|prices|ceny|tsiny|prais/i,
-    /faq|questions|voprosy|zapytannya/i,
-    /contact|kontakt|kontakty|zv-yazok/i,
-  ];
-
-  // Extract all hrefs from HTML
-  const hrefRegex = /href=["']([^"'#]+)["']/gi;
-  const urls: string[] = [];
-  let match;
-  while ((match = hrefRegex.exec(html)) !== null) {
-    try {
-      const resolved = new URL(match[1], baseUrl);
-      if (
-        resolved.hostname === baseHost &&
-        resolved.pathname !== '/' &&
-        resolved.pathname !== urlObj.pathname &&
-        !resolved.pathname.match(/\.(jpg|jpeg|png|gif|svg|css|js|ico|pdf|zip|woff|woff2|ttf)$/i)
-      ) {
-        urls.push(resolved.href);
-      }
-    } catch {
-      /* skip malformed URLs */
-    }
-  }
-
-  // Deduplicate
-  const unique = [...new Set(urls)];
-
-  // Sort by priority: pages matching priority patterns come first
-  const scored = unique.map((u) => {
-    const pathLower = new URL(u).pathname.toLowerCase();
-    const score = priorityPatterns.findIndex((p) => p.test(pathLower));
-    return { url: u, score: score >= 0 ? score : 999 };
-  });
-  scored.sort((a, b) => a.score - b.score);
-
-  return scored.slice(0, maxUrls).map((s) => s.url);
-}
-
-// --- Fetch Single Page Text ---
-async function fetchPageText(url: string): Promise<string> {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; WinBixBot/1.0)',
-        Accept: 'text/html',
-      },
-    });
-    clearTimeout(timeout);
-    if (!res.ok) return '';
-
-    const reader = res.body?.getReader();
-    if (!reader) return '';
-    let html = '';
-    const decoder = new TextDecoder();
-    let bytesRead = 0;
-    while (bytesRead < 100 * 1024) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      bytesRead += value.length;
-      html += decoder.decode(value, { stream: true });
-    }
-    reader.cancel();
-    return extractTextContent(html);
-  } catch {
-    return '';
-  }
-}
-
 // --- Set AI System Prompt (synchronous — must complete before user interacts) ---
 async function setAISettings(clientId: string, brandName: string, language: string): Promise<void> {
   let systemPrompt: string;
@@ -257,64 +154,69 @@ async function setAISettings(clientId: string, brandName: string, language: stri
   );
 }
 
-// --- Background Knowledge Upload (embeddings only — AI prompt already set) ---
-async function uploadKnowledgeBackground(
-  clientId: string,
-  brandName: string,
-  websiteUrl: string,
-  homepageHtml: string
-): Promise<void> {
+// --- Background Knowledge Upload — deep crawl + embeddings ---
+async function uploadKnowledgeBackground(clientId: string, brandName: string, websiteUrl: string): Promise<void> {
   try {
     await connectDB();
 
-    // 1. Extract text from homepage (already fetched)
-    const homepageText = extractTextContent(homepageHtml);
-    if (!homepageText || homepageText.length < 50) {
-      console.log(`[KnowledgeBg] ${clientId}: Homepage text too short (${homepageText.length} chars), skipping`);
+    // 1. Deep crawl the entire website (up to 30 pages, 2 min timeout)
+    const crawlResult = await crawlWebsite(websiteUrl, {
+      maxPages: 30,
+      totalTimeoutMs: 120_000,
+      onProgress: (p) =>
+        console.log(
+          `[KnowledgeBg] ${clientId}: ${p.pagesVisited} pages crawled, ${p.totalCharsCollected} chars (${Math.round(p.elapsedMs / 1000)}s)`
+        ),
+    });
+
+    if (crawlResult.pages.length === 0) {
+      console.log(`[KnowledgeBg] ${clientId}: No pages crawled, skipping knowledge upload`);
       return;
     }
 
-    // 2. Discover and fetch subpages (max 2)
-    const subpageUrls = discoverSubpageUrls(homepageHtml, websiteUrl, 2);
-    const subpageTexts = await Promise.allSettled(subpageUrls.map((url) => fetchPageText(url)));
-
-    // 3. Compile all content
-    let fullText = `${brandName}\n\n`;
-    fullText += `${homepageText}\n\n`;
-
-    for (let i = 0; i < subpageUrls.length; i++) {
-      const result = subpageTexts[i];
-      if (result.status === 'fulfilled' && result.value.length > 50) {
-        fullText += `${result.value}\n\n`;
-      }
-    }
-
-    // Trim to reasonable size
-    fullText = fullText.slice(0, 15000);
-
-    // 4. Split into chunks and generate embeddings
-    const textChunks = splitTextIntoChunks(fullText, 500);
     console.log(
-      `[KnowledgeBg] ${clientId}: Processing ${textChunks.length} chunks from ${1 + subpageUrls.length} pages`
+      `[KnowledgeBg] ${clientId}: Crawl complete — ${crawlResult.totalPages} pages, ${crawlResult.totalChars} chars, strategies: ${crawlResult.strategies.join(', ')} (${Math.round(crawlResult.durationMs / 1000)}s)`
     );
 
+    // 2. Compile all crawled content
+    let fullText = `${brandName}\n\n`;
+    for (const page of crawlResult.pages) {
+      fullText += `--- ${page.title || page.url} ---\n${page.text}\n\n`;
+    }
+
+    // 3. Split into chunks and generate embeddings (batched to avoid rate limits)
+    const textChunks = splitTextIntoChunks(fullText, 500);
+    console.log(`[KnowledgeBg] ${clientId}: Processing ${textChunks.length} chunks`);
+
+    const BATCH_SIZE = 10;
+    const BATCH_DELAY_MS = 1000;
     let savedChunks = 0;
-    for (const chunkText of textChunks) {
-      try {
-        const embedding = await generateEmbedding(chunkText);
-        await KnowledgeChunk.create({
-          clientId,
-          text: chunkText,
-          embedding,
-          source: 'demo-auto',
-        });
-        savedChunks++;
-      } catch (embError) {
-        console.error(`[KnowledgeBg] ${clientId}: Embedding failed for chunk:`, embError);
+
+    for (let i = 0; i < textChunks.length; i += BATCH_SIZE) {
+      const batch = textChunks.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(
+        batch.map(async (chunkText) => {
+          const embedding = await withRetry(() => generateEmbedding(chunkText), {
+            maxRetries: 3,
+            backoffMs: 2000,
+          });
+          await KnowledgeChunk.create({
+            clientId,
+            text: chunkText,
+            embedding,
+            source: 'deep-crawl',
+          });
+        })
+      );
+      savedChunks += results.filter((r) => r.status === 'fulfilled').length;
+
+      // Delay between batches to avoid Gemini rate limits
+      if (i + BATCH_SIZE < textChunks.length) {
+        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
       }
     }
 
-    // 5. Export seed (dev → production sync)
+    // 4. Export seed (dev → production sync)
     try {
       const { exportClientSeed } = await import('@/lib/exportSeed');
       await exportClientSeed(clientId);
@@ -496,8 +398,8 @@ export async function POST(request: NextRequest) {
       console.error('[GenerateDemo] DB error (non-fatal):', dbError);
     }
 
-    // 12. Fire-and-forget: upload knowledge embeddings in background
-    uploadKnowledgeBackground(clientId, brandName, websiteUrl, metadata.rawHtml).catch((err) => {
+    // 12. Fire-and-forget: deep crawl + upload knowledge embeddings in background
+    uploadKnowledgeBackground(clientId, brandName, websiteUrl).catch((err) => {
       console.error('[GenerateDemo] Background knowledge upload error:', err);
     });
 

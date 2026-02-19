@@ -24,7 +24,10 @@ const common: Record<string, string> = {
   'demo.iframeError.dental': 'Стоматология',
   'demo.iframeError.construction': 'Строительная компания',
   'demo.iframeError.hotel': 'Отель',
+  'demo.iframeError.screenshot': 'Скриншот сайта',
   'demo.iframeError.openDirect': 'Или откройте сайт напрямую',
+  'demo.screenshotMode.loading': 'Делаем скриншот...',
+  'demo.screenshotMode.back': 'Назад к шаблонам',
 };
 
 export default common;

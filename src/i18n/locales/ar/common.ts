@@ -22,7 +22,10 @@ const common: Record<string, string> = {
   'demo.iframeError.dental': 'عيادة أسنان',
   'demo.iframeError.construction': 'شركة بناء',
   'demo.iframeError.hotel': 'فندق فاخر',
+  'demo.iframeError.screenshot': 'لقطة شاشة للموقع',
   'demo.iframeError.openDirect': 'أو افتح الموقع مباشرة',
+  'demo.screenshotMode.loading': 'جاري التقاط الصورة...',
+  'demo.screenshotMode.back': 'العودة إلى القوالب',
 };
 
 export default common;

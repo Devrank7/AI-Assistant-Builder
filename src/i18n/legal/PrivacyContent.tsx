@@ -33,7 +33,69 @@ function RuContent() {
         Общим регламентом защиты данных Европейского Союза (GDPR) и другими применимыми нормативными актами.
       </p>
 
-      <SectionTitle>2. Условия оплаты, расчётный цикл и приостановка сервиса</SectionTitle>
+      <SectionTitle>2. Какие данные мы собираем</SectionTitle>
+
+      <SubTitle>2.1 Данные аккаунта клиента</SubTitle>
+      <p>При регистрации на Платформе в качестве клиента мы можем собирать:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Название компании / имя пользователя</li>
+        <li>Адрес электронной почты</li>
+        <li>Номер телефона</li>
+        <li>Адрес веб-сайта</li>
+        <li>Физические адреса офисов / филиалов</li>
+        <li>Аккаунты в социальных сетях (Instagram и др.)</li>
+      </ul>
+
+      <SubTitle>2.2 Данные чата (конечные пользователи виджета)</SubTitle>
+      <p>Когда посетитель сайта клиента взаимодействует с AI-виджетом, мы собираем:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Текст сообщений чата</li>
+        <li>Идентификатор сессии (генерируется автоматически)</li>
+        <li>Временные метки сообщений</li>
+        <li>Загруженные изображения (при отправке через виджет)</li>
+      </ul>
+
+      <SubTitle>2.3 Технические данные</SubTitle>
+      <p>Автоматически собираемая техническая информация:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>IP-адрес</li>
+        <li>User-Agent (тип браузера, операционная система, устройство)</li>
+        <li>URL страницы, на которой установлен виджет</li>
+        <li>Канал связи (веб-сайт, Telegram, WhatsApp, Instagram)</li>
+      </ul>
+
+      <SubTitle>2.4 Данные лидов</SubTitle>
+      <p>Если посетитель оставляет контактные данные через виджет:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Имя</li>
+        <li>Адрес электронной почты</li>
+        <li>Номер телефона</li>
+        <li>Дополнительная информация, предоставленная пользователем (тип услуги, предпочтительная дата и т.д.)</li>
+      </ul>
+
+      <SubTitle>2.5 Платёжные данные</SubTitle>
+      <p>
+        Мы не храним данные платёжных карт. Оплата обрабатывается сторонними платёжными провайдерами (WayForPay,
+        Cryptomus, NowPayments). Мы сохраняем только:
+      </p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Способ оплаты (название провайдера)</li>
+        <li>Сумму и статус платежа</li>
+        <li>Даты платежей</li>
+        <li>Номер счёта</li>
+      </ul>
+
+      <SubTitle>2.6 Аналитические данные</SubTitle>
+      <p>Мы собираем агрегированную статистику использования:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Количество обращений в чат</li>
+        <li>Среднее количество сообщений за сессию</li>
+        <li>Среднее время ответа AI</li>
+        <li>Распределение активности по часам</li>
+        <li>Оценки ответов (положительные / отрицательные)</li>
+      </ul>
+
+      <SectionTitle>3. Условия оплаты, расчётный цикл и приостановка сервиса</SectionTitle>
       <p>
         Предоставление AI-виджета начинается с первоначального платежа, который покрывает разработку, настройку и
         эксплуатацию виджета в течение первых тридцати (30) дней. По истечении этого начального периода дальнейшая
@@ -44,9 +106,9 @@ function RuContent() {
         Клиента до погашения задолженности.
       </p>
 
-      <SectionTitle>3. Файлы cookie и локальное хранилище</SectionTitle>
+      <SectionTitle>4. Файлы cookie и локальное хранилище</SectionTitle>
 
-      <SubTitle>3.1 Файлы cookie</SubTitle>
+      <SubTitle>4.1 Файлы cookie</SubTitle>
       <p>Платформа использует следующие cookie:</p>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
@@ -79,7 +141,7 @@ function RuContent() {
         маркетинговые или сторонние аналитические cookie.
       </p>
 
-      <SubTitle>3.2 Локальное хранилище (localStorage)</SubTitle>
+      <SubTitle>4.2 Локальное хранилище (localStorage)</SubTitle>
       <p>AI-виджет на сайте клиента использует localStorage браузера для:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -97,7 +159,7 @@ function RuContent() {
       </ul>
       <p>Данные localStorage хранятся только в браузере пользователя и не передаются на сервер.</p>
 
-      <SectionTitle>4. Как мы используем данные</SectionTitle>
+      <SectionTitle>5. Как мы используем данные</SectionTitle>
       <p>Мы используем собранные данные для:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>Предоставления и поддержки сервиса AI-ассистента</li>
@@ -109,7 +171,7 @@ function RuContent() {
         <li>Соблюдения требований законодательства</li>
       </ul>
 
-      <SubTitle>4.1 Правовые основания обработки (Статья 6 GDPR)</SubTitle>
+      <SubTitle>5.1 Правовые основания обработки (Статья 6 GDPR)</SubTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -151,35 +213,35 @@ function RuContent() {
         </table>
       </div>
 
-      <SectionTitle>5. Передача данных третьим сторонам</SectionTitle>
+      <SectionTitle>6. Передача данных третьим сторонам</SectionTitle>
       <p>
         Мы передаём данные третьим сторонам исключительно для обеспечения работы сервиса. Мы не продаём и не передаём
         данные в рекламных целях.
       </p>
 
-      <SubTitle>5.1 Google (Gemini API)</SubTitle>
+      <SubTitle>6.1 Google (Gemini API)</SubTitle>
       <p>
         Для генерации ответов AI мы передаём текст сообщений пользователя и контекст базы знаний в Google Gemini API.
         Google обрабатывает данные в соответствии со своей Политикой конфиденциальности.
       </p>
 
-      <SubTitle>5.2 Google Sheets API</SubTitle>
+      <SubTitle>6.2 Google Sheets API</SubTitle>
       <p>По запросу клиента данные лидов могут экспортироваться в Google Sheets через сервисный аккаунт Google.</p>
 
-      <SubTitle>5.3 Мессенджеры</SubTitle>
+      <SubTitle>6.3 Мессенджеры</SubTitle>
       <p>
         При подключении каналов Telegram, WhatsApp или Instagram сообщения маршрутизируются через соответствующие API
         (Telegram Bot API, WhatsApp Business API / WHAPI, Instagram Messaging API).
       </p>
 
-      <SubTitle>5.4 Платёжные провайдеры</SubTitle>
+      <SubTitle>6.4 Платёжные провайдеры</SubTitle>
       <p>
         Для обработки платежей мы используем WayForPay, Cryptomus и NowPayments. При оплате мы передаём провайдеру
         электронную почту, номер телефона и сумму платежа. Данные банковской карты обрабатываются напрямую платёжным
         провайдером и не проходят через наши серверы.
       </p>
 
-      <SectionTitle>6. Сроки хранения данных</SectionTitle>
+      <SectionTitle>7. Сроки хранения данных</SectionTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -224,7 +286,7 @@ function RuContent() {
         </table>
       </div>
 
-      <SectionTitle>7. Ваши права</SectionTitle>
+      <SectionTitle>8. Ваши права</SectionTitle>
       <p>В соответствии с GDPR и законодательством Украины вы имеете право на:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -255,7 +317,7 @@ function RuContent() {
         </a>
       </p>
 
-      <SectionTitle>8. Демо-страницы</SectionTitle>
+      <SectionTitle>9. Демо-страницы</SectionTitle>
       <p>
         Платформа предоставляет демонстрационные страницы, на которых сайт потенциального клиента отображается в iframe
         вместе с нашим AI-виджетом. Это делается исключительно в целях предварительного просмотра.
@@ -268,7 +330,7 @@ function RuContent() {
         <li>Демо создаётся для ознакомления и может быть удалено по запросу владельца сайта</li>
       </ul>
 
-      <SectionTitle>9. Безопасность данных</SectionTitle>
+      <SectionTitle>10. Безопасность данных</SectionTitle>
       <p>Мы принимаем следующие меры:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>Флаги HttpOnly и Secure для cookie</li>
@@ -279,13 +341,13 @@ function RuContent() {
         <li>Аудит-логирование всех критических действий</li>
       </ul>
 
-      <SectionTitle>10. Изменения в политике</SectionTitle>
+      <SectionTitle>11. Изменения в политике</SectionTitle>
       <p>
         Мы оставляем за собой право обновлять настоящую Политику конфиденциальности. При существенных изменениях мы
         уведомим вас через Платформу или по электронной почте. Дата последнего обновления указана в начале документа.
       </p>
 
-      <SectionTitle>11. Контактная информация</SectionTitle>
+      <SectionTitle>12. Контактная информация</SectionTitle>
       <ul className="ml-6 list-disc space-y-1">
         <li>
           Email:{' '}
@@ -330,7 +392,69 @@ function EnContent() {
         applicable regulations.
       </p>
 
-      <SectionTitle>2. Payment Terms, Billing Cycle, and Service Suspension</SectionTitle>
+      <SectionTitle>2. What Data We Collect</SectionTitle>
+
+      <SubTitle>2.1 Client Account Data</SubTitle>
+      <p>When registering on the Platform as a client, we may collect:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Company name / username</li>
+        <li>Email address</li>
+        <li>Phone number</li>
+        <li>Website address</li>
+        <li>Physical addresses of offices / branches</li>
+        <li>Social media accounts (Instagram, etc.)</li>
+      </ul>
+
+      <SubTitle>2.2 Chat Data (widget end users)</SubTitle>
+      <p>When a client&apos;s website visitor interacts with the AI widget, we collect:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Chat message text</li>
+        <li>Session identifier (auto-generated)</li>
+        <li>Message timestamps</li>
+        <li>Uploaded images (when sent via widget)</li>
+      </ul>
+
+      <SubTitle>2.3 Technical Data</SubTitle>
+      <p>Automatically collected technical information:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>IP address</li>
+        <li>User-Agent (browser type, operating system, device)</li>
+        <li>URL of the page where the widget is installed</li>
+        <li>Communication channel (website, Telegram, WhatsApp, Instagram)</li>
+      </ul>
+
+      <SubTitle>2.4 Lead Data</SubTitle>
+      <p>If a visitor leaves contact data via the widget:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Name</li>
+        <li>Email address</li>
+        <li>Phone number</li>
+        <li>Additional information provided by the user (service type, preferred date, etc.)</li>
+      </ul>
+
+      <SubTitle>2.5 Payment Data</SubTitle>
+      <p>
+        We do not store payment card data. Payment is processed by third-party payment providers (WayForPay, Cryptomus,
+        NowPayments). We only save:
+      </p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Payment method (provider name)</li>
+        <li>Amount and payment status</li>
+        <li>Payment dates</li>
+        <li>Invoice number</li>
+      </ul>
+
+      <SubTitle>2.6 Analytics Data</SubTitle>
+      <p>We collect aggregated usage statistics:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Number of chat inquiries</li>
+        <li>Average messages per session</li>
+        <li>Average AI response time</li>
+        <li>Hourly activity distribution</li>
+        <li>Response ratings (positive / negative)</li>
+      </ul>
+
+      <SectionTitle>3. Payment Terms, Billing Cycle, and Service Suspension</SectionTitle>
       <p>
         The provision of the AI widget begins with an initial payment, which covers the development, setup, and
         operation of the widget for the first thirty (30) days. Following this initial period, continued operation,
@@ -341,9 +465,9 @@ function EnContent() {
         outstanding balance is settled.
       </p>
 
-      <SectionTitle>3. Cookies and Local Storage</SectionTitle>
+      <SectionTitle>4. Cookies and Local Storage</SectionTitle>
 
-      <SubTitle>3.1 Cookies</SubTitle>
+      <SubTitle>4.1 Cookies</SubTitle>
       <p>The Platform uses the following cookies:</p>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
@@ -376,7 +500,7 @@ function EnContent() {
         or third-party analytics cookies.
       </p>
 
-      <SubTitle>3.2 Local Storage (localStorage)</SubTitle>
+      <SubTitle>4.2 Local Storage (localStorage)</SubTitle>
       <p>The AI widget on the client&apos;s site uses browser localStorage for:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -394,7 +518,7 @@ function EnContent() {
       </ul>
       <p>localStorage data is stored only in the user&apos;s browser and is not transmitted to the server.</p>
 
-      <SectionTitle>4. How We Use Data</SectionTitle>
+      <SectionTitle>5. How We Use Data</SectionTitle>
       <p>We use collected data for:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>Providing and supporting the AI assistant service</li>
@@ -406,7 +530,7 @@ function EnContent() {
         <li>Compliance with legal requirements</li>
       </ul>
 
-      <SubTitle>4.1 Legal Basis for Processing (Article 6 GDPR)</SubTitle>
+      <SubTitle>5.1 Legal Basis for Processing (Article 6 GDPR)</SubTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -448,35 +572,35 @@ function EnContent() {
         </table>
       </div>
 
-      <SectionTitle>5. Data Transfer to Third Parties</SectionTitle>
+      <SectionTitle>6. Data Transfer to Third Parties</SectionTitle>
       <p>
         We transfer data to third parties exclusively for service operation. We do not sell or transfer data for
         advertising purposes.
       </p>
 
-      <SubTitle>5.1 Google (Gemini API)</SubTitle>
+      <SubTitle>6.1 Google (Gemini API)</SubTitle>
       <p>
         To generate AI responses, we transmit user message text and knowledge base context to Google Gemini API. Google
         processes data in accordance with its Privacy Policy.
       </p>
 
-      <SubTitle>5.2 Google Sheets API</SubTitle>
+      <SubTitle>6.2 Google Sheets API</SubTitle>
       <p>At the client&apos;s request, lead data may be exported to Google Sheets via a Google service account.</p>
 
-      <SubTitle>5.3 Messengers</SubTitle>
+      <SubTitle>6.3 Messengers</SubTitle>
       <p>
         When connecting Telegram, WhatsApp, or Instagram channels, messages are routed through the corresponding APIs
         (Telegram Bot API, WhatsApp Business API / WHAPI, Instagram Messaging API).
       </p>
 
-      <SubTitle>5.4 Payment Providers</SubTitle>
+      <SubTitle>6.4 Payment Providers</SubTitle>
       <p>
         For payment processing, we use WayForPay, Cryptomus, and NowPayments. During payment, we transmit email, phone
         number, and payment amount to the provider. Bank card data is processed directly by the payment provider and
         does not pass through our servers.
       </p>
 
-      <SectionTitle>6. Data Retention Periods</SectionTitle>
+      <SectionTitle>7. Data Retention Periods</SectionTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -521,7 +645,7 @@ function EnContent() {
         </table>
       </div>
 
-      <SectionTitle>7. Your Rights</SectionTitle>
+      <SectionTitle>8. Your Rights</SectionTitle>
       <p>In accordance with GDPR and Ukrainian law, you have the right to:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -552,7 +676,7 @@ function EnContent() {
         </a>
       </p>
 
-      <SectionTitle>8. Demo Pages</SectionTitle>
+      <SectionTitle>9. Demo Pages</SectionTitle>
       <p>
         The Platform provides demonstration pages where a potential client&apos;s website is displayed in an iframe
         alongside our AI widget. This is done exclusively for preview purposes.
@@ -565,7 +689,7 @@ function EnContent() {
         <li>Demo is created for familiarization purposes and can be removed at the site owner&apos;s request</li>
       </ul>
 
-      <SectionTitle>9. Data Security</SectionTitle>
+      <SectionTitle>10. Data Security</SectionTitle>
       <p>We take the following measures:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>HttpOnly and Secure cookie flags</li>
@@ -576,13 +700,13 @@ function EnContent() {
         <li>Audit logging of all critical actions</li>
       </ul>
 
-      <SectionTitle>10. Policy Changes</SectionTitle>
+      <SectionTitle>11. Policy Changes</SectionTitle>
       <p>
         We reserve the right to update this Privacy Policy. For significant changes, we will notify you through the
         Platform or by email. The last update date is indicated at the beginning of the document.
       </p>
 
-      <SectionTitle>11. Contact Information</SectionTitle>
+      <SectionTitle>12. Contact Information</SectionTitle>
       <ul className="ml-6 list-disc space-y-1">
         <li>
           Email:{' '}
@@ -625,7 +749,69 @@ function UkContent() {
         Загального регламенту захисту даних Європейського Союзу (GDPR) та інших застосовних нормативних актів.
       </p>
 
-      <SectionTitle>2. Умови оплати, розрахунковий цикл та призупинення сервісу</SectionTitle>
+      <SectionTitle>2. Які дані ми збираємо</SectionTitle>
+
+      <SubTitle>2.1 Дані облікового запису клієнта</SubTitle>
+      <p>При реєстрації на Платформі як клієнт ми можемо збирати:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Назву компанії / ім&apos;я користувача</li>
+        <li>Адресу електронної пошти</li>
+        <li>Номер телефону</li>
+        <li>Адресу веб-сайту</li>
+        <li>Фізичні адреси офісів / філій</li>
+        <li>Акаунти в соціальних мережах (Instagram тощо)</li>
+      </ul>
+
+      <SubTitle>2.2 Дані чату (кінцеві користувачі віджета)</SubTitle>
+      <p>Коли відвідувач сайту клієнта взаємодіє з AI-віджетом, ми збираємо:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Текст повідомлень чату</li>
+        <li>Ідентифікатор сесії (генерується автоматично)</li>
+        <li>Часові мітки повідомлень</li>
+        <li>Завантажені зображення (при надсиланні через віджет)</li>
+      </ul>
+
+      <SubTitle>2.3 Технічні дані</SubTitle>
+      <p>Автоматично зібрана технічна інформація:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>IP-адреса</li>
+        <li>User-Agent (тип браузера, операційна система, пристрій)</li>
+        <li>URL сторінки, на якій встановлено віджет</li>
+        <li>Канал зв&apos;язку (веб-сайт, Telegram, WhatsApp, Instagram)</li>
+      </ul>
+
+      <SubTitle>2.4 Дані лідів</SubTitle>
+      <p>Якщо відвідувач залишає контактні дані через віджет:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Ім&apos;я</li>
+        <li>Адресу електронної пошти</li>
+        <li>Номер телефону</li>
+        <li>Додаткову інформацію, надану користувачем (тип послуги, бажана дата тощо)</li>
+      </ul>
+
+      <SubTitle>2.5 Платіжні дані</SubTitle>
+      <p>
+        Ми не зберігаємо дані платіжних карток. Оплата обробляється сторонніми платіжними провайдерами (WayForPay,
+        Cryptomus, NowPayments). Ми зберігаємо лише:
+      </p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Спосіб оплати (назва провайдера)</li>
+        <li>Суму та статус платежу</li>
+        <li>Дати платежів</li>
+        <li>Номер рахунку</li>
+      </ul>
+
+      <SubTitle>2.6 Аналітичні дані</SubTitle>
+      <p>Ми збираємо агреговану статистику використання:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Кількість звернень у чат</li>
+        <li>Середню кількість повідомлень за сесію</li>
+        <li>Середній час відповіді AI</li>
+        <li>Розподіл активності за годинами</li>
+        <li>Оцінки відповідей (позитивні / негативні)</li>
+      </ul>
+
+      <SectionTitle>3. Умови оплати, розрахунковий цикл та призупинення сервісу</SectionTitle>
       <p>
         Надання AI-віджета починається з початкового платежу, який покриває розробку, налаштування та експлуатацію
         віджета протягом перших тридцяти (30) днів. Після завершення цього початкового періоду подальша експлуатація,
@@ -636,9 +822,9 @@ function UkContent() {
         погашення заборгованості.
       </p>
 
-      <SectionTitle>3. Файли cookie та локальне сховище</SectionTitle>
+      <SectionTitle>4. Файли cookie та локальне сховище</SectionTitle>
 
-      <SubTitle>3.1 Файли cookie</SubTitle>
+      <SubTitle>4.1 Файли cookie</SubTitle>
       <p>Платформа використовує такі cookie:</p>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
@@ -671,7 +857,7 @@ function UkContent() {
         або сторонні аналітичні cookie.
       </p>
 
-      <SubTitle>3.2 Локальне сховище (localStorage)</SubTitle>
+      <SubTitle>4.2 Локальне сховище (localStorage)</SubTitle>
       <p>AI-віджет на сайті клієнта використовує localStorage браузера для:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -689,7 +875,7 @@ function UkContent() {
       </ul>
       <p>Дані localStorage зберігаються лише у браузері користувача і не передаються на сервер.</p>
 
-      <SectionTitle>4. Як ми використовуємо дані</SectionTitle>
+      <SectionTitle>5. Як ми використовуємо дані</SectionTitle>
       <p>Ми використовуємо зібрані дані для:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>Надання та підтримки сервісу AI-асистента</li>
@@ -701,7 +887,7 @@ function UkContent() {
         <li>Дотримання законодавчих вимог</li>
       </ul>
 
-      <SubTitle>4.1 Правові підстави обробки (Стаття 6 GDPR)</SubTitle>
+      <SubTitle>5.1 Правові підстави обробки (Стаття 6 GDPR)</SubTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -743,37 +929,37 @@ function UkContent() {
         </table>
       </div>
 
-      <SectionTitle>5. Передача даних третім сторонам</SectionTitle>
+      <SectionTitle>6. Передача даних третім сторонам</SectionTitle>
       <p>
         Ми передаємо дані третім сторонам виключно для забезпечення роботи сервісу. Ми не продаємо і не передаємо дані в
         рекламних цілях.
       </p>
 
-      <SubTitle>5.1 Google (Gemini API)</SubTitle>
+      <SubTitle>6.1 Google (Gemini API)</SubTitle>
       <p>
         Для генерації відповідей AI ми передаємо текст повідомлень користувача та контекст бази знань до Google Gemini
         API. Google обробляє дані відповідно до своєї Політики конфіденційності.
       </p>
 
-      <SubTitle>5.2 Google Sheets API</SubTitle>
+      <SubTitle>6.2 Google Sheets API</SubTitle>
       <p>
         За запитом клієнта дані лідів можуть експортуватися до Google Sheets через сервісний обліковий запис Google.
       </p>
 
-      <SubTitle>5.3 Месенджери</SubTitle>
+      <SubTitle>6.3 Месенджери</SubTitle>
       <p>
         При підключенні каналів Telegram, WhatsApp або Instagram повідомлення маршрутизуються через відповідні API
         (Telegram Bot API, WhatsApp Business API / WHAPI, Instagram Messaging API).
       </p>
 
-      <SubTitle>5.4 Платіжні провайдери</SubTitle>
+      <SubTitle>6.4 Платіжні провайдери</SubTitle>
       <p>
         Для обробки платежів ми використовуємо WayForPay, Cryptomus та NowPayments. Під час оплати ми передаємо
         провайдеру електронну пошту, номер телефону та суму платежу. Дані банківської картки обробляються безпосередньо
         платіжним провайдером і не проходять через наші сервери.
       </p>
 
-      <SectionTitle>6. Строки зберігання даних</SectionTitle>
+      <SectionTitle>7. Строки зберігання даних</SectionTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -818,7 +1004,7 @@ function UkContent() {
         </table>
       </div>
 
-      <SectionTitle>7. Ваші права</SectionTitle>
+      <SectionTitle>8. Ваші права</SectionTitle>
       <p>Відповідно до GDPR та законодавства України ви маєте право на:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -848,7 +1034,7 @@ function UkContent() {
         </a>
       </p>
 
-      <SectionTitle>8. Демо-сторінки</SectionTitle>
+      <SectionTitle>9. Демо-сторінки</SectionTitle>
       <p>
         Платформа надає демонстраційні сторінки, на яких сайт потенційного клієнта відображається в iframe разом з нашим
         AI-віджетом. Це робиться виключно з метою попереднього перегляду.
@@ -861,7 +1047,7 @@ function UkContent() {
         <li>Демо створюється для ознайомлення і може бути видалене за запитом власника сайту</li>
       </ul>
 
-      <SectionTitle>9. Безпека даних</SectionTitle>
+      <SectionTitle>10. Безпека даних</SectionTitle>
       <p>Ми вживаємо таких заходів:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>Прапорці HttpOnly та Secure для cookie</li>
@@ -872,13 +1058,13 @@ function UkContent() {
         <li>Аудит-логування всіх критичних дій</li>
       </ul>
 
-      <SectionTitle>10. Зміни в політиці</SectionTitle>
+      <SectionTitle>11. Зміни в політиці</SectionTitle>
       <p>
         Ми залишаємо за собою право оновлювати цю Політику конфіденційності. При суттєвих змінах ми повідомимо вас через
         Платформу або електронною поштою. Дата останнього оновлення вказана на початку документа.
       </p>
 
-      <SectionTitle>11. Контактна інформація</SectionTitle>
+      <SectionTitle>12. Контактна інформація</SectionTitle>
       <ul className="ml-6 list-disc space-y-1">
         <li>
           Email:{' '}
@@ -921,7 +1107,69 @@ function PlContent() {
         ochronie danych UE (RODO) oraz innymi obowiązującymi przepisami.
       </p>
 
-      <SectionTitle>2. Warunki płatności, cykl rozliczeniowy i zawieszenie usługi</SectionTitle>
+      <SectionTitle>2. Jakie dane zbieramy</SectionTitle>
+
+      <SubTitle>2.1 Dane konta klienta</SubTitle>
+      <p>Podczas rejestracji na Platformie jako klient możemy zbierać:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Nazwę firmy / imię użytkownika</li>
+        <li>Adres e-mail</li>
+        <li>Numer telefonu</li>
+        <li>Adres strony internetowej</li>
+        <li>Adresy fizyczne biur / oddziałów</li>
+        <li>Konta w mediach społecznościowych (Instagram itp.)</li>
+      </ul>
+
+      <SubTitle>2.2 Dane czatu (użytkownicy końcowi widżetu)</SubTitle>
+      <p>Gdy odwiedzający stronę klienta wchodzi w interakcję z widżetem AI, zbieramy:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Tekst wiadomości czatu</li>
+        <li>Identyfikator sesji (generowany automatycznie)</li>
+        <li>Znaczniki czasu wiadomości</li>
+        <li>Przesłane obrazy (w przypadku wysłania przez widżet)</li>
+      </ul>
+
+      <SubTitle>2.3 Dane techniczne</SubTitle>
+      <p>Automatycznie zbierane informacje techniczne:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Adres IP</li>
+        <li>User-Agent (typ przeglądarki, system operacyjny, urządzenie)</li>
+        <li>URL strony, na której zainstalowany jest widżet</li>
+        <li>Kanał komunikacji (strona internetowa, Telegram, WhatsApp, Instagram)</li>
+      </ul>
+
+      <SubTitle>2.4 Dane leadów</SubTitle>
+      <p>Jeśli odwiedzający pozostawia dane kontaktowe przez widżet:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Imię i nazwisko</li>
+        <li>Adres e-mail</li>
+        <li>Numer telefonu</li>
+        <li>Dodatkowe informacje podane przez użytkownika (rodzaj usługi, preferowana data itp.)</li>
+      </ul>
+
+      <SubTitle>2.5 Dane płatnicze</SubTitle>
+      <p>
+        Nie przechowujemy danych kart płatniczych. Płatności są przetwarzane przez zewnętrznych dostawców usług
+        płatniczych (WayForPay, Cryptomus, NowPayments). Przechowujemy jedynie:
+      </p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Metodę płatności (nazwa dostawcy)</li>
+        <li>Kwotę i status płatności</li>
+        <li>Daty płatności</li>
+        <li>Numer konta</li>
+      </ul>
+
+      <SubTitle>2.6 Dane analityczne</SubTitle>
+      <p>Zbieramy zagregowane statystyki użytkowania:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>Liczbę zgłoszeń na czacie</li>
+        <li>Średnią liczbę wiadomości na sesję</li>
+        <li>Średni czas odpowiedzi AI</li>
+        <li>Rozkład aktywności w godzinach</li>
+        <li>Oceny odpowiedzi (pozytywne / negatywne)</li>
+      </ul>
+
+      <SectionTitle>3. Warunki płatności, cykl rozliczeniowy i zawieszenie usługi</SectionTitle>
       <p>
         Świadczenie usługi widżetu AI rozpoczyna się od płatności początkowej, która obejmuje opracowanie, konfigurację
         i działanie widżetu przez pierwsze trzydzieści (30) dni. Po upływie tego początkowego okresu dalsze działanie,
@@ -932,9 +1180,9 @@ function PlContent() {
         momentu uregulowania zaległej kwoty.
       </p>
 
-      <SectionTitle>3. Pliki cookie i pamięć lokalna</SectionTitle>
+      <SectionTitle>4. Pliki cookie i pamięć lokalna</SectionTitle>
 
-      <SubTitle>3.1 Pliki cookie</SubTitle>
+      <SubTitle>4.1 Pliki cookie</SubTitle>
       <p>Platforma wykorzystuje następujące pliki cookie:</p>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
@@ -967,7 +1215,7 @@ function PlContent() {
         marketingowych ani zewnętrznych analitycznych plików cookie.
       </p>
 
-      <SubTitle>3.2 Pamięć lokalna (localStorage)</SubTitle>
+      <SubTitle>4.2 Pamięć lokalna (localStorage)</SubTitle>
       <p>Widżet AI na stronie klienta wykorzystuje localStorage przeglądarki do:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -985,7 +1233,7 @@ function PlContent() {
       </ul>
       <p>Dane localStorage są przechowywane wyłącznie w przeglądarce użytkownika i nie są przesyłane na serwer.</p>
 
-      <SectionTitle>4. Jak wykorzystujemy dane</SectionTitle>
+      <SectionTitle>5. Jak wykorzystujemy dane</SectionTitle>
       <p>Wykorzystujemy zebrane dane w celu:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>Świadczenia i wspierania usługi asystenta AI</li>
@@ -997,7 +1245,7 @@ function PlContent() {
         <li>Spełniania wymogów prawnych</li>
       </ul>
 
-      <SubTitle>4.1 Podstawy prawne przetwarzania (Artykuł 6 RODO)</SubTitle>
+      <SubTitle>5.1 Podstawy prawne przetwarzania (Artykuł 6 RODO)</SubTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -1039,37 +1287,37 @@ function PlContent() {
         </table>
       </div>
 
-      <SectionTitle>5. Przekazywanie danych stronom trzecim</SectionTitle>
+      <SectionTitle>6. Przekazywanie danych stronom trzecim</SectionTitle>
       <p>
         Przekazujemy dane stronom trzecim wyłącznie w celu zapewnienia działania usługi. Nie sprzedajemy ani nie
         przekazujemy danych w celach reklamowych.
       </p>
 
-      <SubTitle>5.1 Google (Gemini API)</SubTitle>
+      <SubTitle>6.1 Google (Gemini API)</SubTitle>
       <p>
         W celu generowania odpowiedzi AI przekazujemy tekst wiadomości użytkownika i kontekst bazy wiedzy do Google
         Gemini API. Google przetwarza dane zgodnie ze swoją Polityką prywatności.
       </p>
 
-      <SubTitle>5.2 Google Sheets API</SubTitle>
+      <SubTitle>6.2 Google Sheets API</SubTitle>
       <p>
         Na życzenie klienta dane leadów mogą być eksportowane do Google Sheets za pośrednictwem konta usługowego Google.
       </p>
 
-      <SubTitle>5.3 Komunikatory</SubTitle>
+      <SubTitle>6.3 Komunikatory</SubTitle>
       <p>
         Po podłączeniu kanałów Telegram, WhatsApp lub Instagram wiadomości są kierowane przez odpowiednie API (Telegram
         Bot API, WhatsApp Business API / WHAPI, Instagram Messaging API).
       </p>
 
-      <SubTitle>5.4 Dostawcy usług płatniczych</SubTitle>
+      <SubTitle>6.4 Dostawcy usług płatniczych</SubTitle>
       <p>
         Do przetwarzania płatności wykorzystujemy WayForPay, Cryptomus i NowPayments. Podczas płatności przekazujemy
         dostawcy adres e-mail, numer telefonu i kwotę płatności. Dane karty bankowej są przetwarzane bezpośrednio przez
         dostawcę usług płatniczych i nie przechodzą przez nasze serwery.
       </p>
 
-      <SectionTitle>6. Okresy przechowywania danych</SectionTitle>
+      <SectionTitle>7. Okresy przechowywania danych</SectionTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -1114,7 +1362,7 @@ function PlContent() {
         </table>
       </div>
 
-      <SectionTitle>7. Twoje prawa</SectionTitle>
+      <SectionTitle>8. Twoje prawa</SectionTitle>
       <p>Zgodnie z RODO i prawem ukraińskim masz prawo do:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -1146,7 +1394,7 @@ function PlContent() {
         </a>
       </p>
 
-      <SectionTitle>8. Strony demonstracyjne</SectionTitle>
+      <SectionTitle>9. Strony demonstracyjne</SectionTitle>
       <p>
         Platforma udostępnia strony demonstracyjne, na których strona potencjalnego klienta jest wyświetlana w iframe
         wraz z naszym widżetem AI. Odbywa się to wyłącznie w celach podglądowych.
@@ -1159,7 +1407,7 @@ function PlContent() {
         <li>Demo jest tworzone w celach zapoznawczych i może zostać usunięte na żądanie właściciela strony</li>
       </ul>
 
-      <SectionTitle>9. Bezpieczeństwo danych</SectionTitle>
+      <SectionTitle>10. Bezpieczeństwo danych</SectionTitle>
       <p>Stosujemy następujące środki:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>Flagi HttpOnly i Secure dla plików cookie</li>
@@ -1170,13 +1418,13 @@ function PlContent() {
         <li>Rejestrowanie audytu wszystkich krytycznych działań</li>
       </ul>
 
-      <SectionTitle>10. Zmiany w polityce</SectionTitle>
+      <SectionTitle>11. Zmiany w polityce</SectionTitle>
       <p>
         Zastrzegamy sobie prawo do aktualizacji niniejszej Polityki prywatności. W przypadku istotnych zmian powiadomimy
         Cię za pośrednictwem Platformy lub e-mailem. Data ostatniej aktualizacji jest podana na początku dokumentu.
       </p>
 
-      <SectionTitle>11. Dane kontaktowe</SectionTitle>
+      <SectionTitle>12. Dane kontaktowe</SectionTitle>
       <ul className="ml-6 list-disc space-y-1">
         <li>
           Email:{' '}
@@ -1217,7 +1465,69 @@ function ArContent() {
         واللائحة العامة لحماية البيانات في الاتحاد الأوروبي (GDPR)، والأنظمة الأخرى المعمول بها.
       </p>
 
-      <SectionTitle>2. شروط الدفع ودورة الفوترة وتعليق الخدمة</SectionTitle>
+      <SectionTitle>2. ما البيانات التي نجمعها</SectionTitle>
+
+      <SubTitle>2.1 بيانات حساب العميل</SubTitle>
+      <p>عند التسجيل على المنصة كعميل، قد نجمع:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>اسم الشركة / اسم المستخدم</li>
+        <li>عنوان البريد الإلكتروني</li>
+        <li>رقم الهاتف</li>
+        <li>عنوان الموقع الإلكتروني</li>
+        <li>العناوين الفعلية للمكاتب / الفروع</li>
+        <li>حسابات وسائل التواصل الاجتماعي (Instagram وغيرها)</li>
+      </ul>
+
+      <SubTitle>2.2 بيانات الدردشة (المستخدمون النهائيون للويدجت)</SubTitle>
+      <p>عندما يتفاعل زائر موقع العميل مع ويدجت الذكاء الاصطناعي، نجمع:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>نص رسائل الدردشة</li>
+        <li>معرّف الجلسة (يُنشأ تلقائيًا)</li>
+        <li>الطوابع الزمنية للرسائل</li>
+        <li>الصور المرفوعة (في حالة إرسالها عبر الويدجت)</li>
+      </ul>
+
+      <SubTitle>2.3 البيانات التقنية</SubTitle>
+      <p>المعلومات التقنية المجمّعة تلقائيًا:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>عنوان IP</li>
+        <li>User-Agent (نوع المتصفح، نظام التشغيل، الجهاز)</li>
+        <li>عنوان URL للصفحة التي تم تثبيت الويدجت عليها</li>
+        <li>قناة الاتصال (الموقع الإلكتروني، Telegram، WhatsApp، Instagram)</li>
+      </ul>
+
+      <SubTitle>2.4 بيانات العملاء المحتملين</SubTitle>
+      <p>إذا ترك الزائر بيانات الاتصال عبر الويدجت:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>الاسم</li>
+        <li>عنوان البريد الإلكتروني</li>
+        <li>رقم الهاتف</li>
+        <li>معلومات إضافية يقدمها المستخدم (نوع الخدمة، التاريخ المفضل، إلخ)</li>
+      </ul>
+
+      <SubTitle>2.5 بيانات الدفع</SubTitle>
+      <p>
+        لا نخزن بيانات بطاقات الدفع. تتم معالجة المدفوعات بواسطة مزودي خدمات دفع خارجيين (WayForPay، Cryptomus،
+        NowPayments). نحتفظ فقط بـ:
+      </p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>طريقة الدفع (اسم المزود)</li>
+        <li>المبلغ وحالة الدفع</li>
+        <li>تواريخ الدفع</li>
+        <li>رقم الحساب</li>
+      </ul>
+
+      <SubTitle>2.6 البيانات التحليلية</SubTitle>
+      <p>نجمع إحصائيات استخدام مجمّعة:</p>
+      <ul className="ml-6 list-disc space-y-1">
+        <li>عدد طلبات الدردشة</li>
+        <li>متوسط عدد الرسائل لكل جلسة</li>
+        <li>متوسط وقت استجابة الذكاء الاصطناعي</li>
+        <li>توزيع النشاط حسب الساعات</li>
+        <li>تقييمات الردود (إيجابية / سلبية)</li>
+      </ul>
+
+      <SectionTitle>3. شروط الدفع ودورة الفوترة وتعليق الخدمة</SectionTitle>
       <p>
         يبدأ تقديم ويدجت الذكاء الاصطناعي بدفعة أولية تغطي تطوير الويدجت وإعداده وتشغيله خلال الثلاثين (30) يومًا
         الأولى. بعد انتهاء هذه الفترة الأولية، يخضع استمرار التشغيل والصيانة والدعم الفني لرسوم شهرية متكررة ومتفق
@@ -1226,9 +1536,9 @@ function ArContent() {
         تعليق أو إلغاء تفعيل الويدجت تلقائيًا على موقع العميل الإلكتروني حتى يتم تسوية الرصيد المستحق.
       </p>
 
-      <SectionTitle>3. ملفات تعريف الارتباط والتخزين المحلي</SectionTitle>
+      <SectionTitle>4. ملفات تعريف الارتباط والتخزين المحلي</SectionTitle>
 
-      <SubTitle>3.1 ملفات تعريف الارتباط (Cookies)</SubTitle>
+      <SubTitle>4.1 ملفات تعريف الارتباط (Cookies)</SubTitle>
       <p>تستخدم المنصة ملفات تعريف الارتباط التالية:</p>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
@@ -1261,7 +1571,7 @@ function ArContent() {
         تسويقية أو تحليلية من جهات خارجية.
       </p>
 
-      <SubTitle>3.2 التخزين المحلي (localStorage)</SubTitle>
+      <SubTitle>4.2 التخزين المحلي (localStorage)</SubTitle>
       <p>يستخدم ويدجت الذكاء الاصطناعي على موقع العميل localStorage في المتصفح لـ:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -1279,7 +1589,7 @@ function ArContent() {
       </ul>
       <p>يتم تخزين بيانات localStorage فقط في متصفح المستخدم ولا يتم إرسالها إلى الخادم.</p>
 
-      <SectionTitle>4. كيف نستخدم البيانات</SectionTitle>
+      <SectionTitle>5. كيف نستخدم البيانات</SectionTitle>
       <p>نستخدم البيانات المجمّعة لـ:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>تقديم ودعم خدمة مساعد الذكاء الاصطناعي</li>
@@ -1291,7 +1601,7 @@ function ArContent() {
         <li>الامتثال للمتطلبات القانونية</li>
       </ul>
 
-      <SubTitle>4.1 الأسس القانونية للمعالجة (المادة 6 من GDPR)</SubTitle>
+      <SubTitle>5.1 الأسس القانونية للمعالجة (المادة 6 من GDPR)</SubTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -1333,31 +1643,31 @@ function ArContent() {
         </table>
       </div>
 
-      <SectionTitle>5. نقل البيانات إلى أطراف ثالثة</SectionTitle>
+      <SectionTitle>6. نقل البيانات إلى أطراف ثالثة</SectionTitle>
       <p>ننقل البيانات إلى أطراف ثالثة حصريًا لضمان عمل الخدمة. نحن لا نبيع أو ننقل البيانات لأغراض إعلانية.</p>
 
-      <SubTitle>5.1 Google (Gemini API)</SubTitle>
+      <SubTitle>6.1 Google (Gemini API)</SubTitle>
       <p>
         لإنشاء ردود الذكاء الاصطناعي، ننقل نص رسائل المستخدم وسياق قاعدة المعرفة إلى Google Gemini API. تعالج Google
         البيانات وفقًا لسياسة الخصوصية الخاصة بها.
       </p>
 
-      <SubTitle>5.2 Google Sheets API</SubTitle>
+      <SubTitle>6.2 Google Sheets API</SubTitle>
       <p>بناءً على طلب العميل، يمكن تصدير بيانات العملاء المحتملين إلى Google Sheets عبر حساب خدمة Google.</p>
 
-      <SubTitle>5.3 تطبيقات المراسلة</SubTitle>
+      <SubTitle>6.3 تطبيقات المراسلة</SubTitle>
       <p>
         عند توصيل قنوات Telegram أو WhatsApp أو Instagram، يتم توجيه الرسائل عبر واجهات برمجة التطبيقات المقابلة
         (Telegram Bot API، WhatsApp Business API / WHAPI، Instagram Messaging API).
       </p>
 
-      <SubTitle>5.4 مزودو خدمات الدفع</SubTitle>
+      <SubTitle>6.4 مزودو خدمات الدفع</SubTitle>
       <p>
         لمعالجة المدفوعات، نستخدم WayForPay وCryptomus وNowPayments. أثناء الدفع، ننقل للمزود البريد الإلكتروني ورقم
         الهاتف ومبلغ الدفع. تتم معالجة بيانات البطاقة المصرفية مباشرةً من قبل مزود خدمة الدفع ولا تمر عبر خوادمنا.
       </p>
 
-      <SectionTitle>6. فترات الاحتفاظ بالبيانات</SectionTitle>
+      <SectionTitle>7. فترات الاحتفاظ بالبيانات</SectionTitle>
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -1402,7 +1712,7 @@ function ArContent() {
         </table>
       </div>
 
-      <SectionTitle>7. حقوقك</SectionTitle>
+      <SectionTitle>8. حقوقك</SectionTitle>
       <p>وفقًا للائحة GDPR والقانون الأوكراني، لديك الحق في:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
@@ -1431,7 +1741,7 @@ function ArContent() {
         </a>
       </p>
 
-      <SectionTitle>8. الصفحات التجريبية</SectionTitle>
+      <SectionTitle>9. الصفحات التجريبية</SectionTitle>
       <p>
         توفر المنصة صفحات تجريبية يتم فيها عرض موقع العميل المحتمل في iframe إلى جانب ويدجت الذكاء الاصطناعي الخاص بنا.
         يتم ذلك حصريًا لأغراض المعاينة.
@@ -1444,7 +1754,7 @@ function ArContent() {
         <li>يتم إنشاء العرض التجريبي لأغراض التعريف ويمكن إزالته بناءً على طلب مالك الموقع</li>
       </ul>
 
-      <SectionTitle>9. أمان البيانات</SectionTitle>
+      <SectionTitle>10. أمان البيانات</SectionTitle>
       <p>نتخذ التدابير التالية:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>علامات HttpOnly وSecure لملفات تعريف الارتباط</li>
@@ -1455,13 +1765,13 @@ function ArContent() {
         <li>تسجيل التدقيق لجميع الإجراءات الحرجة</li>
       </ul>
 
-      <SectionTitle>10. التغييرات في السياسة</SectionTitle>
+      <SectionTitle>11. التغييرات في السياسة</SectionTitle>
       <p>
         نحتفظ بالحق في تحديث سياسة الخصوصية هذه. في حالة إجراء تغييرات جوهرية، سنقوم بإخطارك عبر المنصة أو عبر البريد
         الإلكتروني. يُشار إلى تاريخ آخر تحديث في بداية المستند.
       </p>
 
-      <SectionTitle>11. معلومات الاتصال</SectionTitle>
+      <SectionTitle>12. معلومات الاتصال</SectionTitle>
       <ul className="ml-6 list-disc space-y-1">
         <li>
           البريد الإلكتروني:{' '}

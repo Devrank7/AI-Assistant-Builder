@@ -24,7 +24,10 @@ const common: Record<string, string> = {
   'demo.iframeError.dental': 'Klinika stomatologiczna',
   'demo.iframeError.construction': 'Firma budowlana',
   'demo.iframeError.hotel': 'Hotel',
+  'demo.iframeError.screenshot': 'Zrzut ekranu strony',
   'demo.iframeError.openDirect': 'Lub otwórz stronę bezpośrednio',
+  'demo.screenshotMode.loading': 'Wykonywanie zrzutu ekranu...',
+  'demo.screenshotMode.back': 'Powrót do szablonów',
 };
 
 export default common;
