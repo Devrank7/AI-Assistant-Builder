@@ -20,6 +20,12 @@ export function middleware(request: NextRequest) {
     if (!clientToken) return NextResponse.redirect(new URL('/?auth=required', request.url));
   }
 
+  // Public API routes (no auth required)
+  const publicApiPaths = ['/api/clients/demo'];
+  if (publicApiPaths.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
+
   // Admin API routes protection
   const adminApiPaths = [
     '/api/clients',
