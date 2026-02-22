@@ -300,8 +300,8 @@ export async function processManyChatWebhook(body: ManyChatWebhookBody): Promise
     processMediaAsync(inputText, messageType, mediaUrl, sessionId, metadata, body.subscriber_id).catch((err) =>
       console.error('[ManyChat] Async processing failed:', err)
     );
-    // Return empty response immediately — the real response comes via API
-    return buildResponse('');
+    // Return "processing" message immediately — the real response comes via API
+    return buildResponse('Секунду, обрабатываю...');
   }
 
   // --- Text: synchronous processing (within 9s) ---
