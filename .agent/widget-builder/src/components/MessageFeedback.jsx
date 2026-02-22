@@ -25,7 +25,7 @@ export default function MessageFeedback({ messageIndex, sessionId, clientId }) {
     return (
         <div className="flex items-center gap-1 mt-0.5 ml-8">
             <button onClick={() => handleRate('up')}
-                className={`p-0.5 rounded transition-colors ${rating === 'up' ? 'text-[#ebad60]' : 'text-gray-300 hover:text-[#798196]'}`}
+                className={`p-0.5 rounded transition-colors ${rating === 'up' ? 'text-[#00d084]' : 'text-gray-300 hover:text-[#4edda8]'}`}
                 aria-label="Helpful">
                 <ThumbsUp size={11} />
             </button>

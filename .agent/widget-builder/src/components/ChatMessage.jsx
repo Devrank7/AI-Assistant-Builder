@@ -1,21 +1,21 @@
 import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { User, Copy, Check, RotateCcw, ZoomIn, Sparkles, Volume2, VolumeX } from 'lucide-preact';
+import { User, Copy, Check, RotateCcw, ZoomIn, Sparkles } from 'lucide-preact';
 
 function formatRelativeTime(timestamp) {
     if (!timestamp) return '';
     const diff = Date.now() - timestamp;
     const seconds = Math.floor(diff / 1000);
-    if (seconds < 60) return 'just now';
+    if (seconds < 60) return 'щойно';
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
+    if (minutes < 60) return `${minutes} хв`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
-    return `${Math.floor(hours / 24)}d`;
+    if (hours < 24) return `${hours} год`;
+    return `${Math.floor(hours / 24)} д`;
 }
 
-function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick, onSpeak, isSpeaking }) {
+function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick }) {
     const isBot = role === 'assistant';
     const [copied, setCopied] = useState(false);
 
@@ -37,8 +37,8 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         >
             {/* Bot Avatar */}
             {isBot && (
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#f4f6fb] to-[#e6e8f0] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#d3b574]/50">
-                    <Sparkles size={13} className="text-[#1b1c4a]" />
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#ccf5e5] to-[#b3f0d8] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#7ee8c0]/50">
+                    <Sparkles size={13} className="text-[#00b070]" />
                 </div>
             )}
 
@@ -60,13 +60,13 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                             ? 'bg-red-50 text-red-600 border border-red-200 rounded-bl-md'
                             : isBot
                               ? 'bg-white text-gray-700 border border-gray-100 shadow-sm rounded-bl-md'
-                              : 'bg-gradient-to-r from-[#faf8f3] to-[#f4f0e6] text-gray-700 border border-[#d3b574]/50 rounded-br-md shadow-sm'
+                              : 'bg-gradient-to-r from-[#e6faf2] to-[#ccf5e5] text-gray-700 border border-[#7ee8c0]/50 rounded-br-md shadow-sm'
                     }`}>
-                        <div className="max-w-none msg-text [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
+                        <div className="max-w-none [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
-                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#ebad60] hover:text-[#d49a50]">{children}</a>
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#00b070] hover:text-[#009960]">{children}</a>
                                     ),
                                     strong: ({ children }) => (
                                         <strong className="font-semibold text-gray-900">{children}</strong>
@@ -85,27 +85,20 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 <div className={`flex items-center gap-2 mt-1 px-1 ${isBot ? '' : 'justify-end'}`}>
                     {timestamp && <span className="text-[10px] text-gray-400 font-medium">{formatRelativeTime(timestamp)}</span>}
                     {isBot && !isError && content && (
-                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-[#ebad60] transition-all duration-200" aria-label="Copy">
-                            {copied ? <Check size={11} className="text-[#ebad60]" /> : <Copy size={11} />}
-                        </button>
-                    )}
-                    {isBot && !isError && content && onSpeak && (
-                        <button onClick={() => onSpeak(content)}
-                            className={`p-0.5 transition-all duration-200 ${isSpeaking ? 'text-[#ebad60] opacity-100' : 'opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#ebad60]'}`}
-                            aria-label={isSpeaking ? 'Stop reading' : 'Read aloud'}>
-                            {isSpeaking ? <VolumeX size={11} /> : <Volume2 size={11} />}
+                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-[#00d084] transition-all duration-200" aria-label="Copy">
+                            {copied ? <Check size={11} className="text-[#00d084]" /> : <Copy size={11} />}
                         </button>
                     )}
                     {isError && onRetry && (
                         <button onClick={onRetry} className="flex items-center gap-1 text-[10px] font-medium text-red-500 hover:text-red-600 transition-colors">
-                            <RotateCcw size={10} /> Retry
+                            <RotateCcw size={10} /> Повторити
                         </button>
                     )}
                 </div>
             </div>
 
             {!isBot && (
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#f4f6fb] to-[#e6e8f0] border border-[#d3b574]/50 text-[#1b1c4a] flex-shrink-0 shadow-sm">
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#ccf5e5] to-[#b3f0d8] border border-[#7ee8c0]/50 text-[#00b070] flex-shrink-0 shadow-sm">
                     <User size={13} />
                 </div>
             )}
