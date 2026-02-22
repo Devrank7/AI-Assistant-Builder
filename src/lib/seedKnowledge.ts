@@ -41,6 +41,27 @@ export async function seedKnowledgeIfNeeded(): Promise<void> {
 
       if (!clientId) continue;
 
+      // Import AI settings (always check, even if knowledge exists)
+      if (seed.aiSettings) {
+        const existingSettings = await AISettings.findOne({ clientId });
+        if (!existingSettings) {
+          await AISettings.create({
+            clientId,
+            ...seed.aiSettings,
+          });
+          console.log(`[Seed] ${clientId}: created AI settings`);
+        } else if (existingSettings.systemPrompt.length < 200 && seed.aiSettings.systemPrompt?.length > 200) {
+          // Update if existing prompt is generic/short and seed has a real one
+          existingSettings.systemPrompt = seed.aiSettings.systemPrompt;
+          if (seed.aiSettings.greeting) existingSettings.greeting = seed.aiSettings.greeting;
+          if (seed.aiSettings.topK) existingSettings.topK = seed.aiSettings.topK;
+          if (seed.aiSettings.aiModel) existingSettings.aiModel = seed.aiSettings.aiModel;
+          if (seed.aiSettings.maxTokens) existingSettings.maxTokens = seed.aiSettings.maxTokens;
+          await existingSettings.save();
+          console.log(`[Seed] ${clientId}: updated AI settings (short prompt → seed prompt)`);
+        }
+      }
+
       // Check if this client already has knowledge in the DB
       const existingCount = await KnowledgeChunk.countDocuments({ clientId });
       if (existingCount > 0) continue;
@@ -67,23 +88,6 @@ export async function seedKnowledgeIfNeeded(): Promise<void> {
         }
         if (docs.length > 0) {
           await KnowledgeChunk.insertMany(docs);
-        }
-      }
-
-      // Import AI settings if not exists
-      if (seed.aiSettings) {
-        const existingSettings = await AISettings.findOne({ clientId });
-        if (!existingSettings) {
-          await AISettings.create({
-            clientId,
-            ...seed.aiSettings,
-          });
-        } else if (existingSettings.systemPrompt.length < 200 && seed.aiSettings.systemPrompt?.length > 200) {
-          // Update if existing prompt is generic/short and seed has a real one
-          existingSettings.systemPrompt = seed.aiSettings.systemPrompt;
-          if (seed.aiSettings.greeting) existingSettings.greeting = seed.aiSettings.greeting;
-          if (seed.aiSettings.topK) existingSettings.topK = seed.aiSettings.topK;
-          await existingSettings.save();
         }
       }
 

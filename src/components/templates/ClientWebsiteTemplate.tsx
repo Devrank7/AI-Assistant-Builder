@@ -28,6 +28,19 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   // Extract clientId from scriptUrl: "/widgets/{clientId}/script.js"
   const clientId = scriptUrl.split('/')[2] || '';
 
+  // Override document.title and meta description so the widget's page-context
+  // injection picks up the client's website info instead of "WinBix AI" from root layout.
+  useEffect(() => {
+    try {
+      const host = new URL(websiteUrl).hostname.replace(/^www\./, '');
+      document.title = host;
+    } catch {
+      document.title = websiteUrl || 'Demo';
+    }
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', '');
+  }, [websiteUrl]);
+
   useEffect(() => {
     if (scriptUrl) {
       const script = document.createElement('script');
