@@ -362,12 +362,27 @@ async function processMessage(
 
     const [media, [igConfig, history]] = await Promise.all([mediaPromise, dbPromise]);
 
-    // --- Process media result ---
+    // --- Process media result (use actual content-type to determine real type) ---
     let audioData: { data: string; mimeType: string } | undefined;
     let imageData: { data: string; mimeType: string } | undefined;
     let textMessage = rawMessage;
+    let actualType = messageType;
 
-    if (messageType === 'voice' && mediaUrl) {
+    if (mediaUrl && media) {
+      // Use the actual content-type from the HTTP response to determine real media type
+      // This fixes the issue where URL-based detection guesses wrong (e.g., photo detected as voice)
+      const ct = media.mimeType.toLowerCase();
+      if (ct.startsWith('image/')) {
+        actualType = 'photo';
+      } else if (ct.startsWith('audio/') || ct.startsWith('video/')) {
+        actualType = 'voice';
+      }
+      console.log(
+        `[ManyChat] Media actual content-type: ${media.mimeType}, resolved type: ${actualType} (detected: ${messageType})`
+      );
+    }
+
+    if (actualType === 'voice' && mediaUrl) {
       if (media) {
         // Instagram sends voice as video/mp4 (AAC inside MP4 container)
         // Gemini only accepts: audio/wav, audio/mp3, audio/aac, audio/ogg, audio/flac
@@ -380,7 +395,7 @@ async function processMessage(
       }
     }
 
-    if (messageType === 'photo' && mediaUrl) {
+    if (actualType === 'photo' && mediaUrl) {
       if (media) {
         imageData = media;
         textMessage = 'Пользователь отправил фото. Посмотри на него и ответь уместно.';
@@ -426,7 +441,26 @@ async function processMessage(
     const contentInput = mediaParts.length > 0 ? [{ text: prompt }, ...mediaParts] : prompt;
 
     const result = await model.generateContent(contentInput);
-    let responseText = result.response.text();
+
+    // Check for blocked response (PROHIBITED_CONTENT, SAFETY, etc.)
+    const candidate = result.response.candidates?.[0];
+    if (candidate?.finishReason && !['STOP', 'MAX_TOKENS'].includes(candidate.finishReason)) {
+      console.warn(`[ManyChat] Gemini blocked response: finishReason=${candidate.finishReason}`);
+      return buildResponse('Извините, не могу ответить на это сообщение. Попробуйте переформулировать.');
+    }
+
+    let responseText: string;
+    try {
+      responseText = result.response.text();
+    } catch (textError: unknown) {
+      // Gemini throws when text() is called on a blocked response
+      const errMsg = textError instanceof Error ? textError.message : String(textError);
+      if (errMsg.includes('PROHIBITED_CONTENT') || errMsg.includes('blocked')) {
+        console.warn(`[ManyChat] Gemini PROHIBITED_CONTENT: ${errMsg.slice(0, 200)}`);
+        return buildResponse('Извините, не могу ответить на это сообщение. Попробуйте переформулировать.');
+      }
+      throw textError;
+    }
 
     // Truncate for Instagram DM limits (1000 chars)
     if (responseText.length > 1000) {
@@ -439,6 +473,12 @@ async function processMessage(
     console.log(`[ManyChat] Response (${responseText.length} chars): ${responseText.slice(0, 80)}...`);
     return buildResponse(responseText);
   } catch (error) {
+    // Catch-all for PROHIBITED_CONTENT that may throw at any stage
+    const errMsg = error instanceof Error ? error.message : String(error);
+    if (errMsg.includes('PROHIBITED_CONTENT') || errMsg.includes('blocked') || errMsg.includes('SAFETY')) {
+      console.warn(`[ManyChat] Gemini content blocked (catch-all): ${errMsg.slice(0, 200)}`);
+      return buildResponse('Извините, не могу ответить на это сообщение. Попробуйте переформулировать.');
+    }
     console.error('[ManyChat] Processing error:', error);
     return buildResponse('Произошла ошибка. Попробуйте позже.');
   }
