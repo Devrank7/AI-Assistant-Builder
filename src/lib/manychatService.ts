@@ -410,7 +410,16 @@ async function processMessage(
     const maxTokens = igConfig?.maxTokens || 2048;
 
     // --- Build prompt ---
-    let prompt = systemPrompt;
+    // For media messages, use a neutral prompt to avoid PROHIBITED_CONTENT blocks
+    // (aggressive persona + media triggers Google's hard ToS filter)
+    const isMedia = actualType === 'photo' || actualType === 'voice';
+    let prompt: string;
+
+    if (isMedia) {
+      prompt = 'Ты — дружелюбный ассистент в Instagram. Отвечай кратко и по делу на русском языке.';
+    } else {
+      prompt = systemPrompt;
+    }
 
     if (history.length > 0) {
       const historyText = history.map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n');
