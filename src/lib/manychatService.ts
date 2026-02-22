@@ -416,7 +416,7 @@ async function processMessage(
     let prompt: string;
 
     if (isMedia) {
-      prompt = 'Ты — дружелюбный ассистент в Instagram. Отвечай кратко и по делу на русском языке.';
+      prompt = 'Отвечай кратко и по делу. Отвечай на том языке, на котором пишет пользователь.';
     } else {
       prompt = systemPrompt;
     }
