@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
     const rateCheck = checkRateLimit(rateLimitKey, RATE_LIMITS.demoGenerate);
     if (!rateCheck.allowed) {
       return NextResponse.json(
-        { success: false, error: 'Слишком много запросов. Попробуйте через час.' },
+        { success: false, error: 'Too many requests. Please try again in an hour.' },
         { status: 429 }
       );
     }
@@ -405,8 +405,8 @@ export async function POST(request: NextRequest) {
 
     // 13. Build response
     const encodedUrl = encodeURIComponent(websiteUrl);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-    const demoUrl = `/demo/client-website?client=${clientId}&website=${encodedUrl}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${request.headers.get('host')}`;
+    const demoUrl = `${baseUrl}/demo/client-website?client=${clientId}&type=quick&website=${encodedUrl}`;
     const embedCode = `<script src="${baseUrl}/quickwidgets/${clientId}/script.js"></script>`;
 
     return NextResponse.json({

@@ -13,8 +13,11 @@ function DemoContent() {
   const template = params.template as string;
   const clientId = searchParams.get('client') || '';
   const websiteUrl = searchParams.get('website') || '';
+  const widgetType = searchParams.get('type') || '';
 
-  const scriptUrl = clientId ? `/widgets/${clientId}/script.js` : '';
+  // Use /quickwidgets/ for quick (demo) widgets, /widgets/ for production widgets
+  const widgetDir = widgetType === 'quick' ? 'quickwidgets' : 'widgets';
+  const scriptUrl = clientId ? `/${widgetDir}/${clientId}/script.js` : '';
 
   // Special handling for client-website template
   if (template === 'client-website') {
