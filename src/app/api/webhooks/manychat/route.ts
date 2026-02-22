@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       version: 'v2',
       content: {
+        type: 'instagram',
         messages: [{ type: 'text', text: 'Произошла ошибка. Попробуйте позже.' }],
         actions: [],
         quick_replies: [],

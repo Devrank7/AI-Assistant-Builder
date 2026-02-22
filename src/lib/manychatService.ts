@@ -25,8 +25,8 @@ import connectDB from '@/lib/mongodb';
 import ChatLog from '@/models/ChatLog';
 import InstagramConfig from '@/models/InstagramConfig';
 
-// ManyChat External Request timeout is ~30s; we use 25s to leave margin
-const MANYCHAT_TIMEOUT_MS = 25_000;
+// ManyChat External Request timeout is ~10s; we use 9s to leave margin
+const MANYCHAT_TIMEOUT_MS = 9_000;
 
 // Only respond to these Instagram usernames (empty array = respond to all)
 const ALLOWED_USERNAMES: string[] = ['michael_hoiwinbix', 'verstat178'];
@@ -68,6 +68,7 @@ interface ManyChatWebhookBody {
 interface ManyChatResponse {
   version: string;
   content: {
+    type: string;
     messages: Array<{ type: string; text: string }>;
     actions: unknown[];
     quick_replies: unknown[];
@@ -81,6 +82,7 @@ function buildResponse(text: string): ManyChatResponse {
   return {
     version: 'v2',
     content: {
+      type: 'instagram',
       messages: [{ type: 'text', text }],
       actions: [],
       quick_replies: [],
@@ -140,7 +142,7 @@ async function downloadMedia(url: string): Promise<{ data: string; mimeType: str
     console.log(`[ManyChat] Downloading media: ${url.slice(0, 100)}...`);
     const response = await fetch(url, {
       headers: { 'User-Agent': 'WinBix-AI/1.0' },
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(6_000),
     });
 
     if (!response.ok) {
