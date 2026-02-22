@@ -19,7 +19,7 @@
  * 2. Background: download media → Gemini processes → send response via ManyChat sendContent API
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import connectDB from '@/lib/mongodb';
 import ChatLog from '@/models/ChatLog';
 import InstagramConfig from '@/models/InstagramConfig';
@@ -427,6 +427,12 @@ async function processMessage(
         temperature,
         maxOutputTokens: maxTokens,
       },
+      safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+      ],
     });
 
     // Build multimodal content if media present
