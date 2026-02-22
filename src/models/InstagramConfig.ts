@@ -8,6 +8,7 @@ export interface IInstagramConfig extends Document {
   aiModel: string;
   temperature: number;
   maxTokens: number;
+  processingMessage: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,6 +46,10 @@ const InstagramConfigSchema = new Schema<IInstagramConfig>(
     maxTokens: {
       type: Number,
       default: 1024,
+    },
+    processingMessage: {
+      type: String,
+      default: 'Секунду, обрабатываю...',
     },
   },
   { timestamps: true }

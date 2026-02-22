@@ -11,6 +11,7 @@ interface InstagramConfigState {
   aiModel: string;
   temperature: number;
   maxTokens: number;
+  processingMessage: string;
 }
 
 export default function AdminInstagramPage() {
@@ -22,6 +23,7 @@ export default function AdminInstagramPage() {
     aiModel: 'gemini-3-flash-preview',
     temperature: 0.7,
     maxTokens: 1024,
+    processingMessage: 'Секунду, обрабатываю...',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -347,6 +349,45 @@ export default function AdminInstagramPage() {
               <div className="mb-2 text-2xl">📸</div>
               <h3 className="text-sm font-medium text-white">Photos</h3>
               <p className="mt-1 text-xs text-gray-500">Analyzes images using multimodal AI and responds</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Advanced Settings */}
+        <div className="glass-card mb-8 p-6">
+          <h2 className="mb-6 flex items-center gap-2 text-lg font-semibold text-white">
+            <svg className="h-5 w-5 text-[var(--neon-purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            Advanced Settings
+          </h2>
+
+          <div className="space-y-6">
+            {/* Processing Message */}
+            <div>
+              <label className="mb-2 block text-sm text-gray-400">Voice/Photo Processing Message</label>
+              <input
+                type="text"
+                value={config.processingMessage}
+                onChange={(e) => setConfig({ ...config, processingMessage: e.target.value })}
+                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
+                placeholder="Секунду, обрабатываю..."
+              />
+              <p className="mt-1 text-xs text-gray-600">
+                This message is sent instantly while the AI processes voice messages or photos. The actual AI response
+                follows after processing is complete.
+              </p>
             </div>
           </div>
         </div>

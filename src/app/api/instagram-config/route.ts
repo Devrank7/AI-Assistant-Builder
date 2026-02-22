@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
         aiModel: config.aiModel,
         temperature: config.temperature,
         maxTokens: config.maxTokens,
+        processingMessage: config.processingMessage,
       },
     });
   } catch (error) {
@@ -59,6 +60,7 @@ export async function PUT(request: NextRequest) {
     if (body.aiModel !== undefined) updateFields.aiModel = body.aiModel;
     if (body.temperature !== undefined) updateFields.temperature = Math.min(1, Math.max(0, body.temperature));
     if (body.maxTokens !== undefined) updateFields.maxTokens = Math.min(4096, Math.max(128, body.maxTokens));
+    if (body.processingMessage !== undefined) updateFields.processingMessage = body.processingMessage;
 
     const config = await InstagramConfig.findOneAndUpdate({}, { $set: updateFields }, { upsert: true, new: true });
 
@@ -72,6 +74,7 @@ export async function PUT(request: NextRequest) {
         aiModel: config.aiModel,
         temperature: config.temperature,
         maxTokens: config.maxTokens,
+        processingMessage: config.processingMessage,
       },
     });
   } catch (error) {

@@ -296,12 +296,20 @@ export async function processManyChatWebhook(body: ManyChatWebhookBody): Promise
 
   // --- Voice/Photo: async processing (no 10s limit) ---
   if (messageType !== 'text' && mediaUrl && body.subscriber_id) {
+    // Load processing message from DB config (quick query)
+    let processingMsg = 'Секунду, обрабатываю...';
+    try {
+      await connectDB();
+      const igConfig = await InstagramConfig.findOne().select('processingMessage').lean();
+      if (igConfig?.processingMessage) processingMsg = igConfig.processingMessage;
+    } catch {}
+
     // Fire and forget — process in background, send response via ManyChat API
     processMediaAsync(inputText, messageType, mediaUrl, sessionId, metadata, body.subscriber_id).catch((err) =>
       console.error('[ManyChat] Async processing failed:', err)
     );
     // Return "processing" message immediately — the real response comes via API
-    return buildResponse('Секунду, обрабатываю...');
+    return buildResponse(processingMsg);
   }
 
   // --- Text: synchronous processing (within 9s) ---
