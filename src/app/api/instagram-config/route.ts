@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import InstagramConfig from '@/models/InstagramConfig';
+import ChatLog from '@/models/ChatLog';
 import { verifyAdmin } from '@/lib/auth';
+
+const INSTAGRAM_BOT_ID = '_instagram_assistant_';
 
 /**
  * GET /api/instagram-config — Get global Instagram config
@@ -79,6 +82,30 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('[InstagramConfig] PUT error:', error);
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/instagram-config — Clear all Instagram chat sessions
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const auth = await verifyAdmin(request);
+    if (!auth.authenticated) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    await connectDB();
+    const result = await ChatLog.deleteMany({ clientId: INSTAGRAM_BOT_ID });
+
+    console.log(`[InstagramConfig] Cleared ${result.deletedCount} Instagram chat sessions`);
+    return NextResponse.json({
+      success: true,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error('[InstagramConfig] DELETE error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

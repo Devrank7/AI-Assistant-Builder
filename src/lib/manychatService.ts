@@ -278,6 +278,23 @@ export async function processManyChatWebhook(body: ManyChatWebhookBody): Promise
     return buildResponse('Не удалось обработать сообщение.');
   }
 
+  // --- /clear command: delete all sessions for this user ---
+  if (inputText.trim().toLowerCase() === '/clear') {
+    const subscriberId = body.subscriber_id || body.ig_id || 'unknown';
+    console.log(`[ManyChat] /clear command from @${body.ig_username || subscriberId}`);
+    try {
+      await connectDB();
+      const result = await ChatLog.deleteMany({
+        clientId: INSTAGRAM_BOT_ID,
+        sessionId: { $regex: `^ig_${subscriberId}_` },
+      });
+      console.log(`[ManyChat] Cleared ${result.deletedCount} session(s) for subscriber ${subscriberId}`);
+    } catch (err) {
+      console.error('[ManyChat] /clear error:', err);
+    }
+    return buildResponse('Сессия успешно очищена.');
+  }
+
   const { type: messageType, mediaUrl } = detectMessageType(body);
   console.log(`[ManyChat] ${messageType} from @${body.ig_username || body.ig_id}: ${inputText.slice(0, 80)}`);
 

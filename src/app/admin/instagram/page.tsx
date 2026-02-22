@@ -30,6 +30,7 @@ export default function AdminInstagramPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showSetup, setShowSetup] = useState(false);
   const [showToken, setShowToken] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     fetchConfig();
@@ -71,6 +72,27 @@ export default function AdminInstagramPage() {
       setMessage({ type: 'error', text: 'Connection error' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleClearSessions = async () => {
+    if (!confirm('Are you sure you want to clear ALL Instagram chat sessions? This cannot be undone.')) return;
+    setClearing(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch('/api/instagram-config', { method: 'DELETE' });
+      const data = await res.json();
+
+      if (data.success) {
+        setMessage({ type: 'success', text: `Cleared ${data.deletedCount} chat session(s)` });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to clear sessions' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Connection error' });
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -387,6 +409,23 @@ export default function AdminInstagramPage() {
               <p className="mt-1 text-xs text-gray-600">
                 This message is sent instantly while the AI processes voice messages or photos. The actual AI response
                 follows after processing is complete.
+              </p>
+            </div>
+
+            {/* Clear Sessions */}
+            <div className="border-t border-white/10 pt-6">
+              <label className="mb-2 block text-sm text-gray-400">Chat Sessions</label>
+              <button
+                onClick={handleClearSessions}
+                disabled={clearing}
+                className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50"
+              >
+                {clearing ? 'Clearing...' : 'Clear All Sessions'}
+              </button>
+              <p className="mt-2 text-xs text-gray-600">
+                Delete all conversation history for the Instagram assistant. Users can also send{' '}
+                <code className="rounded bg-white/10 px-1 py-0.5 text-gray-400">/clear</code> in DMs to reset their own
+                session.
               </p>
             </div>
           </div>
