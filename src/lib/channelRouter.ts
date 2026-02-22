@@ -35,6 +35,7 @@ export interface RouteMessageInput {
   conversationHistory?: Array<{ role: string; content: string }>;
   metadata?: Record<string, unknown>;
   image?: { data: string; mimeType: string };
+  audio?: { data: string; mimeType: string };
 }
 
 export interface RouteMessageResult {
@@ -244,9 +245,15 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
   });
 
   const textPrompt = fullSystemPrompt + `\n\nUser question: ${input.message}`;
-  const contentInput = input.image?.data
-    ? [{ text: textPrompt }, { inlineData: { data: input.image.data, mimeType: input.image.mimeType || 'image/jpeg' } }]
-    : textPrompt;
+  // Build multimodal content parts if media is present
+  const mediaParts: Array<{ inlineData: { data: string; mimeType: string } }> = [];
+  if (input.image?.data) {
+    mediaParts.push({ inlineData: { data: input.image.data, mimeType: input.image.mimeType || 'image/jpeg' } });
+  }
+  if (input.audio?.data) {
+    mediaParts.push({ inlineData: { data: input.audio.data, mimeType: input.audio.mimeType || 'audio/ogg' } });
+  }
+  const contentInput = mediaParts.length > 0 ? [{ text: textPrompt }, ...mediaParts] : textPrompt;
 
   const result = await model.generateContent(contentInput);
   const response = result.response;
@@ -427,9 +434,15 @@ Only use :::form ONCE per conversation. Use plain text for normal responses.`;
   }
 
   const textPrompt = enhancedPrompt + `\n\nUser question: ${input.message}`;
-  const contentInput = input.image?.data
-    ? [{ text: textPrompt }, { inlineData: { data: input.image.data, mimeType: input.image.mimeType || 'image/jpeg' } }]
-    : textPrompt;
+  // Build multimodal content parts if media is present
+  const streamMediaParts: Array<{ inlineData: { data: string; mimeType: string } }> = [];
+  if (input.image?.data) {
+    streamMediaParts.push({ inlineData: { data: input.image.data, mimeType: input.image.mimeType || 'image/jpeg' } });
+  }
+  if (input.audio?.data) {
+    streamMediaParts.push({ inlineData: { data: input.audio.data, mimeType: input.audio.mimeType || 'audio/ogg' } });
+  }
+  const contentInput = streamMediaParts.length > 0 ? [{ text: textPrompt }, ...streamMediaParts] : textPrompt;
 
   const streamResult = await model.generateContentStream(contentInput);
 
