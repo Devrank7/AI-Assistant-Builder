@@ -45,7 +45,7 @@ const InstagramConfigSchema = new Schema<IInstagramConfig>(
     },
     maxTokens: {
       type: Number,
-      default: 1024,
+      default: 2048,
     },
     processingMessage: {
       type: String,

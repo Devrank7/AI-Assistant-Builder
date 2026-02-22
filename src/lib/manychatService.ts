@@ -392,7 +392,7 @@ async function processMessage(
     const systemPrompt = igConfig?.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     const aiModel = igConfig?.aiModel || 'gemini-3-flash-preview';
     const temperature = igConfig?.temperature ?? 0.7;
-    const maxTokens = igConfig?.maxTokens || 1024;
+    const maxTokens = igConfig?.maxTokens || 2048;
 
     // --- Build prompt ---
     let prompt = systemPrompt;
