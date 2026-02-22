@@ -21,7 +21,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Public API routes (no auth required)
-  const publicApiPaths = ['/api/clients/demo'];
+  const publicApiPaths = ['/api/clients/demo', '/api/webhooks'];
   if (publicApiPaths.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
@@ -34,7 +34,6 @@ export function middleware(request: NextRequest) {
     '/api/audit-log',
     '/api/notifications',
     '/api/invoices',
-    '/api/webhooks',
     '/api/export',
     '/api/payments',
   ];
