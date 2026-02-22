@@ -283,6 +283,10 @@ async function processMessage(
     if (messageType === 'voice' && mediaUrl) {
       const media = await downloadMedia(mediaUrl);
       if (media) {
+        // Instagram sends voice as video/mp4 — remap to audio/mp4 for Gemini
+        if (media.mimeType.startsWith('video/')) {
+          media.mimeType = media.mimeType.replace('video/', 'audio/');
+        }
         audioData = media;
         textMessage = 'Пользователь отправил голосовое сообщение. Послушай его и ответь на то, что он сказал.';
       } else {
@@ -341,7 +345,20 @@ async function processMessage(
 
     const contentInput = mediaParts.length > 0 ? [{ text: prompt }, ...mediaParts] : prompt;
 
-    const result = await model.generateContent(contentInput);
+    // Call Gemini with one retry on 500 errors
+    let result;
+    try {
+      result = await model.generateContent(contentInput);
+    } catch (err: unknown) {
+      const status = (err as { status?: number }).status;
+      if (status === 500 || status === 503) {
+        console.log('[ManyChat] Gemini 500/503, retrying once...');
+        await new Promise((r) => setTimeout(r, 1000));
+        result = await model.generateContent(contentInput);
+      } else {
+        throw err;
+      }
+    }
     let responseText = result.response.text();
 
     // Truncate for Instagram DM limits (1000 chars)
