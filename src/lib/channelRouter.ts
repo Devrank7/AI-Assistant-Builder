@@ -110,7 +110,7 @@ async function getAIConfig(clientId: string): Promise<AIConfig> {
     model: resolvedModel.id,
     systemPrompt: settingsDoc?.systemPrompt || defaultSystemPrompt,
     temperature: settingsDoc?.temperature || 0.7,
-    maxTokens: settingsDoc?.maxTokens || 2048,
+    maxTokens: settingsDoc?.maxTokens || 8196,
     topK: settingsDoc?.topK || 3,
     handoffEnabled: settingsDoc?.handoffEnabled ?? false,
   };

@@ -103,3 +103,14 @@ Failed: 1. username — website (error)
 ```
 
 Always send report and update sheet, even if all leads failed.
+
+---
+
+## Critical Notes
+
+These notes apply to all widgets built via this skill. See also [create-quick-widget/SKILL.md — Critical Notes](../create-quick-widget/SKILL.md#critical-notes).
+
+1. **Demo links must include `type=quick`** — without it, the demo page loads from `/widgets/` instead of `/quickwidgets/`, causing 404s or wrong widget
+2. **Never edit `main.jsx` for init code** — Prettier auto-format strips changes; API base URL detection is handled by Rollup `banner` in `vite.config.js`
+3. **Always set AI system prompt with company name** — default prompt is generic; without a company-specific prompt, the AI responds as "WinBix AI" instead of the client's company
+4. **Builds are sequential** — the build pipeline shares source files, parallel builds will corrupt each other

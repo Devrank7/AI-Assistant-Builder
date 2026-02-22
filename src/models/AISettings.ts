@@ -50,7 +50,7 @@ const AISettingsSchema = new Schema<IAISettings>(
     maxTokens: {
       type: Number,
       required: true,
-      default: 1024,
+      default: 8196,
     },
     topK: {
       type: Number,

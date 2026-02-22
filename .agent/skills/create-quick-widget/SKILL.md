@@ -163,9 +163,37 @@ curl -s -X POST "http://localhost:3000/api/telegram/notify" \
 ```
 ✅ Quick widget created for <Brand Name>!
 📋 Summary: Brand: <name> | Colors: <primary>/<accent> | Theme: <light/dark>
-🔗 Demo: http://localhost:3000/demo/client-website?client=<clientId>&website=<encoded_url>
+🔗 Demo: http://localhost:3000/demo/client-website?client=<clientId>&type=quick&website=<encoded_url>
 📦 Embed: <script src="https://winbix-ai.pp.ua/quickwidgets/<clientId>/script.js"></script>
 ```
+
+---
+
+## Critical Notes
+
+### Demo Link Must Include `type=quick`
+
+Demo links for quick widgets MUST include `type=quick` parameter:
+
+```
+/demo/client-website?client=<clientId>&type=quick&website=<encoded_url>
+```
+
+Without `type=quick`, the demo page loads widgets from `/widgets/` instead of `/quickwidgets/`, causing 404 errors or loading the wrong widget.
+
+### API Base URL Detection — Handled by Vite Banner
+
+The `vite.config.js` injects an API base URL auto-detection script via Rollup `banner` option. This runs post-build and detects the server origin from the script tag's `src` attribute (`/quickwidgets/` or `/widgets/`).
+
+**Do NOT** add API base URL detection code to `main.jsx` — Vite tree-shakes it out, and Prettier auto-format will strip manual edits. The banner approach in `vite.config.js` is the correct and only solution.
+
+### Never Edit main.jsx for Initialization Code
+
+VSCode Prettier auto-format runs on save and will strip any manually added code from `main.jsx`. All initialization code (API base URL detection, Google Fonts loading) is handled by the Rollup `banner` in `vite.config.js`.
+
+### AI Settings — Always Set Company Name
+
+The system prompt MUST include the client's company name (e.g., "You are an AI assistant for <Brand Name>"). Without this, the default prompt is generic and the AI may respond as "WinBix AI" instead of the client's company. The `greeting` field should match the `welcomeMessage` from widget.config.json.
 
 ---
 
