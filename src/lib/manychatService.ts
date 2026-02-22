@@ -283,10 +283,11 @@ async function processMessage(
     if (messageType === 'voice' && mediaUrl) {
       const media = await downloadMedia(mediaUrl);
       if (media) {
-        // Instagram sends voice as video/mp4 — remap to audio/mp4 for Gemini
-        if (media.mimeType.startsWith('video/')) {
-          media.mimeType = media.mimeType.replace('video/', 'audio/');
-        }
+        // Instagram sends voice as video/mp4 (AAC inside MP4 container)
+        // Gemini only accepts: audio/wav, audio/mp3, audio/aac, audio/ogg, audio/flac
+        // Force audio/aac which is the actual codec inside Instagram MP4
+        media.mimeType = 'audio/aac';
+        console.log(`[ManyChat] Voice mimeType set to: ${media.mimeType}`);
         audioData = media;
         textMessage = 'Пользователь отправил голосовое сообщение. Послушай его и ответь на то, что он сказал.';
       } else {
