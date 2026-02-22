@@ -301,7 +301,7 @@ async function processMessage(
     // --- Load Instagram config from DB (admin panel settings) ---
     const igConfig = await InstagramConfig.findOne();
     const systemPrompt = igConfig?.systemPrompt || DEFAULT_SYSTEM_PROMPT;
-    const aiModel = igConfig?.aiModel || 'gemini-2.0-flash';
+    const aiModel = igConfig?.aiModel || 'gemini-3-flash-preview';
     const temperature = igConfig?.temperature ?? 0.7;
     const maxTokens = igConfig?.maxTokens || 1024;
 

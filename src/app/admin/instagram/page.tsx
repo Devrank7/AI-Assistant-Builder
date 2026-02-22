@@ -19,7 +19,7 @@ export default function AdminInstagramPage() {
     pageAccessToken: '',
     pageId: '',
     isActive: false,
-    aiModel: 'gemini-2.0-flash',
+    aiModel: 'gemini-3-flash-preview',
     temperature: 0.7,
     maxTokens: 1024,
   });
@@ -287,9 +287,9 @@ export default function AdminInstagramPage() {
                 onChange={(e) => setConfig({ ...config, aiModel: e.target.value })}
                 className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
               >
-                <option value="gemini-2.0-flash">Gemini 2.0 Flash (fast)</option>
-                <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash (balanced)</option>
-                <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro (quality)</option>
+                <option value="gemini-3-flash-preview">Gemini 3 Flash (fast)</option>
+                <option value="gemini-3-pro-preview">Gemini 3 Pro (balanced)</option>
+                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (quality)</option>
               </select>
             </div>
 

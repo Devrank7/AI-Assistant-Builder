@@ -34,7 +34,7 @@ const InstagramConfigSchema = new Schema<IInstagramConfig>(
     },
     aiModel: {
       type: String,
-      default: 'gemini-2.0-flash',
+      default: 'gemini-3-flash-preview',
     },
     temperature: {
       type: Number,
