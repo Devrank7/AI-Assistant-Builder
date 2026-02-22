@@ -5,19 +5,18 @@
  * NOT connected to widget clients — this is an independent assistant.
  *
  * Features:
- * - Text messages: direct AI response
- * - Voice messages: download audio → Gemini transcribes & responds
- * - Photo messages: download image → Gemini analyzes & responds
+ * - Text messages: synchronous response (within 10s ManyChat limit)
+ * - Voice messages: async — instant "processing" reply, then AI response via ManyChat API
+ * - Photo messages: async — same pattern as voice
  * - Conversation history: persisted per Instagram user
  * - Username whitelist: only responds to allowed accounts
  *
- * Flow:
- * 1. User sends DM on Instagram
- * 2. ManyChat receives it → triggers External Request to our webhook
- * 3. We detect message type, download media if needed
- * 4. Load conversation history for this user
- * 5. Send to Gemini API with system prompt + history
- * 6. Save conversation, return response in ManyChat v2 format
+ * Flow (text):
+ * 1. ManyChat sends External Request → we respond within 9s
+ *
+ * Flow (voice/photo):
+ * 1. ManyChat sends External Request → we instantly reply "Processing..."
+ * 2. Background: download media → Gemini processes → send response via ManyChat sendContent API
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -25,7 +24,7 @@ import connectDB from '@/lib/mongodb';
 import ChatLog from '@/models/ChatLog';
 import InstagramConfig from '@/models/InstagramConfig';
 
-// ManyChat External Request timeout is ~10s; we use 9s to leave margin
+// ManyChat External Request timeout is ~10s; we use 9s for text messages
 const MANYCHAT_TIMEOUT_MS = 9_000;
 
 // Only respond to these Instagram usernames (empty array = respond to all)
@@ -98,6 +97,48 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T
 }
 
 /**
+ * Send a message directly to a subscriber via ManyChat API (bypasses 10s limit)
+ */
+async function sendViaManyChatAPI(subscriberId: string, text: string): Promise<void> {
+  const apiKey = process.env.MANYCHAT_API_KEY;
+  if (!apiKey) {
+    console.error('[ManyChat] MANYCHAT_API_KEY not set, cannot send async response');
+    return;
+  }
+
+  try {
+    const response = await fetch('https://api.manychat.com/fb/sending/sendContent', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        subscriber_id: Number(subscriberId),
+        data: {
+          version: 'v2',
+          content: {
+            type: 'instagram',
+            messages: [{ type: 'text', text }],
+            actions: [],
+            quick_replies: [],
+          },
+        },
+      }),
+    });
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      console.log(`[ManyChat] Async message sent via API (${text.length} chars)`);
+    } else {
+      console.error('[ManyChat] API sendContent failed:', JSON.stringify(result).slice(0, 300));
+    }
+  } catch (error) {
+    console.error('[ManyChat] API sendContent error:', error);
+  }
+}
+
+/**
  * Detect if a string looks like a media URL
  */
 function isMediaUrl(text: string): boolean {
@@ -142,7 +183,7 @@ async function downloadMedia(url: string): Promise<{ data: string; mimeType: str
     console.log(`[ManyChat] Downloading media: ${url.slice(0, 100)}...`);
     const response = await fetch(url, {
       headers: { 'User-Agent': 'WinBix-AI/1.0' },
-      signal: AbortSignal.timeout(6_000),
+      signal: AbortSignal.timeout(15_000),
     });
 
     if (!response.ok) {
@@ -253,13 +294,47 @@ export async function processManyChatWebhook(body: ManyChatWebhookBody): Promise
     messageType,
   };
 
+  // --- Voice/Photo: async processing (no 10s limit) ---
+  if (messageType !== 'text' && mediaUrl && body.subscriber_id) {
+    // Fire and forget — process in background, send response via ManyChat API
+    processMediaAsync(inputText, messageType, mediaUrl, sessionId, metadata, body.subscriber_id).catch((err) =>
+      console.error('[ManyChat] Async processing failed:', err)
+    );
+    // Return empty response immediately — the real response comes via API
+    return buildResponse('');
+  }
+
+  // --- Text: synchronous processing (within 9s) ---
   const timeoutResponse = buildResponse('Извините, ответ занимает слишком много времени. Попробуйте ещё раз.');
 
   return withTimeout(
-    processMessage(inputText, messageType, mediaUrl, sessionId, metadata),
+    processMessage(inputText, messageType, undefined, sessionId, metadata),
     MANYCHAT_TIMEOUT_MS,
     timeoutResponse
   );
+}
+
+/**
+ * Async processing for voice/photo — no time limit, sends via ManyChat API
+ */
+async function processMediaAsync(
+  rawMessage: string,
+  messageType: MessageType,
+  mediaUrl: string,
+  sessionId: string,
+  metadata: Record<string, unknown>,
+  subscriberId: string
+): Promise<void> {
+  try {
+    const response = await processMessage(rawMessage, messageType, mediaUrl, sessionId, metadata);
+    const text = response.content.messages[0]?.text;
+    if (text) {
+      await sendViaManyChatAPI(subscriberId, text);
+    }
+  } catch (error) {
+    console.error('[ManyChat] Async media processing error:', error);
+    await sendViaManyChatAPI(subscriberId, 'Произошла ошибка при обработке. Попробуйте отправить текстом.');
+  }
 }
 
 /**
@@ -309,10 +384,7 @@ async function processMessage(
     const systemPrompt = igConfig?.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     const aiModel = igConfig?.aiModel || 'gemini-3-flash-preview';
     const temperature = igConfig?.temperature ?? 0.7;
-    const configMaxTokens = igConfig?.maxTokens || 1024;
-    // Voice/photo need faster responses — cap tokens to speed up Gemini
-    const hasMedia = !!(audioData || imageData);
-    const maxTokens = hasMedia ? Math.min(configMaxTokens, 256) : configMaxTokens;
+    const maxTokens = igConfig?.maxTokens || 1024;
 
     // --- Build prompt ---
     let prompt = systemPrompt;
@@ -323,9 +395,6 @@ async function processMessage(
     }
 
     prompt += `\n\nUser: ${textMessage}`;
-    if (hasMedia) {
-      prompt += '\n\nОтветь кратко, максимум 2-3 предложения.';
-    }
 
     // --- Call Gemini API ---
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -356,7 +425,7 @@ async function processMessage(
       responseText = responseText.slice(0, 997) + '...';
     }
 
-    // Save conversation history (non-blocking — don't wait for DB write)
+    // Save conversation history (non-blocking)
     saveHistory(sessionId, textMessage, responseText, metadata).catch(() => {});
 
     console.log(`[ManyChat] Response (${responseText.length} chars): ${responseText.slice(0, 80)}...`);
