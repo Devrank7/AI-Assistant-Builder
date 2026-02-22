@@ -1,0 +1,18 @@
+{
+  "name": "Avion Dental",
+  "clientId": "demo-aviondentalgp-com-df131a",
+  "username": "demo-aviondentalgp-com-df131a",
+  "email": "",
+  "website": "https://www.aviondentalgp.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T08:47:43.541Z",
+  "version": "2.0.0",
+  "selfService": true
+}

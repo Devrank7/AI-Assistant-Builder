@@ -4,6 +4,23 @@ import './index.css';
 
 window.__WIDGET_CONFIG__ = __WIDGET_CONFIG__;
 
+// Auto-detect API base URL from the script's own src
+(function() {
+    try {
+        const scripts = document.querySelectorAll('script[src]');
+        for (const s of scripts) {
+            if (s.src && (s.src.includes('/quickwidgets/') || s.src.includes('/widgets/'))) {
+                const url = new URL(s.src);
+                window.__WIDGET_API_BASE__ = url.origin;
+                break;
+            }
+        }
+    } catch (e) {}
+    if (!window.__WIDGET_API_BASE__) {
+        window.__WIDGET_API_BASE__ = '';
+    }
+})();
+
 class AIChatWidget extends HTMLElement {
     constructor() {
         super();
@@ -11,6 +28,14 @@ class AIChatWidget extends HTMLElement {
     }
 
     connectedCallback() {
+        // Load Google Fonts into document head (fonts are global, available in Shadow DOM)
+        const fontHref = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap';
+        if (!document.querySelector('link[href="' + fontHref + '"]')) {
+            const fontLink = document.createElement('link');
+            fontLink.rel = 'stylesheet';
+            fontLink.href = fontHref;
+            document.head.appendChild(fontLink);
+        }
 
         const container = document.createElement('div');
         container.id = 'widget-root';

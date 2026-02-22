@@ -1,0 +1,18 @@
+{
+  "name": "The Art of Orthodontics",
+  "clientId": "demo-theartoforthodontics-516b0d",
+  "username": "demo-theartoforthodontics-516b0d",
+  "email": "",
+  "website": "https://www.theartoforthodontics.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T08:51:15.963Z",
+  "version": "2.0.0",
+  "selfService": true
+}

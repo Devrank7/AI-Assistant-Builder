@@ -1,0 +1,18 @@
+{
+  "name": "Periodontal Therapy Frisco",
+  "clientId": "demo-friscoperio-com-07ed46",
+  "username": "demo-friscoperio-com-07ed46",
+  "email": "",
+  "website": "https://www.friscoperio.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T08:50:41.132Z",
+  "version": "2.0.0",
+  "selfService": true
+}

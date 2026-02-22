@@ -1,0 +1,18 @@
+{
+  "name": "Orthodontist in Allen &amp; McKinney TX",
+  "clientId": "demo-forgreatsmiles-com-08a1b8",
+  "username": "demo-forgreatsmiles-com-08a1b8",
+  "email": "",
+  "website": "https://www.forgreatsmiles.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T22:54:42.100Z",
+  "version": "2.0.0",
+  "selfService": true
+}

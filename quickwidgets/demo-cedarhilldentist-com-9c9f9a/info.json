@@ -1,0 +1,18 @@
+{
+  "name": "Cedar Hill, TX Dentist",
+  "clientId": "demo-cedarhilldentist-com-9c9f9a",
+  "username": "demo-cedarhilldentist-com-9c9f9a",
+  "email": "",
+  "website": "http://www.cedarhilldentist.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T09:58:01.374Z",
+  "version": "2.0.0",
+  "selfService": true
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Kids Dentist Allen",
+  "clientId": "demo-kidspediatricdentist-5dbe32",
+  "username": "demo-kidspediatricdentist-5dbe32",
+  "email": "",
+  "website": "http://www.kidspediatricdentistry.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:54:10.709Z",
+  "version": "2.0.0",
+  "selfService": true
+}

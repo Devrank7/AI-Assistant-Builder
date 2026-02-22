@@ -1,0 +1,18 @@
+{
+  "name": "Metroplex Oral &amp; Facial Surgery &#8211; Center for Dental Implants",
+  "clientId": "demo-metroplexoralsurgery-d49917",
+  "username": "demo-metroplexoralsurgery-d49917",
+  "email": "",
+  "website": "http://www.metroplexoralsurgery.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:54:42.277Z",
+  "version": "2.0.0",
+  "selfService": true
+}

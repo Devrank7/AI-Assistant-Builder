@@ -1,0 +1,34 @@
+{
+  "clientId": "demo-westallendental-com-c12fd4",
+  "botName": "Allen Dentist AI",
+  "welcomeMessage": "Hi there! 👋 I'm the **Allen Dentist** AI assistant. How can I help you?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Tell me about your company", "What services do you offer?", "How can I contact you?"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AD"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "👋 Hi there! Need any help?"
+    }
+  },
+  "contacts": {
+    "phone": "(469)242-9500",
+    "email": "info@westallendental.com",
+    "website": "https://www.westallendental.com/"
+  }
+}

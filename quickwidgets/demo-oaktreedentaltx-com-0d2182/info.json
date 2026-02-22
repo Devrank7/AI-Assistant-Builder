@@ -1,0 +1,18 @@
+{
+  "name": "5120 Hwy 78 Ste#400 972.414.2300 info@oaktreedentaltx.com",
+  "clientId": "demo-oaktreedentaltx-com-0d2182",
+  "username": "demo-oaktreedentaltx-com-0d2182",
+  "email": "",
+  "website": "https://oaktreedentaltx.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T08:48:04.504Z",
+  "version": "2.0.0",
+  "selfService": true
+}

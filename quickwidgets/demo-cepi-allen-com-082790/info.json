@@ -1,0 +1,18 @@
+{
+  "name": "Center of Endodontics, Periodontics and Implantology",
+  "clientId": "demo-cepi-allen-com-082790",
+  "username": "demo-cepi-allen-com-082790",
+  "email": "",
+  "website": "http://www.cepi-allen.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T09:58:22.449Z",
+  "version": "2.0.0",
+  "selfService": true
+}

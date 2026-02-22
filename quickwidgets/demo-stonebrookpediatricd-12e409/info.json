@@ -1,0 +1,18 @@
+{
+  "name": "Pediatric Dentist Frisco",
+  "clientId": "demo-stonebrookpediatricd-12e409",
+  "username": "demo-stonebrookpediatricd-12e409",
+  "email": "",
+  "website": "https://www.stonebrookpediatricdentistry.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T22:52:11.065Z",
+  "version": "2.0.0",
+  "selfService": true
+}

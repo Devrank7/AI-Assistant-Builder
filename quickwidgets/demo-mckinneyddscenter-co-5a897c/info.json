@@ -1,0 +1,18 @@
+{
+  "name": "McKinney Dental and Implant Center",
+  "clientId": "demo-mckinneyddscenter-co-5a897c",
+  "username": "demo-mckinneyddscenter-co-5a897c",
+  "email": "",
+  "website": "https://mckinneyddscenter.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T09:58:28.608Z",
+  "version": "2.0.0",
+  "selfService": true
+}

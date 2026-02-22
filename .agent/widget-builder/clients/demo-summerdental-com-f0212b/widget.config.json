@@ -1,0 +1,34 @@
+{
+  "clientId": "demo-summerdental-com-f0212b",
+  "botName": "Summer Smiles Dental & Orthodontics AI",
+  "welcomeMessage": "Hi there! 👋 I'm the **Summer Smiles Dental & Orthodontics** AI assistant. How can I help you?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Tell me about your company", "What services do you offer?", "How can I contact you?"],
+  "avatar": {
+    "type": "initials",
+    "initials": "SS"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "👋 Hi there! Need any help?"
+    }
+  },
+  "contacts": {
+    "phone": "214-383-5562",
+    "email": "info@summerdental.com",
+    "website": "http://www.summerdental.com/"
+  }
+}

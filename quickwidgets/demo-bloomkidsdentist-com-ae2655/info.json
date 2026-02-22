@@ -1,0 +1,18 @@
+{
+  "name": "Pediatric Dentist Murphy, TX",
+  "clientId": "demo-bloomkidsdentist-com-ae2655",
+  "username": "demo-bloomkidsdentist-com-ae2655",
+  "email": "",
+  "website": "https://www.bloomkidsdentist.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:57:33.587Z",
+  "version": "2.0.0",
+  "selfService": true
+}

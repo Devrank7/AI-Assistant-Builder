@@ -1,0 +1,18 @@
+{
+  "name": "Dentist in Royse City, TX",
+  "clientId": "demo-signaturesmiledfw-co-cb40a8",
+  "username": "demo-signaturesmiledfw-co-cb40a8",
+  "email": "",
+  "website": "http://www.signaturesmiledfw.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T09:58:46.078Z",
+  "version": "2.0.0",
+  "selfService": true
+}

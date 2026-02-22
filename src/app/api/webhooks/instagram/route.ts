@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processInstagramWebhook } from '@/lib/instagramService';
+import { processGlobalInstagramWebhook, processInstagramWebhook } from '@/lib/instagramService';
 
 const VERIFY_TOKEN = process.env.INSTAGRAM_VERIFY_TOKEN || 'winbix_instagram_verify';
 
@@ -21,12 +21,28 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/webhooks/instagram — Incoming Instagram messages
+ *
+ * Tries global auto-responder first. If the pageId doesn't match
+ * the global config, falls back to per-client ChannelConfig flow.
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    processInstagramWebhook(body).catch((err) => console.error('[Instagram] Webhook processing error:', err));
+    // Process asynchronously — always return 200 to Meta immediately
+    (async () => {
+      try {
+        // Try global handler first
+        const handled = await processGlobalInstagramWebhook(body);
+
+        // If not handled by global, try per-client
+        if (!handled) {
+          await processInstagramWebhook(body);
+        }
+      } catch (err) {
+        console.error('[Instagram] Webhook processing error:', err);
+      }
+    })();
 
     return NextResponse.json({ success: true });
   } catch (error) {

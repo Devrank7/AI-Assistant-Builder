@@ -1,0 +1,33 @@
+{
+  "clientId": "demo-cragunendo-com-e719f9",
+  "botName": "Endodontist in Frisco, TX AI",
+  "welcomeMessage": "Hi there! 👋 I'm the **Endodontist in Frisco, TX** AI assistant. How can I help you?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Tell me about your company", "What services do you offer?", "How can I contact you?"],
+  "avatar": {
+    "type": "initials",
+    "initials": "EI"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "👋 Hi there! Need any help?"
+    }
+  },
+  "contacts": {
+    "phone": "469-579-4201",
+    "website": "https://www.cragunendo.com/"
+  }
+}

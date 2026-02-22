@@ -1,0 +1,18 @@
+{
+  "name": "Precisionendodallas",
+  "clientId": "demo-precisionendodallas--545d6d",
+  "username": "demo-precisionendodallas--545d6d",
+  "email": "",
+  "website": "https://www.precisionendodallas.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T08:50:22.458Z",
+  "version": "2.0.0",
+  "selfService": true
+}

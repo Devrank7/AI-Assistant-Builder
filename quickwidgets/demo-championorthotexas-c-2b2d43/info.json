@@ -1,0 +1,18 @@
+{
+  "name": "Orthodontics in Garland, Texas",
+  "clientId": "demo-championorthotexas-c-2b2d43",
+  "username": "demo-championorthotexas-c-2b2d43",
+  "email": "",
+  "website": "http://www.championorthotexas.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:56:23.655Z",
+  "version": "2.0.0",
+  "selfService": true
+}

@@ -15,16 +15,16 @@ export default function QuickReplies({ options, onSelect }) {
                     whileHover={{ scale: 1.015, y: -1 }}
                     whileTap={{ scale: 0.985 }}
                     onClick={() => onSelect(option)}
-                    className="group relative w-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer text-left shadow-sm hover:shadow-md bg-white/80 border-[#99c7f5] hover:border-[#66abf0] hover:bg-[#b3d5f8]/40 group-hover:shadow-[0_2px_16px_rgba(0,115,230,0.10)]"
+                    className="group relative w-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer text-left shadow-sm hover:shadow-md bg-white/80 border-[#d3b574] hover:border-[#ebad60] hover:bg-[#f4f0e6]/40 group-hover:shadow-[0_2px_16px_rgba(27,28,74,0.10)]"
                     style={{ backdropFilter: 'blur(8px)' }}
                 >
                     <div className="relative flex items-center gap-3 px-3.5 py-2.5">
-                        <span className="flex-shrink-0 w-7 h-7 rounded-xl bg-gradient-to-br from-[#0073e6]/[0.12] to-[#0073e6]/[0.05] flex items-center justify-center shadow-sm">
-                            <MessageCircle size={13} className="text-[#0073e6]" />
+                        <span className="flex-shrink-0 w-7 h-7 rounded-xl bg-gradient-to-br from-[#1b1c4a]/[0.12] to-[#1b1c4a]/[0.05] flex items-center justify-center shadow-sm">
+                            <MessageCircle size={13} className="text-[#1b1c4a]" />
                         </span>
-                        <span className="text-[12px] font-medium leading-snug text-[#005ebd]">{option}</span>
+                        <span className="text-[12px] font-medium leading-snug text-[#1b1c4a]">{option}</span>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#0073e6]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#1b1c4a]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 </motion.button>
             ))}
         </div>

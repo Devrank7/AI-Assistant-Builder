@@ -1,0 +1,18 @@
+{
+  "name": "Dentist Richardson, TX",
+  "clientId": "demo-jupiterfamdental-com-356865",
+  "username": "demo-jupiterfamdental-com-356865",
+  "email": "",
+  "website": "https://www.jupiterfamdental.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:57:15.925Z",
+  "version": "2.0.0",
+  "selfService": true
+}

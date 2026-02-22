@@ -1,0 +1,18 @@
+{
+  "name": "Orthodontist In Plano &amp; Anna, Texas",
+  "clientId": "demo-mpbraces-com-cc76da",
+  "username": "demo-mpbraces-com-cc76da",
+  "email": "",
+  "website": "https://mpbraces.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:55:33.690Z",
+  "version": "2.0.0",
+  "selfService": true
+}

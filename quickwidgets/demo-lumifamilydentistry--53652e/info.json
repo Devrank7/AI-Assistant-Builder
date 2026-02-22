@@ -1,0 +1,18 @@
+{
+  "name": "Trusted Dentist in Sachse, TX",
+  "clientId": "demo-lumifamilydentistry--53652e",
+  "username": "demo-lumifamilydentistry--53652e",
+  "email": "",
+  "website": "https://lumifamilydentistry.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:56:02.331Z",
+  "version": "2.0.0",
+  "selfService": true
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Orthodontist Sachse, TX",
+  "clientId": "demo-smilebriteorthodonti-6142c9",
+  "username": "demo-smilebriteorthodonti-6142c9",
+  "email": "",
+  "website": "http://smilebriteorthodontics.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T22:53:31.355Z",
+  "version": "2.0.0",
+  "selfService": true
+}

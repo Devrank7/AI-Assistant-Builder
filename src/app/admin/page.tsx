@@ -51,6 +51,12 @@ export default function AdminDashboard() {
                 Settings
               </Link>
               <Link
+                href="/admin/instagram"
+                className="rounded-lg px-4 py-2 text-sm text-gray-400 transition-all hover:bg-white/5 hover:text-white"
+              >
+                Instagram
+              </Link>
+              <Link
                 href="#"
                 className="rounded-lg px-4 py-2 text-sm text-gray-400 transition-all hover:bg-white/5 hover:text-white"
               >

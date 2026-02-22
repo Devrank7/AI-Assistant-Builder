@@ -1,0 +1,18 @@
+{
+  "name": "Polarisdentistry",
+  "clientId": "demo-polarisdentistry-com-d84072",
+  "username": "demo-polarisdentistry-com-d84072",
+  "email": "",
+  "website": "https://polarisdentistry.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T09:58:16.549Z",
+  "version": "2.0.0",
+  "selfService": true
+}

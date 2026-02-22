@@ -1,0 +1,18 @@
+{
+  "name": "Texas Endodontics",
+  "clientId": "demo-frisco-endo-com-0b5e5a",
+  "username": "demo-frisco-endo-com-0b5e5a",
+  "email": "",
+  "website": "https://www.frisco-endo.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:57:44.175Z",
+  "version": "2.0.0",
+  "selfService": true
+}

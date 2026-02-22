@@ -1,0 +1,18 @@
+{
+  "name": "Endodontic Associates of Carrollton &#8211; Welcome To Our Site",
+  "clientId": "demo-eaofcarrollton-com-ac0e49",
+  "username": "demo-eaofcarrollton-com-ac0e49",
+  "email": "",
+  "website": "https://eaofcarrollton.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T22:54:52.858Z",
+  "version": "2.0.0",
+  "selfService": true
+}

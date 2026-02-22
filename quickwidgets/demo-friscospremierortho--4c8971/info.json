@@ -1,0 +1,18 @@
+{
+  "name": "Top Orthodontics Care",
+  "clientId": "demo-friscospremierortho--4c8971",
+  "username": "demo-friscospremierortho--4c8971",
+  "email": "",
+  "website": "https://friscospremierortho.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T08:49:24.478Z",
+  "version": "2.0.0",
+  "selfService": true
+}

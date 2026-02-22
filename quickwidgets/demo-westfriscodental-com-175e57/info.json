@@ -1,0 +1,18 @@
+{
+  "name": "West Frisco Dental and Implants &#8211; Family and implant dentistry in Frisco",
+  "clientId": "demo-westfriscodental-com-175e57",
+  "username": "demo-westfriscodental-com-175e57",
+  "email": "",
+  "website": "https://westfriscodental.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:54:00.060Z",
+  "version": "2.0.0",
+  "selfService": true
+}

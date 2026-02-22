@@ -1,0 +1,18 @@
+{
+  "name": "Pediatric Dentist in Carrollton",
+  "clientId": "demo-kids101pediatricdent-2f5648",
+  "username": "demo-kids101pediatricdent-2f5648",
+  "email": "",
+  "website": "https://www.kids101pediatricdentistry.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:54:05.450Z",
+  "version": "2.0.0",
+  "selfService": true
+}

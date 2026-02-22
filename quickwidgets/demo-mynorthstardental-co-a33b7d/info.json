@@ -1,0 +1,18 @@
+{
+  "name": "Dentist In Richardson, TX",
+  "clientId": "demo-mynorthstardental-co-a33b7d",
+  "username": "demo-mynorthstardental-co-a33b7d",
+  "email": "",
+  "website": "https://mynorthstardental.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:56:54.670Z",
+  "version": "2.0.0",
+  "selfService": true
+}

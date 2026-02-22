@@ -1,0 +1,18 @@
+{
+  "name": "Prime Orthodontics",
+  "clientId": "demo-primeorthodontics-co-afef94",
+  "username": "demo-primeorthodontics-co-afef94",
+  "email": "",
+  "website": "https://primeorthodontics.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:54:31.465Z",
+  "version": "2.0.0",
+  "selfService": true
+}

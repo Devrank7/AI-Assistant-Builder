@@ -1,0 +1,18 @@
+{
+  "name": "Dentist in Garland, TX",
+  "clientId": "demo-dentalimplantsandper-f44e82",
+  "username": "demo-dentalimplantsandper-f44e82",
+  "email": "",
+  "website": "https://www.dentalimplantsandperio.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T22:52:55.918Z",
+  "version": "2.0.0",
+  "selfService": true
+}

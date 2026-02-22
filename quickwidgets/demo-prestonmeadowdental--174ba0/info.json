@@ -1,0 +1,18 @@
+{
+  "name": "Family Dentist in Plano, TX",
+  "clientId": "demo-prestonmeadowdental--174ba0",
+  "username": "demo-prestonmeadowdental--174ba0",
+  "email": "",
+  "website": "https://www.prestonmeadowdental.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:57:09.619Z",
+  "version": "2.0.0",
+  "selfService": true
+}

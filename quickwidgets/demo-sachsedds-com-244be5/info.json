@@ -1,0 +1,18 @@
+{
+  "name": "Discover Dentistry of Sachse",
+  "clientId": "demo-sachsedds-com-244be5",
+  "username": "demo-sachsedds-com-244be5",
+  "email": "",
+  "website": "https://www.sachsedds.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T08:50:05.380Z",
+  "version": "2.0.0",
+  "selfService": true
+}

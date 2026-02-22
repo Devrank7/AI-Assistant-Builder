@@ -1,32 +1,15 @@
 {
-  "clientId": "demo-expsuspension-com-a17462",
-  "botName": "Premium Auto Spare Parts in the UK AI",
-  "welcomeMessage": "Hi there! 👋 I'm the **Premium Auto Spare Parts in the UK** AI assistant. How can I help you?",
-  "inputPlaceholder": "Ask a question...",
-  "quickReplies": ["Tell me about your company", "What services do you offer?", "How can I contact you?"],
+  "clientId": "ziasnagging",
+  "botName": "Zia Luxury AI",
+  "welcomeMessage": "Welcome to Zia Luxury Property Observer! We provide certified property snagging & inspection services across Dubai and the UAE. How can I assist you today?",
+  "inputPlaceholder": "Ask about our services...",
+  "quickReplies": ["Book an inspection", "View our services", "Get a quote"],
   "avatar": {
     "type": "initials",
-    "initials": "PA"
-  },
-  "design": {
-    "position": "bottom-right"
+    "initials": "ZL"
   },
   "features": {
-    "streaming": true,
     "sound": true,
-    "voiceInput": true,
-    "feedback": true,
-    "tts": true,
-    "autoLang": true,
-    "richCards": true,
-    "leadForm": true,
-    "memory": true,
-    "proactive": {
-      "delay": 8,
-      "message": "👋 Hi there! Need any help?"
-    }
-  },
-  "contacts": {
-    "website": "https://expsuspension.com"
+    "voiceInput": true
   }
 }

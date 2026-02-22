@@ -1,0 +1,33 @@
+{
+  "clientId": "demo-aaoralsurgery-com-4351aa",
+  "botName": "Andrew Arango Oral and Facial Surgery AI",
+  "welcomeMessage": "Hi there! 👋 I'm the **Andrew Arango Oral and Facial Surgery** AI assistant. How can I help you?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Tell me about your company", "What services do you offer?", "How can I contact you?"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AA"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "👋 Hi there! Need any help?"
+    }
+  },
+  "contacts": {
+    "email": "info@AAORALSURGERY.com",
+    "website": "http://www.aaoralsurgery.com/"
+  }
+}

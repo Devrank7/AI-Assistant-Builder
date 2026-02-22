@@ -1,0 +1,18 @@
+{
+  "name": "Flower Mound and Denton, TX",
+  "clientId": "demo-piedental-com-bdce05",
+  "username": "demo-piedental-com-bdce05",
+  "email": "",
+  "website": "http://www.piedental.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-22T09:58:49.908Z",
+  "version": "2.0.0",
+  "selfService": true
+}

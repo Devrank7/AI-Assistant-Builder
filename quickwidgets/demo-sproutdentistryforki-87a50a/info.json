@@ -1,0 +1,18 @@
+{
+  "name": "Pediatric Dentistry in North Texas",
+  "clientId": "demo-sproutdentistryforki-87a50a",
+  "username": "demo-sproutdentistryforki-87a50a",
+  "email": "",
+  "website": "https://www.sproutdentistryforkids.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-02-21T23:55:01.379Z",
+  "version": "2.0.0",
+  "selfService": true
+}
