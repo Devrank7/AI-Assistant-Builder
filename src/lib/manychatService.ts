@@ -309,7 +309,10 @@ async function processMessage(
     const systemPrompt = igConfig?.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     const aiModel = igConfig?.aiModel || 'gemini-3-flash-preview';
     const temperature = igConfig?.temperature ?? 0.7;
-    const maxTokens = igConfig?.maxTokens || 1024;
+    const configMaxTokens = igConfig?.maxTokens || 1024;
+    // Voice/photo need faster responses — cap tokens to speed up Gemini
+    const hasMedia = !!(audioData || imageData);
+    const maxTokens = hasMedia ? Math.min(configMaxTokens, 256) : configMaxTokens;
 
     // --- Build prompt ---
     let prompt = systemPrompt;
@@ -320,6 +323,9 @@ async function processMessage(
     }
 
     prompt += `\n\nUser: ${textMessage}`;
+    if (hasMedia) {
+      prompt += '\n\nОтветь кратко, максимум 2-3 предложения.';
+    }
 
     // --- Call Gemini API ---
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
