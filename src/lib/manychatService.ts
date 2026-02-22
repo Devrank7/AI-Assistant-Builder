@@ -273,19 +273,21 @@ async function processMessage(
   metadata: Record<string, unknown>
 ): Promise<ManyChatResponse> {
   try {
-    await connectDB();
+    // --- Run DB connect + media download + config/history load in parallel ---
+    const mediaPromise = mediaUrl ? downloadMedia(mediaUrl) : Promise.resolve(null);
+    const dbPromise = connectDB().then(() => Promise.all([InstagramConfig.findOne(), loadHistory(sessionId)]));
 
-    // --- Download media if voice or photo ---
+    const [media, [igConfig, history]] = await Promise.all([mediaPromise, dbPromise]);
+
+    // --- Process media result ---
     let audioData: { data: string; mimeType: string } | undefined;
     let imageData: { data: string; mimeType: string } | undefined;
     let textMessage = rawMessage;
 
     if (messageType === 'voice' && mediaUrl) {
-      const media = await downloadMedia(mediaUrl);
       if (media) {
         // Instagram sends voice as video/mp4 (AAC inside MP4 container)
         // Gemini only accepts: audio/wav, audio/mp3, audio/aac, audio/ogg, audio/flac
-        // Force audio/aac which is the actual codec inside Instagram MP4
         media.mimeType = 'audio/aac';
         console.log(`[ManyChat] Voice mimeType set to: ${media.mimeType}`);
         audioData = media;
@@ -296,7 +298,6 @@ async function processMessage(
     }
 
     if (messageType === 'photo' && mediaUrl) {
-      const media = await downloadMedia(mediaUrl);
       if (media) {
         imageData = media;
         textMessage = 'Пользователь отправил фото. Посмотри на него и ответь уместно.';
@@ -305,15 +306,10 @@ async function processMessage(
       }
     }
 
-    // --- Load Instagram config from DB (admin panel settings) ---
-    const igConfig = await InstagramConfig.findOne();
     const systemPrompt = igConfig?.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     const aiModel = igConfig?.aiModel || 'gemini-3-flash-preview';
     const temperature = igConfig?.temperature ?? 0.7;
     const maxTokens = igConfig?.maxTokens || 1024;
-
-    // --- Load conversation history ---
-    const history = await loadHistory(sessionId);
 
     // --- Build prompt ---
     let prompt = systemPrompt;
@@ -346,20 +342,7 @@ async function processMessage(
 
     const contentInput = mediaParts.length > 0 ? [{ text: prompt }, ...mediaParts] : prompt;
 
-    // Call Gemini with one retry on 500 errors
-    let result;
-    try {
-      result = await model.generateContent(contentInput);
-    } catch (err: unknown) {
-      const status = (err as { status?: number }).status;
-      if (status === 500 || status === 503) {
-        console.log('[ManyChat] Gemini 500/503, retrying once...');
-        await new Promise((r) => setTimeout(r, 1000));
-        result = await model.generateContent(contentInput);
-      } else {
-        throw err;
-      }
-    }
+    const result = await model.generateContent(contentInput);
     let responseText = result.response.text();
 
     // Truncate for Instagram DM limits (1000 chars)
@@ -367,8 +350,8 @@ async function processMessage(
       responseText = responseText.slice(0, 997) + '...';
     }
 
-    // --- Save conversation history ---
-    await saveHistory(sessionId, textMessage, responseText, metadata);
+    // Save conversation history (non-blocking — don't wait for DB write)
+    saveHistory(sessionId, textMessage, responseText, metadata).catch(() => {});
 
     console.log(`[ManyChat] Response (${responseText.length} chars): ${responseText.slice(0, 80)}...`);
     return buildResponse(responseText);
