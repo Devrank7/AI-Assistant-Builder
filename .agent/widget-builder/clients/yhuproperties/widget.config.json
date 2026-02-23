@@ -1,0 +1,34 @@
+{
+  "clientId": "yhuproperties",
+  "botName": "YHU Properties AI",
+  "welcomeMessage": "Welcome to **YHU Properties**! How can I help you find your perfect property?",
+  "inputPlaceholder": "Ask about properties, prices, areas...",
+  "quickReplies": ["Buy a property", "Rent a property", "Off-plan projects"],
+  "avatar": {
+    "type": "initials",
+    "initials": "YP"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for property in Dubai? Let me help!"
+    }
+  },
+  "contacts": {
+    "phone": "548888914",
+    "email": "info@yhuproperties.com",
+    "website": "https://www.yhuproperties.com/"
+  }
+}

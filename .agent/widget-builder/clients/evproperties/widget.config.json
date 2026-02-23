@@ -1,15 +1,34 @@
 {
   "clientId": "evproperties",
   "botName": "Elite Venture AI",
-  "welcomeMessage": "Welcome to **Elite Venture Properties**!\n\nI'm your AI property assistant. I can help you explore premier Dubai properties, learn about investment opportunities, find off-plan and ready-to-move options, or connect you with our team.\n\nHow can I assist you today?",
-  "inputPlaceholder": "Ask about Dubai properties...",
-  "quickReplies": ["Featured projects in Dubai", "Investment opportunities", "Book a consultation"],
+  "welcomeMessage": "Welcome to **Elite Venture Properties**! How can I help you find your perfect property?",
+  "inputPlaceholder": "Ask about properties, prices, areas...",
+  "quickReplies": ["Buy a property", "Rent a property", "Off-plan projects"],
   "avatar": {
     "type": "initials",
     "initials": "EV"
   },
+  "design": {
+    "position": "bottom-right"
+  },
   "features": {
     "sound": true,
-    "voiceInput": true
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for property in Dubai? Let me help!"
+    }
+  },
+  "contacts": {
+    "phone": "543452231",
+    "email": "info@evproperties.ae",
+    "website": "http://www.evproperties.ae/"
   }
 }

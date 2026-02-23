@@ -1,0 +1,34 @@
+{
+  "clientId": "lariviera-ae",
+  "botName": "La Riviera AI",
+  "welcomeMessage": "Bienvenue chez **La Riviera Real Estate**! Comment puis-je vous aider?",
+  "inputPlaceholder": "Posez une question...",
+  "quickReplies": ["Acheter un bien", "Louer un bien", "Projets off-plan"],
+  "avatar": {
+    "type": "initials",
+    "initials": "LR"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Besoin d'aide pour trouver un bien à Dubaï?"
+    }
+  },
+  "contacts": {
+    "phone": "+97142962861",
+    "email": "contact@lariviera.ae",
+    "website": "http://larivierarealestate.com/"
+  }
+}

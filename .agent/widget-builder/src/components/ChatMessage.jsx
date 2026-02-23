@@ -1,21 +1,21 @@
 import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { User, Copy, Check, RotateCcw, ZoomIn, Sparkles } from 'lucide-preact';
+import { User, Copy, Check, RotateCcw, ZoomIn, Sparkles, Volume2, VolumeX } from 'lucide-preact';
 
 function formatRelativeTime(timestamp) {
     if (!timestamp) return '';
     const diff = Date.now() - timestamp;
     const seconds = Math.floor(diff / 1000);
-    if (seconds < 60) return 'щойно';
+    if (seconds < 60) return 'just now';
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} хв`;
+    if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} год`;
-    return `${Math.floor(hours / 24)} д`;
+    if (hours < 24) return `${hours}h`;
+    return `${Math.floor(hours / 24)}d`;
 }
 
-function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick }) {
+function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick, onSpeak, isSpeaking }) {
     const isBot = role === 'assistant';
     const [copied, setCopied] = useState(false);
 
@@ -37,15 +37,15 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         >
             {/* Bot Avatar */}
             {isBot && (
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#ccf5e5] to-[#b3f0d8] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#7ee8c0]/50">
-                    <Sparkles size={13} className="text-[#00b070]" />
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#040407] to-[#07070c] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#0a0a12]/50">
+                    <Sparkles size={13} className="text-[#1A1A2E]" />
                 </div>
             )}
 
             <div className="flex flex-col max-w-[78%]">
                 {imageUrl && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={`mb-1.5 ${isBot ? '' : 'flex justify-end'}`}>
-                        <div className="relative group/img cursor-pointer overflow-hidden rounded-2xl border border-gray-200 shadow-sm" onClick={() => onImageClick?.(imageUrl)}>
+                        <div className="relative group/img cursor-pointer overflow-hidden rounded-2xl border border-[#1e2d3d] shadow-sm" onClick={() => onImageClick?.(imageUrl)}>
                             <img src={imageUrl} alt="" className="max-w-[200px] max-h-[140px] object-cover rounded-2xl" />
                             <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/15 transition-all duration-200 flex items-center justify-center">
                                 <ZoomIn size={18} className="text-white opacity-0 group-hover/img:opacity-90 transition-opacity drop-shadow-lg" />
@@ -59,17 +59,17 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                         isError
                             ? 'bg-red-50 text-red-600 border border-red-200 rounded-bl-md'
                             : isBot
-                              ? 'bg-white text-gray-700 border border-gray-100 shadow-sm rounded-bl-md'
-                              : 'bg-gradient-to-r from-[#e6faf2] to-[#ccf5e5] text-gray-700 border border-[#7ee8c0]/50 rounded-br-md shadow-sm'
+                              ? 'bg-[#111927] text-[#e2e8f0] border border-[#1e2d3d] shadow-sm rounded-bl-md'
+                              : 'bg-gradient-to-r from-[#1A1A2E] to-[#D7D7D7] text-white rounded-br-md shadow-sm'
                     }`}>
-                        <div className="max-w-none [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
+                        <div className="max-w-none msg-text [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
-                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#00b070] hover:text-[#009960]">{children}</a>
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#babac0] hover:text-[#313143]">{children}</a>
                                     ),
                                     strong: ({ children }) => (
-                                        <strong className="font-semibold text-gray-900">{children}</strong>
+                                        <strong className="font-semibold text-white">{children}</strong>
                                     ),
                                     li: ({ children }) => (
                                         <li className="text-[12.5px] leading-relaxed">{children}</li>
@@ -83,22 +83,29 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 )}
 
                 <div className={`flex items-center gap-2 mt-1 px-1 ${isBot ? '' : 'justify-end'}`}>
-                    {timestamp && <span className="text-[10px] text-gray-400 font-medium">{formatRelativeTime(timestamp)}</span>}
+                    {timestamp && <span className="text-[10px] text-[#64748b] font-medium">{formatRelativeTime(timestamp)}</span>}
                     {isBot && !isError && content && (
-                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-[#00d084] transition-all duration-200" aria-label="Copy">
-                            {copied ? <Check size={11} className="text-[#00d084]" /> : <Copy size={11} />}
+                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-[#475569] hover:text-[#1A1A2E] transition-all duration-200" aria-label="Copy">
+                            {copied ? <Check size={11} className="text-[#1A1A2E]" /> : <Copy size={11} />}
+                        </button>
+                    )}
+                    {isBot && !isError && content && onSpeak && (
+                        <button onClick={() => onSpeak(content)}
+                            className={`p-0.5 transition-all duration-200 ${isSpeaking ? 'text-[#1A1A2E] opacity-100' : 'opacity-0 group-hover:opacity-100 text-[#475569] hover:text-[#1A1A2E]'}`}
+                            aria-label={isSpeaking ? 'Stop reading' : 'Read aloud'}>
+                            {isSpeaking ? <VolumeX size={11} /> : <Volume2 size={11} />}
                         </button>
                     )}
                     {isError && onRetry && (
                         <button onClick={onRetry} className="flex items-center gap-1 text-[10px] font-medium text-red-500 hover:text-red-600 transition-colors">
-                            <RotateCcw size={10} /> Повторити
+                            <RotateCcw size={10} /> Retry
                         </button>
                     )}
                 </div>
             </div>
 
             {!isBot && (
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#ccf5e5] to-[#b3f0d8] border border-[#7ee8c0]/50 text-[#00b070] flex-shrink-0 shadow-sm">
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#040407] to-[#07070c] border border-[#0a0a12]/50 text-[#1A1A2E] flex-shrink-0 shadow-sm">
                     <User size={13} />
                 </div>
             )}

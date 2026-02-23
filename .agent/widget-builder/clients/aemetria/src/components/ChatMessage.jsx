@@ -37,7 +37,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         >
             {/* Bot Avatar */}
             {isBot && (
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#E0F5F3] to-[#C2EBE7] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#8DD9D3]/50">
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#e8f6f5] to-[#bbe4e1] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#a4dbd7]/50">
                     <Sparkles size={13} className="text-[#1BA49A]" />
                 </div>
             )}
@@ -60,13 +60,13 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                             ? 'bg-red-50 text-red-600 border border-red-200 rounded-bl-md'
                             : isBot
                               ? 'bg-white text-gray-700 border border-gray-100 shadow-sm rounded-bl-md'
-                              : 'bg-gradient-to-r from-[#F0FAF9] to-[#E0F5F3] text-gray-700 border border-[#8DD9D3]/50 rounded-br-md shadow-sm'
+                              : 'bg-gradient-to-r from-[#e8f6f5] to-[#ddf1f0] text-gray-700 border border-[#a4dbd7]/50 rounded-br-md shadow-sm'
                     }`}>
                         <div className="max-w-none msg-text [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
-                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#1BA49A] hover:text-[#0E7B73]">{children}</a>
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#1BA49A] hover:text-[#16837b]">{children}</a>
                                     ),
                                     strong: ({ children }) => (
                                         <strong className="font-semibold text-gray-900">{children}</strong>
@@ -105,7 +105,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
             </div>
 
             {!isBot && (
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#E0F5F3] to-[#C2EBE7] border border-[#8DD9D3]/50 text-[#1BA49A] flex-shrink-0 shadow-sm">
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#e8f6f5] to-[#bbe4e1] border border-[#a4dbd7]/50 text-[#1BA49A] flex-shrink-0 shadow-sm">
                     <User size={13} />
                 </div>
             )}

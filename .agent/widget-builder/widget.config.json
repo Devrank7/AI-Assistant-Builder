@@ -1,24 +1,34 @@
 {
-  "clientId": "zdorovo",
-  "bot": {
-    "name": "ZDÓROVO AI",
-    "greeting": "Вітаємо у **ZDÓROVO Dental Clinic**! 👋\n\nЯ — AI-помічник клініки. Працюю 24/7 — відповім на ваші питання, допоможу з записом.\n\nНапишіть або оберіть тему!",
-    "tone": "professional_friendly"
+  "clientId": "evproperties",
+  "botName": "Elite Venture AI",
+  "welcomeMessage": "Welcome to **Elite Venture Properties**! How can I help you find your perfect property?",
+  "inputPlaceholder": "Ask about properties, prices, areas...",
+  "quickReplies": ["Buy a property", "Rent a property", "Off-plan projects"],
+  "avatar": {
+    "type": "initials",
+    "initials": "EV"
   },
   "design": {
-    "style": "dark_green",
     "position": "bottom-right"
   },
   "features": {
-    "streaming": true,
-    "imageUpload": true,
-    "quickReplies": {
-      "enabled": true,
-      "starters": ["🦷 Ціни на лікування", "📅 Найближчий вільний час", "⚡ Екстрена допомога"]
-    },
-    "feedback": true,
     "sound": true,
-    "leads": true,
-    "integrations": {}
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for property in Dubai? Let me help!"
+    }
+  },
+  "contacts": {
+    "phone": "543452231",
+    "email": "info@evproperties.ae",
+    "website": "http://www.evproperties.ae/"
   }
 }

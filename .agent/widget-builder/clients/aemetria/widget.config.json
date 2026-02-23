@@ -1,12 +1,12 @@
 {
   "clientId": "aemetria",
-  "botName": "AEMETRIA AI",
-  "welcomeMessage": "Welcome to **AEMETRIA** — Top Brokers for Top People! How can we help you find your perfect property?",
-  "inputPlaceholder": "Ask about properties...",
-  "quickReplies": ["Buy property in Dubai", "Investment opportunities", "Sell my property", "Bali properties"],
+  "botName": "AEMETRIA Real AI",
+  "welcomeMessage": "Welcome to **AEMETRIA Real Estate**! How can I help you find your perfect property?",
+  "inputPlaceholder": "Ask about properties, prices, areas...",
+  "quickReplies": ["Buy a property", "Rent a property", "Off-plan projects"],
   "avatar": {
     "type": "initials",
-    "initials": "AE"
+    "initials": "AR"
   },
   "design": {
     "position": "bottom-right"
@@ -23,12 +23,12 @@
     "memory": true,
     "proactive": {
       "delay": 8,
-      "message": "Looking for premium real estate in Dubai or Bali? We can help!"
+      "message": "Looking for property in Dubai? Let me help!"
     }
   },
   "contacts": {
     "phone": "+971521133555",
     "email": "ae@aemetria.com",
-    "website": "https://aemetria.com"
+    "website": "https://aemetria.com/"
   }
 }

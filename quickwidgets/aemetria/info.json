@@ -1,11 +1,14 @@
 {
   "clientId": "aemetria",
   "username": "aemetria",
-  "name": "AEMETRIA",
+  "name": "AEMETRIA Real Estate",
   "email": "ae@aemetria.com",
-  "website": "https://aemetria.com",
-  "phone": "+971521133555",
-  "addresses": ["Media City, Loft Offices Building 1, Dubai, UAE"],
+  "website": "https://aemetria.com/",
+  "phone": "+971 52 113 3555",
+  "addresses": [
+    "Media City, Loft Offices Building 1, Dubai, UAE"
+  ],
+  "instagram": null,
   "clientType": "quick",
-  "createdAt": "2026-02-18T12:00:00.000Z"
+  "createdAt": "2026-02-23T08:16:43.634Z"
 }

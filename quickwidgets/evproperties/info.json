@@ -1,7 +1,14 @@
 {
   "clientId": "evproperties",
-  "clientType": "quick",
+  "username": "evproperties",
   "name": "Elite Venture Properties",
-  "website": "http://www.evproperties.ae",
-  "createdAt": "2026-02-16T17:00:00.000Z"
+  "email": "info@evproperties.ae",
+  "website": "http://www.evproperties.ae/",
+  "phone": "543452231",
+  "addresses": [
+    "Office 501, Emirates Sports Hotel, Dubai Sports City, Dubai"
+  ],
+  "instagram": "https://www.instagram.com/elite_venture_properties/",
+  "clientType": "quick",
+  "createdAt": "2026-02-23T08:33:32.092Z"
 }

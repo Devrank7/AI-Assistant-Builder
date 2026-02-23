@@ -2,13 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AEMETRIA — Teal & Gold Theme */
+/* AEMETRIA Real Estate — Light Theme */
 :host {
     --aw-primary: #1BA49A;
-    --aw-accent: #D3B98A;
+    --aw-accent: #d3b98a;
     --aw-bg: #ffffff;
     --aw-text: #374151;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Roboto', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }

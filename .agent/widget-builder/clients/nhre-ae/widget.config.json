@@ -1,0 +1,34 @@
+{
+  "clientId": "nhre-ae",
+  "botName": "National Homes AI",
+  "welcomeMessage": "Welcome to **National Homes Real Estate**! How can I help you find your perfect property?",
+  "inputPlaceholder": "Ask about properties, prices, areas...",
+  "quickReplies": ["Buy a property", "Rent a property", "Off-plan projects"],
+  "avatar": {
+    "type": "initials",
+    "initials": "NH"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for property in Dubai? Let me help!"
+    }
+  },
+  "contacts": {
+    "phone": "+97144943400",
+    "email": "info@nhre.ae",
+    "website": "http://www.nhre.ae/"
+  }
+}

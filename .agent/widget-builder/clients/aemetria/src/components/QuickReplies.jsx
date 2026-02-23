@@ -15,14 +15,14 @@ export default function QuickReplies({ options, onSelect }) {
                     whileHover={{ scale: 1.015, y: -1 }}
                     whileTap={{ scale: 0.985 }}
                     onClick={() => onSelect(option)}
-                    className="group relative w-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer text-left shadow-sm hover:shadow-md bg-white/80 border-[#8DD9D3] hover:border-[#4EC4BB] hover:bg-[#E0F5F3]/40 group-hover:shadow-[0_2px_16px_rgba(27,164,154,0.10)]"
+                    className="group relative w-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer text-left shadow-sm hover:shadow-md bg-white/80 border-[#a4dbd7] hover:border-[#76c8c2] hover:bg-[#bbe4e1]/40 group-hover:shadow-[0_2px_16px_rgba(27,164,154,0.10)]"
                     style={{ backdropFilter: 'blur(8px)' }}
                 >
                     <div className="relative flex items-center gap-3 px-3.5 py-2.5">
                         <span className="flex-shrink-0 w-7 h-7 rounded-xl bg-gradient-to-br from-[#1BA49A]/[0.12] to-[#1BA49A]/[0.05] flex items-center justify-center shadow-sm">
                             <MessageCircle size={13} className="text-[#1BA49A]" />
                         </span>
-                        <span className="text-[12px] font-medium leading-snug text-[#0E7B73]">{option}</span>
+                        <span className="text-[12px] font-medium leading-snug text-[#16837b]">{option}</span>
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#1BA49A]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 </motion.button>
