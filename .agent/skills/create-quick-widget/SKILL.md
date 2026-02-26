@@ -155,7 +155,7 @@ Read current data, find next empty row, append `[email, website, username, "TRUE
 curl -s -X POST "http://localhost:3000/api/telegram/notify" \
   -H "Content-Type: application/json" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
-  -d '{"message":"✅ <b>Quick Widget Created</b>\n\n👤 Client: <username>\n🌐 Website: <website>\n📧 Email: <email or N/A>\n\n📦 Embed:\n<code>&lt;script src=\"https://winbix-ai.pp.ua/quickwidgets/<clientId>/script.js\"&gt;&lt;/script&gt;</code>"}'
+  -d '{"message":"✅ <b>Quick Widget Created</b>\n\n👤 Client: <username>\n🌐 Website: <website>\n📧 Email: <email or N/A>\n\n📦 Embed:\n<code>&lt;script src=\"https://winbix-ai.xyz/quickwidgets/<clientId>/script.js\"&gt;&lt;/script&gt;</code>"}'
 ```
 
 ### 5.3 Output to User
@@ -164,7 +164,7 @@ curl -s -X POST "http://localhost:3000/api/telegram/notify" \
 ✅ Quick widget created for <Brand Name>!
 📋 Summary: Brand: <name> | Colors: <primary>/<accent> | Theme: <light/dark>
 🔗 Demo: http://localhost:3000/demo/client-website?client=<clientId>&type=quick&website=<encoded_url>
-📦 Embed: <script src="https://winbix-ai.pp.ua/quickwidgets/<clientId>/script.js"></script>
+📦 Embed: <script src="https://winbix-ai.xyz/quickwidgets/<clientId>/script.js"></script>
 ```
 
 ---

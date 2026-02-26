@@ -202,14 +202,14 @@ Demo URL format:
 
 Where:
 
-- `{BASE_URL}` = value of `NEXT_PUBLIC_BASE_URL` environment variable (default: `https://winbix-ai.pp.ua`)
+- `{BASE_URL}` = value of `NEXT_PUBLIC_BASE_URL` environment variable (default: `https://winbix-ai.xyz`)
 - `{clientId}` = the lead's username/clientId from the sheet
 - `{encoded_website_url}` = URL-encoded website address
 
 **Example:**
 
 ```
-https://winbix-ai.pp.ua/demo/client-website?client=smile-dental&website=https%3A%2F%2Fsmile-dental.com
+https://winbix-ai.xyz/demo/client-website?client=smile-dental&website=https%3A%2F%2Fsmile-dental.com
 ```
 
 ### 5.5 Generate the First Message

@@ -279,13 +279,13 @@ export default function AdminInstagramPage() {
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value="https://winbix-ai.pp.ua/api/webhooks/instagram"
+                  value="https://winbix-ai.xyz/api/webhooks/instagram"
                   readOnly
                   className="flex-1 rounded-lg border border-white/10 bg-white/5 p-3 text-gray-400 focus:outline-none"
                 />
                 <button
                   type="button"
-                  onClick={() => navigator.clipboard.writeText('https://winbix-ai.pp.ua/api/webhooks/instagram')}
+                  onClick={() => navigator.clipboard.writeText('https://winbix-ai.xyz/api/webhooks/instagram')}
                   className="rounded-lg border border-white/10 bg-white/5 px-4 text-sm text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   Copy
@@ -482,7 +482,7 @@ export default function AdminInstagramPage() {
                   <p className="mt-1 text-gray-500">
                     Set webhook URL to{' '}
                     <code className="rounded bg-white/10 px-1 py-0.5 text-[var(--neon-cyan)]">
-                      https://winbix-ai.pp.ua/api/webhooks/instagram
+                      https://winbix-ai.xyz/api/webhooks/instagram
                     </code>{' '}
                     and verify token to{' '}
                     <code className="rounded bg-white/10 px-1 py-0.5 text-[var(--neon-cyan)]">

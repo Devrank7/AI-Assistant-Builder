@@ -22,7 +22,7 @@ function RuContent() {
       <SectionTitle>1. Общие положения</SectionTitle>
       <p>
         Настоящая Политика конфиденциальности описывает, как WinBix AI (далее — «Компания», «мы», «нас») собирает,
-        использует, хранит и защищает персональные данные пользователей платформы winbix-ai.pp.ua (далее — «Платформа»).
+        использует, хранит и защищает персональные данные пользователей платформы winbix-ai.xyz (далее — «Платформа»).
       </p>
       <p>
         Используя Платформу, вы подтверждаете, что ознакомились с настоящей Политикой и даёте согласие на обработку
@@ -379,7 +379,7 @@ function EnContent() {
       <SectionTitle>1. General Provisions</SectionTitle>
       <p>
         This Privacy Policy describes how WinBix AI (hereinafter &quot;Company&quot;, &quot;we&quot;, &quot;us&quot;)
-        collects, uses, stores, and protects personal data of users of the platform winbix-ai.pp.ua (hereinafter
+        collects, uses, stores, and protects personal data of users of the platform winbix-ai.xyz (hereinafter
         &quot;Platform&quot;).
       </p>
       <p>
@@ -738,7 +738,7 @@ function UkContent() {
       <SectionTitle>1. Загальні положення</SectionTitle>
       <p>
         Ця Політика конфіденційності описує, як WinBix AI (далі — «Компанія», «ми», «нас») збирає, використовує,
-        зберігає та захищає персональні дані користувачів платформи winbix-ai.pp.ua (далі — «Платформа»).
+        зберігає та захищає персональні дані користувачів платформи winbix-ai.xyz (далі — «Платформа»).
       </p>
       <p>
         Використовуючи Платформу, ви підтверджуєте, що ознайомилися з цією Політикою та даєте згоду на обробку ваших
@@ -1096,7 +1096,7 @@ function PlContent() {
       <SectionTitle>1. Postanowienia ogólne</SectionTitle>
       <p>
         Niniejsza Polityka prywatności opisuje, w jaki sposób WinBix AI (dalej „Firma", „my", „nas") gromadzi,
-        wykorzystuje, przechowuje i chroni dane osobowe użytkowników platformy winbix-ai.pp.ua (dalej „Platforma").
+        wykorzystuje, przechowuje i chroni dane osobowe użytkowników platformy winbix-ai.xyz (dalej „Platforma").
       </p>
       <p>
         Korzystając z Platformy, potwierdzasz, że zapoznałeś się z niniejszą Polityką i wyrażasz zgodę na przetwarzanie
@@ -1456,7 +1456,7 @@ function ArContent() {
       <SectionTitle>1. أحكام عامة</SectionTitle>
       <p>
         توضح سياسة الخصوصية هذه كيف تقوم WinBix AI (المشار إليها فيما بعد بـ &quot;الشركة&quot;، &quot;نحن&quot;) بجمع
-        واستخدام وتخزين وحماية البيانات الشخصية لمستخدمي منصة winbix-ai.pp.ua (المشار إليها فيما بعد بـ
+        واستخدام وتخزين وحماية البيانات الشخصية لمستخدمي منصة winbix-ai.xyz (المشار إليها فيما بعد بـ
         &quot;المنصة&quot;).
       </p>
       <p>باستخدام المنصة، فإنك تؤكد أنك قد اطلعت على هذه السياسة وتوافق على معالجة بياناتك وفقًا لها.</p>

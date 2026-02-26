@@ -9,7 +9,7 @@
  *   token = from .env.local ADMIN_SECRET_TOKEN
  *
  * Example (export from production):
- *   node scripts/export-knowledge-seeds.js https://winbix-ai.pp.ua md_winbix_prod
+ *   node scripts/export-knowledge-seeds.js https://winbix-ai.xyz md_winbix_prod
  */
 
 const fs = require('fs');

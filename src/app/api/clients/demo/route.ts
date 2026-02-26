@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const QUICK_WIDGETS_DIR = path.join(process.cwd(), 'quickwidgets');
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbix-ai.pp.ua';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbix-ai.xyz';
 
 interface DemoClient {
   name: string;

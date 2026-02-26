@@ -5,7 +5,7 @@
 **WinBix AI** is a multi-tenant SaaS platform that creates and deploys AI chat widgets for businesses. A client (dental clinic, car tuning studio, etc.) gets a customized widget embedded on their site with a single script tag:
 
 ```html
-<script src="https://winbix-ai.pp.ua/widgets/drcare/script.js"></script>
+<script src="https://winbix-ai.xyz/widgets/drcare/script.js"></script>
 ```
 
 The widget answers visitor questions 24/7 using the client's knowledge base + Google Gemini AI. It supports web chat, Telegram, WhatsApp, and Instagram channels.
@@ -21,7 +21,7 @@ The widget answers visitor questions 24/7 using the client's knowledge base + Go
 | **AI**             | Google Gemini API (`@google/generative-ai`)                                |
 | **Payments**       | WayForPay (cards), Cryptomus (crypto), NowPayments (crypto)                |
 | **Integrations**   | Google Sheets API, Telegram Bot API, WhatsApp (WHAPI), Instagram, ManyChat |
-| **Deployment**     | Docker (multi-stage), production at `https://winbix-ai.pp.ua`              |
+| **Deployment**     | Docker (multi-stage), production at `https://winbix-ai.xyz`                |
 
 ---
 
@@ -608,7 +608,7 @@ Reads `mass-build-configs.json` (23 clients), for each: generates config → bui
 ### Export Knowledge Seeds from Production
 
 ```bash
-node scripts/export-knowledge-seeds.js https://winbix-ai.pp.ua <admin_token>
+node scripts/export-knowledge-seeds.js https://winbix-ai.xyz <admin_token>
 ```
 
 ---
@@ -630,13 +630,13 @@ node scripts/export-knowledge-seeds.js https://winbix-ai.pp.ua <admin_token>
 
 ## Environment
 
-| Environment  | URL                                                                             |
-| ------------ | ------------------------------------------------------------------------------- |
-| Local dev    | `http://localhost:3000`                                                         |
-| Production   | `https://winbix-ai.pp.ua`                                                       |
-| Demo links   | `https://winbix-ai.pp.ua/demo/client-website?client=<id>&website=<encoded_url>` |
-| Widget embed | `<script src="https://winbix-ai.pp.ua/widgets/<id>/script.js"></script>`        |
-| Quick widget | `<script src="https://winbix-ai.pp.ua/quickwidgets/<id>/script.js"></script>`   |
+| Environment  | URL                                                                           |
+| ------------ | ----------------------------------------------------------------------------- |
+| Local dev    | `http://localhost:3000`                                                       |
+| Production   | `https://winbix-ai.xyz`                                                       |
+| Demo links   | `https://winbix-ai.xyz/demo/client-website?client=<id>&website=<encoded_url>` |
+| Widget embed | `<script src="https://winbix-ai.xyz/widgets/<id>/script.js"></script>`        |
+| Quick widget | `<script src="https://winbix-ai.xyz/quickwidgets/<id>/script.js"></script>`   |
 
 ---
 
