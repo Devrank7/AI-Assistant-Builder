@@ -1,12 +1,12 @@
 {
-  "clientId": "evproperties",
-  "botName": "Elite Venture AI",
-  "welcomeMessage": "Welcome to **Elite Venture Properties**! How can I help you find your perfect property?",
+  "clientId": "gulfinvestre",
+  "botName": "Gulf Invest AI",
+  "welcomeMessage": "Welcome to **Gulf Invest Real Estate**! How can I help you find your perfect property?",
   "inputPlaceholder": "Ask about properties, prices, areas...",
   "quickReplies": ["Buy a property", "Rent a property", "Off-plan projects"],
   "avatar": {
     "type": "initials",
-    "initials": "EV"
+    "initials": "GI"
   },
   "design": {
     "position": "bottom-right"
@@ -27,8 +27,8 @@
     }
   },
   "contacts": {
-    "phone": "543452231",
-    "email": "info@evproperties.ae",
-    "website": "http://www.evproperties.ae/"
+    "phone": "+971553582725",
+    "email": "info@gulfinvestre.com",
+    "website": "https://www.gulfinvestre.ae/"
   }
 }

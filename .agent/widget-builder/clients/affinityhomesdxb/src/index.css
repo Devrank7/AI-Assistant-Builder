@@ -45,7 +45,8 @@ button, a, input, textarea {
 }
 .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 .animate-breathe { animation: breathe 3s ease-in-out infinite; }
-.safe-area-bottom { margin-bottom: env(safe-area-inset-bottom, 0); }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+button, a, input, textarea, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
 /* Skeleton shimmer loading */
 @keyframes shimmer {

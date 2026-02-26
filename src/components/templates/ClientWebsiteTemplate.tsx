@@ -11,6 +11,10 @@ interface ClientWebsiteTemplateProps {
 
 export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientWebsiteTemplateProps) {
   const { t } = useTranslation('common');
+
+  // Force HTTPS to avoid Mixed Content blocking (HTTPS page can't embed HTTP iframe)
+  const safeUrl = websiteUrl.replace(/^http:\/\//i, 'https://');
+
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const [screenshotMode, setScreenshotMode] = useState(false);
@@ -32,14 +36,14 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   // injection picks up the client's website info instead of "WinBix AI" from root layout.
   useEffect(() => {
     try {
-      const host = new URL(websiteUrl).hostname.replace(/^www\./, '');
+      const host = new URL(safeUrl).hostname.replace(/^www\./, '');
       document.title = host;
     } catch {
-      document.title = websiteUrl || 'Demo';
+      document.title = safeUrl || 'Demo';
     }
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', '');
-  }, [websiteUrl]);
+  }, [safeUrl]);
 
   useEffect(() => {
     if (scriptUrl) {
@@ -62,7 +66,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   useEffect(() => {
     const checkFrameable = async () => {
       try {
-        const res = await fetch(`/api/check-frameable?url=${encodeURIComponent(websiteUrl)}`);
+        const res = await fetch(`/api/check-frameable?url=${encodeURIComponent(safeUrl)}`);
         const data = await res.json();
         if ((!data.reachable || !data.frameable) && !iframeLoadedRef.current) {
           setIframeError(true);
@@ -72,7 +76,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
       }
     };
     checkFrameable();
-  }, [websiteUrl]);
+  }, [safeUrl]);
 
   // Timeout fallback: if iframe onLoad never fires (e.g. slow resources, hanging
   // scripts on client sites), remove the loading spinner after 8 seconds so the
@@ -172,7 +176,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
           <div className="text-center">
             <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
             <p className="mb-2 text-lg text-white">Loading client website...</p>
-            <p className="text-sm text-gray-400">{websiteUrl}</p>
+            <p className="text-sm text-gray-400">{safeUrl}</p>
           </div>
         </div>
       )}
@@ -348,7 +352,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
             onLoad={() => setScreenshotLoaded(true)}
             onError={() => {
               // If cached preview fails, try thum.io external service
-              const thumbUrl = `https://image.thum.io/get/width/1440/crop/900/${websiteUrl}`;
+              const thumbUrl = `https://image.thum.io/get/width/1440/crop/900/${safeUrl}`;
               if (screenshotSrc !== thumbUrl) {
                 setScreenshotSrc(thumbUrl);
               } else {
@@ -364,7 +368,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
       {/* Iframe — no sandbox to let client sites load naturally without script failures */}
       <iframe
         ref={iframeRef}
-        src={websiteUrl}
+        src={safeUrl}
         className="h-screen w-full border-0"
         onLoad={handleIframeLoad}
         onError={handleIframeError}

@@ -42,7 +42,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 </div>
             )}
 
-            <div className="flex flex-col max-w-[78%]">
+            <div className="flex flex-col max-w-[85%] sm:max-w-[78%]">
                 {imageUrl && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={`mb-1.5 ${isBot ? '' : 'flex justify-end'}`}>
                         <div className="relative group/img cursor-pointer overflow-hidden rounded-2xl border border-gray-200 shadow-sm" onClick={() => onImageClick?.(imageUrl)}>

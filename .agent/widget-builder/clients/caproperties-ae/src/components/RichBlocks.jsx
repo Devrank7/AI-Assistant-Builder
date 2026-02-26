@@ -4,7 +4,7 @@ import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-preact';
 
 function Card({ card, onAction }) {
     return (
-        <div className="flex-shrink-0 w-[200px] rounded-2xl border overflow-hidden bg-white border-gray-100 shadow-sm">
+        <div className="flex-shrink-0 w-[170px] sm:w-[200px] rounded-2xl border overflow-hidden bg-white border-gray-100 shadow-sm">
             {card.image && (
                 <img src={card.image} alt={card.title || ''} className="w-full h-[100px] object-cover" loading="lazy" />
             )}
@@ -122,7 +122,7 @@ export default function RichBlocks({ blocks, onAction }) {
     if (!blocks || blocks.length === 0) return null;
 
     return (
-        <div className="ml-9 mt-1.5 mb-1 space-y-2">
+        <div className="ml-7 sm:ml-9 mt-1.5 mb-1 space-y-2">
             {blocks.map((block, idx) => {
                 if (block.type === 'card') {
                     return <div key={idx} className="flex"><Card card={block} onAction={onAction} /></div>;

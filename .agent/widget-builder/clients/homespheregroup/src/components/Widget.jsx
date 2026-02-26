@@ -90,18 +90,35 @@ export function Widget({ config }) {
     }, [isListening, startListening, stopListening]);
 
     // Mobile swipe-to-close handlers
+    const swipeStartTime = useRef(0);
     const handleSwipeStart = useCallback((e) => {
         swipeStartRef.current = e.touches[0].clientY;
+        swipeStartTime.current = Date.now();
     }, []);
     const handleSwipeMove = useCallback((e) => {
         const diff = e.touches[0].clientY - swipeStartRef.current;
-        if (diff > 0) setSwipeY(diff);
+        if (diff > 0) { setSwipeY(diff); e.preventDefault(); }
     }, []);
     const handleSwipeEnd = useCallback(() => {
-        if (swipeY > 80) setIsOpen(false);
+        const elapsed = Date.now() - swipeStartTime.current;
+        const velocity = swipeY / Math.max(elapsed, 1);
+        if (swipeY > 80 || velocity > 0.5) setIsOpen(false);
         setSwipeY(0);
         swipeStartRef.current = 0;
     }, [swipeY]);
+
+    // Keyboard-aware resize for mobile (visualViewport API)
+    const panelRef = useRef(null);
+    useEffect(() => {
+        if (!isMobile || !isOpen) return;
+        const vv = window.visualViewport;
+        if (!vv) return;
+        const onResize = () => {
+            if (panelRef.current) panelRef.current.style.height = vv.height + 'px';
+        };
+        vv.addEventListener('resize', onResize);
+        return () => vv.removeEventListener('resize', onResize);
+    }, [isMobile, isOpen]);
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -264,8 +281,8 @@ export function Widget({ config }) {
                         )}
                     </div>
                     <div>
-                        <h3 className="font-semibold text-[14px] text-white tracking-tight leading-tight">{config.botName || config.bot?.name}</h3>
-                        <p className="text-[11px] text-white/65 font-medium">{isOffline ? uiStrings.offline : uiStrings.online}</p>
+                        <h3 className="font-semibold text-[14px] text-white tracking-tight leading-tight truncate max-w-[140px] sm:max-w-[180px]">{config.botName || config.bot?.name}</h3>
+                        <p className="text-[12px] text-white/65 font-medium">{isOffline ? uiStrings.offline : uiStrings.online}</p>
                     </div>
                 </div>
                 <div className="relative flex items-center gap-1">
@@ -306,20 +323,20 @@ export function Widget({ config }) {
 
             {/* CONTACT BAR */}
             {contacts && Object.keys(contacts).length > 0 && (
-                <div className="flex items-center gap-1.5 px-4 py-1.5 border-b bg-gray-50/60 border-gray-100">
+                <div className="flex items-center gap-1.5 px-4 py-1.5 border-b overflow-x-auto scrollbar-hide bg-gray-50/60 border-gray-100">
                     {contacts.phone && (
-                        <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all text-gray-500 hover:text-[#e88f1d] hover:bg-white" target="_blank" rel="noopener">
-                            <Phone size={11} /> {uiStrings.call}
+                        <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#e88f1d] hover:bg-white" target="_blank" rel="noopener">
+                            <Phone size={12} /> {uiStrings.call}
                         </a>
                     )}
                     {contacts.email && (
-                        <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all text-gray-500 hover:text-[#e88f1d] hover:bg-white">
-                            <Mail size={11} /> Email
+                        <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#e88f1d] hover:bg-white">
+                            <Mail size={12} /> Email
                         </a>
                     )}
                     {contacts.website && (
-                        <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all text-gray-500 hover:text-[#e88f1d] hover:bg-white">
-                            <Globe size={11} /> {uiStrings.website}
+                        <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#e88f1d] hover:bg-white">
+                            <Globe size={12} /> {uiStrings.website}
                         </a>
                     )}
                 </div>
@@ -349,10 +366,10 @@ export function Widget({ config }) {
                         {/* Follow-up suggestions */}
                         {msg.role === 'assistant' && !msg.isError && msg.suggestions?.length > 0 && idx === messages.length - 1 && (
                             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                                className="flex flex-wrap gap-1.5 ml-9 mt-2 mb-1">
+                                className="flex flex-wrap gap-1.5 ml-7 sm:ml-9 mt-2 mb-1">
                                 {msg.suggestions.map((s, si) => (
                                     <button key={si} onClick={() => { detectLang(s); sendMessage(s); }}
-                                        className="px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-all duration-200 cursor-pointer border-[#f6d2a5] bg-[#fdf4e8] text-[#ba7217] hover:bg-[#f8ddbb] hover:border-[#f1bc77]">
+                                        className="px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-200 cursor-pointer border-[#f6d2a5] bg-[#fdf4e8] text-[#ba7217] hover:bg-[#f8ddbb] hover:border-[#f1bc77]">
                                         {s}
                                     </button>
                                 ))}
@@ -376,7 +393,7 @@ export function Widget({ config }) {
                 {hasNewMessages && !isAtBottom && (
                     <div className="sticky bottom-2 left-0 right-0 flex justify-center z-10">
                         <button onClick={scrollToBottom}
-                            className="new-msg-pill px-3.5 py-1.5 rounded-full text-[11px] font-semibold shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:shadow-xl bg-white text-gray-700 border border-gray-200 shadow-black/10">
+                            className="new-msg-pill px-3.5 py-1.5 rounded-full text-[12px] font-semibold shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:shadow-xl bg-white text-gray-700 border border-gray-200 shadow-black/10">
                             <ArrowDown size={12} /> {uiStrings.newMessages}
                         </button>
                     </div>
@@ -390,8 +407,8 @@ export function Widget({ config }) {
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-4 overflow-hidden bg-white border-t border-gray-50">
                         <div className="relative inline-block my-2.5">
                             <img src={selectedImage.previewUrl} alt="" className="h-16 w-auto rounded-xl border border-gray-200 object-cover shadow-sm" />
-                            <button onClick={removeSelectedImage} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors">
-                                <X size={10} />
+                            <button onClick={removeSelectedImage} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors">
+                                <X size={11} />
                             </button>
                         </div>
                     </motion.div>
@@ -468,7 +485,8 @@ export function Widget({ config }) {
                             className={isMobile
                                 ? 'fixed inset-x-0 bottom-0 flex flex-col bg-white shadow-2xl shadow-black/15 rounded-t-3xl overflow-hidden'
                                 : 'relative w-[85vw] max-w-[360px] h-[60vh] max-h-[520px] sm:w-[360px] sm:h-[520px] rounded-3xl overflow-hidden flex flex-col bg-white shadow-2xl shadow-black/15 border border-gray-100'}
-                            style={isMobile ? { height: '90vh', maxHeight: '90vh' } : {}}
+                            ref={isMobile ? panelRef : undefined}
+                            style={isMobile ? { height: '90dvh', maxHeight: '90dvh' } : {}}
                             role="dialog"
                             aria-label="Chat widget"
                         >
@@ -485,12 +503,12 @@ export function Widget({ config }) {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.9 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                            className="max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl shadow-black/10 border cursor-pointer relative bg-white border-gray-100 text-gray-700"
+                            className="max-w-[200px] sm:max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl shadow-black/10 border cursor-pointer relative bg-white border-gray-100 text-gray-700"
                             onClick={() => { dismissNudge(); setIsOpen(true); }}
                         >
                             <button onClick={(e) => { e.stopPropagation(); dismissNudge(); }}
-                                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center transition-colors bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600">
-                                <X size={10} />
+                                className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-colors bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600">
+                                <X size={11} />
                             </button>
                             <p className="text-[12.5px] leading-relaxed pr-2">{nudgeMessage}</p>
                         </motion.div>
