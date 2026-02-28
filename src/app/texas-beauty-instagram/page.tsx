@@ -46,15 +46,18 @@ function Counter({ target, prefix = '', suffix = '' }: { target: number; prefix?
 /* ─── Section fade-in ─── */
 function Section({
   children,
+  id,
   className = '',
   delay = 0,
 }: {
   children: React.ReactNode;
+  id?: string;
   className?: string;
   delay?: number;
 }) {
   return (
     <motion.section
+      id={id}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
