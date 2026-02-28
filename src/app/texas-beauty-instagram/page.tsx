@@ -575,7 +575,7 @@ export default function TexasBeautyInstagramPage() {
           <div className="hidden h-8 w-px bg-[#B76E79]/10 md:block" />
           <div className="text-center">
             <p className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#B76E79]">
-              <Counter target={2} prefix="<" suffix="s" />
+              <Counter target={5} prefix="<" suffix="s" />
             </p>
             <p className="mt-1 text-sm text-[#6B5B5B]">Average Response Time</p>
           </div>
@@ -773,7 +773,7 @@ export default function TexasBeautyInstagramPage() {
                 </svg>
               ),
               title: '24/7 Instant DM Responses',
-              desc: 'Your AI responds to every DM in under 2 seconds. No client left waiting, no booking left on the table. Day or night.',
+              desc: 'Your AI responds to every DM in under 5 seconds. No client left waiting, no booking left on the table. Day or night.',
               accent: '#B76E79',
             },
             {
@@ -900,7 +900,7 @@ export default function TexasBeautyInstagramPage() {
                 </p>
                 <p className="leading-relaxed text-[#6B5B5B]">
                   <strong className="text-[#2D2D2D]">With your AI assistant:</strong> Sarah gets a warm, on-brand
-                  response in 2 seconds. The AI shows available slots, Sarah picks 2 PM tomorrow, and the booking is
+                  response in seconds. The AI shows available slots, Sarah picks 2 PM tomorrow, and the booking is
                   confirmed. You wake up to a new appointment and $150+ in revenue.
                 </p>
               </div>
@@ -1175,19 +1175,6 @@ export default function TexasBeautyInstagramPage() {
             >
               Get My AI Assistant Now
             </a>
-
-            {/* Money-back guarantee */}
-            <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-[#6B5B5B]">
-              <svg className="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              </svg>
-              14-day money-back guarantee. No risk.
-            </p>
           </div>
 
           {/* ROI callout below pricing */}
@@ -1281,6 +1268,30 @@ export default function TexasBeautyInstagramPage() {
             <WidgetGenerator />
           </div>
         </div>
+
+        {/* Demo disclaimer */}
+        <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-[#B76E79]/15 bg-white/60 p-5 backdrop-blur-sm">
+          <div className="flex gap-3">
+            <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#B76E79]/10">
+              <svg className="h-4 w-4 text-[#B76E79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[#2D2D2D]">This is a live preview of your AI assistant</p>
+              <p className="mt-1 text-xs leading-relaxed text-[#6B5B5B]">
+                It already knows your brand, services, and content — generated in 30 seconds with Apple-level design.
+                However, it can&apos;t book appointments or access your CRM yet — that requires connecting your
+                scheduling system and API keys, which we set up together after purchase.
+              </p>
+            </div>
+          </div>
+        </div>
       </Section>
 
       {/* ===== FINAL CTA ===== */}
@@ -1313,9 +1324,7 @@ export default function TexasBeautyInstagramPage() {
               Get My AI Assistant
             </a>
           </div>
-          <p className="mt-6 text-sm text-white/60">
-            $300 setup + $80/mo &bull; Cancel anytime &bull; 14-day money-back guarantee
-          </p>
+          <p className="mt-6 text-sm text-white/60">$300 setup + $80/mo</p>
         </div>
       </section>
 

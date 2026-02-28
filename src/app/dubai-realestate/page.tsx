@@ -236,7 +236,7 @@ export default function DubaiRealEstatePage() {
               <span className="gradient-text-gold">That Never Sleeps</span>
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-400 md:text-xl">
-              Respond to every property enquiry in under <span className="font-semibold text-white">1 second</span>.{' '}
+              Respond to every property enquiry in under <span className="font-semibold text-white">5 seconds</span>.{' '}
               <br className="hidden md:block" />
               In Arabic, English, Russian, or Hindi. <span className="font-semibold text-white">24/7.</span>
             </p>
@@ -288,7 +288,7 @@ export default function DubaiRealEstatePage() {
                 value: (
                   <>
                     &lt;
-                    <Counter target={1} />s
+                    <Counter target={5} />s
                   </>
                 ),
                 label: 'Response time',
@@ -474,6 +474,30 @@ export default function DubaiRealEstatePage() {
                 <p className="mt-8 text-center text-sm text-gray-600 italic">
                   Like having Apple&apos;s design team and a top sales agent merged into one — ready in 30 seconds.
                 </p>
+
+                {/* Demo disclaimer */}
+                <div className="mx-auto mt-8 max-w-2xl rounded-xl border border-[#C5A55A]/20 bg-[#0A1628]/80 p-5">
+                  <div className="flex gap-3">
+                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#C5A55A]/10">
+                      <svg className="h-4 w-4 text-[#C5A55A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">This is a live preview of your AI agent</p>
+                      <p className="mt-1 text-xs leading-relaxed text-gray-400">
+                        It already knows your listings, brand, and content — generated in 30 seconds with Apple-level
+                        design. However, it can&apos;t access your CRM or lead management system yet — that requires
+                        connecting your private API keys and data, which we configure together after onboarding.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

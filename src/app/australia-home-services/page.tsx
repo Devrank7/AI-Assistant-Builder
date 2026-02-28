@@ -94,7 +94,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Answers every enquiry instantly',
-    desc: "2am on a Sunday? Public holiday? Doesn't matter. Every enquiry gets a response in under 1 second.",
+    desc: "2am on a Sunday? Public holiday? Doesn't matter. Every enquiry gets a response in under 5 seconds.",
   },
   {
     icon: (
@@ -370,7 +370,7 @@ export default function AustraliaHomeServicesPage() {
                 value: (
                   <>
                     &lt;
-                    <Counter target={1} />s
+                    <Counter target={5} />s
                   </>
                 ),
                 label: 'AI response time',
@@ -721,6 +721,30 @@ export default function AustraliaHomeServicesPage() {
               <p className="mt-6 text-center text-sm text-[#94A3B8]">
                 Like having a $55K receptionist — without the salary.
               </p>
+
+              {/* Demo disclaimer */}
+              <div className="mx-auto mt-8 max-w-2xl rounded-xl border border-[#FF6B2C]/15 bg-[#FFF7ED] p-5">
+                <div className="flex gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#FF6B2C]/10">
+                    <svg className="h-4 w-4 text-[#FF6B2C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[#0F172A]">This is a live preview of your AI assistant</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+                      It already knows your services, brand, and content — generated in 30 seconds with Apple-level
+                      design. However, it can&apos;t book jobs or access your scheduling system yet — that requires
+                      connecting your private API keys and business data, which we set up together after purchase.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </Section>
         </div>
