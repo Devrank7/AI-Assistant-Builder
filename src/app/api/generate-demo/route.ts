@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { execSync } from 'child_process';
-import { randomBytes } from 'crypto';
+import { randomBytes, randomInt } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
@@ -22,6 +22,7 @@ import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rateLimit';
 import { generateThemeJson, generateWidgetConfig } from '@/lib/themeGenerator';
 import { crawlWebsite } from '@/lib/crawler';
 import { withRetry } from '@/lib/retry';
+import ShortLink from '@/models/ShortLink';
 
 // --- Paths ---
 const PROJECT_ROOT = process.cwd();
@@ -403,10 +404,24 @@ export async function POST(request: NextRequest) {
       console.error('[GenerateDemo] Background knowledge upload error:', err);
     });
 
-    // 13. Build response
+    // 13. Create short link
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let shortCode = '';
+    for (let i = 0; i < 6; i++) shortCode += chars[randomInt(chars.length)];
+    try {
+      await ShortLink.create({ code: shortCode, clientId, website: websiteUrl, widgetType: 'quick' });
+    } catch {
+      // Code collision — retry once with a new code
+      shortCode = '';
+      for (let i = 0; i < 6; i++) shortCode += chars[randomInt(chars.length)];
+      await ShortLink.create({ code: shortCode, clientId, website: websiteUrl, widgetType: 'quick' }).catch(() => {});
+    }
+
+    // 14. Build response
     const encodedUrl = encodeURIComponent(websiteUrl);
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${request.headers.get('host')}`;
     const demoUrl = `${baseUrl}/demo/client-website?client=${clientId}&type=quick&website=${encodedUrl}`;
+    const shortUrl = `${baseUrl}/d/${shortCode}`;
     const embedCode = `<script src="${baseUrl}/quickwidgets/${clientId}/script.js"></script>`;
 
     return NextResponse.json({
@@ -414,6 +429,7 @@ export async function POST(request: NextRequest) {
       data: {
         clientId,
         demoUrl,
+        shortUrl,
         embedCode,
       },
     });

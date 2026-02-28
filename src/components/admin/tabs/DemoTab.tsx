@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -48,8 +49,66 @@ interface DemoTabProps {
 }
 
 export default function DemoTab({ clientId, website }: DemoTabProps) {
+  const [shortUrl, setShortUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/short-link?clientId=${clientId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.shortUrl) setShortUrl(data.shortUrl);
+      })
+      .catch(() => {});
+  }, [clientId]);
+
+  const fullDemoUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/demo/client-website?client=${clientId}&website=${encodeURIComponent(website)}`
+      : '';
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div>
+      {/* Short Link Section */}
+      {(shortUrl || fullDemoUrl) && (
+        <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+          <h4 className="mb-3 text-sm font-semibold tracking-wider text-gray-400 uppercase">Demo Links</h4>
+
+          {shortUrl && (
+            <div className="mb-3 flex items-center gap-3">
+              <span className="shrink-0 text-xs text-gray-500">Short:</span>
+              <code className="min-w-0 flex-1 truncate rounded bg-black/40 px-3 py-1.5 text-sm text-green-400">
+                {shortUrl}
+              </code>
+              <button
+                onClick={() => handleCopy(shortUrl)}
+                className="shrink-0 rounded-lg bg-green-500/20 px-3 py-1.5 text-xs font-medium text-green-400 transition-colors hover:bg-green-500/30"
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            <span className="shrink-0 text-xs text-gray-500">Full:</span>
+            <code className="min-w-0 flex-1 truncate rounded bg-black/40 px-3 py-1.5 text-xs text-gray-400">
+              {fullDemoUrl}
+            </code>
+            <button
+              onClick={() => handleCopy(fullDemoUrl)}
+              className="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-gray-300 transition-colors hover:bg-white/20"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mb-6">
         <h3 className="mb-2 text-2xl font-bold text-white">Live Demo Templates</h3>
         <p className="text-gray-400">Preview how your widget looks on different website templates</p>

@@ -1002,3 +1002,277 @@ main {
 [dir="rtl"] .table-premium th {
   text-align: right;
 }
+
+/* ============================================
+   DUBAI REAL ESTATE PAGE THEME
+   ============================================ */
+
+.dubai-theme {
+  --dubai-navy: #0A1628;
+  --dubai-navy-light: #0F1D32;
+  --dubai-gold: #C5A55A;
+  --dubai-gold-dark: #A08930;
+  --dubai-gold-light: #D4AF37;
+  --dubai-cream: #F5F0E8;
+  /* Override global neon vars so WidgetGenerator + glass effects become gold */
+  --neon-cyan: #C5A55A;
+  --neon-purple: #A08930;
+  --neon-pink: #D4AF37;
+  --accent: #C5A55A;
+  background: var(--dubai-navy);
+}
+
+/* Gold selection highlight */
+.dubai-theme ::selection {
+  background: rgba(197, 165, 90, 0.3);
+  color: #fff;
+}
+
+/* Thin gold accent line for section dividers */
+.dubai-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(197, 165, 90, 0.15), rgba(212, 175, 55, 0.3), rgba(197, 165, 90, 0.15), transparent);
+}
+
+/* Premium card with gold top-border accent */
+.dubai-theme .card-gold-top {
+  position: relative;
+  overflow: hidden;
+}
+
+.dubai-theme .card-gold-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #C5A55A, #D4AF37, #C5A55A, transparent);
+}
+
+/* Subtle gold shimmer animation */
+@keyframes gold-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.dubai-theme .gold-shimmer {
+  background: linear-gradient(90deg,
+    rgba(197, 165, 90, 0) 0%,
+    rgba(197, 165, 90, 0.08) 25%,
+    rgba(212, 175, 55, 0.15) 50%,
+    rgba(197, 165, 90, 0.08) 75%,
+    rgba(197, 165, 90, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: gold-shimmer 8s linear infinite;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, #C5A55A, #D4AF37, #E8C860);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dubai-theme .glass-dubai {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid rgba(197, 165, 90, 0.1);
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dubai-theme .glass-dubai:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(197, 165, 90, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(197, 165, 90, 0.08);
+}
+
+.dubai-theme .btn-gold {
+  background: linear-gradient(135deg, #C5A55A, #D4AF37);
+  color: #0A1628;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(197, 165, 90, 0.3);
+}
+
+.dubai-theme .btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(197, 165, 90, 0.45);
+}
+
+.dubai-theme .glow-line-gold {
+  position: relative;
+  height: 1px;
+}
+
+.dubai-theme .glow-line-gold::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(197, 165, 90, 0.4), rgba(212, 175, 55, 0.6), rgba(197, 165, 90, 0.4), transparent);
+  opacity: 0.6;
+}
+
+.dubai-bg-grid {
+  background-image:
+    linear-gradient(rgba(197, 165, 90, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(197, 165, 90, 0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* ============================================
+   AUSTRALIA HOME SERVICES PAGE THEME
+   ============================================ */
+
+.aus-theme {
+  --aus-blue: #2563EB;
+  --aus-blue-dark: #1D4ED8;
+  --aus-orange: #FF6B2C;
+  --aus-orange-dark: #EA580C;
+  --aus-hivis: #FFB800;
+  --aus-navy: #1E293B;
+  --aus-slate: #0F172A;
+  --aus-gray: #F7F6F4;
+  --aus-green: #059669;
+  /* Override global neon vars so WidgetGenerator button becomes orange */
+  --neon-cyan: #FF6B2C;
+  --neon-purple: #EA580C;
+  --neon-pink: #F97316;
+  --accent: #FF6B2C;
+  background: #FFFFFF;
+  color: #1E293B;
+}
+
+/* Dark section within light theme (for widget generator) */
+.aus-dark-section {
+  background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+  color: #FFFFFF;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(135deg, #2563EB, #3B82F6, #60A5FA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-orange {
+  background: linear-gradient(135deg, #FF6B2C, #F97316, #FB923C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-hivis {
+  background: linear-gradient(135deg, #FF6B2C, #FFB800);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.aus-theme .card-aus {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.aus-theme .card-aus:hover {
+  border-color: #2563EB30;
+  box-shadow: 0 10px 40px rgba(37, 99, 235, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Orange-top accent for highlight cards */
+.aus-theme .card-aus-orange {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-top: 3px solid #FF6B2C;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.aus-theme .card-aus-orange:hover {
+  box-shadow: 0 10px 40px rgba(255, 107, 44, 0.1);
+  transform: translateY(-2px);
+}
+
+.aus-theme .btn-aus-primary {
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  color: #fff;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 12px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.aus-theme .btn-aus-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
+
+.aus-theme .btn-aus-orange {
+  background: linear-gradient(135deg, #FF6B2C, #F97316);
+  color: #fff;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 12px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 14px rgba(255, 107, 44, 0.3);
+}
+
+.aus-theme .btn-aus-orange:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 44, 0.4);
+}
+
+/* Comparison table styles */
+.aus-theme .comparison-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.aus-theme .comparison-row:last-child {
+  border-bottom: none;
+}
+
+/* Hi-vis stripe accent */
+.aus-hivis-stripe {
+  background: linear-gradient(135deg, #FF6B2C, #FFB800);
+  height: 4px;
+}
+
+.aus-dots-bg {
+  background-image: radial-gradient(#E2E8F0 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Warm gray section */
+.aus-warm-section {
+  background: #F7F6F4;
+}
+
+/* NOTE: Light-themed WidgetGenerator overrides for aus-theme are injected
+   at runtime via <style> tag in australia-home-services/page.tsx because
+   Tailwind v4 PostCSS strips .glass-based selector rules from this file. */
+
+/* ============================================
+   TEXAS BEAUTY / INSTAGRAM ASSISTANT THEME
+   ============================================ */
+/* NOTE: ALL beauty-theme CSS (variables, cards, buttons, gradients,
+   section backgrounds, WidgetGenerator overrides) is injected at runtime
+   via <style> tag in texas-beauty-instagram/page.tsx because Tailwind v4
+   PostCSS strips newly-added custom class rules from this file. */

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import connectDB from '@/lib/mongodb';
+import ShortLink from '@/models/ShortLink';
 
 const QUICK_WIDGETS_DIR = path.join(process.cwd(), 'quickwidgets');
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbix-ai.xyz';
@@ -11,6 +13,7 @@ interface DemoClient {
   website: string;
   email: string;
   demoUrl: string;
+  shortUrl: string;
   createdAt: string;
 }
 
@@ -22,6 +25,11 @@ export async function GET() {
 
     const folders = fs.readdirSync(QUICK_WIDGETS_DIR, { withFileTypes: true }).filter((d) => d.isDirectory());
 
+    // Load all short links in one query
+    await connectDB();
+    const shortLinks = await ShortLink.find({ widgetType: 'quick' }).lean();
+    const shortLinkMap = new Map(shortLinks.map((sl) => [sl.clientId, sl.code]));
+
     const clients: DemoClient[] = [];
 
     for (const folder of folders) {
@@ -31,16 +39,21 @@ export async function GET() {
       try {
         const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
         const website = info.website || '';
+        const cid = info.clientId || folder.name;
         const demoUrl = website
-          ? `${BASE_URL}/demo/client-website?client=${info.clientId || folder.name}&website=${encodeURIComponent(website)}`
-          : `${BASE_URL}/demo/client-website?client=${info.clientId || folder.name}`;
+          ? `${BASE_URL}/demo/client-website?client=${cid}&website=${encodeURIComponent(website)}`
+          : `${BASE_URL}/demo/client-website?client=${cid}`;
+
+        const code = shortLinkMap.get(cid);
+        const shortUrl = code ? `${BASE_URL}/d/${code}` : '';
 
         clients.push({
           name: info.name || folder.name,
-          clientId: info.clientId || folder.name,
+          clientId: cid,
           website,
           email: info.email || '',
           demoUrl,
+          shortUrl,
           createdAt: info.createdAt || '',
         });
       } catch {
