@@ -42,8 +42,8 @@ export function useTranslation(namespace: Namespace) {
   const { lang } = useLanguage();
 
   const t = useMemo(() => {
-    const ns = translations[lang]?.[namespace] || translations.ru[namespace];
-    return (key: string): string => ns[key] || translations.ru[namespace]?.[key] || key;
+    const ns = translations[lang]?.[namespace] || translations.en[namespace];
+    return (key: string): string => ns[key] || translations.en[namespace]?.[key] || key;
   }, [lang, namespace]);
 
   return { t, lang };

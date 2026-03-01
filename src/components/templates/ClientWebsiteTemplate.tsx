@@ -20,6 +20,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   const [screenshotMode, setScreenshotMode] = useState(false);
   const [screenshotLoaded, setScreenshotLoaded] = useState(false);
   const [screenshotSrc, setScreenshotSrc] = useState('');
+  const [screenshotFailed, setScreenshotFailed] = useState(false);
   const iframeLoadedRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -77,6 +78,15 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
     };
     checkFrameable();
   }, [safeUrl]);
+
+  // Auto-enter screenshot mode when iframe is blocked
+  useEffect(() => {
+    if (iframeError && !screenshotMode && !screenshotFailed) {
+      setScreenshotSrc(`/quickwidgets/${clientId}/preview.png`);
+      setScreenshotLoaded(false);
+      setScreenshotMode(true);
+    }
+  }, [iframeError, screenshotMode, screenshotFailed, clientId]);
 
   // Timeout fallback: if iframe onLoad never fires (e.g. slow resources, hanging
   // scripts on client sites), remove the loading spinner after 8 seconds so the
@@ -181,8 +191,8 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
         </div>
       )}
 
-      {/* Error State — Template Picker (hidden during screenshot mode) */}
-      {iframeError && !screenshotMode && (
+      {/* Error State — Template Picker (shown only after screenshot also fails) */}
+      {iframeError && !screenshotMode && screenshotFailed && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900">
           <div className="max-w-2xl px-6 text-center">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10">
@@ -271,6 +281,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
                 onClick={() => {
                   setScreenshotSrc(`/quickwidgets/${clientId}/preview.png`);
                   setScreenshotLoaded(false);
+                  setScreenshotFailed(false);
                   setScreenshotMode(true);
                 }}
                 className="group rounded-2xl border border-green-500/30 bg-green-500/[0.05] p-6 transition-all duration-300 hover:border-green-500/50 hover:bg-green-500/[0.1]"
@@ -324,6 +335,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
             onClick={() => {
               setScreenshotMode(false);
               setScreenshotLoaded(false);
+              setScreenshotFailed(true);
             }}
             className="fixed top-16 left-4 z-[9999] flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-sm text-white backdrop-blur-sm transition-colors hover:bg-black/90"
           >
@@ -356,9 +368,10 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
               if (screenshotSrc !== thumbUrl) {
                 setScreenshotSrc(thumbUrl);
               } else {
-                // Both sources failed — go back to template picker
+                // Both sources failed — show template picker
                 setScreenshotMode(false);
                 setScreenshotLoaded(false);
+                setScreenshotFailed(true);
               }
             }}
           />

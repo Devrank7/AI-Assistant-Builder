@@ -7,7 +7,7 @@ export const LANGUAGES = {
 } as const;
 
 export type Lang = keyof typeof LANGUAGES;
-export const DEFAULT_LANG: Lang = 'ru';
+export const DEFAULT_LANG: Lang = 'en';
 export const SUPPORTED_LANGS = Object.keys(LANGUAGES) as Lang[];
 
 /** Map browser locale codes to our supported languages */

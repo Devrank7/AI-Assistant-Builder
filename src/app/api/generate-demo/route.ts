@@ -23,6 +23,7 @@ import { generateThemeJson, generateWidgetConfig } from '@/lib/themeGenerator';
 import { crawlWebsite } from '@/lib/crawler';
 import { withRetry } from '@/lib/retry';
 import ShortLink from '@/models/ShortLink';
+import { captureScreenshot } from '@/lib/screenshot';
 
 // --- Paths ---
 const PROJECT_ROOT = process.cwd();
@@ -402,6 +403,11 @@ export async function POST(request: NextRequest) {
     // 12. Fire-and-forget: deep crawl + upload knowledge embeddings in background
     uploadKnowledgeBackground(clientId, brandName, websiteUrl).catch((err) => {
       console.error('[GenerateDemo] Background knowledge upload error:', err);
+    });
+
+    // 12b. Fire-and-forget: capture website screenshot for iframe-blocked sites
+    captureScreenshot(clientId, websiteUrl).catch((err) => {
+      console.error('[GenerateDemo] Screenshot capture error:', err);
     });
 
     // 13. Create short link
