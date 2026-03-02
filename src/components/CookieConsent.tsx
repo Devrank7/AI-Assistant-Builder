@@ -1,21 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export default function CookieConsent() {
   const { t } = useTranslation('common');
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
+  // Hide on demo and short-link pages
+  const isDemo = pathname.startsWith('/demo/') || pathname.startsWith('/d/');
+
   useEffect(() => {
+    if (isDemo) return;
     try {
       const consent = localStorage.getItem('cookie_consent');
       if (!consent) setVisible(true);
     } catch {
       // localStorage unavailable
     }
-  }, []);
+  }, [isDemo]);
 
   const accept = () => {
     try {
@@ -26,7 +32,7 @@ export default function CookieConsent() {
     setVisible(false);
   };
 
-  if (!visible) return null;
+  if (!visible || isDemo) return null;
 
   return (
     <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-white/[0.08] bg-[#0a0a0f]/95 p-4 backdrop-blur-xl md:p-6">
