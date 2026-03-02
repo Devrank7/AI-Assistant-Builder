@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import InstagramConfig from '@/models/InstagramConfig';
+import AISettings from '@/models/AISettings';
 import ChatLog from '@/models/ChatLog';
 import { verifyAdmin } from '@/lib/auth';
 
@@ -66,6 +67,21 @@ export async function PUT(request: NextRequest) {
     if (body.processingMessage !== undefined) updateFields.processingMessage = body.processingMessage;
 
     const config = await InstagramConfig.findOneAndUpdate({}, { $set: updateFields }, { upsert: true, new: true });
+
+    // Reverse sync shared fields to AISettings (so widget & all channels use the same prompt)
+    const syncFields: Record<string, unknown> = {};
+    if (updateFields.systemPrompt !== undefined) syncFields.systemPrompt = updateFields.systemPrompt;
+    if (updateFields.aiModel !== undefined) syncFields.aiModel = updateFields.aiModel;
+    if (updateFields.temperature !== undefined) syncFields.temperature = updateFields.temperature;
+    if (updateFields.maxTokens !== undefined) syncFields.maxTokens = updateFields.maxTokens;
+
+    if (Object.keys(syncFields).length > 0) {
+      await AISettings.findOneAndUpdate({ clientId: INSTAGRAM_BOT_ID }, { $set: syncFields }, { upsert: true }).catch(
+        (err: unknown) => {
+          console.error(`[InstagramConfig] Failed to sync to AISettings:`, err);
+        }
+      );
+    }
 
     return NextResponse.json({
       success: true,

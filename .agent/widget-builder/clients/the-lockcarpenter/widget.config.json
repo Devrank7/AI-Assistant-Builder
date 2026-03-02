@@ -1,0 +1,33 @@
+{
+  "clientId": "the-lockcarpenter",
+  "botName": "The Lockcarpenter AI",
+  "welcomeMessage": "Welcome to **The Lockcarpenter**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Get a quote", "View services", "See our projects", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "LC"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need carpentry work done? Get a free quote!"
+    }
+  },
+  "contacts": {
+    "email": "tony@lockcarpentry.com.au",
+    "website": "http://www.lockcarpenter.com.au/"
+  }
+}

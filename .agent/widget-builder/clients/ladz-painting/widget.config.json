@@ -1,0 +1,34 @@
+{
+  "clientId": "ladz-painting",
+  "botName": "LADZ Painting and Maintenance AI",
+  "welcomeMessage": "Welcome to **LADZ Painting and Maintenance**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Get a free quote", "View services", "See our work", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "LP"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for professional painters? Get a free quote!"
+    }
+  },
+  "contacts": {
+    "phone": "+61468880776",
+    "email": "LADZpainting@outlook.com",
+    "website": "https://www.ladzpainting.com.au/"
+  }
+}

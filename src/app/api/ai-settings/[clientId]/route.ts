@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import AISettings from '@/models/AISettings';
 import { defaultSystemPrompt } from '@/models/AISettings'; // Fix import if needed or use string directly
+import InstagramConfig from '@/models/InstagramConfig';
 import { invalidatePromptCache } from '@/lib/gemini';
 import { getModelIds, GEMINI_MODELS } from '@/lib/models'; // Ensure this exists or mock/fix
 import { verifyAdminOrClient } from '@/lib/auth';
 import { exportClientSeed } from '@/lib/exportSeed';
+
+const INSTAGRAM_BOT_ID = '_instagram_assistant_';
 
 // GET - Get AI settings for a client
 export async function GET(request: NextRequest, { params }: { params: Promise<{ clientId: string }> }) {
@@ -95,6 +98,19 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     // If system prompt was updated, invalidate the cached context
     if (updateData.systemPrompt) {
       await invalidatePromptCache(clientId);
+    }
+
+    // Sync shared fields to InstagramConfig (so ManyChat uses the same prompt)
+    const syncFields: Record<string, unknown> = {};
+    if (updateData.systemPrompt !== undefined) syncFields.systemPrompt = updateData.systemPrompt;
+    if (updateData.aiModel !== undefined) syncFields.aiModel = updateData.aiModel;
+    if (updateData.temperature !== undefined) syncFields.temperature = updateData.temperature;
+    if (updateData.maxTokens !== undefined) syncFields.maxTokens = updateData.maxTokens;
+
+    if (Object.keys(syncFields).length > 0) {
+      await InstagramConfig.findOneAndUpdate({}, { $set: syncFields }, { upsert: true }).catch((err: unknown) => {
+        console.error(`[AI Settings] Failed to sync to InstagramConfig:`, err);
+      });
     }
 
     // Auto-export seed file on local so it deploys with the code

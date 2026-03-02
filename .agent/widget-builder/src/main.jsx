@@ -11,14 +11,6 @@ class AIChatWidget extends HTMLElement {
     }
 
     connectedCallback() {
-        // Load Google Fonts into document head (fonts are global, available in Shadow DOM)
-        const fontHref = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap';
-        if (!document.querySelector('link[href="' + fontHref + '"]')) {
-            const fontLink = document.createElement('link');
-            fontLink.rel = 'stylesheet';
-            fontLink.href = fontHref;
-            document.head.appendChild(fontLink);
-        }
 
         const container = document.createElement('div');
         container.id = 'widget-root';

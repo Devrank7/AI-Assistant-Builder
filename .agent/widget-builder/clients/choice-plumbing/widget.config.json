@@ -1,0 +1,34 @@
+{
+  "clientId": "choice-plumbing",
+  "botName": "Choice Plumbing AI",
+  "welcomeMessage": "Welcome to **Choice Plumbing**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Book a plumber", "View services", "Emergency plumbing", "Get a quote"],
+  "avatar": {
+    "type": "initials",
+    "initials": "CP"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need a plumber? Get a free quote in seconds!"
+    }
+  },
+  "contacts": {
+    "phone": "+61416043559",
+    "email": "frank@choiceplumbing.com.au",
+    "website": "https://www.choiceplumbing.com.au/"
+  }
+}

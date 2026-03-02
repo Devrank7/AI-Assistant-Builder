@@ -1,0 +1,34 @@
+{
+  "clientId": "shire-care-plumbing",
+  "botName": "Shire Care Plumbing AI",
+  "welcomeMessage": "Welcome to **Shire Care Plumbing**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Book a plumber", "View services", "Emergency plumbing", "Get a quote"],
+  "avatar": {
+    "type": "initials",
+    "initials": "SC"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need a plumber? Get a free quote in seconds!"
+    }
+  },
+  "contacts": {
+    "phone": "+611800744732",
+    "email": "shirecareservicesptyltd@gmail.com",
+    "website": "http://shirecareplumbing.com.au/"
+  }
+}

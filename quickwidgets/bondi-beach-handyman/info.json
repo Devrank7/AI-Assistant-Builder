@@ -1,0 +1,14 @@
+{
+  "clientId": "bondi-beach-handyman",
+  "username": "bondi-beach-handyman",
+  "name": "Bondi Beach Handyman",
+  "email": "bondibeachhandyman@gmail.com",
+  "website": "https://www.bondibeachhandyman.com/",
+  "phone": "+61 477 694 353",
+  "addresses": [
+    "316 Birrell St, Bondi NSW 2026, Australia"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-02T18:34:32.014Z"
+}

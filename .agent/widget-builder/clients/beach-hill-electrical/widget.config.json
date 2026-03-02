@@ -1,0 +1,34 @@
+{
+  "clientId": "beach-hill-electrical",
+  "botName": "Beach Hill Electrical AI",
+  "welcomeMessage": "Welcome to **Beach Hill Electrical**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Book an electrician", "View services", "Emergency callout", "Get a quote"],
+  "avatar": {
+    "type": "initials",
+    "initials": "BH"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need an electrician? Get a free quote today!"
+    }
+  },
+  "contacts": {
+    "phone": "+61410774060",
+    "email": "abi@beachhillelectrical.com",
+    "website": "http://beachhillelectrical.com/"
+  }
+}

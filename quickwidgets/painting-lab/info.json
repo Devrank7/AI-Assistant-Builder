@@ -1,0 +1,14 @@
+{
+  "clientId": "painting-lab",
+  "username": "painting-lab",
+  "name": "Painting Lab",
+  "email": "kris@paintinglab.com.au",
+  "website": "http://www.paintinglab.com.au/",
+  "phone": null,
+  "addresses": [
+    "1219 Pittwater Rd, Collaroy NSW 2097, Australia"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-02T18:07:19.044Z"
+}

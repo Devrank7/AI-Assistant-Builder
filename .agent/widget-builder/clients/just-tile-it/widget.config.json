@@ -1,0 +1,34 @@
+{
+  "clientId": "just-tile-it",
+  "botName": "Just Tile It AI",
+  "welcomeMessage": "Welcome to **Just Tile It**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Get a free quote", "View services", "See our work", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "JT"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need tiling done? Get a free quote today!"
+    }
+  },
+  "contacts": {
+    "phone": "+61405215846",
+    "email": "Just.tile.it@hotmail.com",
+    "website": "http://www.justtileit.com.au/"
+  }
+}

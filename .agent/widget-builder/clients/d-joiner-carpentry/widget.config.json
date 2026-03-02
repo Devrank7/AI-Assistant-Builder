@@ -1,0 +1,34 @@
+{
+  "clientId": "d-joiner-carpentry",
+  "botName": "D Joiner Carpentry AI",
+  "welcomeMessage": "Welcome to **D Joiner Carpentry**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Get a quote", "View services", "See our projects", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "DJ"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need carpentry work done? Get a free quote!"
+    }
+  },
+  "contacts": {
+    "phone": "+61402094849",
+    "email": "dave@djoinercarpentry.com.au",
+    "website": "http://www.djoinercarpentry.com.au/"
+  }
+}

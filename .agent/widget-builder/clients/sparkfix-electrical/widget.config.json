@@ -1,0 +1,34 @@
+{
+  "clientId": "sparkfix-electrical",
+  "botName": "Sparkfix Electrical Services AI",
+  "welcomeMessage": "Welcome to **Sparkfix Electrical Services**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Book an electrician", "View services", "Emergency callout", "Get a quote"],
+  "avatar": {
+    "type": "initials",
+    "initials": "SF"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need an electrician? Get a free quote today!"
+    }
+  },
+  "contacts": {
+    "phone": "+61452188790",
+    "email": "josh@sparkfix.com.au",
+    "website": "http://www.sparkfix.com.au/"
+  }
+}

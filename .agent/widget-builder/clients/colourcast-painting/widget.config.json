@@ -1,0 +1,34 @@
+{
+  "clientId": "colourcast-painting",
+  "botName": "Colourcast Painting and Decorating AI",
+  "welcomeMessage": "Welcome to **Colourcast Painting and Decorating**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Get a free quote", "View services", "See our work", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "CP"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Looking for professional painters? Get a free quote!"
+    }
+  },
+  "contacts": {
+    "phone": "+61406091739",
+    "email": "hirecolourcast@gmail.com",
+    "website": "https://colourcastpainting.com.au/"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "clientId": "commercial-electrical-sydney",
+  "botName": "Commercial Electrical Services Sydney AI",
+  "welcomeMessage": "Welcome to **Commercial Electrical Services Sydney**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Book an electrician", "View services", "Emergency callout", "Get a quote"],
+  "avatar": {
+    "type": "initials",
+    "initials": "CE"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need an electrician? Get a free quote today!"
+    }
+  },
+  "contacts": {
+    "phone": "+611300942237",
+    "email": "pcawu1@gmail.com",
+    "website": "http://commercialelectrician.net.au/"
+  }
+}

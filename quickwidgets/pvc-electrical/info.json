@@ -1,0 +1,14 @@
+{
+  "clientId": "pvc-electrical",
+  "username": "pvc-electrical",
+  "name": "PVC Electrical",
+  "email": "ian@pvcelectrical.com.au",
+  "website": "https://pvcelectrical.com.au/",
+  "phone": "+61 432 673 599",
+  "addresses": [
+    "Vermont St, Sutherland NSW 2232, Australia"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-02T17:37:59.427Z"
+}

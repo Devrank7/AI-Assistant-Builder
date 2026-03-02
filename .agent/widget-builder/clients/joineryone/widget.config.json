@@ -1,0 +1,34 @@
+{
+  "clientId": "joineryone",
+  "botName": "JoineryOne Pty Ltd AI",
+  "welcomeMessage": "Welcome to **JoineryOne Pty Ltd**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Get a quote", "View services", "See our projects", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "JO"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need carpentry work done? Get a free quote!"
+    }
+  },
+  "contacts": {
+    "phone": "+61294761894",
+    "email": "graham@joineryone.com.au",
+    "website": "https://joineryone.com.au/"
+  }
+}

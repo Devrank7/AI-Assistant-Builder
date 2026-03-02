@@ -1,0 +1,14 @@
+{
+  "clientId": "bondi-carpentry",
+  "username": "bondi-carpentry",
+  "name": "Bondi Carpentry and Maintenance",
+  "email": "bondicarpentryandmaintenance@gmail.com",
+  "website": "https://www.bondicarpentryandmaintenance.com.au/",
+  "phone": "+61 415 931 515",
+  "addresses": [
+    "128 Warners Ave, Bondi Beach NSW 2026, Australia"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-02T18:34:23.308Z"
+}

@@ -1,0 +1,34 @@
+{
+  "clientId": "central-home-maintenance",
+  "botName": "Central Home Maintenance AI",
+  "welcomeMessage": "Welcome to **Central Home Maintenance**! How can we help you today?",
+  "inputPlaceholder": "Ask us anything...",
+  "quickReplies": ["Get a quote", "View services", "See our projects", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "CH"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need carpentry work done? Get a free quote!"
+    }
+  },
+  "contacts": {
+    "phone": "+61424752987",
+    "email": "chmaintenance@outlook.com.au",
+    "website": "https://centralhomemaintenance.com.au/"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "clientId": "manning-plumbing",
+  "username": "manning-plumbing",
+  "name": "Manning Plumbing",
+  "email": "smanningplumbing@gmail.com",
+  "website": "http://manningplumbing.com.au/",
+  "phone": "+61 423 325 048",
+  "addresses": [
+    "60 Lord Sheffield Cct, Penrith NSW 2750, Australia"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-02T17:14:12.607Z"
+}
