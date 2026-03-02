@@ -74,6 +74,20 @@ async function main() {
                 continue;
             }
 
+            // Fetch short link
+            let shortLink = null;
+            try {
+                const slRes = await fetch(`${baseUrl}/api/short-link?clientId=${clientId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (slRes.ok) {
+                    const slData = await slRes.json();
+                    if (slData.success && slData.code) {
+                        shortLink = { code: slData.code };
+                    }
+                }
+            } catch {}
+
             // Save seed file
             const seed = {
                 clientId,
@@ -91,6 +105,7 @@ async function main() {
                     aiModel: settings.aiModel,
                     handoffEnabled: settings.handoffEnabled,
                 } : null,
+                shortLink,
             };
 
             const seedPath = path.join(SEEDS_DIR, `${clientId}.json`);

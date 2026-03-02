@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
 import AISettings from '@/models/AISettings';
+import ShortLink from '@/models/ShortLink';
 import { generateEmbedding } from '@/lib/gemini';
 
 const SEEDS_DIR = path.join(process.cwd(), 'knowledge-seeds');
@@ -59,6 +60,34 @@ export async function seedKnowledgeIfNeeded(): Promise<void> {
           if (seed.aiSettings.maxTokens) existingSettings.maxTokens = seed.aiSettings.maxTokens;
           await existingSettings.save();
           console.log(`[Seed] ${clientId}: updated AI settings (short prompt → seed prompt)`);
+        }
+      }
+
+      // Import short link if present and not already in DB
+      if (seed.shortLink?.code) {
+        const existingLink = await ShortLink.findOne({ clientId });
+        if (!existingLink) {
+          // Read website from info.json in quickwidgets
+          let website = '';
+          try {
+            const infoPath = path.join(process.cwd(), 'quickwidgets', clientId, 'info.json');
+            if (fs.existsSync(infoPath)) {
+              const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
+              website = info.website || '';
+            }
+          } catch {}
+
+          try {
+            await ShortLink.create({
+              code: seed.shortLink.code,
+              clientId,
+              website,
+              widgetType: 'quick',
+            });
+            console.log(`[Seed] ${clientId}: created short link /d/${seed.shortLink.code}`);
+          } catch {
+            console.warn(`[Seed] ${clientId}: short link code collision, skipping`);
+          }
         }
       }
 
