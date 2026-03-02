@@ -31,43 +31,48 @@ export async function seedKnowledgeIfNeeded(): Promise<void> {
 
   console.log(`[Seed] Found ${seedFiles.length} knowledge seed files, checking DB...`);
 
-  let imported = 0;
-
+  // Parse all seed files upfront
+  const seeds: { file: string; data: Record<string, unknown> }[] = [];
   for (const file of seedFiles) {
     try {
-      const seedPath = path.join(SEEDS_DIR, file);
-      const raw = fs.readFileSync(seedPath, 'utf-8');
-      const seed = JSON.parse(raw);
-      const clientId = seed.clientId;
+      const raw = fs.readFileSync(path.join(SEEDS_DIR, file), 'utf-8');
+      seeds.push({ file, data: JSON.parse(raw) });
+    } catch {
+      // skip unparseable files
+    }
+  }
 
-      if (!clientId) continue;
+  // ── Pass 1: Fast operations (AI settings + short links) ──
+  // These are DB-only ops and must complete for all clients before
+  // attempting slow embedding generation.
+  for (const { data: seed } of seeds) {
+    const clientId = seed.clientId as string;
+    if (!clientId) continue;
 
-      // Import AI settings (always check, even if knowledge exists)
-      if (seed.aiSettings) {
+    try {
+      // Import AI settings
+      const aiSettings = seed.aiSettings as Record<string, unknown> | undefined;
+      if (aiSettings) {
         const existingSettings = await AISettings.findOne({ clientId });
         if (!existingSettings) {
-          await AISettings.create({
-            clientId,
-            ...seed.aiSettings,
-          });
+          await AISettings.create({ clientId, ...aiSettings });
           console.log(`[Seed] ${clientId}: created AI settings`);
-        } else if (existingSettings.systemPrompt.length < 200 && seed.aiSettings.systemPrompt?.length > 200) {
-          // Update if existing prompt is generic/short and seed has a real one
-          existingSettings.systemPrompt = seed.aiSettings.systemPrompt;
-          if (seed.aiSettings.greeting) existingSettings.greeting = seed.aiSettings.greeting;
-          if (seed.aiSettings.topK) existingSettings.topK = seed.aiSettings.topK;
-          if (seed.aiSettings.aiModel) existingSettings.aiModel = seed.aiSettings.aiModel;
-          if (seed.aiSettings.maxTokens) existingSettings.maxTokens = seed.aiSettings.maxTokens;
+        } else if (existingSettings.systemPrompt.length < 200 && (aiSettings.systemPrompt as string)?.length > 200) {
+          existingSettings.systemPrompt = aiSettings.systemPrompt as string;
+          if (aiSettings.greeting) existingSettings.greeting = aiSettings.greeting as string;
+          if (aiSettings.topK) existingSettings.topK = aiSettings.topK as number;
+          if (aiSettings.aiModel) existingSettings.aiModel = aiSettings.aiModel as string;
+          if (aiSettings.maxTokens) existingSettings.maxTokens = aiSettings.maxTokens as number;
           await existingSettings.save();
           console.log(`[Seed] ${clientId}: updated AI settings (short prompt → seed prompt)`);
         }
       }
 
-      // Import short link if present and not already in DB
-      if (seed.shortLink?.code) {
+      // Import short link
+      const shortLink = seed.shortLink as { code?: string } | undefined;
+      if (shortLink?.code) {
         const existingLink = await ShortLink.findOne({ clientId });
         if (!existingLink) {
-          // Read website from info.json in quickwidgets
           let website = '';
           try {
             const infoPath = path.join(process.cwd(), 'quickwidgets', clientId, 'info.json');
@@ -78,52 +83,58 @@ export async function seedKnowledgeIfNeeded(): Promise<void> {
           } catch {}
 
           try {
-            await ShortLink.create({
-              code: seed.shortLink.code,
-              clientId,
-              website,
-              widgetType: 'quick',
-            });
-            console.log(`[Seed] ${clientId}: created short link /d/${seed.shortLink.code}`);
+            await ShortLink.create({ code: shortLink.code, clientId, website, widgetType: 'quick' });
+            console.log(`[Seed] ${clientId}: created short link /d/${shortLink.code}`);
           } catch {
             console.warn(`[Seed] ${clientId}: short link code collision, skipping`);
           }
         }
       }
+    } catch (err) {
+      console.warn(`[Seed] ${clientId}: error in pass 1:`, err);
+    }
+  }
 
-      // Check if this client already has knowledge in the DB
+  // ── Pass 2: Slow operations (knowledge chunks with embedding generation) ──
+  let imported = 0;
+
+  for (const { data: seed } of seeds) {
+    const clientId = seed.clientId as string;
+    if (!clientId) continue;
+
+    try {
       const existingCount = await KnowledgeChunk.countDocuments({ clientId });
       if (existingCount > 0) continue;
 
-      // Import knowledge chunks
-      if (seed.chunks && seed.chunks.length > 0) {
-        const docs = [];
-        for (const c of seed.chunks as { text: string; embedding?: number[]; source?: string }[]) {
-          let embedding = c.embedding;
-          if (!embedding || embedding.length === 0) {
-            try {
-              embedding = await generateEmbedding(c.text);
-            } catch {
-              console.warn(`[Seed] ${clientId}: failed to generate embedding, skipping chunk`);
-              continue;
-            }
+      const chunks = seed.chunks as { text: string; embedding?: number[]; source?: string }[] | undefined;
+      if (!chunks || chunks.length === 0) continue;
+
+      const docs = [];
+      for (const c of chunks) {
+        let embedding = c.embedding;
+        if (!embedding || embedding.length === 0) {
+          try {
+            embedding = await generateEmbedding(c.text);
+          } catch {
+            console.warn(`[Seed] ${clientId}: failed to generate embedding, skipping chunk`);
+            continue;
           }
-          docs.push({
-            clientId,
-            text: c.text,
-            embedding,
-            source: c.source || 'website',
-          });
         }
-        if (docs.length > 0) {
-          await KnowledgeChunk.insertMany(docs);
-        }
+        docs.push({
+          clientId,
+          text: c.text,
+          embedding,
+          source: c.source || 'website',
+        });
+      }
+      if (docs.length > 0) {
+        await KnowledgeChunk.insertMany(docs);
       }
 
       imported++;
-      console.log(`[Seed] ${clientId}: imported ${seed.chunks?.length || 0} chunks`);
+      console.log(`[Seed] ${clientId}: imported ${chunks.length} chunks`);
     } catch (err) {
-      console.warn(`[Seed] Error processing ${file}:`, err);
+      console.warn(`[Seed] ${clientId}: error importing chunks:`, err);
     }
   }
 

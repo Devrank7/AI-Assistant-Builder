@@ -45,7 +45,9 @@ curl -s "http://localhost:3000/api/integrations/sheets/read?spreadsheetId=SPREAD
 
 For each lead, run create-quick-widget phases 1-4 (analyze → configs → generate/build/deploy → knowledge/AI).
 
-Track: `successes: [{username, website}]`, `failures: [{username, website, error}]`, `skipped: count`.
+Track: `successes: [{username, website, shortCode}]`, `failures: [{username, website, error}]`, `skipped: count`.
+
+For each successful widget, create a ShortLink record in MongoDB (6-char alphanumeric code, `widgetType: 'quick'`). Store the code in the success record for the Demo column update in Phase 4B.
 
 **On failure**: log error, add to failures, continue to next lead immediately.
 
@@ -55,13 +57,26 @@ Track: `successes: [{username, website}]`, `failures: [{username, website, error
 
 ### 4A. Mark `hasWidget` in source sheet
 
-Find `hasWidget` column index from headers. Batch update via `POST /api/integrations/sheets/update`:
+1. Read the spreadsheet headers to find the `hasWidget` column index.
+2. **If `hasWidget` column does NOT exist**: create it by writing the header `"hasWidget"` to the next empty column in row 1, then use that column for values.
+3. Batch update via `POST /api/integrations/sheets/update`:
+   - `"TRUE"` for successful leads
+   - `""` for skipped/failed
+   - Range format: no sheet name prefix (`K2:K50`, not `Sheet1!K2:K50`)
 
-- `"TRUE"` for successful leads
-- `""` for skipped/failed
-- Range format: no sheet name prefix (`D2:D50`, not `Sheet1!D2:D50`)
+### 4B. Write `Demo` short links column
 
-### 4B. Add to "Проверенные лиды" (if source is a different sheet)
+1. For each successful widget, create a short link via the ShortLink model (6-char code, stored in MongoDB). The short link URL format is `https://winbix-ai.xyz/d/{code}`.
+2. Read the spreadsheet headers to find the `Demo` column index.
+3. **If `Demo` column does NOT exist**: create it by writing the header `"Demo"` to the next empty column in row 1 (after `hasWidget`), then use that column for values.
+4. Batch update the `Demo` column:
+   - Short link URL (`https://winbix-ai.xyz/d/{code}`) for successful leads
+   - `""` for skipped/failed
+   - Range format: no sheet name prefix
+
+**Important**: After creating short links, re-export knowledge seeds (`node scripts/export-knowledge-seeds.js`) so short link codes are included in seed files and will work on production after deployment.
+
+### 4C. Add to "Проверенные лиды" (if source is a different sheet)
 
 Search for today's sheet, read current data, find next empty row, batch append successful leads as `[email, website, username, "TRUE"]`. Don't duplicate existing entries.
 
@@ -96,9 +111,10 @@ Report format:
 ```
 ✅ Mass Quick Widget creation complete!
 📊 Results: Created: N | Failed: N | Skipped: N
-📋 Source sheet: hasWidget updated
+📋 Source sheet: hasWidget + Demo columns updated
 📨 Telegram report sent
-Successful: 1. username — website  2. username — website
+🔗 Knowledge seeds re-exported (short links included)
+Successful: 1. username — website (winbix-ai.xyz/d/AbC123)  2. username — website (winbix-ai.xyz/d/XyZ789)
 Failed: 1. username — website (error)
 ```
 
