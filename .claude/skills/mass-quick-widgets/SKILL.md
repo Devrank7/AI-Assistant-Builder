@@ -76,7 +76,20 @@ For each successful widget, create a ShortLink record in MongoDB (6-char alphanu
 
 **Important**: After creating short links, re-export knowledge seeds (`node scripts/export-knowledge-seeds.js`) so short link codes are included in seed files and will work on production after deployment.
 
-### 4C. Add to "Проверенные лиды" (if source is a different sheet)
+### 4C. Write `JavaScript` console snippet column
+
+1. Read the spreadsheet headers to find the `JavaScript` column index.
+2. **If `JavaScript` column does NOT exist**: create it by writing the header `"JavaScript"` to the next empty column in row 1 (after `Demo`), then use that column for values.
+3. For each successful widget, generate a console-executable snippet:
+   ```
+   (function(){var s=document.createElement('script');s.src='https://winbix-ai.xyz/quickwidgets/CLIENT_ID/script.js';document.head.appendChild(s)})()
+   ```
+4. Batch update the `JavaScript` column:
+   - Console snippet for successful leads
+   - `""` for skipped/failed
+   - Range format: no sheet name prefix
+
+### 4D. Add to "Проверенные лиды" (if source is a different sheet)
 
 Search for today's sheet, read current data, find next empty row, batch append successful leads as `[email, website, username, "TRUE"]`. Don't duplicate existing entries.
 

@@ -10,6 +10,8 @@ interface ClientInfoTabProps {
 }
 
 export default function ClientInfoTab({ client, scriptUrl, startDate, daysUntilPayment }: ClientInfoTabProps) {
+  const jsSnippet = `(function(){var s=document.createElement('script');s.src='${scriptUrl}';document.head.appendChild(s)})()`;
+
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Contact Information */}
@@ -93,9 +95,20 @@ export default function ClientInfoTab({ client, scriptUrl, startDate, daysUntilP
               <pre>{`<script src="${scriptUrl}"></script>`}</pre>
             </div>
           </div>
-          <button onClick={() => navigator.clipboard.writeText(scriptUrl)} className="neon-button w-full">
-            Copy Script URL
-          </button>
+          <div>
+            <label className="mb-2 block text-sm text-gray-400">Console Preview Snippet</label>
+            <div className="overflow-x-auto rounded-lg bg-black/30 p-3 font-mono text-xs text-amber-300">
+              <pre>{jsSnippet}</pre>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => navigator.clipboard.writeText(scriptUrl)} className="neon-button flex-1">
+              Copy Script URL
+            </button>
+            <button onClick={() => navigator.clipboard.writeText(jsSnippet)} className="neon-button flex-1">
+              Copy JS Snippet
+            </button>
+          </div>
         </div>
       </div>
 
