@@ -3,8 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * GET /api/check-frameable?url=https://example.com
  *
- * Makes a HEAD request to the given URL and inspects response headers
+ * Makes a GET request to the given URL and inspects response headers
  * to determine whether the site can be embedded in an iframe.
+ * Uses GET instead of HEAD because many servers don't return
+ * X-Frame-Options or CSP headers on HEAD requests.
  *
  * Returns: { reachable: boolean, frameable: boolean }
  */
@@ -16,15 +18,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const timeout = setTimeout(() => controller.abort(), 12000);
 
     const res = await fetch(url, {
-      method: 'HEAD',
+      method: 'GET',
       signal: controller.signal,
       redirect: 'follow',
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
     });
 
     clearTimeout(timeout);
+
+    // Consume body to free resources (we only need headers)
+    try {
+      await res.text();
+    } catch {}
 
     // Check X-Frame-Options header
     const xfo = (res.headers.get('x-frame-options') || '').toLowerCase().trim();

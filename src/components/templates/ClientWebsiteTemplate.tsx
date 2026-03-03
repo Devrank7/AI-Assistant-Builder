@@ -21,6 +21,8 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   const [screenshotLoaded, setScreenshotLoaded] = useState(false);
   const [screenshotSrc, setScreenshotSrc] = useState('');
   const [screenshotFailed, setScreenshotFailed] = useState(false);
+  // Skip iframe entirely when pre-computed info says not frameable
+  const [skipIframe, setSkipIframe] = useState(false);
   const iframeLoadedRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -30,8 +32,9 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   const RELOAD_LOOP_THRESHOLD = 3; // max loads within time window
   const RELOAD_LOOP_WINDOW_MS = 5000; // 5 second window
 
-  // Extract clientId from scriptUrl: "/widgets/{clientId}/script.js"
+  // Extract clientId from scriptUrl: "/quickwidgets/{clientId}/script.js" or "/widgets/{clientId}/script.js"
   const clientId = scriptUrl.split('/')[2] || '';
+  const widgetDir = scriptUrl.split('/')[1] || 'quickwidgets';
 
   // Override document.title and meta description so the widget's page-context
   // injection picks up the client's website info instead of "WinBix AI" from root layout.
@@ -63,8 +66,31 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
     }
   }, [scriptUrl]);
 
-  // Server-side pre-check: detect unreachable sites and iframe-blocking headers
+  // Fast pre-check: read pre-computed frameable flag from info.json (instant, no server round-trip to target site)
   useEffect(() => {
+    const checkInfoJson = async () => {
+      try {
+        const res = await fetch(`/${widgetDir}/${clientId}/info.json`);
+        if (!res.ok) return;
+        const info = await res.json();
+        if (info.frameable === false) {
+          // Site is known to block iframes — skip iframe entirely, go straight to screenshot
+          setSkipIframe(true);
+          setIframeError(true);
+        }
+      } catch {
+        // info.json not available — fall through to runtime check
+      }
+    };
+    if (clientId) checkInfoJson();
+  }, [clientId, widgetDir]);
+
+  // Server-side runtime check: detect unreachable sites and iframe-blocking headers
+  // This runs as a fallback when info.json doesn't have a frameable flag
+  useEffect(() => {
+    // Skip runtime check if info.json already told us it's not frameable
+    if (skipIframe) return;
+
     const checkFrameable = async () => {
       try {
         const res = await fetch(`/api/check-frameable?url=${encodeURIComponent(safeUrl)}`);
@@ -77,29 +103,30 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
       }
     };
     checkFrameable();
-  }, [safeUrl]);
+  }, [safeUrl, skipIframe]);
 
   // Auto-enter screenshot mode when iframe is blocked
   useEffect(() => {
     if (iframeError && !screenshotMode && !screenshotFailed) {
-      setScreenshotSrc(`/quickwidgets/${clientId}/preview.png`);
+      setScreenshotSrc(`/${widgetDir}/${clientId}/preview.png`);
       setScreenshotLoaded(false);
       setScreenshotMode(true);
     }
-  }, [iframeError, screenshotMode, screenshotFailed, clientId]);
+  }, [iframeError, screenshotMode, screenshotFailed, clientId, widgetDir]);
 
   // Timeout fallback: if iframe onLoad never fires (e.g. slow resources, hanging
-  // scripts on client sites), remove the loading spinner after 8 seconds so the
+  // scripts on client sites), remove the loading spinner after 5 seconds so the
   // user can see whatever has already rendered in the iframe.
   useEffect(() => {
+    if (skipIframe) return; // No iframe to wait for
     const timer = setTimeout(() => {
       if (!iframeLoadedRef.current && !iframeError) {
         iframeLoadedRef.current = true;
         setIframeLoaded(true);
       }
-    }, 8000);
+    }, 5000);
     return () => clearTimeout(timer);
-  }, [iframeError]);
+  }, [iframeError, skipIframe]);
 
   // Handle iframe load — detect reload loops (e.g. LiteSpeed Cache lazy loader)
   // and trigger error state if the iframe reloads too many times in quick succession.
@@ -180,8 +207,8 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
         </div>
       </div>
 
-      {/* Loading State */}
-      {!iframeLoaded && !iframeError && (
+      {/* Loading State — only shown when iframe is being attempted */}
+      {!skipIframe && !iframeLoaded && !iframeError && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900">
           <div className="text-center">
             <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
@@ -279,7 +306,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
               {/* Screenshot preview card */}
               <button
                 onClick={() => {
-                  setScreenshotSrc(`/quickwidgets/${clientId}/preview.png`);
+                  setScreenshotSrc(`/${widgetDir}/${clientId}/preview.png`);
                   setScreenshotLoaded(false);
                   setScreenshotFailed(false);
                   setScreenshotMode(true);
@@ -378,15 +405,17 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
         </div>
       )}
 
-      {/* Iframe — no sandbox to let client sites load naturally without script failures */}
-      <iframe
-        ref={iframeRef}
-        src={safeUrl}
-        className="h-screen w-full border-0"
-        onLoad={handleIframeLoad}
-        onError={handleIframeError}
-        title="Client Website Preview"
-      />
+      {/* Iframe — only rendered when site is potentially frameable */}
+      {!skipIframe && (
+        <iframe
+          ref={iframeRef}
+          src={safeUrl}
+          className="h-screen w-full border-0"
+          onLoad={handleIframeLoad}
+          onError={handleIframeError}
+          title="Client Website Preview"
+        />
+      )}
     </div>
   );
 }

@@ -5,8 +5,12 @@
   "email": "Beataleakplumbing@gmail.com",
   "website": "https://beataleakplumbing.com.au",
   "phone": "+61 405 113 587",
-  "addresses": ["30 Archer St, Blacktown NSW 2148, Australia"],
+  "addresses": [
+    "30 Archer St, Blacktown NSW 2148, Australia"
+  ],
   "instagram": null,
   "clientType": "quick",
-  "createdAt": "2026-03-02T12:00:00.000Z"
+  "createdAt": "2026-03-02T12:00:00.000Z",
+  "frameable": true,
+  "hasPreview": true
 }

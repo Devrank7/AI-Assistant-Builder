@@ -8,5 +8,7 @@
   "addresses": [],
   "instagram": null,
   "clientType": "quick",
-  "createdAt": "2026-03-02T18:34:46.922Z"
+  "createdAt": "2026-03-02T18:34:46.922Z",
+  "frameable": true,
+  "hasPreview": true
 }

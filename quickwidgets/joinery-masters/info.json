@@ -10,5 +10,7 @@
   ],
   "instagram": null,
   "clientType": "quick",
-  "createdAt": "2026-03-02T18:25:25.742Z"
+  "createdAt": "2026-03-02T18:25:25.742Z",
+  "frameable": true,
+  "hasPreview": true
 }

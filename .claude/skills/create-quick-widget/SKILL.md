@@ -98,6 +98,23 @@ Schema: [CONFIG_REFERENCE.md#infojson-schema](./CONFIG_REFERENCE.md#infojson-sch
 
 Write `quickwidgets/<clientId>/info.json`.
 
+### 3.3 Check Frameability & Capture Screenshot
+
+After deploying, check if the client's website can be embedded in an iframe (for the demo page). Store the result in `info.json` so the demo page can skip the iframe instantly for blocked sites.
+
+```bash
+# Check frameability (GET request, check X-Frame-Options / CSP headers)
+# Store result as "frameable": true/false in info.json
+
+# Capture screenshot via thum.io for iframe-blocked fallback
+curl -o quickwidgets/<clientId>/preview.png \
+  "https://image.thum.io/get/width/1440/crop/900/<website_url>"
+```
+
+Update info.json with `"frameable": true/false` and `"hasPreview": true/false`.
+
+The `captureScreenshot()` function in `src/lib/screenshot.ts` does this automatically when called from the `generate-demo` API route. For CLI-based creation, use the batch script: `node scripts/batch-check-frameable.js`.
+
 ---
 
 ## Phase 4 — Knowledge Base & AI
