@@ -1,0 +1,24 @@
+{
+  "clientId": "osadchyclinic",
+  "bot": {
+    "name": "Осадчий Dental AI",
+    "greeting": "Вітаємо у **Стоматології Осадчого**! 👋\n\nЯ — AI-асистент клініки на Січових Стрільців. Відповім на питання про послуги, ціни та допоможу записатись.\n\nЧим допомогти?",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_green",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["🦷 Прайс на послуги", "📅 Записатись на прийом", "🏥 Адреса клініки"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

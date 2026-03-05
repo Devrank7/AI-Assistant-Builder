@@ -1,0 +1,24 @@
+{
+  "clientId": "dentline",
+  "bot": {
+    "name": "Dent Line AI",
+    "greeting": "Ласкаво просимо до **Dent Line**! 👋\n\nЯ — віртуальний асистент клініки на Волоській, 20. Допоможу записатись, відповім на питання про послуги та ціни.\n\nЧим можу допомогти?",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_green",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["🦷 Імплантація — ціни", "📅 Вільні дати для запису", "💳 Які є способи оплати?"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

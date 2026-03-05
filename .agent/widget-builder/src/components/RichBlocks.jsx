@@ -13,7 +13,7 @@ function Card({ card, onAction }) {
                 {card.description && <p className="text-[11px] leading-relaxed text-gray-500">{card.description}</p>}
                 {card.button && (
                     <button onClick={() => onAction?.(card.button.url, card.button.label)}
-                        className="w-full mt-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all bg-[#f2f8fc] text-[#0265a1] hover:bg-[#e6f1f8] flex items-center justify-center gap-1">
+                        className="w-full mt-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all bg-[#ebeded] text-[#2f3c43] hover:bg-[#c3c8ca] flex items-center justify-center gap-1">
                         {card.button.label} <ExternalLink size={10} />
                     </button>
                 )}
@@ -69,7 +69,7 @@ function ButtonGroup({ buttons, onAction }) {
         <div className="flex flex-wrap gap-1.5">
             {buttons.map((btn, i) => (
                 <button key={i} onClick={() => onAction?.(btn.url, btn.label)}
-                    className="px-2.5 py-1.5 rounded-xl border text-[11px] font-medium transition-all cursor-pointer border-[#9ac9e5] bg-[#f2f8fc] text-[#0265a1] hover:bg-[#e6f1f8] hover:border-[#67add7]">
+                    className="px-2.5 py-1.5 rounded-xl border text-[11px] font-medium transition-all cursor-pointer border-[#afb5b9] bg-[#ebeded] text-[#2f3c43] hover:bg-[#c3c8ca] hover:border-[#879195]">
                     {btn.label}
                 </button>
             ))}
@@ -107,11 +107,11 @@ function LeadForm({ fields, submitLabel, onSubmit }) {
                     placeholder={f.label}
                     value={values[f.key] || ''}
                     onChange={(e) => setValues(prev => ({ ...prev, [f.key]: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border text-[12px] focus:outline-none focus:ring-1 focus:ring-[#e6f1f8] transition-all bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-[#67add7]"
+                    className="w-full px-3 py-2 rounded-xl border text-[12px] focus:outline-none focus:ring-1 focus:ring-[#ebeded] transition-all bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-[#879195]"
                 />
             ))}
             <button type="submit"
-                className="w-full py-2 rounded-xl text-[12px] font-semibold text-white bg-[#0277bd] hover:bg-[#0265a1] transition-all shadow-sm">
+                className="w-full py-2 rounded-xl text-[12px] font-semibold text-white bg-[#37474F] hover:bg-[#2f3c43] transition-all shadow-sm">
                 {submitLabel}
             </button>
         </motion.form>

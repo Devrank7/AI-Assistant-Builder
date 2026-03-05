@@ -378,14 +378,14 @@ export function Widget({ config }) {
                     </div>
                 ))}
                 {isTyping && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-2 py-2">
+                    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
                         <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#f2f9ec] to-[#d7ecc7] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#c9e6b4]/50">
                             <Sparkles size={13} className="text-[#79c043]" />
                         </div>
-                        <div className="flex-1 max-w-[70%] space-y-2 pt-1">
-                            <div className="h-3 shimmer-line bg-gray-100/80" style={{ width: '82%' }} />
-                            <div className="h-3 shimmer-line bg-gray-100/80" style={{ width: '61%', animationDelay: '0.15s' }} />
-                            <div className="h-3 shimmer-line bg-gray-100/80" style={{ width: '40%', animationDelay: '0.3s' }} />
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
                         </div>
                     </motion.div>
                 )}

@@ -1,0 +1,24 @@
+{
+  "clientId": "jstuning",
+  "bot": {
+    "name": "JS Tuning AI",
+    "greeting": "Вітаємо в **JS Tuning**! 🏎️\n\nЯ — AI-помічник. Розкажу про автосвітло, ремонт фар, шумоізоляцію, детейлінг та інші послуги.\n\nЧим допомогти?",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_blue",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": false,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["💡 Ремонт та тюнінг фар", "🔇 Шумоізоляція — ціна", "📅 Записатись на послугу"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

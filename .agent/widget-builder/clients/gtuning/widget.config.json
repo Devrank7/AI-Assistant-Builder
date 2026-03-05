@@ -1,0 +1,24 @@
+{
+  "clientId": "gtuning",
+  "bot": {
+    "name": "G-TUNING AI",
+    "greeting": "Привіт! Я — AI-помічник **G-TUNING** 🏎️\n\nРозкажу про чіп-тюнінг, діагностику, ціни та допоможу записатись.\n\nОберіть тему або напишіть!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_blue",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": false,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["⚡ Чіп-тюнінг — ціни", "🔧 Діагностика авто", "📅 Записатись на послугу"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

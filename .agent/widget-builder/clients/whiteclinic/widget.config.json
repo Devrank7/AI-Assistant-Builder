@@ -1,0 +1,24 @@
+{
+  "clientId": "whiteclinic",
+  "bot": {
+    "name": "White Clinic AI",
+    "greeting": "Ласкаво просимо до **White Clinic**! 👋\n\nЯ — AI-асистент клініки на Драгоманова. Відповім на питання про послуги та ціни, допоможу записатись.\n\nЗадайте питання!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_green",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": true,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["🦷 Відбілювання — ціна", "📅 Онлайн-запис", "🦷 Вініри та коронки"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}

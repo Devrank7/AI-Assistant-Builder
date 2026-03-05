@@ -201,17 +201,20 @@ button, a, input, textarea {
 .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
 button, a, input, textarea, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
-/* Skeleton shimmer loading */
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+/* Typing indicator — bouncing dots */
+@keyframes typing-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
 }
-.shimmer-line {
-    background: linear-gradient(90deg, ${c.isDark ? `rgba(${c.focusRgb}, 0.06)` : `rgba(${c.focusRgb}, 0.06)`} 25%, ${c.isDark ? `rgba(${c.focusRgb}, 0.15)` : `rgba(${c.focusRgb}, 0.12)`} 50%, ${c.isDark ? `rgba(${c.focusRgb}, 0.06)` : `rgba(${c.focusRgb}, 0.06)`} 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.8s ease-in-out infinite;
-    border-radius: 9999px;
+.typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: ${c.isDark ? c.cssPrimary : c.cssPrimary};
+    animation: typing-bounce 1.4s ease-in-out infinite;
 }
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
 /* Chat background pattern — branded SVG icons + gradient */
 .chat-pattern {
@@ -331,7 +334,6 @@ function genWidget(c) {
     const contactBtnClasses = c.isDark
         ? `text-[${c.textSecondary}] hover:text-[${c.textPrimary}] hover:bg-[${c.surfaceInput}]`
         : `text-gray-500 hover:text-[${c.cssPrimary}] hover:bg-white`;
-    const shimmerBg = c.isDark ? `bg-[${c.surfaceBorder}]/60` : 'bg-gray-100/80';
     const pillClasses = c.isDark
         ? `bg-[${c.surfaceCard}] text-[${c.textPrimary}] border border-[${c.surfaceBorder}] shadow-black/30`
         : 'bg-white text-gray-700 border border-gray-200 shadow-black/10';
@@ -715,14 +717,14 @@ export function Widget({ config }) {
                     </div>
                 ))}
                 {isTyping && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-2 py-2">
+                    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
                         <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50">
                             <Sparkles size={13} className="text-[${c.avatarIcon}]" />
                         </div>
-                        <div className="flex-1 max-w-[70%] space-y-2 pt-1">
-                            <div className="h-3 shimmer-line ${shimmerBg}" style={{ width: '82%' }} />
-                            <div className="h-3 shimmer-line ${shimmerBg}" style={{ width: '61%', animationDelay: '0.15s' }} />
-                            <div className="h-3 shimmer-line ${shimmerBg}" style={{ width: '40%', animationDelay: '0.3s' }} />
+                        <div className="${c.isDark ? `bg-[${c.surfaceCard}] border border-[${c.surfaceBorder}]` : 'bg-white border border-gray-100 shadow-sm'} rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
                         </div>
                     </motion.div>
                 )}

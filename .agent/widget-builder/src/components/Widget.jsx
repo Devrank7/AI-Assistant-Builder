@@ -268,7 +268,7 @@ export function Widget({ config }) {
 
             {/* HEADER */}
             <div className="relative px-5 py-4 flex items-center justify-between ">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0277bd] via-[#1b85c4] to-[#00838f]" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#37474F] via-[#4b5961] to-[#78909C]" />
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
 
                 <div className="relative flex items-center gap-3">
@@ -277,7 +277,7 @@ export function Widget({ config }) {
                             <Sparkles size={18} className="text-white" />
                         </div>
                         {!isOffline && (
-                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#b3d6eb] border-[2.5px] border-[#0277bd] shadow-sm" />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#c3c8ca] border-[2.5px] border-[#37474F] shadow-sm" />
                         )}
                     </div>
                     <div>
@@ -325,17 +325,17 @@ export function Widget({ config }) {
             {contacts && Object.keys(contacts).length > 0 && (
                 <div className="flex items-center gap-1.5 px-4 py-1.5 border-b overflow-x-auto scrollbar-hide bg-gray-50/60 border-gray-100">
                     {contacts.phone && (
-                        <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#0277bd] hover:bg-white" target="_blank" rel="noopener">
+                        <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#37474F] hover:bg-white" target="_blank" rel="noopener">
                             <Phone size={12} /> {uiStrings.call}
                         </a>
                     )}
                     {contacts.email && (
-                        <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#0277bd] hover:bg-white">
+                        <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#37474F] hover:bg-white">
                             <Mail size={12} /> Email
                         </a>
                     )}
                     {contacts.website && (
-                        <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#0277bd] hover:bg-white">
+                        <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#37474F] hover:bg-white">
                             <Globe size={12} /> {uiStrings.website}
                         </a>
                     )}
@@ -369,7 +369,7 @@ export function Widget({ config }) {
                                 className="flex flex-wrap gap-1.5 ml-7 sm:ml-9 mt-2 mb-1">
                                 {msg.suggestions.map((s, si) => (
                                     <button key={si} onClick={() => { detectLang(s); sendMessage(s); }}
-                                        className="px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-200 cursor-pointer border-[#9ac9e5] bg-[#f2f8fc] text-[#0265a1] hover:bg-[#e6f1f8] hover:border-[#67add7]">
+                                        className="px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-200 cursor-pointer border-[#afb5b9] bg-[#ebeded] text-[#2f3c43] hover:bg-[#c3c8ca] hover:border-[#879195]">
                                         {s}
                                     </button>
                                 ))}
@@ -378,14 +378,14 @@ export function Widget({ config }) {
                     </div>
                 ))}
                 {isTyping && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-2 py-2">
-                        <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#e6f1f8] to-[#b3d6eb] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#9ac9e5]/50">
-                            <Sparkles size={13} className="text-[#0277bd]" />
+                    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
+                        <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#ebeded] to-[#c3c8ca] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#afb5b9]/50">
+                            <Sparkles size={13} className="text-[#37474F]" />
                         </div>
-                        <div className="flex-1 max-w-[70%] space-y-2 pt-1">
-                            <div className="h-3 shimmer-line bg-gray-100/80" style={{ width: '82%' }} />
-                            <div className="h-3 shimmer-line bg-gray-100/80" style={{ width: '61%', animationDelay: '0.15s' }} />
-                            <div className="h-3 shimmer-line bg-gray-100/80" style={{ width: '40%', animationDelay: '0.3s' }} />
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
                         </div>
                     </motion.div>
                 )}
@@ -421,13 +421,13 @@ export function Widget({ config }) {
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                     <button type="button" onClick={() => fileInputRef.current?.click()}
-                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#67add7] bg-[#e6f1f8] text-[#0277bd] shadow-sm' : 'border-gray-200 text-gray-400 hover:text-[#0277bd] hover:border-[#67add7] hover:bg-[#e6f1f8]'}`}
+                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#879195] bg-[#ebeded] text-[#37474F] shadow-sm' : 'border-gray-200 text-gray-400 hover:text-[#37474F] hover:border-[#879195] hover:bg-[#ebeded]'}`}
                         aria-label="Upload photo">
                         <ImagePlus size={16} />
                     </button>
                     {voiceSupported && config.features?.voiceInput !== false && (
                         <button type="button" onClick={handleVoiceToggle}
-                            className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#67add7] bg-[#e6f1f8] text-[#0277bd] shadow-sm animate-pulse' : 'border-gray-200 text-gray-400 hover:text-[#0277bd] hover:border-[#67add7] hover:bg-[#e6f1f8]'}`}
+                            className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#879195] bg-[#ebeded] text-[#37474F] shadow-sm animate-pulse' : 'border-gray-200 text-gray-400 hover:text-[#37474F] hover:border-[#879195] hover:bg-[#ebeded]'}`}
                             aria-label={isListening ? 'Stop recording' : 'Voice input'}>
                             {isListening ? <MicOff size={16} /> : <Mic size={16} />}
                         </button>
@@ -435,11 +435,11 @@ export function Widget({ config }) {
                     <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                         placeholder={uiStrings.placeholder}
                         rows={1}
-                        className="flex-1 min-w-0 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl py-2.5 pl-3.5 pr-3.5 border border-gray-200 focus:outline-none focus:border-[#67add7] focus:ring-2 focus:ring-[#e6f1f8] focus:bg-white transition-all resize-none text-[13.5px] leading-relaxed"
+                        className="flex-1 min-w-0 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl py-2.5 pl-3.5 pr-3.5 border border-gray-200 focus:outline-none focus:border-[#879195] focus:ring-2 focus:ring-[#ebeded] focus:bg-white transition-all resize-none text-[13.5px] leading-relaxed"
                         style={{ maxHeight: '100px' }}
                     />
                     <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
-                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#0277bd] text-white flex items-center justify-center hover:bg-[#0265a1] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#0277bd]/25">
+                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#37474F] text-white flex items-center justify-center hover:bg-[#2f3c43] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#37474F]/25">
                         <Send size={16} />
                     </button>
                 </form>
@@ -472,7 +472,7 @@ export function Widget({ config }) {
                 )}
             </AnimatePresence>
 
-            <div className={`fixed z-[9999] flex flex-col gap-3 antialiased ${positionClasses}`} style={{ fontFamily: "\'Inter\', -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif", ...(isMobile && isOpen ? {} : dragStyle) }}>
+            <div className={`fixed z-[9999] flex flex-col gap-3 antialiased ${positionClasses}`} style={{ fontFamily: "-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif", ...(isMobile && isOpen ? {} : dragStyle) }}>
                 {/* Chat panel */}
                 <AnimatePresence>
                     {isOpen && (
@@ -519,17 +519,17 @@ export function Widget({ config }) {
                 {(!isMobile || !isOpen) && (
                     <div className="relative self-end">
                         {!isOpen && unreadCount > 0 && (
-                            <span className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#0277bd] to-[#00838f] animate-pulse-ring" />
+                            <span className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#37474F] to-[#78909C] animate-pulse-ring" />
                         )}
                         <motion.button
-                            whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(2, 119, 189, 0.35)' }}
+                            whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(55, 71, 79, 0.35)' }}
                             whileTap={isDragging ? {} : { scale: 0.92 }}
                             onClick={() => { if (!isDragging) setIsOpen(!isOpen); }}
                             onDoubleClick={resetPosition}
                             onPointerDown={onPointerDown}
                             onPointerMove={onPointerMove}
                             onPointerUp={onPointerUp}
-                            className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#0277bd]/30 bg-gradient-to-br from-[#0277bd] via-[#1b85c4] to-[#00838f] border border-white/10 ${!isOpen ? 'animate-breathe' : ''}`}
+                            className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#37474F]/30 bg-gradient-to-br from-[#37474F] via-[#4b5961] to-[#78909C] border border-white/10 ${!isOpen ? 'animate-breathe' : ''}`}
                             aria-label={isOpen ? 'Close chat' : 'Open chat'}
                         >
                             <AnimatePresence mode="wait">

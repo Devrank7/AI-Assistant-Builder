@@ -37,8 +37,8 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         >
             {/* Bot Avatar */}
             {isBot && (
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#e6f1f8] to-[#b3d6eb] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#9ac9e5]/50">
-                    <Sparkles size={13} className="text-[#0277bd]" />
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#ebeded] to-[#c3c8ca] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#afb5b9]/50">
+                    <Sparkles size={13} className="text-[#37474F]" />
                 </div>
             )}
 
@@ -60,13 +60,13 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                             ? 'bg-red-50 text-red-600 border border-red-200 rounded-bl-md'
                             : isBot
                               ? 'bg-white text-gray-700 border border-gray-100 shadow-sm rounded-bl-md'
-                              : 'bg-gradient-to-r from-[#f2f8fc] to-[#e6f1f8] text-gray-700 border border-[#9ac9e5]/50 rounded-br-md shadow-sm'
+                              : 'bg-gradient-to-r from-[#ebeded] to-[#c3c8ca] text-gray-700 border border-[#afb5b9]/50 rounded-br-md shadow-sm'
                     }`}>
                         <div className="max-w-none msg-text [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
-                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#0277bd] hover:text-[#0265a1]">{children}</a>
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#37474F] hover:text-[#2f3c43]">{children}</a>
                                     ),
                                     strong: ({ children }) => (
                                         <strong className="font-semibold text-gray-900">{children}</strong>
@@ -85,13 +85,13 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 <div className={`flex items-center gap-2 mt-1 px-1 ${isBot ? '' : 'justify-end'}`}>
                     {timestamp && <span className="text-[10px] text-gray-400 font-medium">{formatRelativeTime(timestamp)}</span>}
                     {isBot && !isError && content && (
-                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-[#0277bd] transition-all duration-200" aria-label="Copy">
-                            {copied ? <Check size={11} className="text-[#0277bd]" /> : <Copy size={11} />}
+                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-[#37474F] transition-all duration-200" aria-label="Copy">
+                            {copied ? <Check size={11} className="text-[#37474F]" /> : <Copy size={11} />}
                         </button>
                     )}
                     {isBot && !isError && content && onSpeak && (
                         <button onClick={() => onSpeak(content)}
-                            className={`p-0.5 transition-all duration-200 ${isSpeaking ? 'text-[#0277bd] opacity-100' : 'opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#0277bd]'}`}
+                            className={`p-0.5 transition-all duration-200 ${isSpeaking ? 'text-[#37474F] opacity-100' : 'opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#37474F]'}`}
                             aria-label={isSpeaking ? 'Stop reading' : 'Read aloud'}>
                             {isSpeaking ? <VolumeX size={11} /> : <Volume2 size={11} />}
                         </button>
@@ -105,7 +105,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
             </div>
 
             {!isBot && (
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#e6f1f8] to-[#b3d6eb] border border-[#9ac9e5]/50 text-[#0277bd] flex-shrink-0 shadow-sm">
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#ebeded] to-[#c3c8ca] border border-[#afb5b9]/50 text-[#37474F] flex-shrink-0 shadow-sm">
                     <User size={13} />
                 </div>
             )}

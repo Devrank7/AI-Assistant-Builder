@@ -1,0 +1,24 @@
+{
+  "clientId": "tuningcomua",
+  "bot": {
+    "name": "Tuning.com.ua AI",
+    "greeting": "Привіт! Я — AI-помічник **Tuning.com.ua** 🏎️\n\nДопоможу підібрати тюнінг для вашого авто, розкажу про ціни та наявність.\n\nЗадайте питання!",
+    "tone": "professional_friendly"
+  },
+  "design": {
+    "style": "dark_blue",
+    "position": "bottom-right"
+  },
+  "features": {
+    "streaming": true,
+    "imageUpload": false,
+    "quickReplies": {
+      "enabled": true,
+      "starters": ["🚗 Підібрати тюнінг", "💰 Ціни на послуги", "📅 Записатись на встановлення"]
+    },
+    "feedback": true,
+    "sound": true,
+    "leads": true,
+    "integrations": {}
+  }
+}
