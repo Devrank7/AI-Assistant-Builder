@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { seedKnowledgeIfNeeded } from './seedKnowledge';
+import { syncClientsIfNeeded } from './syncClients';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-widget-admin';
 
@@ -50,6 +51,9 @@ async function connectDB(): Promise<typeof mongoose> {
 
     // Seed knowledge from JSON files if DB is empty for any client
     seedKnowledgeIfNeeded().catch((err) => console.warn('[Seed] Knowledge seed failed:', err));
+
+    // Sync widget folders → Client records so widgets work immediately after deploy
+    syncClientsIfNeeded().catch((err) => console.warn('[Sync] Client sync failed:', err));
   } catch (e) {
     cached.promise = null;
     throw e;
