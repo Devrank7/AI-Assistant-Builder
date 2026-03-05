@@ -1,0 +1,34 @@
+{
+  "clientId": "winnsrealhandy",
+  "botName": "Winn's Real Handy AI",
+  "welcomeMessage": "Welcome to **Winn's Real Handy**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Request service", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "WR"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Winn's Real Handy anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(469) 444-1086",
+    "email": "winn@winnsrealhandy.com",
+    "website": "https://winnsrealhandy.com/"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "clientId": "blackwellfencing",
+  "botName": "Blackwell Fencing AI",
+  "welcomeMessage": "Welcome to **Blackwell Fencing**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "View fence styles", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "BF"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Blackwell Fencing anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 412-6877",
+    "email": "megan@blackwellfencing.com",
+    "website": "https://www.blackwellfencing.com/"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "clientId": "restoreserverestoration",
+  "botName": "Restore Serve Restoration AI",
+  "welcomeMessage": "Welcome to **Restore Serve Restoration**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Request emergency service", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "RS"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Restore Serve Restoration anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(469) 517-9302",
+    "email": "jack.basler@restoreserverestoration.com",
+    "website": "https://www.restoreserverestoration.com/"
+  }
+}

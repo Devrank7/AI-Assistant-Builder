@@ -1,0 +1,34 @@
+{
+  "clientId": "richardsonreadyelectric",
+  "botName": "Richardson Ready Electric Inc. AI",
+  "welcomeMessage": "Welcome to **Richardson Ready Electric Inc.**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Request a quote", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "RR"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need electrical work? Get a free quote from Richardson Ready Electric Inc.!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 234-5092",
+    "email": "ikanev@rre1.net",
+    "website": "http://richardsonreadyelectric.com/"
+  }
+}

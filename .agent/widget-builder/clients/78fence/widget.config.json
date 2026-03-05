@@ -1,0 +1,34 @@
+{
+  "clientId": "78fence",
+  "botName": "78Fence AI",
+  "welcomeMessage": "Welcome to **78Fence**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "View fence styles", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "7"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask 78Fence anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(214) 351-0212",
+    "email": "robert@78fence.com",
+    "website": "http://www.78fence.com/"
+  }
+}

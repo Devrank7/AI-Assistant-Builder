@@ -1,0 +1,14 @@
+{
+  "clientId": "smiths-painting",
+  "username": "smiths-painting",
+  "name": "Smith's Painting",
+  "email": "reggie@smiths-painting.com",
+  "website": "https://smiths-painting.com/",
+  "phone": "(972) 399-1729",
+  "addresses": [
+    "125 S Irving Heights Dr, Irving, TX 75060"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-05T11:37:00.079Z"
+}

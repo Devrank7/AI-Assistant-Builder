@@ -1,0 +1,34 @@
+{
+  "clientId": "dfwimproved",
+  "botName": "DFW Improved AI",
+  "welcomeMessage": "Welcome to **DFW Improved**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "View our work", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "DI"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask DFW Improved anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 377-7600",
+    "email": "freequote@dfwimproved.com",
+    "website": "https://www.dfwimproved.com/"
+  }
+}

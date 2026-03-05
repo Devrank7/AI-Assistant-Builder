@@ -1,0 +1,34 @@
+{
+  "clientId": "texas-allstar",
+  "botName": "Texas Allstar Contractors AI",
+  "welcomeMessage": "Welcome to **Texas Allstar Contractors**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "TA"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Texas Allstar Contractors anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 754-5380",
+    "email": "arturo@texas-allstar.com",
+    "website": "http://www.texas-allstar.com/"
+  }
+}

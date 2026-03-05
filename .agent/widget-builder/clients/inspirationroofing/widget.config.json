@@ -1,0 +1,34 @@
+{
+  "clientId": "inspirationroofing",
+  "botName": "Inspiration Roofing & Construction LLC AI",
+  "welcomeMessage": "Welcome to **Inspiration Roofing & Construction LLC**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "Roof repair services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "IR"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need roofing help? Inspiration Roofing & Construction LLC offers free estimates!"
+    }
+  },
+  "contacts": {
+    "phone": "(214) 799-4793",
+    "email": "kenneth@inspirationroofing.com",
+    "website": "https://www.inspirationroofing.com/"
+  }
+}

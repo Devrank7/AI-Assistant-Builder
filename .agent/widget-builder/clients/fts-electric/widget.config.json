@@ -1,0 +1,34 @@
+{
+  "clientId": "fts-electric",
+  "botName": "Flip the Switch Electric AI",
+  "welcomeMessage": "Welcome to **Flip the Switch Electric**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Request a quote", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "FT"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need electrical work? Get a free quote from Flip the Switch Electric!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 619-9978",
+    "email": "benjamin@fts-electric.com",
+    "website": "http://fts-electric.com/"
+  }
+}

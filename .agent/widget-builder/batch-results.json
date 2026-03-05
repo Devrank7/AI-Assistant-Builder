@@ -1,0 +1,500 @@
+{
+  "successes": [
+    {
+      "clientId": "swanroofing",
+      "brandName": "Swan Roofing LLC",
+      "website": "https://swanroofing.com/"
+    },
+    {
+      "clientId": "cottagecare",
+      "brandName": "CottageCare Plano",
+      "website": "https://cottagecare.com/locations/plano/"
+    },
+    {
+      "clientId": "fts-electric",
+      "brandName": "Flip the Switch Electric",
+      "website": "http://fts-electric.com/"
+    },
+    {
+      "clientId": "americaoneelectric",
+      "brandName": "America One Electric LLC",
+      "website": "https://americaoneelectric.com/"
+    },
+    {
+      "clientId": "oxifresh",
+      "brandName": "Oxi Fresh Carpet Cleaning",
+      "website": "https://www.oxifresh.com/locations/tx/north-dallas-carpet-cleaning/"
+    },
+    {
+      "clientId": "richardsonreadyelectric",
+      "brandName": "Richardson Ready Electric Inc.",
+      "website": "http://richardsonreadyelectric.com/"
+    },
+    {
+      "clientId": "aptivepestcontrol",
+      "brandName": "Aptive Pest Control",
+      "website": "https://aptivepestcontrol.com/"
+    },
+    {
+      "clientId": "smiths-painting",
+      "brandName": "Smith's Painting",
+      "website": "https://smiths-painting.com/"
+    },
+    {
+      "clientId": "luxuryhomeremodeling",
+      "brandName": "Luxury Home Remodeling",
+      "website": "https://www.luxuryhomeremodeling.net/"
+    },
+    {
+      "clientId": "crestpainting",
+      "brandName": "Crest Painting",
+      "website": "http://www.crestpainting.net/"
+    },
+    {
+      "clientId": "honestabesconstruction",
+      "brandName": "Honest Abe's Construction",
+      "website": "https://www.hacdfw.com/"
+    },
+    {
+      "clientId": "dfwbathroomremodeling",
+      "brandName": "DFW Bathroom Remodeling",
+      "website": "http://www.dfwbathroomremodeling.com/"
+    },
+    {
+      "clientId": "victorylandscapes",
+      "brandName": "Victory Landscapes",
+      "website": "http://www.victorylandscapes.com/"
+    },
+    {
+      "clientId": "splendidgardens",
+      "brandName": "Splendid Gardens Landscaping",
+      "website": "https://splendidgardens.net/"
+    },
+    {
+      "clientId": "txsagelandscaping",
+      "brandName": "Texas Sage Landscaping & Lawn",
+      "website": "http://txsagelandscaping.com/"
+    },
+    {
+      "clientId": "doffdon",
+      "brandName": "Doffdon Bedbug Exterminator",
+      "website": "http://www.doffdon.com/"
+    },
+    {
+      "clientId": "floorcoveringsinternational",
+      "brandName": "Floor Coverings International Plano",
+      "website": "https://www.floorcoveringsinternational.com/locations/us/tx/plano/"
+    },
+    {
+      "clientId": "surfacepropowerwash",
+      "brandName": "Surface Pro Power Wash",
+      "website": "https://www.surfacepropowerwash.com/"
+    },
+    {
+      "clientId": "greenblastsolutions",
+      "brandName": "Green Blast Solutions",
+      "website": "http://www.greenblastsolutions.com/"
+    },
+    {
+      "clientId": "intensadry",
+      "brandName": "Intensa Dry",
+      "website": "https://intensadry.com/"
+    },
+    {
+      "clientId": "phoenixfloodandfires",
+      "brandName": "Phoenix Flood and Fire LLC",
+      "website": "https://phoenixfloodandfires.com/"
+    },
+    {
+      "clientId": "twdremodeling",
+      "brandName": "Texas Window & Door",
+      "website": "https://twdremodeling.com/"
+    },
+    {
+      "clientId": "hutchnsonpainting",
+      "brandName": "Hutch-N-Son Painting & Drywall",
+      "website": "https://www.hutchnsonpainting.com/"
+    },
+    {
+      "clientId": "deckmasterspatios",
+      "brandName": "Deck Masters Patios",
+      "website": "http://www.deckmasterspatios.com/"
+    },
+    {
+      "clientId": "allinoneelectric",
+      "brandName": "All-In-One Electric",
+      "website": "https://www.allinoneelectric.com/"
+    },
+    {
+      "clientId": "cprroofinggc",
+      "brandName": "CPR Roofing & General Contractors",
+      "website": "https://www.cprroofinggc.com/"
+    },
+    {
+      "clientId": "greenerworkslandscape",
+      "brandName": "Greener Works Landscape",
+      "website": "https://www.greenerworkslandscape.com/"
+    },
+    {
+      "clientId": "neweliteroofing",
+      "brandName": "New Elite Roofing",
+      "website": "https://neweliteroofing.com/"
+    },
+    {
+      "clientId": "cleannpristine",
+      "brandName": "Clean n Pristine, Inc.",
+      "website": "https://www.cleannpristine.com/"
+    },
+    {
+      "clientId": "perfecttreestx",
+      "brandName": "Perfect Trees",
+      "website": "https://perfecttreestx.com/"
+    },
+    {
+      "clientId": "northtexaspoolservice",
+      "brandName": "North Texas Pool Service Inc.",
+      "website": "http://northtexaspoolservice.com/"
+    },
+    {
+      "clientId": "texastreeguy",
+      "brandName": "Texas Tree Guy",
+      "website": "https://www.texastreeguy.com/"
+    },
+    {
+      "clientId": "arborwizard",
+      "brandName": "White Rock Tree Wizards",
+      "website": "https://arborwizard.com/"
+    },
+    {
+      "clientId": "elitestarflooring",
+      "brandName": "EliteStar Flooring LLC",
+      "website": "http://www.elitestarflooring.com/"
+    },
+    {
+      "clientId": "1800waterdamage",
+      "brandName": "1-800 Water Damage of NE Dallas & SE Collin",
+      "website": "https://www.1800waterdamage.com/ne-dallas-se-collin/"
+    },
+    {
+      "clientId": "walkercustomexteriors",
+      "brandName": "Walker Custom Exteriors",
+      "website": "http://walkercustomexteriors.com/"
+    },
+    {
+      "clientId": "affordablefencentx",
+      "brandName": "Affordable Fence Company",
+      "website": "http://www.affordablefencentx.com/"
+    },
+    {
+      "clientId": "colemansinsulationguys",
+      "brandName": "Coleman's Insulation Guys",
+      "website": "https://colemansinsulationguys.com/"
+    },
+    {
+      "clientId": "legacyplumbing",
+      "brandName": "Legacy Plumbing",
+      "website": "https://legacyplumbing.net/"
+    },
+    {
+      "clientId": "parkcitiespowerwash",
+      "brandName": "Park Cities Power Wash",
+      "website": "https://www.parkcitiespowerwash.com/"
+    },
+    {
+      "clientId": "winnsrealhandy",
+      "brandName": "Winn's Real Handy",
+      "website": "https://winnsrealhandy.com/"
+    },
+    {
+      "clientId": "lonestardecks",
+      "brandName": "Lone Star Decks LLC",
+      "website": "http://www.lonestardecks.com/"
+    },
+    {
+      "clientId": "inspirationroofing",
+      "brandName": "Inspiration Roofing & Construction LLC",
+      "website": "https://www.inspirationroofing.com/"
+    },
+    {
+      "clientId": "dallashomerenovations",
+      "brandName": "Dallas Home Renovations",
+      "website": "https://dallashomerenovations.com/"
+    },
+    {
+      "clientId": "jafarhandymandfw",
+      "brandName": "Jafar Handyman LLC",
+      "website": "https://jafarhandymandfw.com/"
+    },
+    {
+      "clientId": "innovationstouch",
+      "brandName": "Innovations Touch",
+      "website": "https://www.innovationstouch.com/"
+    },
+    {
+      "clientId": "voogaly",
+      "brandName": "Voogaly Carpet Care",
+      "website": "http://www.voogaly.com/"
+    },
+    {
+      "clientId": "haynesremodels",
+      "brandName": "Haynes Remodeling",
+      "website": "https://haynesremodels.com/"
+    },
+    {
+      "clientId": "puddlepools",
+      "brandName": "Puddle Pool Services",
+      "website": "https://puddlepools.com/locations/addison-tx/"
+    },
+    {
+      "clientId": "restoreserverestoration",
+      "brandName": "Restore Serve Restoration",
+      "website": "https://www.restoreserverestoration.com/"
+    },
+    {
+      "clientId": "decathlonconstruction",
+      "brandName": "Decathlon Construction",
+      "website": "https://decathlonconstruction.com/"
+    },
+    {
+      "clientId": "markdanielexteriors",
+      "brandName": "Mark Daniel Exteriors",
+      "website": "https://markdanielexteriors.com/"
+    },
+    {
+      "clientId": "royalflushseptics",
+      "brandName": "Royal Flush Septic, Inc.",
+      "website": "http://royalflushseptics.com/"
+    },
+    {
+      "clientId": "floorrescue",
+      "brandName": "Floor Rescue",
+      "website": "http://floorrescue.com/"
+    },
+    {
+      "clientId": "refreshpool",
+      "brandName": "Refresh Pool Company",
+      "website": "https://www.refreshpool.co/"
+    },
+    {
+      "clientId": "dallaspoolworks",
+      "brandName": "Dallas Pool Works",
+      "website": "http://www.dallaspoolworks.com/"
+    },
+    {
+      "clientId": "texasbestsolar",
+      "brandName": "Texas Best Solar",
+      "website": "http://www.texasbestsolar.com/"
+    },
+    {
+      "clientId": "myprimetimeelectrical",
+      "brandName": "Primetime Electrical Contractors",
+      "website": "http://www.myprimetimeelectrical.com/"
+    },
+    {
+      "clientId": "mondragonac",
+      "brandName": "Mondragon Mechanical LLC",
+      "website": "https://mondragonac.com/"
+    },
+    {
+      "clientId": "arringtonroofing",
+      "brandName": "Arrington Roofing",
+      "website": "https://arringtonroofing.com/"
+    },
+    {
+      "clientId": "supremegaragedoortx",
+      "brandName": "Supreme Garage Door Repair",
+      "website": "https://www.supremegaragedoortx.com/"
+    },
+    {
+      "clientId": "garagetec",
+      "brandName": "Garage Tec Automatic Gates & Garage Door Repair",
+      "website": "https://garagetec.org/"
+    },
+    {
+      "clientId": "structuredfoundation",
+      "brandName": "Structured Foundation Repairs",
+      "website": "https://structuredfoundation.com/"
+    },
+    {
+      "clientId": "dfwimproved",
+      "brandName": "DFW Improved",
+      "website": "https://www.dfwimproved.com/"
+    },
+    {
+      "clientId": "quigleyac",
+      "brandName": "Quigley Heating & Air Conditioning",
+      "website": "https://quigleyac.com/"
+    },
+    {
+      "clientId": "arrowelectric",
+      "brandName": "Arrow Electric",
+      "website": "https://arrowelectric.net/"
+    },
+    {
+      "clientId": "saltriverrestoration",
+      "brandName": "Texas Water and Fire of Dallas",
+      "website": "https://saltriverresto.com/frisco/"
+    },
+    {
+      "clientId": "lsmech",
+      "brandName": "L&S Mechanical",
+      "website": "http://www.lsmech.com/"
+    },
+    {
+      "clientId": "pinnaclefoundationrepair",
+      "brandName": "Pinnacle Foundation Repair",
+      "website": "https://pinnaclefoundationrepair.com/"
+    },
+    {
+      "clientId": "texaslawnsprinklers",
+      "brandName": "Texas Lawn Sprinklers",
+      "website": "http://texaslawnsprinklers.com/"
+    },
+    {
+      "clientId": "hooperplumbing",
+      "brandName": "Hooper Plumbing & Air Conditioning",
+      "website": "https://www.hooperplumbing.com/"
+    },
+    {
+      "clientId": "hawkphac",
+      "brandName": "Hawk Plumbing Heating & Air Conditioning",
+      "website": "https://hawkphac.com/"
+    },
+    {
+      "clientId": "ellisac",
+      "brandName": "Ellis Air Conditioning and Heating",
+      "website": "https://www.ellisac.com/"
+    },
+    {
+      "clientId": "326fencing",
+      "brandName": "326 Construction",
+      "website": "https://www.326fencing.com/"
+    },
+    {
+      "clientId": "texas-allstar",
+      "brandName": "Texas Allstar Contractors",
+      "website": "http://www.texas-allstar.com/"
+    },
+    {
+      "clientId": "lonestarsurfacepros",
+      "brandName": "Lone Star Surface Pros",
+      "website": "https://lonestarsurfacepros.com/"
+    },
+    {
+      "clientId": "texanbuiltllc",
+      "brandName": "Texan Built, LLC",
+      "website": "http://texanbuiltllc.com/"
+    },
+    {
+      "clientId": "lakelandcustomhomes",
+      "brandName": "Lakeland Custom Homes LLC",
+      "website": "http://www.lakelandcustomhomes.com/"
+    },
+    {
+      "clientId": "doiggs",
+      "brandName": "Doigg's Restoration & Cleaning",
+      "website": "https://doiggs.com/"
+    },
+    {
+      "clientId": "sprinklergenius",
+      "brandName": "sprinkler GENIUS",
+      "website": "https://sprinklergenius.com/"
+    },
+    {
+      "clientId": "copperssprinklers",
+      "brandName": "Copper's Sprinkler Innovations and Landscapes",
+      "website": "http://www.copperssprinklers.com/"
+    },
+    {
+      "clientId": "callallsparkelectric",
+      "brandName": "All Spark Electric",
+      "website": "https://callallsparkelectric.com/"
+    },
+    {
+      "clientId": "redbirdroofingtx",
+      "brandName": "Redbird Roofing",
+      "website": "https://www.redbirdroofingtx.com/"
+    },
+    {
+      "clientId": "vikingroofing",
+      "brandName": "Viking Roofing",
+      "website": "https://vikingroofing.com/"
+    },
+    {
+      "clientId": "airemasterac",
+      "brandName": "AireMaster",
+      "website": "https://airemasterac.com/"
+    },
+    {
+      "clientId": "tempoair",
+      "brandName": "Tempo Air",
+      "website": "https://tempoair.com/"
+    },
+    {
+      "clientId": "texasbluelinemoving",
+      "brandName": "Texas Blue Line Moving",
+      "website": "https://texasbluelinemoving.com/"
+    },
+    {
+      "clientId": "olson-electric",
+      "brandName": "Olson Electric Service, Inc.",
+      "website": "http://olsonelectricservice.com/"
+    },
+    {
+      "clientId": "njbroof",
+      "brandName": "NJB Roofing & Construction LLC",
+      "website": "https://njbroof.com/"
+    },
+    {
+      "clientId": "yournextpainter",
+      "brandName": "YourNextPainter",
+      "website": "https://www.yournextpainter.com/"
+    },
+    {
+      "clientId": "blackwellfencing",
+      "brandName": "Blackwell Fencing",
+      "website": "https://www.blackwellfencing.com/"
+    },
+    {
+      "clientId": "bh3ind",
+      "brandName": "BH3 Residential and Commercial Electricians",
+      "website": "https://www.bh3ind.com/"
+    },
+    {
+      "clientId": "johnsheatingandair",
+      "brandName": "John's Heating & Air Conditioning",
+      "website": "http://www.johnsheatingandair.com/"
+    },
+    {
+      "clientId": "candsair",
+      "brandName": "C&S Air, Inc",
+      "website": "https://candsair.com/"
+    },
+    {
+      "clientId": "suncroplandscaping",
+      "brandName": "Suncrop Landscaping",
+      "website": "http://www.suncroplandscaping.com/"
+    },
+    {
+      "clientId": "78fence",
+      "brandName": "78Fence",
+      "website": "http://www.78fence.com/"
+    },
+    {
+      "clientId": "cncgutters",
+      "brandName": "CNC Gutters",
+      "website": "http://www.cncgutters.com/"
+    },
+    {
+      "clientId": "underoneroof-tx",
+      "brandName": "Under One Roof - Roofing and Construction",
+      "website": "https://underoneroof-tx.com/"
+    },
+    {
+      "clientId": "custompoolsbybrian",
+      "brandName": "Custom Pools By Brian",
+      "website": "https://www.custompoolsbybrian.com/"
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,34 @@
+{
+  "clientId": "puddlepools",
+  "botName": "Puddle Pool Services AI",
+  "welcomeMessage": "Welcome to **Puddle Pool Services**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Schedule service", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "PP"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Puddle Pool Services anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(469) 639-1384",
+    "email": "addison@puddlepools.com",
+    "website": "https://puddlepools.com/locations/addison-tx/"
+  }
+}

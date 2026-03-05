@@ -1,0 +1,34 @@
+{
+  "clientId": "arrowelectric",
+  "botName": "Arrow Electric AI",
+  "welcomeMessage": "Welcome to **Arrow Electric**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Request a quote", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AE"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need electrical work? Get a free quote from Arrow Electric!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 926-7007",
+    "email": "matthew@arrowelectric.net",
+    "website": "https://arrowelectric.net/"
+  }
+}

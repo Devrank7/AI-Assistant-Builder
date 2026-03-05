@@ -1,0 +1,34 @@
+{
+  "clientId": "copperssprinklers",
+  "botName": "Copper's Sprinkler Innovations and Landscapes AI",
+  "welcomeMessage": "Welcome to **Copper's Sprinkler Innovations and Landscapes**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Schedule service", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "CS"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Copper's Sprinkler Innovations and Landscapes anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(469) 278-5287",
+    "email": "jason@copperssprinklers.com",
+    "website": "http://www.copperssprinklers.com/"
+  }
+}

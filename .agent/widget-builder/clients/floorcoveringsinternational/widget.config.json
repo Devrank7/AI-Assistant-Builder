@@ -1,0 +1,34 @@
+{
+  "clientId": "floorcoveringsinternational",
+  "botName": "Floor Coverings International Plano AI",
+  "welcomeMessage": "Welcome to **Floor Coverings International Plano**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "View flooring options", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "FC"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Floor Coverings International Plano anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(214) 707-4988",
+    "email": "john.conroy@floorcoveringsinternational.com",
+    "website": "https://www.floorcoveringsinternational.com/locations/us/tx/plano/"
+  }
+}

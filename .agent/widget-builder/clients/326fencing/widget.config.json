@@ -1,0 +1,34 @@
+{
+  "clientId": "326fencing",
+  "botName": "326 Construction AI",
+  "welcomeMessage": "Welcome to **326 Construction**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "View fence styles", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "3C"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask 326 Construction anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 898-9542",
+    "email": "clayton@326fencing.com",
+    "website": "https://www.326fencing.com/"
+  }
+}

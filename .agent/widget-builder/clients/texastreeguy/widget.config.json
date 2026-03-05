@@ -1,0 +1,34 @@
+{
+  "clientId": "texastreeguy",
+  "botName": "Texas Tree Guy AI",
+  "welcomeMessage": "Welcome to **Texas Tree Guy**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "TT"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Texas Tree Guy anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(214) 924-0968",
+    "email": "ryan@texastreeguy.com",
+    "website": "https://www.texastreeguy.com/"
+  }
+}

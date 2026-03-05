@@ -1,0 +1,34 @@
+{
+  "clientId": "yournextpainter",
+  "botName": "YourNextPainter AI",
+  "welcomeMessage": "Welcome to **YourNextPainter**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "Our services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "Y"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask YourNextPainter anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 475-9919",
+    "email": "david@yournextpainter.com",
+    "website": "https://www.yournextpainter.com/"
+  }
+}

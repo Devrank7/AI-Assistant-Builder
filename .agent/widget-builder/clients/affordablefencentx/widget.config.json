@@ -1,0 +1,34 @@
+{
+  "clientId": "affordablefencentx",
+  "botName": "Affordable Fence Company AI",
+  "welcomeMessage": "Welcome to **Affordable Fence Company**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "View fence styles", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AF"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Affordable Fence Company anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 423-2222",
+    "email": "jeff@affordablefencentx.com",
+    "website": "http://www.affordablefencentx.com/"
+  }
+}

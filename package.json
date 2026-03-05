@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@next/swc-darwin-arm64": "^16.1.6",
     "chroma-js": "^3.2.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.33.0",

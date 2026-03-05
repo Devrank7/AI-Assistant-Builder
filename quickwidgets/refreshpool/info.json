@@ -1,0 +1,14 @@
+{
+  "clientId": "refreshpool",
+  "username": "refreshpool",
+  "name": "Refresh Pool Company",
+  "email": "drew@refreshpool.co",
+  "website": "https://www.refreshpool.co/",
+  "phone": "(972) 325-8132",
+  "addresses": [
+    "8820 Southwestern Blvd, Dallas, TX 75206"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-05T11:38:45.520Z"
+}

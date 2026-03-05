@@ -1,0 +1,34 @@
+{
+  "clientId": "texanbuiltllc",
+  "botName": "Texan Built, LLC AI",
+  "welcomeMessage": "Welcome to **Texan Built, LLC**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "View our work", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "TB"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Texan Built, LLC anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(214) 471-2207",
+    "email": "grant@texanbuiltllc.com",
+    "website": "http://texanbuiltllc.com/"
+  }
+}

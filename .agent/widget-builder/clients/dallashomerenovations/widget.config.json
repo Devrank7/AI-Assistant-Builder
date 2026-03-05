@@ -1,0 +1,34 @@
+{
+  "clientId": "dallashomerenovations",
+  "botName": "Dallas Home Renovations AI",
+  "welcomeMessage": "Welcome to **Dallas Home Renovations**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Get a free estimate", "View our work", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "DH"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Hi! Need help? Ask Dallas Home Renovations anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(214) 725-0669",
+    "email": "richard@dallashomerenovations.com",
+    "website": "https://dallashomerenovations.com/"
+  }
+}

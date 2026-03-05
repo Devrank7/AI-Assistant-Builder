@@ -1,0 +1,34 @@
+{
+  "clientId": "ellisac",
+  "botName": "Ellis Air Conditioning and Heating AI",
+  "welcomeMessage": "Welcome to **Ellis Air Conditioning and Heating**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Schedule service", "AC services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "EA"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need AC service? Ask us anything!"
+    }
+  },
+  "contacts": {
+    "phone": "(972) 291-9316",
+    "email": "aaron@ellisac.com",
+    "website": "https://www.ellisac.com/"
+  }
+}

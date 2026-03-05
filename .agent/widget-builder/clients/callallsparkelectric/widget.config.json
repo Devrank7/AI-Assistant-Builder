@@ -1,0 +1,34 @@
+{
+  "clientId": "callallsparkelectric",
+  "botName": "All Spark Electric AI",
+  "welcomeMessage": "Welcome to **All Spark Electric**! How can we help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Request a quote", "Electrical services", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AS"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need electrical work? Get a free quote from All Spark Electric!"
+    }
+  },
+  "contacts": {
+    "phone": "(214) 789-5114",
+    "email": "andrew@callallsparkelectric.com",
+    "website": "https://callallsparkelectric.com/"
+  }
+}
