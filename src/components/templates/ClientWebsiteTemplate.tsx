@@ -9,6 +9,14 @@ interface ClientWebsiteTemplateProps {
   websiteUrl: string;
 }
 
+// Loading step thresholds
+const STEPS = [
+  { key: 'demo.loading.step1', threshold: 0 },
+  { key: 'demo.loading.step2', threshold: 25 },
+  { key: 'demo.loading.step3', threshold: 55 },
+  { key: 'demo.loading.step4', threshold: 85 },
+] as const;
+
 export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientWebsiteTemplateProps) {
   const { t } = useTranslation('common');
 
@@ -23,6 +31,9 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   const [screenshotFailed, setScreenshotFailed] = useState(false);
   // Skip iframe entirely when pre-computed info says not frameable
   const [skipIframe, setSkipIframe] = useState(false);
+  // Simulated loading progress (0-100)
+  const [progress, setProgress] = useState(0);
+  const [loadingDone, setLoadingDone] = useState(false);
   const iframeLoadedRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -36,18 +47,19 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
   const clientId = scriptUrl.split('/')[2] || '';
   const widgetDir = scriptUrl.split('/')[1] || 'quickwidgets';
 
+  // Extract domain for display
+  let displayDomain = safeUrl;
+  try {
+    displayDomain = new URL(safeUrl).hostname.replace(/^www\./, '');
+  } catch {}
+
   // Override document.title and meta description so the widget's page-context
   // injection picks up the client's website info instead of "WinBix AI" from root layout.
   useEffect(() => {
-    try {
-      const host = new URL(safeUrl).hostname.replace(/^www\./, '');
-      document.title = host;
-    } catch {
-      document.title = safeUrl || 'Demo';
-    }
+    document.title = displayDomain || 'Demo';
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', '');
-  }, [safeUrl]);
+  }, [displayDomain]);
 
   useEffect(() => {
     if (scriptUrl) {
@@ -114,8 +126,34 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
     }
   }, [iframeError, screenshotMode, screenshotFailed, clientId, widgetDir]);
 
+  // Simulated progress animation — fast start, slows down, never reaches 100% on its own
+  useEffect(() => {
+    if (skipIframe || iframeError || loadingDone) return;
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 95) return prev; // Stall at 95% — only iframe load completes it
+        if (prev < 30) return prev + 0.8; // Fast: 0→30% in ~1.9s
+        if (prev < 65) return prev + 0.3; // Medium: 30→65% in ~5.8s
+        if (prev < 90) return prev + 0.1; // Slow: 65→90% in ~12.5s
+        return prev + 0.03; // Crawl: 90→95%
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [skipIframe, iframeError, loadingDone]);
+
+  // When iframe loads, animate to 100% and fade out
+  useEffect(() => {
+    if (iframeLoaded && !loadingDone) {
+      setProgress(100);
+      const timer = setTimeout(() => setLoadingDone(true), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [iframeLoaded, loadingDone]);
+
   // Timeout fallback: if iframe onLoad never fires (e.g. slow resources, hanging
-  // scripts on client sites), remove the loading spinner after 5 seconds so the
+  // scripts on client sites), remove the loading spinner after 6 seconds so the
   // user can see whatever has already rendered in the iframe.
   useEffect(() => {
     if (skipIframe) return; // No iframe to wait for
@@ -124,7 +162,7 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
         iframeLoadedRef.current = true;
         setIframeLoaded(true);
       }
-    }, 5000);
+    }, 6000);
     return () => clearTimeout(timer);
   }, [iframeError, skipIframe]);
 
@@ -177,6 +215,11 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
     setIframeError(true);
   }, []);
 
+  // Current step based on progress
+  const currentStepIndex = STEPS.reduce((acc, step, i) => (progress >= step.threshold ? i : acc), 0);
+
+  const showLoading = !skipIframe && !loadingDone && !iframeError;
+
   return (
     <div className="relative min-h-screen bg-gray-900">
       {/* Demo Badge */}
@@ -207,13 +250,79 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
         </div>
       </div>
 
-      {/* Loading State — only shown when iframe is being attempted */}
-      {!skipIframe && !iframeLoaded && !iframeError && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900">
-          <div className="text-center">
-            <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
-            <p className="mb-2 text-lg text-white">Loading client website...</p>
-            <p className="text-sm text-gray-400">{safeUrl}</p>
+      {/* Loading State — engaging progress screen */}
+      {showLoading && (
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900 transition-opacity duration-300"
+          style={{ opacity: progress >= 100 ? 0 : 1 }}
+        >
+          <div className="w-full max-w-md px-8">
+            {/* Globe icon */}
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-green-500/20 to-cyan-500/20">
+              <svg className="h-8 w-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
+                />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h2 className="mb-2 text-center text-xl font-semibold text-white">{t('demo.loading.title')}</h2>
+            <p className="mb-8 text-center text-sm text-gray-500">{displayDomain}</p>
+
+            {/* Progress bar */}
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-400">{t(STEPS[currentStepIndex].key)}</span>
+              <span className="text-xs font-bold text-green-400">{Math.round(progress)}%</span>
+            </div>
+            <div className="mb-8 h-2 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-green-500 to-cyan-400 transition-all duration-150 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            {/* Steps */}
+            <div className="space-y-3">
+              {STEPS.map((step, i) => {
+                const done = progress >= (STEPS[i + 1]?.threshold ?? 100);
+                const active = i === currentStepIndex && !done;
+                return (
+                  <div key={step.key} className="flex items-center gap-3">
+                    {done ? (
+                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-500/20">
+                        <svg
+                          className="h-3.5 w-3.5 text-green-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    ) : active ? (
+                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-green-400 border-t-transparent" />
+                      </div>
+                    ) : (
+                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white/5">
+                        <div className="h-1.5 w-1.5 rounded-full bg-gray-600" />
+                      </div>
+                    )}
+                    <span
+                      className={`text-sm transition-colors duration-300 ${
+                        done ? 'text-gray-500' : active ? 'text-white' : 'text-gray-600'
+                      }`}
+                    >
+                      {t(step.key)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -241,7 +350,6 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
                 {
                   template: 'dental',
                   label: t('demo.iframeError.dental'),
-                  color: 'cyan',
                   borderHover: 'hover:border-cyan-500/40',
                   iconBg: 'from-cyan-500/20 to-cyan-500/5',
                   iconColor: 'text-cyan-400',
@@ -257,7 +365,6 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
                 {
                   template: 'construction',
                   label: t('demo.iframeError.construction'),
-                  color: 'orange',
                   borderHover: 'hover:border-orange-500/40',
                   iconBg: 'from-orange-500/20 to-orange-500/5',
                   iconColor: 'text-orange-400',
@@ -273,7 +380,6 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
                 {
                   template: 'hotel',
                   label: t('demo.iframeError.hotel'),
-                  color: 'purple',
                   borderHover: 'hover:border-purple-500/40',
                   iconBg: 'from-purple-500/20 to-purple-500/5',
                   iconColor: 'text-purple-400',
@@ -372,12 +478,15 @@ export default function ClientWebsiteTemplate({ scriptUrl, websiteUrl }: ClientW
             {t('demo.screenshotMode.back')}
           </button>
 
-          {/* Loading spinner while screenshot loads */}
+          {/* Loading state while screenshot loads */}
           {!screenshotLoaded && (
             <div className="flex h-screen w-full items-center justify-center">
-              <div className="text-center">
-                <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
-                <p className="text-lg text-white">{t('demo.screenshotMode.loading')}</p>
+              <div className="w-full max-w-xs px-8 text-center">
+                <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-3 border-green-400 border-t-transparent" />
+                <p className="mb-4 text-lg text-white">{t('demo.screenshotMode.loading')}</p>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-to-r from-green-500 to-cyan-400" />
+                </div>
               </div>
             </div>
           )}

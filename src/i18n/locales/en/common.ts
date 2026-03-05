@@ -28,6 +28,13 @@ const common: Record<string, string> = {
   'demo.iframeError.openDirect': 'Or open the website directly',
   'demo.screenshotMode.loading': 'Taking screenshot...',
   'demo.screenshotMode.back': 'Back to templates',
+
+  // Demo loading progress
+  'demo.loading.title': 'Loading your interactive demo',
+  'demo.loading.step1': 'Connecting to website...',
+  'demo.loading.step2': 'Loading page content...',
+  'demo.loading.step3': 'Preparing interactive demo...',
+  'demo.loading.step4': 'Almost ready...',
 };
 
 export default common;

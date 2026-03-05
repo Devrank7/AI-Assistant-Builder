@@ -28,6 +28,13 @@ const common: Record<string, string> = {
   'demo.iframeError.openDirect': 'Lub otwórz stronę bezpośrednio',
   'demo.screenshotMode.loading': 'Wykonywanie zrzutu ekranu...',
   'demo.screenshotMode.back': 'Powrót do szablonów',
+
+  // Demo loading progress
+  'demo.loading.title': 'Ładowanie interaktywnego demo',
+  'demo.loading.step1': 'Łączenie ze stroną...',
+  'demo.loading.step2': 'Ładowanie zawartości...',
+  'demo.loading.step3': 'Przygotowanie interaktywnego demo...',
+  'demo.loading.step4': 'Prawie gotowe...',
 };
 
 export default common;
