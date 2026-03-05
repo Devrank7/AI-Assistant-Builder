@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { type Lang, DEFAULT_LANG, LANGUAGES, SUPPORTED_LANGS, mapBrowserLocale } from './config';
+import { type Lang, DEFAULT_LANG, LANGUAGES, SUPPORTED_LANGS } from './config';
 
 interface LanguageContextValue {
   lang: Lang;
@@ -26,26 +26,15 @@ function detectLanguage(urlLang: string | null): Lang {
     return urlLang as Lang;
   }
 
-  // 2. localStorage
+  // 2. localStorage (user's explicit choice)
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('preferred_lang');
     if (stored && SUPPORTED_LANGS.includes(stored as Lang)) {
       return stored as Lang;
     }
-
-    // 3. navigator.language
-    const browserLang = navigator.language || (navigator as { userLanguage?: string }).userLanguage || '';
-    const mapped = mapBrowserLocale(browserLang);
-    if (mapped) return mapped;
-
-    // Also check navigator.languages array
-    for (const l of navigator.languages || []) {
-      const m = mapBrowserLocale(l);
-      if (m) return m;
-    }
   }
 
-  // 4. Default
+  // 3. Default — always English unless user explicitly changes
   return DEFAULT_LANG;
 }
 
