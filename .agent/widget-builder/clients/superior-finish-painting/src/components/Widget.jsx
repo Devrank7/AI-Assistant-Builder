@@ -41,6 +41,12 @@ export function Widget({ config }) {
     const [hasNewMessages, setHasNewMessages] = useState(false);
 
     // Header quick actions menu
+    // Context banner
+    const [contextDismissed, setContextDismissed] = useState(() => {
+        try { return sessionStorage.getItem('aw-ctx-' + config.clientId) === '1'; } catch { return false; }
+    });
+    const pageTitle = typeof document !== 'undefined' ? (document.title || '').replace(/\s*[-|–].*$/, '').trim() : '';
+
     const [showMenu, setShowMenu] = useState(false);
     const [isMuted, setIsMuted] = useState(() => {
         try { const v = localStorage.getItem('aw-muted-' + config.clientId) === 'true'; window.__WIDGET_MUTED__ = v; return v; } catch { return false; }
@@ -255,6 +261,34 @@ export function Widget({ config }) {
 
     const showQuickReplies = messages.filter((m) => m.role === 'user').length === 0;
 
+    // Day separator helper
+    const getDayLabel = useCallback((ts) => {
+        if (!ts) return '';
+        const d = new Date(ts);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const yesterday = today - 86400000;
+        const msgDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        if (msgDay === today) return uiStrings.today;
+        if (msgDay === yesterday) return uiStrings.yesterday;
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }, [uiStrings]);
+
+    const getTimeLabel = useCallback((ts) => {
+        if (!ts) return '';
+        return new Date(ts).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }, []);
+
+    const shouldShowSeparator = useCallback((idx) => {
+        if (idx === 0) return true;
+        const curr = messages[idx]?.timestamp;
+        const prev = messages[idx - 1]?.timestamp;
+        if (!curr || !prev) return false;
+        const currDay = new Date(curr).toDateString();
+        const prevDay = new Date(prev).toDateString();
+        return currDay !== prevDay;
+    }, [messages]);
+
     // Chat panel content (shared between mobile & desktop)
     const chatContent = (
         <>
@@ -282,7 +316,9 @@ export function Widget({ config }) {
                     </div>
                     <div>
                         <h3 className="font-semibold text-[14px] text-white tracking-tight leading-tight truncate max-w-[140px] sm:max-w-[180px]">{config.botName || config.bot?.name}</h3>
-                        <p className="text-[12px] text-white/65 font-medium">{isOffline ? uiStrings.offline : uiStrings.online}</p>
+                        <p className="text-[11px] text-white/65 font-medium flex items-center gap-1">
+                            {isOffline ? uiStrings.offline : (<><span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />{uiStrings.respondsInstantly}</>)}
+                        </p>
                     </div>
                 </div>
                 <div className="relative flex items-center gap-1">
@@ -342,6 +378,18 @@ export function Widget({ config }) {
                 </div>
             )}
 
+            {/* CONTEXT BANNER */}
+            {pageTitle && !contextDismissed && messages.length === 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 border-b bg-[#37474F]/5 border-[#37474F]/10 text-gray-700">
+                    <Globe size={13} className="text-[#37474F]" />
+                    <span className="flex-1 text-[11.5px] font-medium truncate">{uiStrings.contextBanner}: <strong>{pageTitle}</strong></span>
+                    <button onClick={() => { setContextDismissed(true); try { sessionStorage.setItem('aw-ctx-' + config.clientId, '1'); } catch {} }}
+                        className="p-0.5 text-gray-400 hover:text-gray-600 transition-colors">
+                        <X size={12} />
+                    </button>
+                </div>
+            )}
+
             {/* MESSAGES */}
             <div ref={chatContainerRef} onScroll={handleChatScroll}
                 className={`flex-1 overflow-y-auto px-4 py-4 space-y-1 scrollbar-hide chat-pattern font-${chatFontSize}`} aria-live="polite">
@@ -349,6 +397,13 @@ export function Widget({ config }) {
                     onSpeak={ttsSupported && typewriterDone ? () => speak(welcomeMsg, lang, -1) : null} isSpeaking={speakingIdx === -1} />
                 {messages.map((msg, idx) => (
                     <div key={idx}>
+                        {shouldShowSeparator(idx) && msg.timestamp && (
+                            <div className="flex items-center gap-3 my-3">
+                                <div className="flex-1 h-px bg-gray-200/70" />
+                                <span className="text-[10px] font-medium text-gray-400 whitespace-nowrap">{getDayLabel(msg.timestamp)}</span>
+                                <div className="flex-1 h-px bg-gray-200/70" />
+                            </div>
+                        )}
                         <ChatMessage
                             role={msg.role} content={msg.content} timestamp={msg.timestamp}
                             isError={msg.isError} onRetry={msg.isError ? retryLastMessage : undefined}
@@ -382,10 +437,13 @@ export function Widget({ config }) {
                         <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#ebeded] to-[#c3c8ca] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#afb5b9]/50">
                             <Sparkles size={13} className="text-[#37474F]" />
                         </div>
-                        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
-                            <span className="typing-dot" />
-                            <span className="typing-dot" />
-                            <span className="typing-dot" />
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[11px] font-medium text-gray-400 ml-1">{config.botName || 'AI'} {uiStrings.isTyping}</span>
+                            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
+                                <span className="typing-dot" />
+                                <span className="typing-dot" />
+                                <span className="typing-dot" />
+                            </div>
                         </div>
                     </motion.div>
                 )}
@@ -443,6 +501,15 @@ export function Widget({ config }) {
                         <Send size={16} />
                     </button>
                 </form>
+            </div>
+
+            {/* POWERED BY */}
+            <div className="flex justify-center py-1.5 bg-gray-50/50">
+                <a href="https://winbix-ai.xyz" target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] font-medium text-gray-400 hover:text-gray-500 transition-colors opacity-70 hover:opacity-100">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Powered by WinBix AI
+                </a>
             </div>
 
             {/* EXPANDED IMAGE */}

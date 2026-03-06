@@ -3,16 +3,10 @@ import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { User, Copy, Check, RotateCcw, ZoomIn, Sparkles, Volume2, VolumeX } from 'lucide-preact';
 
-function formatRelativeTime(timestamp) {
+function formatTime(timestamp) {
     if (!timestamp) return '';
-    const diff = Date.now() - timestamp;
-    const seconds = Math.floor(diff / 1000);
-    if (seconds < 60) return 'just now';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
-    return `${Math.floor(hours / 24)}d`;
+    try { return new Date(timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
+    catch { return ''; }
 }
 
 function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick, onSpeak, isSpeaking }) {
@@ -83,7 +77,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 )}
 
                 <div className={`flex items-center gap-2 mt-1 px-1 ${isBot ? '' : 'justify-end'}`}>
-                    {timestamp && <span className="text-[10px] text-gray-400 font-medium">{formatRelativeTime(timestamp)}</span>}
+                    {timestamp && <span className="text-[10px] text-gray-400 font-medium">{formatTime(timestamp)}</span>}
                     {isBot && !isError && content && (
                         <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-[#0277bd] transition-all duration-200" aria-label="Copy">
                             {copied ? <Check size={11} className="text-[#0277bd]" /> : <Copy size={11} />}
