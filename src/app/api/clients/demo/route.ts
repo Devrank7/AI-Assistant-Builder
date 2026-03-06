@@ -5,7 +5,7 @@ import connectDB from '@/lib/mongodb';
 import ShortLink from '@/models/ShortLink';
 
 const QUICK_WIDGETS_DIR = path.join(process.cwd(), 'quickwidgets');
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbix-ai.xyz';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbixai.com';
 
 interface DemoClient {
   name: string;

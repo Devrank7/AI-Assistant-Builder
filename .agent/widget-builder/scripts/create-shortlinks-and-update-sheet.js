@@ -12,7 +12,7 @@ const crypto = require('crypto');
 const ROOT = path.resolve(__dirname, '../../..');
 const ADMIN_TOKEN = process.env.ADMIN_SECRET_TOKEN || 'admin-secret-2026';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-const PROD_URL = 'https://winbix-ai.xyz';
+const PROD_URL = 'https://winbixai.com';
 const SPREADSHEET_ID = process.argv[2];
 
 if (!SPREADSHEET_ID) {

@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongodb';
 import ShortLink from '@/models/ShortLink';
 import { verifyAdmin } from '@/lib/auth';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbix-ai.xyz';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbixai.com';
 
 /**
  * GET /api/short-link?clientId=xxx — Get short link for a client

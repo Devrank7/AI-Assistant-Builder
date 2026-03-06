@@ -11,7 +11,7 @@ const { execSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '../../..');
 const ADMIN_TOKEN = 'admin-secret-2026';
 const BASE_URL = 'http://localhost:3000';
-const PROD_URL = 'https://winbix-ai.xyz';
+const PROD_URL = 'https://winbixai.com';
 const SPREADSHEET_ID = process.argv[2];
 
 function apiCall(method, endpoint, data) {

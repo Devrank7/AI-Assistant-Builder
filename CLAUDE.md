@@ -39,7 +39,7 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 - **AI**: Google Gemini API (`@google/generative-ai`)
 - **Payments**: WayForPay, Cryptomus, NowPayments
 - **Integrations**: Google Sheets API, Telegram Bot API, WhatsApp (WHAPI), Instagram, ManyChat
-- **Deployment**: Docker, production at `https://winbix-ai.xyz`
+- **Deployment**: Docker, production at `https://winbixai.com`
 
 ---
 
@@ -267,9 +267,9 @@ All API calls require `Cookie: admin_token=${ADMIN_SECRET_TOKEN}` from `.env.loc
 ## Environment
 
 - **Local dev**: `http://localhost:3000` (Next.js dev server)
-- **Production**: `https://winbix-ai.xyz`
-- **Demo links**: `https://winbix-ai.xyz/demo/client-website?client=<clientId>&website=<encoded_url>`
-- **Widget embed**: `<script src="https://winbix-ai.xyz/quickwidgets/<clientId>/script.js"></script>`
+- **Production**: `https://winbixai.com`
+- **Demo links**: `https://winbixai.com/demo/client-website?client=<clientId>&website=<encoded_url>`
+- **Widget embed**: `<script src="https://winbixai.com/quickwidgets/<clientId>/script.js"></script>`
 
 ---
 

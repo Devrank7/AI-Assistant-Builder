@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongodb';
 import ShortLink from '@/models/ShortLink';
 
 function getBaseUrl(request: NextRequest): string {
-  return process.env.NEXT_PUBLIC_BASE_URL || `https://${request.headers.get('host') || 'winbix-ai.xyz'}`;
+  return process.env.NEXT_PUBLIC_BASE_URL || `https://${request.headers.get('host') || 'winbixai.com'}`;
 }
 
 /**
