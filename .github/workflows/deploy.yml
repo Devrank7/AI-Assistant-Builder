@@ -29,12 +29,18 @@ jobs:
             echo "📥 Pulling latest changes..."
             git pull origin main
 
+            # Free up disk space before building
+            echo "🧹 Cleaning up Docker cache and old images..."
+            docker builder prune -f --all 2>/dev/null || true
+            docker image prune -af --filter "until=24h" 2>/dev/null || true
+            docker system prune -f --volumes 2>/dev/null || true
+
             # Rebuild and restart containers
             echo "🔄 Rebuilding and restarting containers..."
             docker compose up -d --build --remove-orphans
 
-            # Prune unused images to save space
-            echo "🧹 Cleaning up old images..."
+            # Final cleanup
+            echo "🧹 Removing dangling images..."
             docker image prune -f
 
             echo "✅ Deployment successful!"

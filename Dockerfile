@@ -26,6 +26,13 @@ RUN npm run build
 # Install widget-builder dependencies (vite etc. are devDependencies but needed at runtime for widget generation)
 RUN cd .agent/widget-builder && npm ci --include=dev
 
+# Clean up heavy files not needed at runtime (source maps, preview images)
+RUN find .agent/widget-builder/node_modules -name "*.map" -delete 2>/dev/null; \
+    find quickwidgets -name "preview.png" -delete 2>/dev/null; \
+    find widgets -name "preview.png" -delete 2>/dev/null; \
+    rm -rf .agent/widget-builder/node_modules/.cache 2>/dev/null; \
+    true
+
 # Stage 3: Production
 FROM node:20-alpine AS runner
 WORKDIR /app
