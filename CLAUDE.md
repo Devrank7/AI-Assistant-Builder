@@ -6,7 +6,7 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 
 **Layer 1: Skills (What to do)**
 
-- SOPs written in Markdown, live in `.agent/skills/<skill-name>/SKILL.md`
+- SOPs written in Markdown, live in `.claude/skills/<skill-name>/SKILL.md`
 - Define the goals, inputs, execution steps, outputs, and edge cases
 - Natural language instructions, like you'd give a mid-level employee
 - Each skill is a self-contained recipe for a specific task (create widget, mass-build, send messages, etc.)
@@ -15,11 +15,11 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 
 - This is you. Your job: intelligent routing.
 - Read skills, call execution scripts in the right order, handle errors, ask for clarification, update skills with learnings
-- You're the glue between intent and execution. E.g. you don't manually write JSX/CSS for widgets—you read `.agent/skills/create-quick-widget/SKILL.md`, create `theme.json`, and run `generate-single-theme.js` + `build.js`
+- You're the glue between intent and execution. E.g. you don't manually write JSX/CSS for widgets — you read `.claude/skills/create-quick-widget/SKILL.md`, create `theme.json`, and run `generate-single-theme.js` + `build.js`
 
 **Layer 3: Execution (Doing the work)**
 
-- Deterministic Node.js scripts in `.agent/widget-builder/scripts/`
+- Deterministic Node.js scripts in `.claude/widget-builder/scripts/`
 - Environment variables and API tokens stored in `.env.local`
 - Handle widget generation, builds, API calls, data processing
 - Reliable, testable, fast. Use scripts instead of manual work.
@@ -45,16 +45,17 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 
 ## Available Skills
 
-| Skill                           | Location                                               | Purpose                                       |
-| ------------------------------- | ------------------------------------------------------ | --------------------------------------------- |
-| `create-widget`                 | `.agent/skills/create-widget/SKILL.md`                 | Full custom widget with discovery interview   |
-| `create-quick-widget`           | `.agent/skills/create-quick-widget/SKILL.md`           | Auto-create demo widget from website analysis |
-| `mass-quick-widgets`            | `.agent/skills/mass-quick-widgets/SKILL.md`            | Batch create widgets from Google Sheets leads |
-| `create-start-messages`         | `.agent/skills/create-start-messages/SKILL.md`         | Generate personalized outreach messages       |
-| `create-telegram-bot-assistant` | `.agent/skills/create-telegram-bot-assistant/SKILL.md` | Set up Telegram bot channel                   |
-| `create-whatsapp-assistant`     | `.agent/skills/create-whatsapp-assistant/SKILL.md`     | Set up WhatsApp channel                       |
-| `create-instagram-assistant`    | `.agent/skills/create-instagram-assistant/SKILL.md`    | Set up Instagram channel                      |
-| `upload-widget-knowledge`       | `.agent/skills/upload-widget-knowledge/SKILL.md`       | Crawl site & populate AI knowledge + prompt   |
+| Skill                           | Location                                                | Purpose                                       |
+| ------------------------------- | ------------------------------------------------------- | --------------------------------------------- |
+| `create-widget`                 | `.claude/skills/create-widget/SKILL.md`                 | Full custom widget with discovery interview   |
+| `create-quick-widget`           | `.claude/skills/create-quick-widget/SKILL.md`           | Auto-create demo widget from website analysis |
+| `mass-quick-widgets`            | `.claude/skills/mass-quick-widgets/SKILL.md`            | Batch create widgets from Google Sheets leads |
+| `create-start-messages`         | `.claude/skills/create-start-messages/SKILL.md`         | Generate personalized outreach messages       |
+| `create-telegram-bot-assistant` | `.claude/skills/create-telegram-bot-assistant/SKILL.md` | Set up Telegram bot channel                   |
+| `create-whatsapp-assistant`     | `.claude/skills/create-whatsapp-assistant/SKILL.md`     | Set up WhatsApp channel                       |
+| `create-instagram-assistant`    | `.claude/skills/create-instagram-assistant/SKILL.md`    | Set up Instagram channel                      |
+| `upload-widget-knowledge`       | `.claude/skills/upload-widget-knowledge/SKILL.md`       | Crawl site & populate AI knowledge + prompt   |
+| `check-demo-quality`            | `.claude/skills/check-demo-quality/SKILL.md`            | Verify iframe compatibility for demo widgets  |
 
 **Always read the skill file before executing.** Skills contain the exact steps, API calls, constraints, and edge cases.
 
@@ -62,25 +63,25 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 
 ## Execution Scripts
 
-| Script                      | Command                                                                   | Purpose                                                         |
-| --------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `generate-single-theme.js`  | `node .agent/widget-builder/scripts/generate-single-theme.js <client_id>` | Generate all 7 source files from `theme.json`                   |
-| `build.js`                  | `node .agent/widget-builder/scripts/build.js <client_id>`                 | Build widget → `.agent/widget-builder/dist/script.js`           |
-| `mass-build.js`             | `node .agent/widget-builder/scripts/mass-build.js`                        | Batch build from `mass-build-configs.json`                      |
-| `export-knowledge-seeds.js` | `node scripts/export-knowledge-seeds.js`                                  | Export all client knowledge + AI settings to `knowledge-seeds/` |
+| Script                      | Command                                                                    | Purpose                                                         |
+| --------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `generate-single-theme.js`  | `node .claude/widget-builder/scripts/generate-single-theme.js <client_id>` | Generate all 7 source files from `theme.json`                   |
+| `build.js`                  | `node .claude/widget-builder/scripts/build.js <client_id>`                 | Build widget → `.claude/widget-builder/dist/script.js`          |
+| `mass-build.js`             | `node .claude/widget-builder/scripts/mass-build.js`                        | Batch build from `mass-build-configs.json`                      |
+| `export-knowledge-seeds.js` | `node scripts/export-knowledge-seeds.js`                                   | Export all client knowledge + AI settings to `knowledge-seeds/` |
 
 **Critical rule:** Never write JSX or CSS manually for widgets. Always create `theme.json` → run `generate-single-theme.js` → run `build.js`.
 
 ### Shared Widget Hooks (NOT overwritten during build)
 
-| Hook              | File                                              | Purpose                                                               |
-| ----------------- | ------------------------------------------------- | --------------------------------------------------------------------- |
-| `useChat.js`      | `.agent/widget-builder/src/hooks/useChat.js`      | Chat logic, streaming, embedded MP3 notification sound                |
-| `useVoice.js`     | `.agent/widget-builder/src/hooks/useVoice.js`     | Web Speech API voice input (mic button, speech-to-text transcription) |
-| `useDrag.js`      | `.agent/widget-builder/src/hooks/useDrag.js`      | Draggable toggle button position                                      |
-| `useProactive.js` | `.agent/widget-builder/src/hooks/useProactive.js` | Proactive nudge bubble (shows after delay when widget is closed)      |
-| `useLanguage.js`  | `.agent/widget-builder/src/hooks/useLanguage.js`  | Auto language detection, dynamic UI strings (en/uk/ru/ar)             |
-| `useTTS.js`       | `.agent/widget-builder/src/hooks/useTTS.js`       | Text-to-speech on bot messages (Web Speech Synthesis API)             |
+| Hook              | File                                               | Purpose                                                               |
+| ----------------- | -------------------------------------------------- | --------------------------------------------------------------------- |
+| `useChat.js`      | `.claude/widget-builder/src/hooks/useChat.js`      | Chat logic, streaming, embedded MP3 notification sound                |
+| `useVoice.js`     | `.claude/widget-builder/src/hooks/useVoice.js`     | Web Speech API voice input (mic button, speech-to-text transcription) |
+| `useDrag.js`      | `.claude/widget-builder/src/hooks/useDrag.js`      | Draggable toggle button position                                      |
+| `useProactive.js` | `.claude/widget-builder/src/hooks/useProactive.js` | Proactive nudge bubble (shows after delay when widget is closed)      |
+| `useLanguage.js`  | `.claude/widget-builder/src/hooks/useLanguage.js`  | Auto language detection, dynamic UI strings (en/uk/ru/ar)             |
+| `useTTS.js`       | `.claude/widget-builder/src/hooks/useTTS.js`       | Text-to-speech on bot messages (Web Speech Synthesis API)             |
 
 These hooks live in the shared `src/hooks/` directory and are never overwritten by per-client builds. The generated `Widget.jsx` template already imports and uses all six hooks.
 
@@ -90,7 +91,7 @@ These hooks live in the shared `src/hooks/` directory and are never overwritten 
 
 ### 1. Check for scripts first
 
-Before writing code, check `.agent/widget-builder/scripts/` per your skill. Only create new scripts if none exist. The theme generator produces all 7 widget source files from a single `theme.json` — don't duplicate this work.
+Before writing code, check `.claude/widget-builder/scripts/` per your skill. Only create new scripts if none exist. The theme generator produces all 7 widget source files from a single `theme.json` — don't duplicate this work.
 
 ### 2. Self-anneal when things break
 
@@ -130,7 +131,7 @@ Errors are learning opportunities. When something breaks:
 ### Directory Structure
 
 ```
-.agent/
+.claude/
   skills/                     # Layer 1: Skill definitions (SOPs)
     create-quick-widget/SKILL.md
     mass-quick-widgets/SKILL.md
@@ -172,7 +173,7 @@ widgets/<clientId>/             # Deployed production widgets
 ### Deliverables vs Intermediates
 
 - **Deliverables**: Built widgets in `quickwidgets/` and `widgets/`, Google Sheets updates, Telegram reports
-- **Intermediates**: `theme.json`, `widget.config.json`, build artifacts in `.agent/widget-builder/dist/`
+- **Intermediates**: `theme.json`, `widget.config.json`, build artifacts in `.claude/widget-builder/dist/`
 
 ### Key Principle
 
@@ -184,11 +185,11 @@ Widget source files are generated, not hand-written. `theme.json` → `generate-
 
 ```
 1. Analyze website (WebFetch → extract colors, fonts, content)
-2. Create .agent/widget-builder/clients/<clientId>/theme.json
-3. Create .agent/widget-builder/clients/<clientId>/widget.config.json
-4. Run: node .agent/widget-builder/scripts/generate-single-theme.js <clientId>
-5. Run: node .agent/widget-builder/scripts/build.js <clientId>
-6. Copy: .agent/widget-builder/dist/script.js → quickwidgets/<clientId>/script.js
+2. Create .claude/widget-builder/clients/<clientId>/theme.json
+3. Create .claude/widget-builder/clients/<clientId>/widget.config.json
+4. Run: node .claude/widget-builder/scripts/generate-single-theme.js <clientId>
+5. Run: node .claude/widget-builder/scripts/build.js <clientId>
+6. Copy: .claude/widget-builder/dist/script.js → quickwidgets/<clientId>/script.js
 7. Write: quickwidgets/<clientId>/info.json  (clientType: "quick")
 8. Upload knowledge: POST /api/knowledge
 9. Set AI settings: PUT /api/ai-settings/<clientId>
@@ -282,7 +283,7 @@ All API calls require `Cookie: admin_token=${ADMIN_SECRET_TOKEN}` from `.env.loc
 5. **WebFetch on Ukrainian sites**: Many are WordPress/Elementor/React SPAs — JS-rendered content may not appear. Try WP REST API (`/wp-json/wp/v2/pages`), sitemaps (`/sitemap.xml`), or alternative URL patterns.
 6. **Demo link encoding**: Website URLs in demo links must be `encodeURIComponent()`-encoded.
 7. **Service account**: `service_account.json` must be in project root and the spreadsheet must be shared with the service account email.
-8. **Shared hooks override**: `build.js` copies client `src/` over shared `src/` with `force: true`. If a client directory contains `src/hooks/useChat.js`, it will **overwrite** the shared version. Never put hooks in client directories — they belong only in `.agent/widget-builder/src/hooks/`.
+8. **Shared hooks override**: `build.js` copies client `src/` over shared `src/` with `force: true`. If a client directory contains `src/hooks/useChat.js`, it will **overwrite** the shared version. Never put hooks in client directories — they belong only in `.claude/widget-builder/src/hooks/`.
 9. **Knowledge seeds must be re-exported**: After uploading knowledge via API, run `node scripts/export-knowledge-seeds.js` so the seed files stay in sync. Otherwise the Docker image will have stale knowledge.
 
 ---

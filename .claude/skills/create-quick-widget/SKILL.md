@@ -34,15 +34,9 @@ CONTENT: 8. Brand name 9. Business type 10. Language
 17. Brief company description
 ```
 
-### 1.2 Crawl Key Pages
+### 1.2 Check Key Pages (for theme/config only)
 
-Visit 5-8 pages from navigation (About, Services, Pricing, FAQ, Contact). Per-page prompt:
-
-```
-Extract ALL text content: headings, service descriptions, prices,
-FAQ Q&A, contact info, hours, key facts, guarantees.
-Format as clean structured text.
-```
+Optionally visit 1-2 key pages (About, Services) via WebFetch **only** to extract design info (colors, fonts) or contact details not found on the homepage. Do NOT manually scrape for knowledge — Phase 4 uses the deep-crawl API which automatically crawls ALL pages (up to 50) server-side.
 
 ### 1.3 Light vs Dark
 
@@ -68,6 +62,7 @@ Schema: [CONFIG_REFERENCE.md](./CONFIG_REFERENCE.md). Quick replies by business 
 - `contacts` object with phone, email, and website from site analysis (enables the contact bar below the header)
 - `features.proactive` with a short nudge message (appears after 8s to engage visitors)
 - All features default to `true` — only set to `false` if you have a reason to disable
+- `welcomeMessage` (greeting) must be **180 characters or less** — it gets truncated automatically but write it short from the start
 
 ### 2.3 Write theme.json
 
@@ -119,18 +114,20 @@ The `captureScreenshot()` function in `src/lib/screenshot.ts` does this automati
 
 ## Phase 4 — Knowledge Base & AI
 
-### 4.1 Save & Upload Knowledge
+### 4.1 Deep Crawl & Upload Knowledge
 
-Write all scraped content to `.claude/widget-builder/clients/<clientId>/knowledge/context.md`.
-
-Upload:
+Use the deep-crawl endpoint to automatically crawl ALL pages (up to 50) and upload everything as knowledge chunks. This replaces manual WebFetch scraping — the server-side crawler uses sitemap.xml, WordPress API, and BFS link discovery to get ALL content.
 
 ```bash
-curl -X POST http://localhost:3000/api/knowledge \
+curl -X POST http://localhost:3000/api/knowledge/deep-crawl \
   -H "Content-Type: application/json" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
-  -d '{"clientId":"<clientId>","text":"<knowledge text>","source":"quick-widget-builder"}'
+  -d '{"clientId":"<clientId>","websiteUrl":"<website URL>","brandName":"<Brand Name>","replace":true}'
 ```
+
+The response includes crawl stats (pages found, chars extracted, strategies used) and knowledge upload results (chunks created). Verify that `savedChunks > 0` in the response.
+
+**Note:** This replaces the old manual approach of WebFetch-crawling 5-8 pages. The deep crawler gets ALL pages automatically.
 
 ### 4.2 Set AI Settings
 
@@ -175,7 +172,7 @@ Read current data, find next empty row, append `[email, website, username, "TRUE
 curl -s -X POST "http://localhost:3000/api/telegram/notify" \
   -H "Content-Type: application/json" \
   -H "Cookie: admin_token=${ADMIN_SECRET_TOKEN}" \
-  -d '{"message":"✅ <b>Quick Widget Created</b>\n\n👤 Client: <username>\n🌐 Website: <website>\n📧 Email: <email or N/A>\n\n📦 Embed:\n<code>&lt;script src=\"https://winbix-ai.xyz/quickwidgets/<clientId>/script.js\"&gt;&lt;/script&gt;</code>"}'
+  -d '{"message":"✅ <b>Quick Widget Created</b>\n\n👤 Client: <username>\n🌐 Website: <website>\n📧 Email: <email or N/A>\n\n📦 Embed:\n<code>&lt;script src=\"https://winbixai.com/quickwidgets/<clientId>/script.js\"&gt;&lt;/script&gt;</code>"}'
 ```
 
 ### 5.3 Output to User
@@ -183,9 +180,37 @@ curl -s -X POST "http://localhost:3000/api/telegram/notify" \
 ```
 ✅ Quick widget created for <Brand Name>!
 📋 Summary: Brand: <name> | Colors: <primary>/<accent> | Theme: <light/dark>
-🔗 Demo: http://localhost:3000/demo/client-website?client=<clientId>&website=<encoded_url>
-📦 Embed: <script src="https://winbix-ai.xyz/quickwidgets/<clientId>/script.js"></script>
+🔗 Demo: http://localhost:3000/demo/client-website?client=<clientId>&type=quick&website=<encoded_url>
+📦 Embed: <script src="https://winbixai.com/quickwidgets/<clientId>/script.js"></script>
 ```
+
+---
+
+## Critical Notes
+
+### Demo Link Must Include `type=quick`
+
+Demo links for quick widgets MUST include `type=quick` parameter:
+
+```
+/demo/client-website?client=<clientId>&type=quick&website=<encoded_url>
+```
+
+Without `type=quick`, the demo page loads widgets from `/widgets/` instead of `/quickwidgets/`, causing 404 errors or loading the wrong widget.
+
+### API Base URL Detection — Handled by Vite Banner
+
+The `vite.config.js` injects an API base URL auto-detection script via Rollup `banner` option. This runs post-build and detects the server origin from the script tag's `src` attribute (`/quickwidgets/` or `/widgets/`).
+
+**Do NOT** add API base URL detection code to `main.jsx` — Vite tree-shakes it out, and Prettier auto-format will strip manual edits. The banner approach in `vite.config.js` is the correct and only solution.
+
+### Never Edit main.jsx for Initialization Code
+
+VSCode Prettier auto-format runs on save and will strip any manually added code from `main.jsx`. All initialization code (API base URL detection, Google Fonts loading) is handled by the Rollup `banner` in `vite.config.js`.
+
+### AI Settings — Always Set Company Name
+
+The system prompt MUST include the client's company name (e.g., "You are an AI assistant for <Brand Name>"). Without this, the default prompt is generic and the AI may respond as "WinBix AI" instead of the client's company. The `greeting` field should match the `welcomeMessage` from widget.config.json.
 
 ---
 

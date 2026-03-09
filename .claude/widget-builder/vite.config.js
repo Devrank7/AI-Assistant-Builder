@@ -46,6 +46,11 @@ export default defineConfig({
             external: (id) => false,
             output: {
                 extend: true,
+                banner: `
+/* API base URL auto-detect */
+(function(){try{var s=document.querySelectorAll("script[src]");for(var i=0;i<s.length;i++){var u=s[i].src;if(u&&(u.indexOf("/quickwidgets/")!==-1||u.indexOf("/widgets/")!==-1)){window.__WIDGET_API_BASE__=new URL(u).origin;break}}}catch(e){}if(!window.__WIDGET_API_BASE__){window.__WIDGET_API_BASE__=""}})();
+/* Google Fonts */
+(function(){var h="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap";if(!document.querySelector('link[href="'+h+'"]')){var l=document.createElement("link");l.rel="stylesheet";l.href=h;document.head.appendChild(l)}})();`,
             },
         },
         outDir: 'dist',

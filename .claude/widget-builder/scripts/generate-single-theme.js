@@ -5,19 +5,19 @@
  * Used by AI agents via the create-quick-widget and mass-quick-widgets skills.
  *
  * Usage:
- *   node .claude/widget-builder/scripts/generate-single-theme.js <clientId>
+ *   node .agent/widget-builder/scripts/generate-single-theme.js <clientId>
  *
  * Expects theme config at:
- *   .claude/widget-builder/clients/<clientId>/theme.json
+ *   .agent/widget-builder/clients/<clientId>/theme.json
  *
  * Generates:
- *   .claude/widget-builder/clients/<clientId>/src/index.css
- *   .claude/widget-builder/clients/<clientId>/src/main.jsx
- *   .claude/widget-builder/clients/<clientId>/src/components/Widget.jsx
- *   .claude/widget-builder/clients/<clientId>/src/components/ChatMessage.jsx
- *   .claude/widget-builder/clients/<clientId>/src/components/QuickReplies.jsx
- *   .claude/widget-builder/clients/<clientId>/src/components/MessageFeedback.jsx
- *   .claude/widget-builder/clients/<clientId>/src/components/RichBlocks.jsx
+ *   .agent/widget-builder/clients/<clientId>/src/index.css
+ *   .agent/widget-builder/clients/<clientId>/src/main.jsx
+ *   .agent/widget-builder/clients/<clientId>/src/components/Widget.jsx
+ *   .agent/widget-builder/clients/<clientId>/src/components/ChatMessage.jsx
+ *   .agent/widget-builder/clients/<clientId>/src/components/QuickReplies.jsx
+ *   .agent/widget-builder/clients/<clientId>/src/components/MessageFeedback.jsx
+ *   .agent/widget-builder/clients/<clientId>/src/components/RichBlocks.jsx
  */
 const fs = require('fs');
 const path = require('path');
@@ -198,19 +198,23 @@ button, a, input, textarea {
 }
 .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 .animate-breathe { animation: breathe 3s ease-in-out infinite; }
-.safe-area-bottom { margin-bottom: env(safe-area-inset-bottom, 0); }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+button, a, input, textarea, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
-/* Skeleton shimmer loading */
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+/* Typing indicator — bouncing dots */
+@keyframes typing-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
 }
-.shimmer-line {
-    background: linear-gradient(90deg, ${c.isDark ? `rgba(${c.focusRgb}, 0.06)` : `rgba(${c.focusRgb}, 0.06)`} 25%, ${c.isDark ? `rgba(${c.focusRgb}, 0.15)` : `rgba(${c.focusRgb}, 0.12)`} 50%, ${c.isDark ? `rgba(${c.focusRgb}, 0.06)` : `rgba(${c.focusRgb}, 0.06)`} 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.8s ease-in-out infinite;
-    border-radius: 9999px;
+.typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: ${c.isDark ? c.cssPrimary : c.cssPrimary};
+    animation: typing-bounce 1.4s ease-in-out infinite;
 }
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
 /* Chat background pattern — branded SVG icons + gradient */
 .chat-pattern {
@@ -330,7 +334,6 @@ function genWidget(c) {
     const contactBtnClasses = c.isDark
         ? `text-[${c.textSecondary}] hover:text-[${c.textPrimary}] hover:bg-[${c.surfaceInput}]`
         : `text-gray-500 hover:text-[${c.cssPrimary}] hover:bg-white`;
-    const shimmerBg = c.isDark ? `bg-[${c.surfaceBorder}]/60` : 'bg-gray-100/80';
     const pillClasses = c.isDark
         ? `bg-[${c.surfaceCard}] text-[${c.textPrimary}] border border-[${c.surfaceBorder}] shadow-black/30`
         : 'bg-white text-gray-700 border border-gray-200 shadow-black/10';
@@ -366,7 +369,8 @@ export function Widget({ config }) {
     const fileInputRef = useRef(null);
 
     // Typewriter welcome
-    const welcomeMsg = config.welcomeMessage || config.bot?.greeting || '';
+    const rawWelcome = config.welcomeMessage || config.bot?.greeting || '';
+    const welcomeMsg = rawWelcome.length > 180 ? rawWelcome.slice(0, 177) + '...' : rawWelcome;
     const [typewriterText, setTypewriterText] = useState('');
     const [typewriterDone, setTypewriterDone] = useState(false);
 
@@ -377,6 +381,12 @@ export function Widget({ config }) {
     const [hasNewMessages, setHasNewMessages] = useState(false);
 
     // Header quick actions menu
+    // Context banner
+    const [contextDismissed, setContextDismissed] = useState(() => {
+        try { return sessionStorage.getItem('aw-ctx-' + config.clientId) === '1'; } catch { return false; }
+    });
+    const pageTitle = typeof document !== 'undefined' ? (document.title || '').replace(/\\s*[-|–].*$/, '').trim() : '';
+
     const [showMenu, setShowMenu] = useState(false);
     const [isMuted, setIsMuted] = useState(() => {
         try { const v = localStorage.getItem('aw-muted-' + config.clientId) === 'true'; window.__WIDGET_MUTED__ = v; return v; } catch { return false; }
@@ -426,18 +436,35 @@ export function Widget({ config }) {
     }, [isListening, startListening, stopListening]);
 
     // Mobile swipe-to-close handlers
+    const swipeStartTime = useRef(0);
     const handleSwipeStart = useCallback((e) => {
         swipeStartRef.current = e.touches[0].clientY;
+        swipeStartTime.current = Date.now();
     }, []);
     const handleSwipeMove = useCallback((e) => {
         const diff = e.touches[0].clientY - swipeStartRef.current;
-        if (diff > 0) setSwipeY(diff);
+        if (diff > 0) { setSwipeY(diff); e.preventDefault(); }
     }, []);
     const handleSwipeEnd = useCallback(() => {
-        if (swipeY > 80) setIsOpen(false);
+        const elapsed = Date.now() - swipeStartTime.current;
+        const velocity = swipeY / Math.max(elapsed, 1);
+        if (swipeY > 80 || velocity > 0.5) setIsOpen(false);
         setSwipeY(0);
         swipeStartRef.current = 0;
     }, [swipeY]);
+
+    // Keyboard-aware resize for mobile (visualViewport API)
+    const panelRef = useRef(null);
+    useEffect(() => {
+        if (!isMobile || !isOpen) return;
+        const vv = window.visualViewport;
+        if (!vv) return;
+        const onResize = () => {
+            if (panelRef.current) panelRef.current.style.height = vv.height + 'px';
+        };
+        vv.addEventListener('resize', onResize);
+        return () => vv.removeEventListener('resize', onResize);
+    }, [isMobile, isOpen]);
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -574,6 +601,34 @@ export function Widget({ config }) {
 
     const showQuickReplies = messages.filter((m) => m.role === 'user').length === 0;
 
+    // Day separator helper
+    const getDayLabel = useCallback((ts) => {
+        if (!ts) return '';
+        const d = new Date(ts);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const yesterday = today - 86400000;
+        const msgDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        if (msgDay === today) return uiStrings.today;
+        if (msgDay === yesterday) return uiStrings.yesterday;
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }, [uiStrings]);
+
+    const getTimeLabel = useCallback((ts) => {
+        if (!ts) return '';
+        return new Date(ts).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }, []);
+
+    const shouldShowSeparator = useCallback((idx) => {
+        if (idx === 0) return true;
+        const curr = messages[idx]?.timestamp;
+        const prev = messages[idx - 1]?.timestamp;
+        if (!curr || !prev) return false;
+        const currDay = new Date(curr).toDateString();
+        const prevDay = new Date(prev).toDateString();
+        return currDay !== prevDay;
+    }, [messages]);
+
     // Chat panel content (shared between mobile & desktop)
     const chatContent = (
         <>
@@ -599,8 +654,10 @@ export function Widget({ config }) {
                         )}
                     </div>
                     <div>
-                        <h3 className="font-semibold ${c.nameSize} text-white tracking-tight leading-tight">{config.botName || config.bot?.name}</h3>
-                        <p className="text-[11px] text-white/65 font-medium">{isOffline ? uiStrings.offline : uiStrings.online}</p>
+                        <h3 className="font-semibold ${c.nameSize} text-white tracking-tight leading-tight truncate max-w-[140px] sm:max-w-[180px]">{config.botName || config.bot?.name}</h3>
+                        <p className="text-[11px] text-white/65 font-medium flex items-center gap-1">
+                            {isOffline ? uiStrings.offline : (<><span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />{uiStrings.respondsInstantly}</>)}
+                        </p>
                     </div>
                 </div>
                 <div className="relative flex items-center gap-1">
@@ -641,22 +698,34 @@ export function Widget({ config }) {
 
             {/* CONTACT BAR */}
             {contacts && Object.keys(contacts).length > 0 && (
-                <div className="flex items-center gap-1.5 px-4 py-1.5 border-b ${contactBarClasses}">
+                <div className="flex items-center gap-1.5 px-4 py-1.5 border-b overflow-x-auto scrollbar-hide ${contactBarClasses}">
                     {contacts.phone && (
-                        <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${contactBtnClasses}" target="_blank" rel="noopener">
-                            <Phone size={11} /> {uiStrings.call}
+                        <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap ${contactBtnClasses}" target="_blank" rel="noopener">
+                            <Phone size={12} /> {uiStrings.call}
                         </a>
                     )}
                     {contacts.email && (
-                        <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${contactBtnClasses}">
-                            <Mail size={11} /> Email
+                        <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap ${contactBtnClasses}">
+                            <Mail size={12} /> Email
                         </a>
                     )}
                     {contacts.website && (
-                        <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${contactBtnClasses}">
-                            <Globe size={11} /> {uiStrings.website}
+                        <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap ${contactBtnClasses}">
+                            <Globe size={12} /> {uiStrings.website}
                         </a>
                     )}
+                </div>
+            )}
+
+            {/* CONTEXT BANNER */}
+            {pageTitle && !contextDismissed && messages.length === 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 border-b ${c.isDark ? `bg-[${c.cssPrimary}]/10 border-[${c.surfaceBorder}] text-[${c.textPrimary}]` : `bg-[${c.cssPrimary}]/5 border-[${c.cssPrimary}]/10 text-gray-700`}">
+                    <Globe size={13} className="${c.isDark ? `text-[${c.cssPrimary}]` : `text-[${c.cssPrimary}]`}" />
+                    <span className="flex-1 text-[11.5px] font-medium truncate">{uiStrings.contextBanner}: <strong>{pageTitle}</strong></span>
+                    <button onClick={() => { setContextDismissed(true); try { sessionStorage.setItem('aw-ctx-' + config.clientId, '1'); } catch {} }}
+                        className="p-0.5 ${c.isDark ? `text-[${c.textMuted}] hover:text-[${c.textSecondary}]` : 'text-gray-400 hover:text-gray-600'} transition-colors">
+                        <X size={12} />
+                    </button>
                 </div>
             )}
 
@@ -667,6 +736,13 @@ export function Widget({ config }) {
                     onSpeak={ttsSupported && typewriterDone ? () => speak(welcomeMsg, lang, -1) : null} isSpeaking={speakingIdx === -1} />
                 {messages.map((msg, idx) => (
                     <div key={idx}>
+                        {shouldShowSeparator(idx) && msg.timestamp && (
+                            <div className="flex items-center gap-3 my-3">
+                                <div className="flex-1 h-px ${c.isDark ? `bg-[${c.surfaceBorder}]/50` : 'bg-gray-200/70'}" />
+                                <span className="text-[10px] font-medium ${c.isDark ? `text-[${c.textMuted}]` : 'text-gray-400'} whitespace-nowrap">{getDayLabel(msg.timestamp)}</span>
+                                <div className="flex-1 h-px ${c.isDark ? `bg-[${c.surfaceBorder}]/50` : 'bg-gray-200/70'}" />
+                            </div>
+                        )}
                         <ChatMessage
                             role={msg.role} content={msg.content} timestamp={msg.timestamp}
                             isError={msg.isError} onRetry={msg.isError ? retryLastMessage : undefined}
@@ -684,10 +760,10 @@ export function Widget({ config }) {
                         {/* Follow-up suggestions */}
                         {msg.role === 'assistant' && !msg.isError && msg.suggestions?.length > 0 && idx === messages.length - 1 && (
                             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                                className="flex flex-wrap gap-1.5 ml-9 mt-2 mb-1">
+                                className="flex flex-wrap gap-1.5 ml-7 sm:ml-9 mt-2 mb-1">
                                 {msg.suggestions.map((s, si) => (
                                     <button key={si} onClick={() => { detectLang(s); sendMessage(s); }}
-                                        className="px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-all duration-200 cursor-pointer ${suggestionClasses}">
+                                        className="px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-200 cursor-pointer ${suggestionClasses}">
                                         {s}
                                     </button>
                                 ))}
@@ -696,14 +772,17 @@ export function Widget({ config }) {
                     </div>
                 ))}
                 {isTyping && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-2 py-2">
+                    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
                         <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50">
                             <Sparkles size={13} className="text-[${c.avatarIcon}]" />
                         </div>
-                        <div className="flex-1 max-w-[70%] space-y-2 pt-1">
-                            <div className="h-3 shimmer-line ${shimmerBg}" style={{ width: '82%' }} />
-                            <div className="h-3 shimmer-line ${shimmerBg}" style={{ width: '61%', animationDelay: '0.15s' }} />
-                            <div className="h-3 shimmer-line ${shimmerBg}" style={{ width: '40%', animationDelay: '0.3s' }} />
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[11px] font-medium ${c.isDark ? `text-[${c.textSecondary}]` : 'text-gray-400'} ml-1">{config.botName || 'AI'} {uiStrings.isTyping}</span>
+                            <div className="${c.isDark ? `bg-[${c.surfaceCard}] border border-[${c.surfaceBorder}]` : 'bg-white border border-gray-100 shadow-sm'} rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
+                                <span className="typing-dot" />
+                                <span className="typing-dot" />
+                                <span className="typing-dot" />
+                            </div>
                         </div>
                     </motion.div>
                 )}
@@ -711,7 +790,7 @@ export function Widget({ config }) {
                 {hasNewMessages && !isAtBottom && (
                     <div className="sticky bottom-2 left-0 right-0 flex justify-center z-10">
                         <button onClick={scrollToBottom}
-                            className="new-msg-pill px-3.5 py-1.5 rounded-full text-[11px] font-semibold shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:shadow-xl ${pillClasses}">
+                            className="new-msg-pill px-3.5 py-1.5 rounded-full text-[12px] font-semibold shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:shadow-xl ${pillClasses}">
                             <ArrowDown size={12} /> {uiStrings.newMessages}
                         </button>
                     </div>
@@ -725,8 +804,8 @@ export function Widget({ config }) {
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-4 overflow-hidden ${imgPreviewBg}">
                         <div className="relative inline-block my-2.5">
                             <img src={selectedImage.previewUrl} alt="" className="h-16 w-auto rounded-xl border ${imgPreviewBorder} object-cover shadow-sm" />
-                            <button onClick={removeSelectedImage} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors">
-                                <X size={10} />
+                            <button onClick={removeSelectedImage} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors">
+                                <X size={11} />
                             </button>
                         </div>
                     </motion.div>
@@ -761,6 +840,15 @@ export function Widget({ config }) {
                         <Send size={16} />
                     </button>
                 </form>
+            </div>
+
+            {/* POWERED BY */}
+            <div className="flex justify-center py-1.5 ${c.isDark ? `bg-[${c.surfaceBg}]` : 'bg-gray-50/50'}">
+                <a href="https://winbixai.com" target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] font-medium ${c.isDark ? `text-[${c.textMuted}] hover:text-[${c.textSecondary}]` : 'text-gray-400 hover:text-gray-500'} transition-colors opacity-70 hover:opacity-100">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Powered by WinBix AI
+                </a>
             </div>
 
             {/* EXPANDED IMAGE */}
@@ -803,7 +891,8 @@ export function Widget({ config }) {
                             className={isMobile
                                 ? 'fixed inset-x-0 bottom-0 flex flex-col ${containerBg} shadow-2xl ${containerShadow} rounded-t-3xl overflow-hidden'
                                 : 'relative w-[85vw] ${c.widgetMaxW ? `max-w-[${c.widgetMaxW}]` : 'max-w-[360px]'} h-[60vh] ${c.widgetMaxH ? `max-h-[${c.widgetMaxH}]` : 'max-h-[520px]'} ${c.widgetW ? `sm:w-[${c.widgetW}]` : 'sm:w-[360px]'} ${c.widgetH ? `sm:h-[${c.widgetH}]` : 'sm:h-[520px]'} rounded-3xl overflow-hidden flex flex-col ${containerBg} shadow-2xl ${containerShadow} border ${containerBorder}'}
-                            style={isMobile ? { height: '90vh', maxHeight: '90vh' } : {}}
+                            ref={isMobile ? panelRef : undefined}
+                            style={isMobile ? { height: '90dvh', maxHeight: '90dvh' } : {}}
                             role="dialog"
                             aria-label="Chat widget"
                         >
@@ -820,12 +909,12 @@ export function Widget({ config }) {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.9 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                            className="max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl ${nudgeShadow} border cursor-pointer relative ${nudgeBg}"
+                            className="max-w-[200px] sm:max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl ${nudgeShadow} border cursor-pointer relative ${nudgeBg}"
                             onClick={() => { dismissNudge(); setIsOpen(true); }}
                         >
                             <button onClick={(e) => { e.stopPropagation(); dismissNudge(); }}
-                                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center transition-colors ${c.isDark ? `bg-[${c.surfaceBorder}] text-[${c.textSecondary}] hover:bg-[${c.surfaceInput}]` : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'}">
-                                <X size={10} />
+                                className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-colors ${c.isDark ? `bg-[${c.surfaceBorder}] text-[${c.textSecondary}] hover:bg-[${c.surfaceInput}]` : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'}">
+                                <X size={11} />
                             </button>
                             <p className="text-[12.5px] leading-relaxed pr-2">{nudgeMessage}</p>
                         </motion.div>
@@ -892,16 +981,10 @@ import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { User, Copy, Check, RotateCcw, ZoomIn, Sparkles, Volume2, VolumeX } from 'lucide-preact';
 
-function formatRelativeTime(timestamp) {
+function formatTime(timestamp) {
     if (!timestamp) return '';
-    const diff = Date.now() - timestamp;
-    const seconds = Math.floor(diff / 1000);
-    if (seconds < 60) return 'just now';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return \`\${minutes}m\`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return \`\${hours}h\`;
-    return \`\${Math.floor(hours / 24)}d\`;
+    try { return new Date(timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
+    catch { return ''; }
 }
 
 function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick, onSpeak, isSpeaking }) {
@@ -931,7 +1014,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 </div>
             )}
 
-            <div className="flex flex-col max-w-[78%]">
+            <div className="flex flex-col max-w-[85%] sm:max-w-[78%]">
                 {imageUrl && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={\`mb-1.5 \${isBot ? '' : 'flex justify-end'}\`}>
                         <div className="relative group/img cursor-pointer overflow-hidden rounded-2xl border ${imgBorder} shadow-sm" onClick={() => onImageClick?.(imageUrl)}>
@@ -972,7 +1055,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 )}
 
                 <div className={\`flex items-center gap-2 mt-1 px-1 \${isBot ? '' : 'justify-end'}\`}>
-                    {timestamp && <span className="text-[10px] ${timestampColor} font-medium">{formatRelativeTime(timestamp)}</span>}
+                    {timestamp && <span className="text-[10px] ${timestampColor} font-medium">{formatTime(timestamp)}</span>}
                     {isBot && !isError && content && (
                         <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 ${copyDefault} hover:text-[${c.copyHover}] transition-all duration-200" aria-label="Copy">
                             {copied ? <Check size={11} className="text-[${c.copyActive}]" /> : <Copy size={11} />}
@@ -1108,13 +1191,16 @@ function genRichBlocks(c) {
     const formBg = c.isDark ? `bg-[${c.surfaceCard}] border-[${c.surfaceBorder}]` : 'bg-gray-50 border-gray-100';
     const formInputBg = c.isDark ? `bg-[${c.surfaceInput}] border-[${c.surfaceBorder}] text-[${c.textPrimary}] placeholder-[${c.textMuted}] focus:border-[${c.focusBorder}]` : `bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-[${c.focusBorder}]`;
 
-    return `import { useState, useCallback } from 'react';
+    const arrowBg = c.isDark ? `bg-[${c.surfaceCard}]/90 border-[${c.surfaceBorder}] hover:bg-[${c.surfaceCard}]` : 'bg-white/90 border-gray-200 hover:bg-white';
+    const arrowIcon = c.isDark ? `text-[${c.textSecondary}]` : 'text-gray-600';
+
+    return `import { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-preact';
 
 function Card({ card, onAction }) {
     return (
-        <div className="flex-shrink-0 w-[200px] rounded-2xl border overflow-hidden ${cardBg} shadow-sm">
+        <div className="flex-shrink-0 w-[170px] sm:w-[200px] rounded-2xl border overflow-hidden ${cardBg} shadow-sm">
             {card.image && (
                 <img src={card.image} alt={card.title || ''} className="w-full h-[100px] object-cover" loading="lazy" />
             )}
@@ -1128,6 +1214,48 @@ function Card({ card, onAction }) {
                     </button>
                 )}
             </div>
+        </div>
+    );
+}
+
+function Carousel({ items, onAction }) {
+    const scrollRef = useRef(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+
+    const updateArrows = useCallback(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 2);
+        setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+    }, []);
+
+    const scroll = useCallback((dir) => {
+        const el = scrollRef.current;
+        if (!el) return;
+        el.scrollBy({ left: dir * 210, behavior: 'smooth' });
+    }, []);
+
+    return (
+        <div className="relative group">
+            <div ref={scrollRef} onScroll={updateArrows}
+                className="overflow-x-auto scrollbar-hide -mr-4 pr-4 scroll-smooth">
+                <div className="flex gap-2" style={{ minWidth: 'max-content' }}>
+                    {items.map((card, ci) => <Card key={ci} card={card} onAction={onAction} />)}
+                </div>
+            </div>
+            {canScrollLeft && (
+                <button onClick={() => scroll(-1)}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full ${arrowBg} shadow-md border flex items-center justify-center transition-all z-10">
+                    <ChevronLeft size={14} className="${arrowIcon}" />
+                </button>
+            )}
+            {canScrollRight && (
+                <button onClick={() => scroll(1)}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full ${arrowBg} shadow-md border flex items-center justify-center transition-all z-10">
+                    <ChevronRight size={14} className="${arrowIcon}" />
+                </button>
+            )}
         </div>
     );
 }
@@ -1190,19 +1318,13 @@ export default function RichBlocks({ blocks, onAction }) {
     if (!blocks || blocks.length === 0) return null;
 
     return (
-        <div className="ml-9 mt-1.5 mb-1 space-y-2">
+        <div className="ml-7 sm:ml-9 mt-1.5 mb-1 space-y-2">
             {blocks.map((block, idx) => {
                 if (block.type === 'card') {
                     return <div key={idx} className="flex"><Card card={block} onAction={onAction} /></div>;
                 }
                 if (block.type === 'carousel') {
-                    return (
-                        <div key={idx} className="overflow-x-auto scrollbar-hide -mr-4 pr-4">
-                            <div className="flex gap-2" style={{ minWidth: 'max-content' }}>
-                                {block.items.map((card, ci) => <Card key={ci} card={card} onAction={onAction} />)}
-                            </div>
-                        </div>
-                    );
+                    return <Carousel key={idx} items={block.items} onAction={onAction} />;
                 }
                 if (block.type === 'button_group') {
                     return <ButtonGroup key={idx} buttons={block.buttons} onAction={onAction} />;
@@ -1239,4 +1361,4 @@ console.log(`   → ${compDir}/ChatMessage.jsx`);
 console.log(`   → ${compDir}/QuickReplies.jsx`);
 console.log(`   → ${compDir}/MessageFeedback.jsx`);
 console.log(`   → ${compDir}/RichBlocks.jsx`);
-console.log(`\nNext: node .claude/widget-builder/scripts/build.js ${clientId}`);
+console.log(`\nNext: node .agent/widget-builder/scripts/build.js ${clientId}`);

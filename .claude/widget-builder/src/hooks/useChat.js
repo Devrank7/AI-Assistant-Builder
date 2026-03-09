@@ -153,7 +153,7 @@ export default function useChat(config) {
                     body.image = imageData;
                 }
 
-                const response = await fetch('/api/chat/stream', {
+                const response = await fetch((window.__WIDGET_API_BASE__ || '') + '/api/chat/stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body),

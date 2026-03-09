@@ -1,15 +1,33 @@
 {
-  "clientId": "ziasnagging",
-  "botName": "Zia Luxury AI",
-  "welcomeMessage": "Welcome to Zia Luxury Property Observer! We provide certified property snagging & inspection services across Dubai and the UAE. How can I assist you today?",
-  "inputPlaceholder": "Ask about our services...",
-  "quickReplies": ["Book an inspection", "View our services", "Get a quote"],
+  "clientId": "supportcoachdublin",
+  "botName": "SupportCoach Dublin AI",
+  "welcomeMessage": "Welcome to **SupportCoach Dublin**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
   "avatar": {
     "type": "initials",
-    "initials": "ZL"
+    "initials": "SD"
+  },
+  "design": {
+    "position": "bottom-right"
   },
   "features": {
     "sound": true,
-    "voiceInput": true
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about SupportCoach Dublin? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "ann@supportcoachdublin.com",
+    "website": "https://supportcoachdublin.com"
   }
 }
