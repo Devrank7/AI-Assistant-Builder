@@ -15,8 +15,8 @@ function DemoContent() {
   const websiteUrl = searchParams.get('website') || '';
   const widgetType = searchParams.get('type') || '';
 
-  // Use /quickwidgets/ for quick (demo) widgets, /widgets/ for production widgets
-  const widgetDir = widgetType === 'quick' ? 'quickwidgets' : 'widgets';
+  // Default to /quickwidgets/ (demo widgets) — only use /widgets/ when explicitly set to "production"
+  const widgetDir = widgetType === 'production' ? 'widgets' : 'quickwidgets';
   const scriptUrl = clientId ? `/${widgetDir}/${clientId}/script.js` : '';
 
   // Special handling for client-website template
