@@ -1,0 +1,34 @@
+{
+  "clientId": "aware",
+  "botName": "Resilience Programme AI",
+  "welcomeMessage": "Welcome to **Resilience Programme**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "RP"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Resilience Programme? We're here to help!"
+    }
+  },
+  "contacts": {
+    "phone": "1800 80 48 48",
+    "email": "communications@aware.ie",
+    "website": "https://www.aware.ie"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "clientId": "aspirecounselling",
+  "botName": "Resilience & Wellbeing Training in Dublin AI",
+  "welcomeMessage": "Welcome to **Resilience & Wellbeing Training in Dublin**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "RW"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Resilience & Wellbeing Training in Dublin? We're here to help!"
+    }
+  },
+  "contacts": {
+    "phone": "+353877824957",
+    "email": "michaela@aspirecounselling.com",
+    "website": "https://aspirecounselling.com"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "clientId": "b2bgeek",
+  "botName": "Rory Donnelly AI",
+  "welcomeMessage": "Welcome to **Rory Donnelly**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a consultation", "View services", "About us", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "RD"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Rory Donnelly? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "rory@b2bgeek.com",
+    "website": "https://www.b2bgeek.com"
+  }
+}

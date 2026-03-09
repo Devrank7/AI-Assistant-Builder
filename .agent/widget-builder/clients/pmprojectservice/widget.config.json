@@ -1,0 +1,34 @@
+{
+  "clientId": "pmprojectservice",
+  "botName": "PM Project Management AI",
+  "welcomeMessage": "Welcome to **PM Project Management**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a consultation", "View services", "About us", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "PP"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about PM Project Management? We're here to help!"
+    }
+  },
+  "contacts": {
+    "phone": "0873392219",
+    "email": "pmprojectservice@gmail.com",
+    "website": "https://www.pmconstructionmanagement.com"
+  }
+}

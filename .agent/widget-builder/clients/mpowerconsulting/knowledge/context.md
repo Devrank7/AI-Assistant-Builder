@@ -1,0 +1,16 @@
+# MPower Consulting
+
+Website: https://mpowerconsulting.ie
+Niche: Executive Coaching & OD
+City: Dublin, Ireland
+Email: marie@mpowerconsulting.ie
+
+## About
+
+I help leaders, teams, and coaches unlock clarity, confidence, and lasting impact through deep, relational coaching and supervision
+
+Page title: MPower Consulting - mpowerconsulting.ie
+
+## Homepage Content
+
+marie@mpowerconsulting.ie Home About Us My Offerings Executive Coaching Team Coaching Leadership Development Executive Coaching &amp; Organisational Development Supervision HR Business Partner Support Coaching Fundamentals for Managers Contact Us Home About Us My Offerings Executive Coaching Team Coaching Leadership Development Executive Coaching &amp; Organisational Development Supervision HR Business Partner Support Coaching Fundamentals for Managers Contact Us Unlocking potential. Leading with purpose. About MPower Consulting Unlocking clarity, confidence, and impact through relational coaching and supervision I help leaders, teams, and coaches unlock clarity, confidence, and lasting impact through deep, relational coaching and supervision. With over 20 years in senior leadership and a background in psychotherapy, I bring a psychologically informed, emotionally intelligent approach to every engagement whether supporting executives in transition, teams striving for high performance, or coaches looking to grow and sustain their practice. Executive Coaching For leaders and executives navigating transition, complexity, or new challenges. I offer psychologically informed, relational coaching that helps you lead with clarity, presence, and confidence. View More Leadership Development Tailored programs that grow leadership capacity at every level, developing self-aware, adaptive, and authentic leaders. View More Team Coaching High-performing teams don’t just happen, they’re built. I help teams enhance trust, communication, and collective effectiveness. View More Coaching Fundamentals for Managers For people leaders ready to move from directive to developmental leadership. This program equips managers to coach in real time — boosting engagement, autonomy, and accountability across teams. View More HR Business Partner Support For HRBPs evolving into strategic team coaches. This tailored coaching and development program builds the skillset and mindset to lead with confidence and coach high-performing teams. View More Executive Coaching &amp; Organisational Development Supervision For executive coaches, OD consultants and L&amp;D leaders. I offer 1:1 and group supervision to deepen reflective practice, sustain impact, and support ethical, human-centred work. View More INDUSTRIES Industries we cover for We cover a broad range of industries where services are most applicable and valuable Contact US [01] Professional Services High-pressure, high-performance cultures that benefit from leadership development and reflective practice [02] Technology Coaching for tech innovators, founder-CEOs, and teams building emotionally intelligent leadership in high-growth environments [03] Financial Services Executive coaching and team coaching are key for navigating rapid change and regulatory pressure [04] Public Sector Supporting cultural change and leadership resilience in complex, hierarchical systems "Working with Marie changed how I lead. I’m more grounded, intentio

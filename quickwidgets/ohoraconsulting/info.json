@@ -1,0 +1,14 @@
+{
+  "clientId": "ohoraconsulting",
+  "username": "ohoraconsulting",
+  "name": "Organisational Development",
+  "email": "edwin@ohoraconsulting.ie",
+  "website": "https://www.ohoraconsulting.ie",
+  "phone": "+353 86 821 9959",
+  "addresses": [
+    "= $(this).find(\"a\").attr(\"href\"); \n  return false;\n  });\n});"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-08T20:50:07.437Z"
+}

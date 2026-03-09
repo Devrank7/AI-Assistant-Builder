@@ -1,0 +1,33 @@
+{
+  "clientId": "zinc",
+  "botName": "Contact AI",
+  "welcomeMessage": "Welcome to **Contact**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a consultation", "View services", "About us", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "C"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Contact? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "ruth@zinc.ie",
+    "website": "https://www.zinc.ie"
+  }
+}

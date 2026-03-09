@@ -1,0 +1,34 @@
+{
+  "clientId": "lifeonaroll",
+  "botName": "About AI",
+  "welcomeMessage": "Welcome to **About**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "A"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about About? We're here to help!"
+    }
+  },
+  "contacts": {
+    "phone": "0864076881",
+    "email": "fiona@lifeonaroll.ie",
+    "website": "https://lifeonaroll.ie"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "clientId": "theorg",
+  "username": "theorg",
+  "name": "Elaine Connolly",
+  "email": "pr@theorg.com",
+  "website": "https://theorg.com",
+  "phone": null,
+  "addresses": [
+    "V2\":{\"__typename\":\"Location\",\"coordinates\":null,\"street\":null,\"postalCode\":null,"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-08T20:53:55.739Z"
+}

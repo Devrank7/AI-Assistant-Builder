@@ -1,0 +1,14 @@
+{
+  "clientId": "scotwork",
+  "username": "scotwork",
+  "name": "Scotwork Ireland",
+  "email": "info.ie@scotwork.com",
+  "website": "https://www.scotwork.com",
+  "phone": "+35318311377",
+  "addresses": [
+    ".href; a = [];\n        u.location.search.replace('?', '').split('&').forEach(fun"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-08T20:59:52.625Z"
+}

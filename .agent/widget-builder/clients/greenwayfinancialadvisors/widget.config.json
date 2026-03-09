@@ -1,0 +1,34 @@
+{
+  "clientId": "greenwayfinancialadvisors",
+  "botName": "Professional Business Consultants In Dublin AI",
+  "welcomeMessage": "Welcome to **Professional Business Consultants In Dublin**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a consultation", "View services", "About us", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "PB"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Professional Business Consultants In Dublin? We're here to help!"
+    }
+  },
+  "contacts": {
+    "phone": "+35318532727",
+    "email": "freeinitialmeeting@greenwayfinancialadvisors.ie",
+    "website": "https://greenwayfinancialadvisors.ie"
+  }
+}

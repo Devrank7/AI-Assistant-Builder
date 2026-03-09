@@ -1,0 +1,33 @@
+{
+  "clientId": "coachtransformation",
+  "botName": "ICF Coaching Certification Programs in Ireland Coaching Cour AI",
+  "welcomeMessage": "Welcome to **ICF Coaching Certification Programs in Ireland Coaching Cour**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "IC"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about ICF Coaching Certification Programs in Ireland Coaching Cour? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "franda@coachtransformation.com",
+    "website": "https://coachtransformation.com"
+  }
+}

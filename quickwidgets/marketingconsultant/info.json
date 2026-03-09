@@ -1,0 +1,14 @@
+{
+  "clientId": "marketingconsultant",
+  "username": "marketingconsultant",
+  "name": "The Marketing Consultant",
+  "email": "ronan@marketingconsultant.ie",
+  "website": "https://marketingconsultant.ie",
+  "phone": "+353876330050",
+  "addresses": [
+    ".href;if(!href.match(/[?&]nowprocket/)){if(href.indexOf(\"?\")==-1){if(href.indexO"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-08T20:48:14.528Z"
+}

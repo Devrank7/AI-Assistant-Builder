@@ -1,0 +1,33 @@
+{
+  "clientId": "boards",
+  "botName": "Great Financial Advisor in Dublin? AI",
+  "welcomeMessage": "Welcome to **Great Financial Advisor in Dublin?**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Financial services", "Book a consultation", "About the firm", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "GF"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Great Financial Advisor in Dublin?? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "hello@boards.ie",
+    "website": "https://www.boards.ie"
+  }
+}

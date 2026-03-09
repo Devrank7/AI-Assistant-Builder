@@ -1,0 +1,17 @@
+# Karen McCarthy
+
+Website: https://www.thesimplifiedsocialmedia.com
+Niche: Business Coaching
+City: Dublin, Ireland
+Email: karen@thesimplifiedsocialmedia.com
+Address: ":"strikingly_ecommerce_buyer_completed_shipping_address","keenio_ecommerce_buye
+
+## About
+
+Marketing &amp; business coach, content creator. Teaching you how to leverage social media to get more clients in your service business.
+
+Page title: Marketing &amp; Business Coach, Dublin, Ireland
+
+## Homepage Content
+
+Home Courses The €5 Simplified Ads Strategy From Stuck To Sales Work with me Simplified Strategy Session Online Business Accelerator 2.0 Testimonials Meet Karen … Home Courses The €5 Simplified Ads Strategy From Stuck To Sales Work with me Simplified Strategy Session Online Business Accelerator 2.0 Testimonials Meet Karen Home Courses The €5 Simplified Ads Strategy From Stuck To Sales Work with me Simplified Strategy Session Online Business Accelerator 2.0 Testimonials Meet Karen … Home Courses The €5 Simplified Ads Strategy From Stuck To Sales Work with me Simplified Strategy Session Online Business Accelerator 2.0 Testimonials Meet Karen Let's Simplify Social Media And Get You Selling Online Business Mentor - Social Media Strategist - Copywriter Hi! I'm Karen I help service business owners grow their businesses online using social media and content marketing EFFECTIVELY. I do this through my signature program; ONLINE BUSINESS ACCELERATOR 2.0 A little about me I'm a 'late bloomer', but so was Harrison Ford so I consider myself in great company! I worked a job I didn't like, managing an offline business, for 10 years. I thought I was too old to start over and I didn't even know where to begin when it came to online business. But in 2015, everything changed with a blog I started writing about dog friendly places in Ireland. I created an Instagram account for the blog, which now has over 30k followers today. In 2016 I packed my bags, rented out my house, quit my job and took a plane to the South of France. That's where I started up-skilling and working on my online business idea. Now, I'm based wherever my laptop is (usually Dublin or Nice) and I couldn't be happier. You see, social media changed the game for all of us because it got rid of all the gatekeepers. Now business can happen anywhere and we can reach anyone with the phone we have in our pockets! So let's take it out and start designing your dream life! My story in dates 2005 &nbsp; Graduated with a B.A in Digital Marketing &amp; French 2006 &nbsp; Began managing an SME 2015 &nbsp; Started a blog about dogs and an Instagram account that would change my world 2015 &nbsp; Started working as a social media strategist and content writer for small businesses 2016 Packed in the job and life that didn't fulfill me and moved to France 2017 &nbsp; Graduated with a Diploma in Social Media Marketing 2017 &nbsp; - Present Helping service business owners grow their businesses online, using social media effectively 2019 &nbsp; Online Business Accelerator was born 2023 I released Online Business Accelerator 2.0 - a much more advanced business and marketing program for businesses looking to grow Online Business Accelerator (OBA) Still want to know more? My story I've always had a passion for storytelling. My background is mixed. I studied Marketing before and after Social Media. I'm a writer , and I worked as a journalist . I am passionate about music and I sing. I never liked traditional Marketing and af

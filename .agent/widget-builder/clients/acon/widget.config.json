@@ -1,0 +1,33 @@
+{
+  "clientId": "acon",
+  "botName": "ACON AI",
+  "welcomeMessage": "Welcome to **ACON**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a consultation", "View services", "About us", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "A"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about ACON? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "andrea@acon.ie",
+    "website": "https://acon.ie"
+  }
+}

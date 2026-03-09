@@ -1,0 +1,14 @@
+{
+  "clientId": "gateoneconsulting",
+  "username": "gateoneconsulting",
+  "name": "Dublin",
+  "email": "alex.jewkes@gateoneconsulting.com",
+  "website": "https://gateoneconsulting.com",
+  "phone": "+353 1 614 5300",
+  "addresses": [
+    ".href;if(!href.match(/[?&]nowprocket/)){if(href.indexOf(\"?\")==-1){if(href.indexO"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-08T20:49:45.619Z"
+}

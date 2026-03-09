@@ -1,0 +1,33 @@
+{
+  "clientId": "cmgconsultants",
+  "botName": "CMG Consultants AI",
+  "welcomeMessage": "Welcome to **CMG Consultants**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Training programs", "Schedule & pricing", "Custom training", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "CC"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about CMG Consultants? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "cmcglynn@cmgconsultants.ie",
+    "website": "https://www.cmgconsultants.ie"
+  }
+}

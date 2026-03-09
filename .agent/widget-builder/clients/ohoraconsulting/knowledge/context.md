@@ -1,0 +1,29 @@
+# Organisational Development
+
+Website: https://www.ohoraconsulting.ie
+Niche: OD Consulting
+City: Dublin, Ireland
+Phone: +353 86 821 9959
+Email: edwin@ohoraconsulting.ie
+Address: = $(this).find("a").attr("href");
+return false;
+});
+});
+
+Page title: Organisational Development | OHORA Consulting
+
+## Homepage Content
+
+Home About Services Organisation Development Executive Talent Management Employment Dispute Resolution Career Counselling Contact Us Select Page Organisational Development &amp; Strategic HR Grow Your Organisation Organisation Development Organisation Development focusses on growing your organisations capability to deal with challenge and change successfully. OHC works with clients to understand the people implications of their growth strategies and then supports the business by putting practical systems, processes and competence in place. Our Approach OHC works with your business to ensure that you and your team are clear on: Where are you going? &#8212; What is your strategy? What are you doing? &#8212; What are your structures and processes? How you are doing it? &#8212; What is working well and what is not? What needs to change? &#8212; How do you deliver your strategy? People Capability Build your People Capability Is your business reaching its full potential? At OHC we passionately believe that putting focus and attention on improving your people management competence at all levels has the best bottom line outputs in dealing with challenge and change. All organisations are perfectly designed to get the results they are now getting. If we want different results, we must change the way we do things - Tom Northup Grow your business with OHC Enquire Today Talk to us Email: edwin@ohoraconsulting.ie Online Contact form Phone: +353 86 821 9959 Twitter Linkedin Copyright &copy; 2015 - 2026 OHORA Consulting | Proudly powered by Nettl of Dublin
+
+## About
+
+Home About Services Organisation Development Executive Talent Management Employment Dispute Resolution Career Counselling Contact Us Select Page About O&#8217;Hora Consulting My Profile Organisation Development My Approach My style is direct and straight forward – the reason an organisation speaks to somebody like me is that they need high level honest advice. I have been described by peers and clients as articulate, professional, diplomatic and insightful. I am practical and enjoy delivering successful projects. My Experience Experience &#x5c; 15 years executive and senior HR experience &#x5c; Worked across multiple environments, both large and small &#x5c; Experienced Board Contributor on People issues &#x5c; Strategic Business approach coupled with the ability to deliver &#x5c; Developed HR &amp; People Strategies for both large and small growing businesses &#x5c; Wide range of clients – from corporate to family owned Qualifications &#x5a; M.Sc. Work &amp; Organisational Psychology &#x5a; B.A. Psychology &#x5a; Post Graduate Diploma in HRM (CIPD) &#x5a; Member of the British Psychological Society (Psychometric Testing) &#x5a; Program Director at the Irish Management Institute &#8211; Post Graduate Diploma in Organizational Development &amp; Transformation. Grow your business with OHC Enquire Today Talk to us Email: edwin@ohoraconsulting.ie Online Contact form Phone: +353 86 821 9959 Twitter Linkedin Copyright &copy; 2015 - 2026 OHORA Consulting | Proudly powered by Nettl of Dublin
+
+## Contact Us
+
+Home About Services Organisation Development Executive Talent Management Employment Dispute Resolution Career Counselling Contact Us Select Page We&#8217;d love to hear from you! Let&#039;s Chat Let&#8217;s Chat Getting in touch with us couldn&#8217;t be easier. Simply complete the form below and we&#8217;ll get back to you shortly. \* \* \* &#xe010; Email: edwin@ohoraconsulting.ie &#xe090; Phone: +353 86 821 9959 Our Services &#xe0ef; Organisational Development &amp; Strategic HR &#xe031; Talent Management Executive Selection &amp; Development &#xe08b; Employment Dispute Resolution: Meditation &amp; Transition Solutions &#xe066; Individual Career Advice &amp; Counselling Talk to us Email: edwin@ohoraconsulting.ie Online Contact form Phone: +353 86 821 9959 Twitter Linkedin Copyright &copy; 2015 - 2026 OHORA Consulting | Proudly powered by Nettl of Dublin
+
+## Organisation Development
+
+Home About Services Organisation Development Executive Talent Management Employment Dispute Resolution Career Counselling Contact Us Select Page Organisational Development &amp; Strategic HR Grow Your Organisation Organisation Development Organisation Development focusses on growing your organisations capability to deal with challenge and change successfully. OHC works with clients to understand the people implications of their growth strategies and then supports the business by putting practical systems, processes and competence in place. Our Approach OHC works with your business to ensure that you and your team are clear on: Where are you going? &#8212; What is your strategy? What are you doing? &#8212; What are your structures and processes? How you are doing it? &#8212; What is working well and what is not? What needs to change? &#8212; How do you deliver your strategy? People Capability Build your People Capability Is your business reaching its full potential? At OHC we passionately believe that putting focus and attention on improving your people management competence at all levels has the best bottom line outputs in dealing with challenge and change. All organisations are perfectly designed to get the results they are now getting. If we want different results, we must change the way we do things - Tom Northup Grow your business with OHC Enquire Today Talk to us Email: edwin@ohoraconsulting.ie Online Contact form Phone: +353 86 821 9959 Twitter Linkedin Copyright &copy; 2015 - 2026 OHORA Consulting | Proudly powered by Nettl of Dublin

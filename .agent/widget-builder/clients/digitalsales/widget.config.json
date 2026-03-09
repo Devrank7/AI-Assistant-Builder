@@ -1,0 +1,34 @@
+{
+  "clientId": "digitalsales",
+  "botName": "Digital Sales AI",
+  "welcomeMessage": "Welcome to **Digital Sales**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a consultation", "View services", "About us", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "DS"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Digital Sales? We're here to help!"
+    }
+  },
+  "contacts": {
+    "phone": "+35315397207",
+    "email": "info@DigitalSales.ie",
+    "website": "https://www.digitalsales.ie"
+  }
+}

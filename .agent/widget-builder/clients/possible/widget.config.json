@@ -1,0 +1,33 @@
+{
+  "clientId": "possible",
+  "botName": "Possible Coaching AI",
+  "welcomeMessage": "Welcome to **Possible Coaching**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "PC"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Possible Coaching? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "paul@possible.ie",
+    "website": "http://www.possible.ie"
+  }
+}

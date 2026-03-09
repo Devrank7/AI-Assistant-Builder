@@ -1,0 +1,33 @@
+{
+  "clientId": "martelloleadership",
+  "botName": "Leadership Development Consultants Dublin AI",
+  "welcomeMessage": "Welcome to **Leadership Development Consultants Dublin**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a consultation", "View services", "About us", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "LD"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Leadership Development Consultants Dublin? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "mark@martelloleadership.com",
+    "website": "https://martelloleadership.com"
+  }
+}

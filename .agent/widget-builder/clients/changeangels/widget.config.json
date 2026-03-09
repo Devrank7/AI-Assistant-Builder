@@ -1,0 +1,33 @@
+{
+  "clientId": "changeangels",
+  "botName": "Agile Consulting and Training Services Dublin AI",
+  "welcomeMessage": "Welcome to **Agile Consulting and Training Services Dublin**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["About us", "Our services", "Book a consultation", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AC"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Agile Consulting and Training Services Dublin? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "joanna@changeangels.ie",
+    "website": "https://changeangels.ie"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "clientId": "resolveireland",
+  "botName": "Dispute Resolution Services AI",
+  "welcomeMessage": "Welcome to **Dispute Resolution Services**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a consultation", "View services", "About us", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "DR"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Dispute Resolution Services? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "miriam@resolveireland.ie",
+    "website": "https://www.resolveireland.ie"
+  }
+}
