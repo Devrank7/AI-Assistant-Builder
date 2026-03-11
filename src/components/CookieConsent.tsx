@@ -49,7 +49,7 @@ export default function CookieConsent() {
         </p>
         <button
           onClick={accept}
-          className="flex-shrink-0 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-cyan-500/25"
+          className="flex-shrink-0 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-blue-500/25"
         >
           {t('cookie.accept')}
         </button>

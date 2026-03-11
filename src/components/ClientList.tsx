@@ -87,7 +87,7 @@ export default function ClientList() {
             </svg>
           </div>
           <div className="relative z-10 mb-2 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-cyan)]/20 bg-[var(--neon-cyan)]/10 shadow-[0_0_15px_rgba(0,229,255,0.1)] backdrop-blur-md">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-cyan)]/20 bg-[var(--neon-cyan)]/10 shadow-[0_0_15px_rgba(59,130,246,0.1)] backdrop-blur-md">
               <svg className="h-5 w-5 text-[var(--neon-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -123,7 +123,7 @@ export default function ClientList() {
             </svg>
           </div>
           <div className="relative z-10 mb-2 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-purple)]/20 bg-[var(--neon-purple)]/10 shadow-[0_0_15px_rgba(184,77,255,0.1)] backdrop-blur-md">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-purple)]/20 bg-[var(--neon-purple)]/10 shadow-[0_0_15px_rgba(99,102,241,0.1)] backdrop-blur-md">
               <svg className="h-5 w-5 text-[var(--neon-purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -159,7 +159,7 @@ export default function ClientList() {
             </svg>
           </div>
           <div className="relative z-10 mb-2 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-pink)]/20 bg-[var(--neon-pink)]/10 shadow-[0_0_15px_rgba(255,45,135,0.1)] backdrop-blur-md">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--neon-pink)]/20 bg-[var(--neon-pink)]/10 shadow-[0_0_15px_rgba(129,140,248,0.1)] backdrop-blur-md">
               <svg className="h-5 w-5 text-[var(--neon-pink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>

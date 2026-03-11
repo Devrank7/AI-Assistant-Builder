@@ -51,11 +51,11 @@ interface AnalyticsTabProps {
 // --- Color palette ---
 
 const COLORS = {
-  cyan: '#00d9ff',
-  purple: '#a855f7',
+  cyan: '#3B82F6',
+  purple: '#818CF8',
   green: '#22c55e',
   amber: '#f59e0b',
-  pink: '#ec4899',
+  pink: '#6366F1',
 };
 
 const PIE_COLORS = [COLORS.cyan, COLORS.purple, COLORS.green, COLORS.amber, COLORS.pink];
@@ -206,7 +206,7 @@ export default function AnalyticsTab({
               onClick={() => handlePeriodChange(period)}
               className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
                 selectedPeriod === period
-                  ? 'border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)] shadow-[0_0_20px_rgba(0,217,255,0.1)]'
+                  ? 'border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)] shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                   : 'border border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
               }`}
             >

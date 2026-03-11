@@ -533,7 +533,7 @@ export default function ChannelsTab({ clientId }: ChannelsTabProps) {
                     {getProviderLabel(channel.provider)}
                   </span>
                   {channel.provider === 'whapi' && channel.config?.humanTakeover && (
-                    <span className="ml-2 rounded-full bg-purple-500/20 px-2.5 py-1 text-xs text-purple-300">
+                    <span className="ml-2 rounded-full bg-indigo-500/20 px-2.5 py-1 text-xs text-indigo-300">
                       Human + AI
                     </span>
                   )}

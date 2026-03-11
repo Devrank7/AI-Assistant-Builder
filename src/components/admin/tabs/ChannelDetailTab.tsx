@@ -68,8 +68,8 @@ interface AnalyticsData {
 }
 
 const COLORS = {
-  cyan: '#00d9ff',
-  purple: '#a855f7',
+  cyan: '#3B82F6',
+  purple: '#818CF8',
   green: '#22c55e',
   amber: '#f59e0b',
 };

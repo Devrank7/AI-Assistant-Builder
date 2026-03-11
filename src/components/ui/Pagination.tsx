@@ -64,7 +64,7 @@ export default function Pagination({
               onClick={() => onPageChange(p)}
               className={`${btnBase} ${
                 p === currentPage
-                  ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg shadow-purple-500/20'
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
             >

@@ -24,7 +24,7 @@ export default function ClientCard({ client, isQuick = false }: ClientCardProps)
   const statusColor = isQuick
     ? 'bg-amber-400/10 text-amber-400 border-amber-400/20'
     : client.subscriptionStatus === 'trial'
-      ? 'bg-cyan-400/10 text-cyan-400 border-cyan-400/20'
+      ? 'bg-blue-400/10 text-blue-400 border-blue-400/20'
       : client.subscriptionStatus === 'active'
         ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'
         : client.subscriptionStatus === 'suspended'

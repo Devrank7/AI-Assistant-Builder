@@ -3,21 +3,25 @@ interface StatsCardProps {
   value: string | number;
   change?: { value: number; label?: string };
   icon?: string;
-  gradient?: 'cyan' | 'purple' | 'pink' | 'emerald' | 'amber';
+  gradient?: 'cyan' | 'purple' | 'pink' | 'emerald' | 'amber' | 'blue' | 'indigo';
 }
 
 const gradients = {
-  cyan: 'from-cyan-500/20 to-cyan-500/5 border-cyan-500/20',
-  purple: 'from-purple-500/20 to-purple-500/5 border-purple-500/20',
-  pink: 'from-pink-500/20 to-pink-500/5 border-pink-500/20',
+  cyan: 'from-blue-500/20 to-blue-500/5 border-blue-500/20',
+  blue: 'from-blue-500/20 to-blue-500/5 border-blue-500/20',
+  purple: 'from-indigo-500/20 to-indigo-500/5 border-indigo-500/20',
+  indigo: 'from-indigo-500/20 to-indigo-500/5 border-indigo-500/20',
+  pink: 'from-indigo-400/20 to-indigo-400/5 border-indigo-400/20',
   emerald: 'from-emerald-500/20 to-emerald-500/5 border-emerald-500/20',
   amber: 'from-amber-500/20 to-amber-500/5 border-amber-500/20',
 };
 
 const iconBgs = {
-  cyan: 'bg-cyan-500/10 text-cyan-400',
-  purple: 'bg-purple-500/10 text-purple-400',
-  pink: 'bg-pink-500/10 text-pink-400',
+  cyan: 'bg-blue-500/10 text-blue-400',
+  blue: 'bg-blue-500/10 text-blue-400',
+  purple: 'bg-indigo-500/10 text-indigo-400',
+  indigo: 'bg-indigo-500/10 text-indigo-400',
+  pink: 'bg-indigo-400/10 text-indigo-400',
   emerald: 'bg-emerald-500/10 text-emerald-400',
   amber: 'bg-amber-500/10 text-amber-400',
 };

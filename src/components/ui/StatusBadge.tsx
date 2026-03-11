@@ -8,7 +8,7 @@ interface StatusBadgeProps {
 
 const statusConfig: Record<Status, { label: string; dot: string; bg: string; text: string }> = {
   active: { label: 'Активен', dot: 'bg-emerald-400', bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
-  trial: { label: 'Пробный', dot: 'bg-cyan-400', bg: 'bg-cyan-500/10', text: 'text-cyan-400' },
+  trial: { label: 'Пробный', dot: 'bg-blue-400', bg: 'bg-blue-500/10', text: 'text-blue-400' },
   past_due: { label: 'Просрочен', dot: 'bg-amber-400', bg: 'bg-amber-500/10', text: 'text-amber-400' },
   inactive: { label: 'Неактивен', dot: 'bg-gray-400', bg: 'bg-gray-500/10', text: 'text-gray-400' },
   blocked: { label: 'Заблокирован', dot: 'bg-red-400', bg: 'bg-red-500/10', text: 'text-red-400' },

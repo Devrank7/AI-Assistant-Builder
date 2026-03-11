@@ -60,14 +60,14 @@ export default function UpgradePrompt({
       className={`relative overflow-hidden rounded-2xl border p-6 ${
         isUrgent
           ? 'border-amber-500/30 bg-amber-500/5'
-          : 'border-cyan-500/20 bg-gradient-to-r from-cyan-500/5 to-purple-500/5'
+          : 'border-blue-500/20 bg-gradient-to-r from-blue-500/5 to-indigo-500/5'
       }`}
     >
       <div className="relative">
         <div className="flex items-start gap-4">
           <div
             className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-2xl ${
-              isUrgent ? 'bg-amber-500/10' : 'bg-cyan-500/10'
+              isUrgent ? 'bg-amber-500/10' : 'bg-blue-500/10'
             }`}
           >
             {isUrgent ? '⚠️' : '⏰'}
@@ -95,7 +95,7 @@ export default function UpgradePrompt({
                   className={`h-full rounded-full transition-all duration-1000 ${
                     isUrgent
                       ? 'bg-gradient-to-r from-amber-500 to-red-500'
-                      : 'bg-gradient-to-r from-cyan-500 to-purple-500'
+                      : 'bg-gradient-to-r from-blue-500 to-indigo-500'
                   }`}
                   style={{ width: `${trialProgress}%` }}
                 />
@@ -107,7 +107,7 @@ export default function UpgradePrompt({
               className={`rounded-xl px-6 py-2.5 text-sm font-semibold shadow-lg transition-all ${
                 isUrgent
                   ? 'bg-amber-600 text-white shadow-amber-500/20 hover:bg-amber-700'
-                  : 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-purple-500/20 hover:opacity-90'
+                  : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-indigo-500/20 hover:opacity-90'
               }`}
             >
               Настроить оплату — ${monthlyPrice}/мес

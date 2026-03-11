@@ -99,7 +99,7 @@ export default function AdminInstagramPage() {
   if (loading) {
     return (
       <div className="bg-gradient-animated flex min-h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-cyan-500" />
+        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500" />
       </div>
     );
   }
@@ -243,7 +243,7 @@ export default function AdminInstagramPage() {
                 type="text"
                 value={config.pageId}
                 onChange={(e) => setConfig({ ...config, pageId: e.target.value })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
+                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-600 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 focus:outline-none"
                 placeholder="e.g. 17841400123456789"
               />
               <p className="mt-1 text-xs text-gray-600">Found in Meta Business Suite or Graph API Explorer</p>
@@ -257,7 +257,7 @@ export default function AdminInstagramPage() {
                   type={showToken ? 'text' : 'password'}
                   value={config.pageAccessToken}
                   onChange={(e) => setConfig({ ...config, pageAccessToken: e.target.value })}
-                  className="flex-1 rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
+                  className="flex-1 rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-600 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 focus:outline-none"
                   placeholder="EAAGm0PX4ZCps..."
                 />
                 <button
@@ -309,7 +309,7 @@ export default function AdminInstagramPage() {
               <select
                 value={config.aiModel}
                 onChange={(e) => setConfig({ ...config, aiModel: e.target.value })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
+                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 focus:outline-none"
               >
                 <option value="gemini-3-flash-preview">Gemini 3 Flash (fast)</option>
                 <option value="gemini-3-pro-preview">Gemini 3 Pro (balanced)</option>
@@ -327,7 +327,7 @@ export default function AdminInstagramPage() {
                 min={128}
                 max={4096}
                 step={128}
-                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
+                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 focus:outline-none"
               />
             </div>
 
@@ -403,7 +403,7 @@ export default function AdminInstagramPage() {
                 type="text"
                 value={config.processingMessage}
                 onChange={(e) => setConfig({ ...config, processingMessage: e.target.value })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
+                className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-600 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 focus:outline-none"
                 placeholder="Секунду, обрабатываю..."
               />
               <p className="mt-1 text-xs text-gray-600">

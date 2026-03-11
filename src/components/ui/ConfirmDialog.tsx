@@ -27,8 +27,8 @@ const variantStyles = {
   },
   info: {
     icon: 'ℹ️',
-    iconBg: 'bg-cyan-500/10',
-    button: 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90',
+    iconBg: 'bg-blue-500/10',
+    button: 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90',
   },
 };
 

@@ -83,7 +83,7 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div className="bg-gradient-animated flex min-h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-cyan-500" />
+        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500" />
       </div>
     );
   }
@@ -128,7 +128,7 @@ export default function AdminSettingsPage() {
                   min={1}
                   max={10000}
                   step={1}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 py-3 pr-4 pl-8 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 py-3 pr-4 pl-8 text-white focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 focus:outline-none"
                 />
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function AdminSettingsPage() {
                   min={0}
                   max={99}
                   step={1}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 py-3 pr-8 pl-4 text-white focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 py-3 pr-8 pl-4 text-white focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 focus:outline-none"
                 />
                 <span className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500">%</span>
               </div>
@@ -244,7 +244,7 @@ export default function AdminSettingsPage() {
           className={`w-full rounded-xl py-4 text-lg font-semibold transition-all ${
             saving || config.costWarningThreshold >= config.costBlockThreshold
               ? 'cursor-not-allowed bg-gray-600 text-gray-400'
-              : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50'
+              : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50'
           }`}
         >
           {saving ? 'Saving...' : 'Save Settings'}

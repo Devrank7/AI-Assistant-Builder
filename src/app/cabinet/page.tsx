@@ -745,7 +745,7 @@ function ClientCabinetContent() {
                                 className="relative w-full overflow-hidden rounded-t-sm bg-gradient-to-t from-[var(--neon-cyan)]/20 to-[var(--neon-cyan)]/60 transition-all duration-300 group-hover:to-[var(--neon-cyan)]"
                                 style={{
                                   height: `${Math.max((stat.totalMessages / Math.max(...analyticsData.dailyStats.map((s) => s.totalMessages))) * 100, 4)}%`,
-                                  boxShadow: '0 0 10px rgba(0, 229, 255, 0.2)',
+                                  boxShadow: '0 0 10px rgba(59, 130, 246, 0.2)',
                                 }}
                               >
                                 <div className="absolute inset-0 translate-y-full transform bg-white/20 transition-transform duration-500 group-hover:translate-y-0" />
@@ -771,7 +771,7 @@ function ClientCabinetContent() {
                                 className="relative w-full overflow-hidden rounded-t-sm bg-gradient-to-t from-[var(--neon-purple)]/20 to-[var(--neon-purple)]/60 transition-all duration-300 group-hover:to-[var(--neon-purple)]"
                                 style={{
                                   height: `${Math.max((stat.count / Math.max(...analyticsData.hourlyDistribution.map((s) => s.count))) * 100, 4)}%`,
-                                  boxShadow: '0 0 10px rgba(184, 77, 255, 0.2)',
+                                  boxShadow: '0 0 10px rgba(99, 102, 241, 0.2)',
                                 }}
                               >
                                 <div className="absolute inset-0 translate-y-full transform bg-white/20 transition-transform duration-500 group-hover:translate-y-0" />
@@ -1065,7 +1065,7 @@ function ClientCabinetContent() {
                     </div>
                   ) : (
                     <div className="relative z-10 transform transition-transform duration-300 group-hover:scale-105">
-                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--neon-cyan)]/10 shadow-[0_0_20px_rgba(0,229,255,0.15)] transition-shadow group-hover:shadow-[0_0_30px_rgba(0,229,255,0.25)]">
+                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--neon-cyan)]/10 shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-shadow group-hover:shadow-[0_0_30px_rgba(59,130,246,0.25)]">
                         <span className="text-3xl">📄</span>
                       </div>
                       <h3 className="mb-2 text-2xl font-bold text-white transition-colors group-hover:text-[var(--neon-cyan)]">
@@ -1417,7 +1417,7 @@ function ClientCabinetContent() {
                   <div className="relative z-10 border-t border-white/[0.06] pt-6 text-center">
                     <a
                       href={`/cabinet/billing?clientId=${client.clientId}`}
-                      className="btn-premium inline-block px-8 py-3 shadow-[0_0_20px_rgba(0,229,255,0.15)] hover:shadow-[0_0_30px_rgba(0,229,255,0.25)]"
+                      className="btn-premium inline-block px-8 py-3 shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:shadow-[0_0_30px_rgba(59,130,246,0.25)]"
                     >
                       Manage Subscription
                     </a>

@@ -63,7 +63,7 @@ export default function SearchFilter({
   };
 
   const selectBase =
-    'h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer';
+    'h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-blue-500/50 transition-colors appearance-none cursor-pointer';
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row">
@@ -75,7 +75,7 @@ export default function SearchFilter({
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
           placeholder={placeholder}
-          className="h-10 w-full rounded-lg border border-white/10 bg-white/5 pr-4 pl-10 text-sm text-white placeholder-gray-500 transition-colors focus:border-cyan-500/50 focus:outline-none"
+          className="h-10 w-full rounded-lg border border-white/10 bg-white/5 pr-4 pl-10 text-sm text-white placeholder-gray-500 transition-colors focus:border-blue-500/50 focus:outline-none"
         />
         {query && (
           <button

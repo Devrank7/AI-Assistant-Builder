@@ -129,7 +129,7 @@ export default function BillingPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-cyan-500"></div>
+        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -139,7 +139,7 @@ export default function BillingPage() {
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-12 text-center">
-          <Link href="/cabinet" className="mb-4 inline-block text-cyan-400 hover:text-cyan-300">
+          <Link href="/cabinet" className="mb-4 inline-block text-blue-400 hover:text-blue-300">
             &larr; Назад в кабинет
           </Link>
           <h1 className="mb-4 text-4xl font-bold text-white">Выберите план подписки</h1>
@@ -190,7 +190,7 @@ export default function BillingPage() {
               {subscription.daysUntilPayment !== null && (
                 <div>
                   <p className="text-sm text-gray-400">Осталось дней</p>
-                  <p className="font-semibold text-cyan-400">{subscription.daysUntilPayment}</p>
+                  <p className="font-semibold text-blue-400">{subscription.daysUntilPayment}</p>
                 </div>
               )}
             </div>
@@ -207,7 +207,7 @@ export default function BillingPage() {
                   onClick={() => setPaymentMethod('wayforpay')}
                   className={`rounded-xl border-2 p-4 transition-all duration-300 ${
                     paymentMethod === 'wayforpay'
-                      ? 'border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+                      ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
                       : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
                   }`}
                 >
@@ -225,7 +225,7 @@ export default function BillingPage() {
                   onClick={() => setPaymentMethod('nowpayments')}
                   className={`rounded-xl border-2 p-4 transition-all duration-300 ${
                     paymentMethod === 'nowpayments'
-                      ? 'border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+                      ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
                       : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
                   }`}
                 >
@@ -248,7 +248,7 @@ export default function BillingPage() {
               onClick={() => setSelectedTier(tier.id)}
               className={`relative rounded-xl border-2 p-6 transition-all duration-300 ${
                 selectedTier === tier.id
-                  ? 'border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+                  ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
                   : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
               }`}
             >
@@ -316,14 +316,14 @@ export default function BillingPage() {
               type="checkbox"
               checked={termsAccepted}
               onChange={(e) => setTermsAccepted(e.target.checked)}
-              className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-gray-600 bg-gray-700 accent-cyan-500"
+              className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer rounded border-gray-600 bg-gray-700 accent-blue-500"
             />
             <span className="text-sm leading-relaxed text-gray-400">
               Я соглашаюсь с{' '}
               <Link
                 href="/terms"
                 target="_blank"
-                className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
+                className="text-blue-400 underline underline-offset-2 hover:text-blue-300"
               >
                 Условиями использования
               </Link>{' '}
@@ -331,7 +331,7 @@ export default function BillingPage() {
               <Link
                 href="/privacy"
                 target="_blank"
-                className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
+                className="text-blue-400 underline underline-offset-2 hover:text-blue-300"
               >
                 Политикой конфиденциальности
               </Link>
@@ -344,7 +344,7 @@ export default function BillingPage() {
             className={`mt-4 w-full rounded-xl py-4 text-lg font-semibold transition-all duration-300 ${
               processing || !clientId || !termsAccepted
                 ? 'cursor-not-allowed bg-gray-600 text-gray-400'
-                : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30 hover:from-cyan-400 hover:to-blue-500 hover:shadow-cyan-500/50'
+                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 hover:from-blue-400 hover:to-blue-500 hover:shadow-blue-500/50'
             }`}
           >
             {processing ? (
@@ -373,7 +373,7 @@ export default function BillingPage() {
           </p>
           <p className="mt-2">
             Вопросы?{' '}
-            <a href="mailto:winbix.ai@gmail.com" className="text-cyan-400 hover:underline">
+            <a href="mailto:winbix.ai@gmail.com" className="text-blue-400 hover:underline">
               winbix.ai@gmail.com
             </a>
           </p>

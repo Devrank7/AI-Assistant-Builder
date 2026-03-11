@@ -24,7 +24,7 @@ export default function TabNav({ tabs, activeTab, onChange, variant = 'underline
             onClick={() => onChange(tab.id)}
             className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
               activeTab === tab.id
-                ? 'border border-white/10 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-white shadow-lg'
+                ? 'border border-white/10 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-white shadow-lg'
                 : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
             }`}
           >
@@ -33,7 +33,7 @@ export default function TabNav({ tabs, activeTab, onChange, variant = 'underline
             {tab.badge !== undefined && tab.badge > 0 && (
               <span
                 className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${
-                  activeTab === tab.id ? 'bg-cyan-500/30 text-cyan-300' : 'bg-white/10 text-gray-500'
+                  activeTab === tab.id ? 'bg-blue-500/30 text-blue-300' : 'bg-white/10 text-gray-500'
                 }`}
               >
                 {tab.badge}
@@ -58,12 +58,12 @@ export default function TabNav({ tabs, activeTab, onChange, variant = 'underline
           {tab.icon && <span>{tab.icon}</span>}
           {tab.label}
           {tab.badge !== undefined && tab.badge > 0 && (
-            <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-cyan-500/20 px-1 text-[10px] font-bold text-cyan-400">
+            <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blue-500/20 px-1 text-[10px] font-bold text-blue-400">
               {tab.badge}
             </span>
           )}
           {activeTab === tab.id && (
-            <span className="absolute right-0 bottom-0 left-0 h-[2px] rounded-t-full bg-gradient-to-r from-cyan-500 to-purple-500" />
+            <span className="absolute right-0 bottom-0 left-0 h-[2px] rounded-t-full bg-gradient-to-r from-blue-500 to-indigo-500" />
           )}
         </button>
       ))}

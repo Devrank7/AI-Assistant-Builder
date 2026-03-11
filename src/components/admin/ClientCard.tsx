@@ -24,11 +24,11 @@ export default function ClientCard({ client, href, onAction }: ClientCardProps) 
       {/* Header */}
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 text-sm font-bold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-sm font-bold text-white">
             {client.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white transition-colors group-hover:text-cyan-400">
+            <h3 className="text-sm font-semibold text-white transition-colors group-hover:text-blue-400">
               {client.name}
             </h3>
             {client.email && <p className="max-w-[200px] truncate text-xs text-gray-500">{client.email}</p>}

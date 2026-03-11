@@ -92,7 +92,7 @@ export default function BillingTab({ client, daysUntilPayment, onClientUpdate, m
                 client.subscriptionStatus === 'active'
                   ? 'text-green-400'
                   : client.subscriptionStatus === 'trial'
-                    ? 'text-cyan-400'
+                    ? 'text-blue-400'
                     : client.subscriptionStatus === 'pending'
                       ? 'text-purple-400'
                       : client.subscriptionStatus === 'past_due'
@@ -269,7 +269,7 @@ export default function BillingTab({ client, daysUntilPayment, onClientUpdate, m
       )}
 
       {/* Admin: Extend Subscription */}
-      <div className="glass-card border border-cyan-500/20 p-6">
+      <div className="glass-card border border-blue-500/20 p-6">
         <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
           <span>🎁</span> Продлить подписку (Админ)
         </h3>
@@ -290,7 +290,7 @@ export default function BillingTab({ client, daysUntilPayment, onClientUpdate, m
             </div>
             <div>
               <p className="text-sm text-gray-400">После продления (+{extensionMonths} мес.)</p>
-              <p className="text-lg font-medium text-cyan-400">
+              <p className="text-lg font-medium text-blue-400">
                 {newPaymentDate.toLocaleDateString('ru-RU', {
                   day: 'numeric',
                   month: 'long',
@@ -310,7 +310,7 @@ export default function BillingTab({ client, daysUntilPayment, onClientUpdate, m
                 onClick={() => setExtensionMonths(m)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                   extensionMonths === m
-                    ? 'bg-cyan-500/20 text-cyan-400 ring-1 ring-cyan-500/50'
+                    ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50'
                     : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                 }`}
               >
@@ -338,7 +338,7 @@ export default function BillingTab({ client, daysUntilPayment, onClientUpdate, m
           className={`rounded-lg px-6 py-3 font-semibold transition-all ${
             extending
               ? 'cursor-not-allowed bg-gray-600 text-gray-400'
-              : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40'
+              : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40'
           }`}
         >
           {extending ? (
