@@ -1,0 +1,14 @@
+{
+  "clientId": "stephens-portfolio",
+  "username": "stephens-portfolio",
+  "name": "Stephens Portfolio",
+  "email": "stephen@stephens-portfolio.com",
+  "website": "https://stephens-portfolio.com",
+  "phone": null,
+  "addresses": [
+    "data of event"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-10T07:55:00.286Z"
+}

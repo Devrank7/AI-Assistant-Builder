@@ -1,0 +1,14 @@
+{
+  "clientId": "escalate",
+  "username": "escalate",
+  "name": "About Us",
+  "email": "aoife@escalate.ie",
+  "website": "https://escalate.ie",
+  "phone": null,
+  "addresses": [
+    "Dublin, Ireland"
+  ],
+  "instagram": null,
+  "clientType": "quick",
+  "createdAt": "2026-03-10T07:56:50.657Z"
+}

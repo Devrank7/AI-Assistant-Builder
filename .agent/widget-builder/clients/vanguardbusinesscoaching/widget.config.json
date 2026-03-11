@@ -1,0 +1,33 @@
+{
+  "clientId": "vanguardbusinesscoaching",
+  "botName": "Andy Turner AI",
+  "welcomeMessage": "Welcome to **Andy Turner**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "AT"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Andy Turner? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "andy@vanguardbusinesscoaching.com",
+    "website": "https://vanguardbusinesscoaching.com"
+  }
+}

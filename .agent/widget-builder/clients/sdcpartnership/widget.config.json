@@ -1,0 +1,33 @@
+{
+  "clientId": "sdcpartnership",
+  "botName": "Start Your Own Business South Dublin AI",
+  "welcomeMessage": "Welcome to **Start Your Own Business South Dublin**! How can I help you today?",
+  "inputPlaceholder": "Ask a question...",
+  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
+  "avatar": {
+    "type": "initials",
+    "initials": "SY"
+  },
+  "design": {
+    "position": "bottom-right"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Questions about Start Your Own Business South Dublin? We're here to help!"
+    }
+  },
+  "contacts": {
+    "email": "edward.cranney@sdcpartnership.ie",
+    "website": "https://sdcpartnership.ie"
+  }
+}

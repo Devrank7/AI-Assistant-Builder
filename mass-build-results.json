@@ -1,586 +1,130 @@
 {
   "successes": [
     {
-      "rowIndex": 1,
-      "clientId": "marketingconsultant",
-      "website": "https://marketingconsultant.ie/",
-      "name": "The Marketing Consultant | Digital Marketing Company Ireland"
+      "rowIndex": 100,
+      "clientId": "afterglow",
+      "website": "https://www.afterglow.ie/",
+      "name": "Cian Walsh - Designer and UX Consultant | Kinsale, Ireland"
     },
     {
-      "rowIndex": 2,
-      "clientId": "lifeonaroll",
-      "website": "https://lifeonaroll.ie/about",
-      "name": "About | Fiona Byrne"
+      "rowIndex": 101,
+      "clientId": "olwyndelaney",
+      "website": "https://www.olwyndelaney.com/",
+      "name": "Olwyn Delaney | The Leadership Mindset Coach | Dublin"
     },
     {
-      "rowIndex": 3,
-      "clientId": "angelaburke",
-      "website": "https://angelaburke.ie/",
-      "name": "Angela Burke | Career Consulting | Best Career Coach Ireland | Career ..."
+      "rowIndex": 102,
+      "clientId": "beembodiedcoaching",
+      "website": "https://www.beembodiedcoaching.ie/",
+      "name": "Be Embodied Coaching | Coaching & workshops for those ready to ..."
     },
     {
-      "rowIndex": 4,
-      "clientId": "joanneleecoaching",
-      "website": "https://www.joanneleecoaching.com/about",
-      "name": "About - Career Coach Dublin"
+      "rowIndex": 103,
+      "clientId": "arrowcoach",
+      "website": "https://arrowcoach.ie/financial-coach-ireland/",
+      "name": "Read about what a Financial Coach does"
     },
     {
-      "rowIndex": 5,
-      "clientId": "careercoachme",
-      "website": "https://careercoachme.ie/",
-      "name": "Career Coach | Ireland Based | CV Rewrite | Interview Preparation"
+      "rowIndex": 104,
+      "clientId": "optimiseyourhealth",
+      "website": "https://optimiseyourhealth.ie/",
+      "name": "Registered Health & Nutrition Coach Dublin Ireland | Optimise Your ..."
     },
     {
-      "rowIndex": 6,
-      "clientId": "businesscoach",
-      "website": "https://businesscoach.ie/",
-      "name": "BOOST Business Coaching Ltd: Business Coach Dublin Ireland"
+      "rowIndex": 105,
+      "clientId": "finnhousefilms",
+      "website": "https://finnhousefilms.com/",
+      "name": "Video Production Company in Dublin, Ireland | Finnhouse Films"
     },
     {
-      "rowIndex": 7,
-      "clientId": "marianbyrne",
-      "website": "https://ili.ie/",
-      "name": "Life Coaching: Life Coach Training Courses, Dublin, Ireland"
+      "rowIndex": 106,
+      "clientId": "audiobrand",
+      "website": "https://audiobrand.ie/",
+      "name": "AudioBrand | Award-Winning Podcast Production for Brands"
     },
     {
-      "rowIndex": 8,
-      "clientId": "coachtransformation",
-      "website": "https://coachtransformation.com/ireland/coaching-certification-training-courses/",
-      "name": "ICF Coaching Certification Programs in Ireland Coaching Courses Online"
+      "rowIndex": 107,
+      "clientId": "stephens-portfolio",
+      "website": "https://stephens-portfolio.com/",
+      "name": "Stephens Portfolio"
     },
     {
-      "rowIndex": 9,
-      "clientId": "caminocoaching",
-      "website": "https://caminocoaching.ie/about-me/",
-      "name": "About Me - Camino Coaching"
+      "rowIndex": 108,
+      "clientId": "vanguardbusinesscoaching",
+      "website": "https://vanguardbusinesscoaching.com/",
+      "name": "Andy Turner | Vanguard Business Coaching Ltd"
     },
     {
-      "rowIndex": 10,
-      "clientId": "innerworks",
-      "website": "https://innerworks.ie/services/conflict-management-coaching-workshop/",
-      "name": "CINERGY Conflict Management Coaching Workshop|ICF Accredited"
+      "rowIndex": 109,
+      "clientId": "cianmurphy",
+      "website": "https://cianmurphy.ie/services/data-analytics/",
+      "name": "GA4 & GTM Consultant: Use Data to Fuel Growth in 2024"
     },
     {
-      "rowIndex": 11,
-      "clientId": "onelifecoaching",
-      "website": "https://www.onelifecoaching.ie/team-coaching",
-      "name": "Team Workshops And Coaching in Ireland"
+      "rowIndex": 110,
+      "clientId": "wellbeinggem",
+      "website": "https://www.wellbeinggem.ie/about/",
+      "name": "Meet Gemma O' Connell | Health and Wellness Coach in Dublin"
     },
     {
-      "rowIndex": 12,
-      "clientId": "racheldoogue",
-      "website": "https://racheldoogue.com/executive-and-team-coaching-corporations-smes/",
-      "name": "Executive & Team Coaching – Corporations & SMEs"
+      "rowIndex": 111,
+      "clientId": "trainforsuccess",
+      "website": "https://www.trainforsuccess.ie/confidence-coach-trainer/",
+      "name": "Confidence Coach and Trainer, Lucan, Dublin - Train for Success"
     },
     {
-      "rowIndex": 13,
-      "clientId": "gateoneconsulting",
-      "website": "https://gateoneconsulting.com/dublin/",
-      "name": "Dublin"
+      "rowIndex": 112,
+      "clientId": "screenskillnet",
+      "website": "https://screenskillnet.ie/courses-and-events/master-your-mindset-as-a-freelancer/",
+      "name": "12.05.21 Master Your Mindset as a Freelancer - Screen Skillnet"
     },
     {
-      "rowIndex": 14,
-      "clientId": "kpmg",
-      "website": "https://kpmg.com/ie/en/services/consulting/management-consulting/digital-transformation.html",
-      "name": "Digital Transformation - Real-world advantage"
+      "rowIndex": 113,
+      "clientId": "irishbuildingmagazine",
+      "website": "https://irishbuildingmagazine.ie/2025/12/02/collen-announces-new-ceo/",
+      "name": "Collen announces new CEO | Irish Building Magazine.ie | Ireland's ..."
     },
     {
-      "rowIndex": 15,
-      "clientId": "reddog",
-      "website": "https://reddog.ie/",
-      "name": "Home - Red Dog - Design Consultants Dublin - Creative Agency & Brand ..."
+      "rowIndex": 114,
+      "clientId": "travelextra",
+      "website": "https://www.travelextra.ie/matthews-coach-hire-sold-to-aircoachs-scottish-based-owner/",
+      "name": "Matthews Coach Hire sold to Aircoach's Scottish-based owner"
     },
     {
-      "rowIndex": 16,
-      "clientId": "boards",
-      "website": "https://www.boards.ie/discussion/2058231647/great-financial-advisor-in-dublin",
-      "name": "Great Financial Advisor in Dublin?"
+      "rowIndex": 115,
+      "clientId": "mwb-advisory",
+      "website": "https://mwb-advisory.com/portfolios/founder-ceo-mwb-advisory-ltd/",
+      "name": "Founder & CEO MWB Advisory Ltd"
     },
     {
-      "rowIndex": 17,
-      "clientId": "ohoraconsulting",
-      "website": "https://www.ohoraconsulting.ie/organisational-development-2/",
-      "name": "Organisational Development"
+      "rowIndex": 116,
+      "clientId": "egonzehnder",
+      "website": "https://www.egonzehnder.com/cn/office/dublin/consultant/karl-croke",
+      "name": "Karl Croke - Egon Zehnder"
     },
     {
-      "rowIndex": 18,
-      "clientId": "martelloleadership",
-      "website": "https://martelloleadership.com/leadership-development-consultants/",
-      "name": "Leadership Development Consultants Dublin | View Services"
+      "rowIndex": 117,
+      "clientId": "sdcpartnership",
+      "website": "https://sdcpartnership.ie/find-a-job-or-start-your-business/start-your-own-business-south-dublin/",
+      "name": "Start Your Own Business South Dublin"
     },
     {
-      "rowIndex": 19,
-      "clientId": "zinc",
-      "website": "https://www.zinc.ie/contact/",
-      "name": "Contact"
+      "rowIndex": 118,
+      "clientId": "workwellireland",
+      "website": "https://www.workwellireland.ie/blog/who-to-watch-in-workplace-wellbeing-in-ireland-in-2022",
+      "name": "Who to Watch in Workplace Wellbeing in Ireland in 2022"
     },
     {
-      "rowIndex": 20,
-      "clientId": "mariachapman",
-      "website": "https://mariachapman.ie/",
-      "name": "Maria Chapman Life Coaching"
-    },
-    {
-      "rowIndex": 22,
-      "clientId": "weekday",
-      "website": "https://www.weekday.works/people/aradhana-singh-aradhana29july",
-      "name": "Aradhana Singh"
-    },
-    {
-      "rowIndex": 23,
-      "clientId": "thesimplifiedsocialmedia",
-      "website": "https://www.thesimplifiedsocialmedia.com/meet-karen",
-      "name": "Karen McCarthy"
-    },
-    {
-      "rowIndex": 24,
-      "clientId": "vickymcfadyencoaching",
-      "website": "https://vickymcfadyencoaching.com/about/",
-      "name": "Vicky McFadyen"
-    },
-    {
-      "rowIndex": 25,
-      "clientId": "consciousleaders",
-      "website": "https://www.consciousleaders.ie/about",
-      "name": "Caroline Hughes"
-    },
-    {
-      "rowIndex": 26,
-      "clientId": "b2bgeek",
-      "website": "https://www.b2bgeek.com/",
-      "name": "Rory Donnelly"
-    },
-    {
-      "rowIndex": 28,
-      "clientId": "outsourcemarketingagency",
-      "website": "https://outsourcemarketingagency.ie/",
-      "name": "Jackie Farrell"
-    },
-    {
-      "rowIndex": 29,
-      "clientId": "carmelokeeffe",
-      "website": "https://carmelokeeffe.com/",
-      "name": "Carmel O'Keeffe"
-    },
-    {
-      "rowIndex": 30,
-      "clientId": "possible",
-      "website": "http://www.possible.ie/",
-      "name": "Possible Coaching"
-    },
-    {
-      "rowIndex": 31,
-      "clientId": "coachingbyemma",
-      "website": "https://coachingbyemma.com/",
-      "name": "Coaching By Emma"
-    },
-    {
-      "rowIndex": 32,
-      "clientId": "digitalsales",
-      "website": "https://www.digitalsales.ie/",
-      "name": "Digital Sales"
-    },
-    {
-      "rowIndex": 33,
-      "clientId": "marketingclever",
-      "website": "http://www.marketingclever.ie/",
-      "name": "Marketing Clever Ltd"
-    },
-    {
-      "rowIndex": 34,
-      "clientId": "principlehr",
-      "website": "http://www.principlehr.com/",
-      "name": "Principle HR"
-    },
-    {
-      "rowIndex": 35,
-      "clientId": "monsoonconsulting",
-      "website": "https://monsoonconsulting.com/",
-      "name": "Monsoon Consulting | B2C & B2B eCommerce Development Agency ..."
-    },
-    {
-      "rowIndex": 36,
-      "clientId": "csmagency",
-      "website": "https://csmagency.ie/",
-      "name": "CSM | Business Growth Consultancy"
-    },
-    {
-      "rowIndex": 37,
-      "clientId": "evolvemarketing",
-      "website": "https://www.evolvemarketing.ie/",
-      "name": "Evolve Marketing | Expert Digital Marketing Solutions"
-    },
-    {
-      "rowIndex": 38,
-      "clientId": "askaboutmoney",
-      "website": "https://www.askaboutmoney.com/threads/recommend-financial-advisor-dublin-northside.241502/",
-      "name": "Recommend Financial Advisor Dublin Northside"
-    },
-    {
-      "rowIndex": 39,
-      "clientId": "missionpr",
-      "website": "https://www.missionpr.ie/",
-      "name": "Mission PR: Home"
-    },
-    {
-      "rowIndex": 40,
-      "clientId": "accenture",
-      "website": "https://www.accenture.com/ie-en/about/company-index?c=acn_glb_locationmarketiyext_14234632&n=otc_0525",
-      "name": "Accenture The Dock"
-    },
-    {
-      "rowIndex": 41,
-      "clientId": "analyze",
-      "website": "https://www.analyze.ie/",
-      "name": "Analyze"
-    },
-    {
-      "rowIndex": 42,
-      "clientId": "humanperformance",
-      "website": "https://humanperformance.ie/executive-coaching-dublin/",
-      "name": "Executive Coaching Dublin | Larry G. Maguire Work Psychologist"
-    },
-    {
-      "rowIndex": 43,
-      "clientId": "lisamurphycoaching",
-      "website": "https://www.lisamurphycoaching.com/",
-      "name": "Lisa Murphy Coaching: Life Coach"
-    },
-    {
-      "rowIndex": 44,
-      "clientId": "taranolan",
-      "website": "https://www.taranolan.ie/",
-      "name": "Tara Nolan – Leadership & Team Coaching"
-    },
-    {
-      "rowIndex": 45,
-      "clientId": "cullencommunications",
-      "website": "https://cullencommunications.ie/",
-      "name": "Cullen Communications | PR and Marketing Consultants Ireland"
-    },
-    {
-      "rowIndex": 46,
-      "clientId": "nickname",
-      "website": "https://www.idcrawl.com/linda-sheehy",
-      "name": "Linda Sheehy Healthy Mind Coach | Speaker"
-    },
-    {
-      "rowIndex": 47,
-      "clientId": "thrivelifecoaching",
-      "website": "https://thrivewithdavidbarry.com/contact-us/",
-      "name": "David Barry"
-    },
-    {
-      "rowIndex": 48,
-      "clientId": "theorg",
-      "website": "https://theorg.com/org/tallaght-university-hospital/org-chart/elaine-connolly-executive-and-leadership-coach",
-      "name": "Elaine Connolly"
-    },
-    {
-      "rowIndex": 50,
-      "clientId": "pmprojectservice",
-      "website": "https://www.pmconstructionmanagement.com/",
-      "name": "PM Project Management"
-    },
-    {
-      "rowIndex": 51,
-      "clientId": "thecharismacoachsu",
-      "website": "http://www.thecharismacoach.ie/",
-      "name": "The Charisma Coach"
-    },
-    {
-      "rowIndex": 52,
-      "clientId": "strategycrowd",
-      "website": "https://strategycrowd.ie/",
-      "name": "Jacques Henry-Bezy"
-    },
-    {
-      "rowIndex": 53,
-      "clientId": "improvingcommunications",
-      "website": "https://improvingcommunications.ie/contact/",
-      "name": "Contact Improving Communications IE"
-    },
-    {
-      "rowIndex": 54,
-      "clientId": "armstrongexecutivecoaching",
-      "website": "https://www.armstrongexecutivecoaching.ie/about",
-      "name": "Executive Coach in Dublin — Tom Armstrong"
-    },
-    {
-      "rowIndex": 55,
-      "clientId": "terryobriencareers",
-      "website": "https://terryobriencareers.com/",
-      "name": "Terry O'Brien - Leading Career Coach"
-    },
-    {
-      "rowIndex": 56,
-      "clientId": "businesschangemanagement",
-      "website": "https://www.businesschangemanagement.ie/",
-      "name": "Business Change Management, Dermot Martin Consultant, Dublin ..."
-    },
-    {
-      "rowIndex": 57,
-      "clientId": "waltoninstitute",
-      "website": "https://waltoninstitute.ie/about/staff/john-mclaughlin",
-      "name": "John Mclaughlin"
-    },
-    {
-      "rowIndex": 58,
-      "clientId": "praesta",
-      "website": "https://praesta.ie/coaches/colm-murphy/",
-      "name": "Dr. Colm Murphy"
-    },
-    {
-      "rowIndex": 59,
-      "clientId": "wbconsulting",
-      "website": "https://www.wbconsulting.ie/",
-      "name": "Walsh Business Consulting"
-    },
-    {
-      "rowIndex": 60,
-      "clientId": "clearstrategy",
-      "website": "https://www.clearstrategy.ie/",
-      "name": "Clear Strategy: Data Analytics Consulting Services"
-    },
-    {
-      "rowIndex": 61,
-      "clientId": "greenwayfinancialadvisors",
-      "website": "https://greenwayfinancialadvisors.ie/business-consultant/",
-      "name": "Professional Business Consultants In Dublin - Hire Us Today"
-    },
-    {
-      "rowIndex": 62,
-      "clientId": "nallyconsulting",
-      "website": "https://nallyconsulting.ie/business-executive-coach-dublin/",
-      "name": "Business Executive Coach Dublin"
-    },
-    {
-      "rowIndex": 63,
-      "clientId": "htraining",
-      "website": "https://htraining.net/individual/career-coaching-services/",
-      "name": "Career Coaching Services Ireland | H-Suite - H-Training"
-    },
-    {
-      "rowIndex": 64,
-      "clientId": "sportireland",
-      "website": "https://www.sportireland.ie/news/executive-coaching-for-individuals-teams",
-      "name": "Executive Coaching for Individuals & Teams"
-    },
-    {
-      "rowIndex": 65,
-      "clientId": "salesperformance",
-      "website": "https://www.salesperformance.ie/",
-      "name": "Sales Training Courses and Bespoke Sales Team Training"
-    },
-    {
-      "rowIndex": 66,
-      "clientId": "changeangels",
-      "website": "https://changeangels.ie/",
-      "name": "Agile Consulting and Training Services Dublin"
-    },
-    {
-      "rowIndex": 67,
-      "clientId": "kickdublin",
-      "website": "https://kickdublin.ie/",
-      "name": "KICK Dublin - Brand Solutions with Impact. Dublin, Ireland. | KICK Dublin"
-    },
-    {
-      "rowIndex": 68,
-      "clientId": "organisationdynamics",
-      "website": "https://www.organisationdynamics.ie/",
-      "name": "Organisation Dynamics"
-    },
-    {
-      "rowIndex": 69,
-      "clientId": "idea",
-      "website": "https://www.idea.ie/",
-      "name": "Idea | Design, Branding & Digital Marketing Agency"
-    },
-    {
-      "rowIndex": 70,
-      "clientId": "drury",
-      "website": "https://drury.ie/",
-      "name": "Drury | PR Agency Dublin: Home"
-    },
-    {
-      "rowIndex": 71,
-      "clientId": "bannerton",
-      "website": "https://bannerton.ie/",
-      "name": "Bannerton | Dublin based full-service PR agency"
-    },
-    {
-      "rowIndex": 72,
-      "clientId": "optimatraining",
-      "website": "https://www.optimatraining.ie/",
-      "name": "Optima Training & Consulting"
-    },
-    {
-      "rowIndex": 73,
-      "clientId": "limelight",
-      "website": "https://limelight.ie/",
-      "name": "Limelight Communications | Premiere Public Relations in Dublin"
-    },
-    {
-      "rowIndex": 74,
-      "clientId": "heneghan",
-      "website": "https://www.heneghan.ie/",
-      "name": "Heneghan Strategic Communications - Public Relations Dublin"
-    },
-    {
-      "rowIndex": 75,
-      "clientId": "mkc",
-      "website": "https://www.mkc.ie/our-people",
-      "name": "Our Team"
-    },
-    {
-      "rowIndex": 76,
-      "clientId": "cdi",
-      "website": "https://www.cdi.ie/training-consultancy/",
-      "name": "Training & Consultancy"
-    },
-    {
-      "rowIndex": 77,
-      "clientId": "cmgconsultants",
-      "website": "https://www.cmgconsultants.ie/",
-      "name": "CMG Consultants - Dublin Management and Consultancy ..."
-    },
-    {
-      "rowIndex": 78,
-      "clientId": "harmonyhealth",
-      "website": "https://harmonyhealth.ie/corporate-wellness/",
-      "name": "Corporate Wellness - Harmony Health"
-    },
-    {
-      "rowIndex": 79,
-      "clientId": "optimum",
-      "website": "https://optimum.ie/wellbeing-training/",
-      "name": "Resilience and Wellbeing Training | Online & In-Person | Optimum Limited"
-    },
-    {
-      "rowIndex": 80,
-      "clientId": "aspirecounselling",
-      "website": "https://aspirecounselling.com/resilience-wellbeing-mindfulness/",
-      "name": "Resilience & Wellbeing Training in Dublin | Aspire Mindfulness"
-    },
-    {
-      "rowIndex": 81,
-      "clientId": "aware",
-      "website": "https://www.aware.ie/programmes/resilience-programme/",
-      "name": "Resilience Programme | Positive Mental Health - Aware.ie"
-    },
-    {
-      "rowIndex": 82,
-      "clientId": "softskillsuccess",
-      "website": "https://www.softskillsuccess.ie/",
-      "name": "Soft Skill Success: Public Speaking & Presentation Skills Training in Ireland"
-    },
-    {
-      "rowIndex": 83,
-      "clientId": "carrcommunications",
-      "website": "https://carrcommunications.ie/presentation-skills/",
-      "name": "Presentation Skills"
-    },
-    {
-      "rowIndex": 84,
-      "clientId": "resolveireland",
-      "website": "https://www.resolveireland.ie/",
-      "name": "Dispute Resolution Services | Resolve | County Dublin"
-    },
-    {
-      "rowIndex": 85,
-      "clientId": "austinkenny",
-      "website": "https://austinkenny.ie/workplace-conflict/conflict-management-coaching/",
-      "name": "Conflict Management Coaching"
-    },
-    {
-      "rowIndex": 86,
-      "clientId": "acon",
-      "website": "https://acon.ie/",
-      "name": "ACON - Andrea O'Neill | Finding a better way"
-    },
-    {
-      "rowIndex": 87,
-      "clientId": "breakthrough",
-      "website": "https://breakthrough.ie/about-breakthrough",
-      "name": "Breakthrough Mediation and Conflict Coaching"
-    },
-    {
-      "rowIndex": 88,
-      "clientId": "moranryan",
-      "website": "https://moranryan.com/mediation/",
-      "name": "Mediation Services Dublin | Mediation & Dispute Resolution"
-    },
-    {
-      "rowIndex": 89,
-      "clientId": "communitylawandmediation",
-      "website": "https://communitylawandmediation.ie/our-services/mediation-ireland/mediation-services/",
-      "name": "Mediation Services"
-    },
-    {
-      "rowIndex": 90,
-      "clientId": "scotwork",
-      "website": "https://www.scotwork.com/ie/",
-      "name": "Scotwork Ireland: Global Negotiation Skills Training & Consultancy"
-    },
-    {
-      "rowIndex": 91,
-      "clientId": "mediationdublin",
-      "website": "https://mediationdublin.ie/",
-      "name": "Mediation Services Dublin | Professional Mediation Ireland"
-    },
-    {
-      "rowIndex": 92,
-      "clientId": "themii",
-      "website": "https://www.themii.ie/find-a-mediator/",
-      "name": "Find a Mediator -"
-    },
-    {
-      "rowIndex": 93,
-      "clientId": "kenocon",
-      "website": "https://www.kenocon.com/mediation/",
-      "name": "Kenneth O'Connor & Co. - Mediation"
-    },
-    {
-      "rowIndex": 94,
-      "clientId": "leaconsulting",
-      "website": "http://leaconsulting.ie/",
-      "name": "LEA Consulting"
-    },
-    {
-      "rowIndex": 95,
-      "clientId": "equita",
-      "website": "https://www.equita.ie/courses/commercial-negotiation-skills/",
-      "name": "Commercial Negotiation Skills - EQuita Group"
-    },
-    {
-      "rowIndex": 96,
-      "clientId": "husseyassociates",
-      "website": "https://husseyassociates.ie",
-      "name": "Hussey Associates"
-    },
-    {
-      "rowIndex": 97,
-      "clientId": "pause",
-      "website": "https://pause.ie",
-      "name": "PAUSE Coaching"
-    },
-    {
-      "rowIndex": 98,
-      "clientId": "mpowerconsulting",
-      "website": "https://mpowerconsulting.ie",
-      "name": "MPower Consulting"
-    },
-    {
-      "rowIndex": 99,
-      "clientId": "supportcoachdublin",
-      "website": "https://supportcoachdublin.com",
-      "name": "SupportCoach Dublin"
+      "rowIndex": 119,
+      "clientId": "escalate",
+      "website": "https://escalate.ie/about-us/",
+      "name": "About Us | Your Digital Brand Marketing Partner Dublin - Escalate"
     }
   ],
   "failures": [],
-  "skipped": 3,
-  "total": 100,
-  "startRow": 2,
-  "endRow": 100,
-  "timestamp": "2026-03-08T21:01:46.384Z"
+  "skipped": 0,
+  "total": 120,
+  "startRow": 101,
+  "endRow": 121,
+  "timestamp": "2026-03-10T07:56:50.945Z"
 }

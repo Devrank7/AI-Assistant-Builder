@@ -1,0 +1,17 @@
+# Olwyn Delaney
+
+Website: https://www.olwyndelaney.com
+Niche: B2B Consulting/Coaching/Info Business
+City: Dublin, Ireland
+Email: olwyn@olwyndelaney.com
+Address: WixCodeSdk","mpaNavigation","navigationManager","navigationPhases","ooi","pages"
+
+## About
+
+Leveraging Self-Discovery To Unlock Your Authentic Leadership Style. Leadership Mindset Coaching For High Performance Professionals Navigating Transition &amp; Transformation.
+
+Page title: Olwyn Delaney | The Leadership Mindset Coach | Dublin
+
+## Homepage Content
+
+top of page Olwyn Delaney The Leadership Mindset Coach Home About Me Coaching Retreats Mindset Coaching How It Works Useful Resources Contact Me More Use tab to navigate through the menu items. Women in Business Coaching Retreat! Leveraging self-discovery to unlock your authentic leadership style. Get Started Leadership Mindset Coaching For High Performance Professionals Navigating Transition &amp; Transformation My purpose is to empower high performance&nbsp; leaders as they transition through cultural change and navigate personal transformation. &nbsp; Passionate about leveraging personal purpose to optimise leadership impact, I help you to reconnect to your sense of self to uncover your authentic leadership style. &nbsp; My approach centres on helping you realise your leadership potential, &nbsp;e quipping you with the coaching skillsets, courage and confidence critical to empowering you and those around you to thrive. Book A Chemistry Call Collaborating As Your Agent Of Change Accelerate your potential through partnered coaching, deep professional insight and mindset modelling fit for this new era of authentic unbound leadership. Executive coaching &amp; leadership development&nbsp; 1-2-1 individual coaching Business coaching for entrepreneurs&nbsp; Psychometric assessment Book A Chemistry Call Ali Griffiths Board Advisor / NED / Fractional CMO Olwyn helped me consider and shape the future I wanted. She is subtle yet impactful, helping me to reach inside myself to understand clearly how different future scenarios might resonate. When life changed unexpectedly, our work together had already prepared me to make the most of the opportunities it presented (and to navigate away from potential pitfalls). I have really valued my time with her, and look forward to working together in the future. &quot;Authentic leadership is revealed in the alignment of what you think, what you say, and what you do.&quot;&nbsp; - Michael Holland &nbsp; Benefits of Coaching I help you see your potential and challenge you to accelerate to meet it Working across all industries, my model is designed to reconnect people like you with their sense of self and the impact that they can have on performance as their authentic self. Empathetic &#39;thought partnership&#39; &nbsp;to gain clarity and unlock barriers Self-discovery to illuminate your pathway of transition or transformation Evocative conversations to ignite a fundamental mindset shift Courage and confidence-building exercises to realise your goals See Who I Work With Stimulate A Fundamental Change In Your Mindset The foundation of my coaching approach begins with your development as a human first, leader second. By identifying your individual needs both in your personal and professional lives, I create a tailored coaching strategy, employing techniques &amp; practices that are right for you. &nbsp; No matter where you&#39;re at, there&#39;s a tailored coaching programme for you. Book A Chemistry Call WorkWitOlwyn Wo
