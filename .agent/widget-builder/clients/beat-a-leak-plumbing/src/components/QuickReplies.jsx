@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { MessageCircle } from 'lucide-preact';
 
 export default function QuickReplies({ options, onSelect }) {
     if (!options || options.length === 0) return null;
@@ -20,7 +19,7 @@ export default function QuickReplies({ options, onSelect }) {
                 >
                     <div className="relative flex items-center gap-3 px-3.5 py-2.5">
                         <span className="flex-shrink-0 w-7 h-7 rounded-xl bg-gradient-to-br from-[#ED1C24]/[0.12] to-[#ED1C24]/[0.05] flex items-center justify-center shadow-sm">
-                            <MessageCircle size={13} className="text-[#ED1C24]" />
+                            <span className="text-[10px] font-mono font-bold text-[#ED1C24] opacity-70">{String(idx + 1).padStart(2, '0')}</span>
                         </span>
                         <span className="text-[12px] font-medium leading-snug text-[#c81820]">{option}</span>
                     </div>

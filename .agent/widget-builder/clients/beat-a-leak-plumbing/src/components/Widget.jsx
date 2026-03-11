@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles, Mic, MicOff, ChevronDown, Phone, Mail, Globe, MoreVertical, ArrowDown, Type, Download, Volume2, VolumeX } from 'lucide-preact';
+import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles, Mic, MicOff, ChevronDown, Phone, Mail, Globe, MoreVertical, ArrowDown, Type, Download, Volume2, VolumeX, Plus } from 'lucide-preact';
 import ChatMessage from './ChatMessage';
 import MessageFeedback from './MessageFeedback';
 import QuickReplies from './QuickReplies';
@@ -23,6 +23,7 @@ export function Widget({ config }) {
         useChat(config);
     const [inputValue, setInputValue] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
+    const [showTools, setShowTools] = useState(false);
     const [expandedImage, setExpandedImage] = useState(null);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
@@ -409,6 +410,8 @@ export function Widget({ config }) {
                             imageUrl={msg.imageUrl} onImageClick={setExpandedImage}
                             onSpeak={msg.role === 'assistant' && ttsSupported ? () => speak(msg.content, lang, idx) : null}
                             isSpeaking={speakingIdx === idx}
+                            prevSender={idx > 0 ? messages[idx - 1].role : null}
+                            nextSender={idx < messages.length - 1 ? messages[idx + 1].role : null}
                         />
                         {msg.role === 'assistant' && !msg.isError && msg.content && config.features?.feedback !== false && (
                             <MessageFeedback messageIndex={idx} sessionId={sessionId} clientId={config.clientId} />
@@ -432,7 +435,7 @@ export function Widget({ config }) {
                     </div>
                 ))}
                 {isTyping && (
-                    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
+                    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2 mt-3">
                         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#fde8e9] to-[#f5a0a4] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#f4c0c2]/50">
                             <Sparkles size={13} className="text-[#ED1C24]" />
                         </div>
@@ -477,18 +480,25 @@ export function Widget({ config }) {
                 {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-                    <button type="button" onClick={() => fileInputRef.current?.click()}
-                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#f06068] bg-[#fde8e9] text-[#ED1C24] shadow-sm' : 'border-gray-200 text-gray-400 hover:text-[#ED1C24] hover:border-[#f06068] hover:bg-[#fde8e9]'}`}
-                        aria-label="Upload photo">
-                        <ImagePlus size={16} />
+                    <button type="button" onClick={() => setShowTools(!showTools)}
+                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-300 border-gray-200 text-gray-400 hover:text-[#ED1C24] hover:border-[#f06068] ${showTools ? 'rotate-45' : ''}`}
+                        aria-label="More tools">
+                        <Plus size={16} />
                     </button>
-                    {voiceSupported && config.features?.voiceInput !== false && (
-                        <button type="button" onClick={handleVoiceToggle}
-                            className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#f06068] bg-[#fde8e9] text-[#ED1C24] shadow-sm animate-pulse' : 'border-gray-200 text-gray-400 hover:text-[#ED1C24] hover:border-[#f06068] hover:bg-[#fde8e9]'}`}
-                            aria-label={isListening ? 'Stop recording' : 'Voice input'}>
-                            {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                    <div className={`flex items-end gap-2 overflow-hidden transition-all duration-300 ${showTools ? 'max-w-[100px] opacity-100' : 'max-w-0 opacity-0'}`}>
+                        <button type="button" onClick={() => fileInputRef.current?.click()}
+                            className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#f06068] bg-[#fde8e9] text-[#ED1C24] shadow-sm' : 'border-gray-200 text-gray-400 hover:text-[#ED1C24] hover:border-[#f06068] hover:bg-[#fde8e9]'}`}
+                            aria-label="Upload photo">
+                            <ImagePlus size={16} />
                         </button>
-                    )}
+                        {voiceSupported && config.features?.voiceInput !== false && (
+                            <button type="button" onClick={handleVoiceToggle}
+                                className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#f06068] bg-[#fde8e9] text-[#ED1C24] shadow-sm animate-pulse' : 'border-gray-200 text-gray-400 hover:text-[#ED1C24] hover:border-[#f06068] hover:bg-[#fde8e9]'}`}
+                                aria-label={isListening ? 'Stop recording' : 'Voice input'}>
+                                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                            </button>
+                        )}
+                    </div>
                     <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                         placeholder={uiStrings.placeholder}
                         rows={1}
@@ -496,7 +506,7 @@ export function Widget({ config }) {
                         style={{ maxHeight: '100px' }}
                     />
                     <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
-                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#ED1C24] text-white flex items-center justify-center hover:bg-[#c81820] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#ED1C24]/25">
+                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#ED1C24] text-white flex items-center justify-center hover:bg-[#c81820] hover:scale-105 active:scale-90 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#ED1C24]/25">
                         <Send size={16} />
                     </button>
                 </form>

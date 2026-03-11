@@ -216,11 +216,9 @@ button, a, input, textarea, [role="button"] { touch-action: manipulation; -webki
 .typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
-/* Chat background pattern — branded SVG icons + gradient */
+/* Chat background — clean gradient */
 .chat-pattern {
-    background-image: url("data:image/svg+xml,${encodedSvg}"), ${chatGradient};
-    background-repeat: repeat, no-repeat;
-    background-size: 200px 200px, 100% 100%;
+    background: ${chatGradient};
 }
 
 /* New messages pill */
@@ -340,7 +338,7 @@ function genWidget(c) {
 
     return `import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles, Mic, MicOff, ChevronDown, Phone, Mail, Globe, MoreVertical, ArrowDown, Type, Download, Volume2, VolumeX } from 'lucide-preact';
+import { MessageCircle, X, Send, Trash2, ImagePlus, Sparkles, Mic, MicOff, ChevronDown, Phone, Mail, Globe, MoreVertical, ArrowDown, Type, Download, Volume2, VolumeX, Plus } from 'lucide-preact';
 import ChatMessage from './ChatMessage';
 import MessageFeedback from './MessageFeedback';
 import QuickReplies from './QuickReplies';
@@ -363,6 +361,7 @@ export function Widget({ config }) {
         useChat(config);
     const [inputValue, setInputValue] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
+    const [showTools, setShowTools] = useState(false);
     const [expandedImage, setExpandedImage] = useState(null);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
@@ -749,6 +748,8 @@ export function Widget({ config }) {
                             imageUrl={msg.imageUrl} onImageClick={setExpandedImage}
                             onSpeak={msg.role === 'assistant' && ttsSupported ? () => speak(msg.content, lang, idx) : null}
                             isSpeaking={speakingIdx === idx}
+                            prevSender={idx > 0 ? messages[idx - 1].role : null}
+                            nextSender={idx < messages.length - 1 ? messages[idx + 1].role : null}
                         />
                         {msg.role === 'assistant' && !msg.isError && msg.content && config.features?.feedback !== false && (
                             <MessageFeedback messageIndex={idx} sessionId={sessionId} clientId={config.clientId} />
@@ -772,8 +773,8 @@ export function Widget({ config }) {
                     </div>
                 ))}
                 {isTyping && (
-                    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
-                        <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50">
+                    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2 mt-3">
+                        <div className="w-7 h-7 ${c.chatAvatarRound} ${c.isDark ? `bg-[${c.cssPrimary}]/20` : `bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}]`} flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50">
                             <Sparkles size={13} className="text-[${c.avatarIcon}]" />
                         </div>
                         <div className="flex flex-col gap-1">
@@ -817,18 +818,25 @@ export function Widget({ config }) {
                 {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-                    <button type="button" onClick={() => fileInputRef.current?.click()}
-                        className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-[${c.imgActiveBorder}] bg-[${c.imgActiveBg}] text-[${c.imgActiveText}] shadow-sm' : '${c.isDark ? `border-[${c.surfaceBorder}] text-[${c.textSecondary}]` : 'border-gray-200 text-gray-400'} hover:text-[${c.imgHoverText}] hover:border-[${c.imgHoverBorder}] hover:bg-[${c.imgHoverBg}]'}\`}
-                        aria-label="Upload photo">
-                        <ImagePlus size={16} />
+                    <button type="button" onClick={() => setShowTools(!showTools)}
+                        className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-300 ${c.isDark ? `border-[${c.surfaceBorder}] text-[${c.textSecondary}]` : 'border-gray-200 text-gray-400'} hover:text-[${c.imgHoverText}] hover:border-[${c.imgHoverBorder}] \${showTools ? 'rotate-45' : ''}\`}
+                        aria-label="More tools">
+                        <Plus size={16} />
                     </button>
-                    {voiceSupported && config.features?.voiceInput !== false && (
-                        <button type="button" onClick={handleVoiceToggle}
-                            className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${isListening ? 'border-[${c.imgActiveBorder}] bg-[${c.imgActiveBg}] text-[${c.imgActiveText}] shadow-sm animate-pulse' : '${c.isDark ? `border-[${c.surfaceBorder}] text-[${c.textSecondary}]` : 'border-gray-200 text-gray-400'} hover:text-[${c.imgHoverText}] hover:border-[${c.imgHoverBorder}] hover:bg-[${c.imgHoverBg}]'}\`}
-                            aria-label={isListening ? 'Stop recording' : 'Voice input'}>
-                            {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                    <div className={\`flex items-end gap-2 overflow-hidden transition-all duration-300 \${showTools ? 'max-w-[100px] opacity-100' : 'max-w-0 opacity-0'}\`}>
+                        <button type="button" onClick={() => fileInputRef.current?.click()}
+                            className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-[${c.imgActiveBorder}] bg-[${c.imgActiveBg}] text-[${c.imgActiveText}] shadow-sm' : '${c.isDark ? `border-[${c.surfaceBorder}] text-[${c.textSecondary}]` : 'border-gray-200 text-gray-400'} hover:text-[${c.imgHoverText}] hover:border-[${c.imgHoverBorder}] hover:bg-[${c.imgHoverBg}]'}\`}
+                            aria-label="Upload photo">
+                            <ImagePlus size={16} />
                         </button>
-                    )}
+                        {voiceSupported && config.features?.voiceInput !== false && (
+                            <button type="button" onClick={handleVoiceToggle}
+                                className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${isListening ? 'border-[${c.imgActiveBorder}] bg-[${c.imgActiveBg}] text-[${c.imgActiveText}] shadow-sm animate-pulse' : '${c.isDark ? `border-[${c.surfaceBorder}] text-[${c.textSecondary}]` : 'border-gray-200 text-gray-400'} hover:text-[${c.imgHoverText}] hover:border-[${c.imgHoverBorder}] hover:bg-[${c.imgHoverBg}]'}\`}
+                                aria-label={isListening ? 'Stop recording' : 'Voice input'}>
+                                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                            </button>
+                        )}
+                    </div>
                     <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                         placeholder={uiStrings.placeholder}
                         rows={1}
@@ -836,7 +844,7 @@ export function Widget({ config }) {
                         style={{ maxHeight: '100px' }}
                     />
                     <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
-                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-[${c.sendFrom}] text-white flex items-center justify-center hover:bg-[${c.sendHoverFrom}] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[${c.sendFrom}]/25">
+                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-[${c.sendFrom}] text-white flex items-center justify-center hover:bg-[${c.sendHoverFrom}] hover:scale-105 active:scale-90 transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[${c.sendFrom}]/25">
                         <Send size={16} />
                     </button>
                 </form>
@@ -966,15 +974,23 @@ export function Widget({ config }) {
 
 function genChatMessage(c) {
     const botMsgClasses = c.isDark
-        ? `bg-[${c.surfaceCard}] text-[${c.textPrimary}] border border-[${c.surfaceBorder}] shadow-sm rounded-bl-md`
-        : 'bg-white text-gray-700 border border-gray-100 shadow-sm rounded-bl-md';
+        ? `bg-[${c.surfaceCard}] text-[${c.textPrimary}] border border-[${c.surfaceBorder}] shadow-sm`
+        : 'bg-white text-gray-700 border border-gray-100 shadow-sm';
     const strongClasses = c.isDark ? 'text-white' : 'text-gray-900';
     const timestampColor = c.isDark ? `text-[${c.textSecondary}]` : 'text-gray-400';
     const copyDefault = c.isDark ? `text-[${c.textMuted}]` : 'text-gray-300';
     const imgBorder = c.isDark ? `border-[${c.surfaceBorder}]` : 'border-gray-200';
+    // Phase 2: Solid user bubbles — no gradient
     const userMsgClasses = c.isDark
-        ? `bg-gradient-to-r from-[${c.userMsgFrom}] to-[${c.userMsgTo}] text-white rounded-br-md shadow-sm`
-        : `bg-gradient-to-r from-[${c.chipFrom}] to-[${c.chipTo}] text-gray-700 border border-[${c.chipBorder}]/50 rounded-br-md shadow-sm`;
+        ? `bg-[${c.cssPrimary}] text-white shadow-sm`
+        : `bg-[${c.cssPrimary}] text-white shadow-sm`;
+    // Phase 4: Avatar bg — dark mode fix
+    const avatarBg = c.isDark
+        ? `bg-[${c.cssPrimary}]/20`
+        : `bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}]`;
+    // Phase 5: Typography
+    const codeBg = c.isDark ? `bg-[${c.surfaceInput}]` : 'bg-gray-100';
+    const blockquoteBorder = `border-[${c.cssPrimary}]`;
 
     return `import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
@@ -987,9 +1003,35 @@ function formatTime(timestamp) {
     catch { return ''; }
 }
 
-function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick, onSpeak, isSpeaking }) {
+function BotAvatar() {
+    const ba = window.__WIDGET_CONFIG__?.botAvatar;
+    if (ba && ba.startsWith('http')) {
+        return <img src={ba} alt="" className="w-7 h-7 rounded-xl object-cover shadow-sm" />;
+    }
+    if (ba && ba.length <= 3) {
+        return (
+            <span className="w-7 h-7 ${c.chatAvatarRound} ${avatarBg} flex items-center justify-center text-[11px] font-semibold border border-[${c.avatarBorder}]/50 shadow-sm">
+                {ba}
+            </span>
+        );
+    }
+    return (
+        <span className="w-7 h-7 ${c.chatAvatarRound} ${avatarBg} flex items-center justify-center border border-[${c.avatarBorder}]/50 shadow-sm">
+            <Sparkles size={13} className="text-[${c.avatarIcon}]" />
+        </span>
+    );
+}
+
+function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onImageClick, onSpeak, isSpeaking, prevSender, nextSender }) {
     const isBot = role === 'assistant';
     const [copied, setCopied] = useState(false);
+
+    // Message grouping
+    const samePrev = prevSender === role;
+    const sameNext = nextSender === role;
+    const showAvatar = !sameNext;
+    const showTail = !sameNext;
+    const showMeta = !sameNext;
 
     const handleCopy = useCallback(async () => {
         try {
@@ -999,20 +1041,20 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         } catch {}
     }, [content]);
 
+    const tailClass = isBot
+        ? (showTail ? 'rounded-bl-sm' : '')
+        : (showTail ? 'rounded-br-sm' : '');
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-            className={\`flex items-end gap-2 mb-3 group \${isBot ? 'justify-start' : 'justify-end'}\`}
+            className={\`flex items-end gap-2 group \${isBot ? 'justify-start' : 'justify-end'} \${samePrev ? 'mt-0.5' : 'mt-3'}\`}
             role="article"
         >
-            {/* Bot Avatar */}
-            {isBot && (
-                <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50">
-                    <Sparkles size={13} className="text-[${c.avatarIcon}]" />
-                </div>
-            )}
+            {/* Bot Avatar — only on last message in group */}
+            {isBot && (showAvatar ? <BotAvatar /> : <div className="w-7 flex-shrink-0" />)}
 
             <div className="flex flex-col max-w-[85%] sm:max-w-[78%]">
                 {imageUrl && (
@@ -1027,7 +1069,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 )}
 
                 {content && (
-                    <div className={\`rounded-2xl px-3.5 py-2.5 text-[13px] leading-[1.6] \${
+                    <div className={\`rounded-2xl px-3.5 py-2.5 text-[13px] leading-[1.6] \${tailClass} \${
                         isError
                             ? 'bg-red-50 text-red-600 border border-red-200 rounded-bl-md'
                             : isBot
@@ -1046,6 +1088,14 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                                     li: ({ children }) => (
                                         <li className="text-[12.5px] leading-relaxed">{children}</li>
                                     ),
+                                    h1: ({ children }) => <h1 className="text-base font-semibold mt-3 mb-1 ${strongClasses}">{children}</h1>,
+                                    h2: ({ children }) => <h2 className="text-sm font-semibold mt-2 mb-1 ${strongClasses}">{children}</h2>,
+                                    h3: ({ children }) => <h3 className="text-sm font-medium mt-2 mb-0.5 ${strongClasses}">{children}</h3>,
+                                    code: ({ children, className: cn }) => cn
+                                        ? <code className={cn}>{children}</code>
+                                        : <code className="${codeBg} px-1 py-0.5 rounded text-[11px] font-mono">{children}</code>,
+                                    pre: ({ children }) => <pre className="${codeBg} p-2 rounded-lg overflow-x-auto text-[11px] my-2 font-mono">{children}</pre>,
+                                    blockquote: ({ children }) => <blockquote className="border-l-2 ${blockquoteBorder} pl-2 italic opacity-80 my-1">{children}</blockquote>,
                                 }}
                             >
                                 {content}
@@ -1054,33 +1104,36 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                     </div>
                 )}
 
-                <div className={\`flex items-center gap-2 mt-1 px-1 \${isBot ? '' : 'justify-end'}\`}>
-                    {timestamp && <span className="text-[10px] ${timestampColor} font-medium">{formatTime(timestamp)}</span>}
-                    {isBot && !isError && content && (
-                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 ${copyDefault} hover:text-[${c.copyHover}] transition-all duration-200" aria-label="Copy">
-                            {copied ? <Check size={11} className="text-[${c.copyActive}]" /> : <Copy size={11} />}
-                        </button>
-                    )}
-                    {isBot && !isError && content && onSpeak && (
-                        <button onClick={() => onSpeak(content)}
-                            className={\`p-0.5 transition-all duration-200 \${isSpeaking ? 'text-[${c.feedbackActive}] opacity-100' : 'opacity-0 group-hover:opacity-100 ${copyDefault} hover:text-[${c.copyHover}]'}\`}
-                            aria-label={isSpeaking ? 'Stop reading' : 'Read aloud'}>
-                            {isSpeaking ? <VolumeX size={11} /> : <Volume2 size={11} />}
-                        </button>
-                    )}
-                    {isError && onRetry && (
-                        <button onClick={onRetry} className="flex items-center gap-1 text-[10px] font-medium text-red-500 hover:text-red-600 transition-colors">
-                            <RotateCcw size={10} /> Retry
-                        </button>
-                    )}
-                </div>
+                {showMeta && (
+                    <div className={\`flex items-center gap-2 mt-1 px-1 \${isBot ? '' : 'justify-end'}\`}>
+                        {timestamp && <span className="text-[10px] ${timestampColor} font-medium">{formatTime(timestamp)}</span>}
+                        {isBot && !isError && content && (
+                            <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 ${copyDefault} hover:text-[${c.copyHover}] transition-all duration-200" aria-label="Copy">
+                                {copied ? <Check size={11} className="text-[${c.copyActive}]" /> : <Copy size={11} />}
+                            </button>
+                        )}
+                        {isBot && !isError && content && onSpeak && (
+                            <button onClick={() => onSpeak(content)}
+                                className={\`p-0.5 transition-all duration-200 \${isSpeaking ? 'text-[${c.feedbackActive}] opacity-100' : 'opacity-0 group-hover:opacity-100 ${copyDefault} hover:text-[${c.copyHover}]'}\`}
+                                aria-label={isSpeaking ? 'Stop reading' : 'Read aloud'}>
+                                {isSpeaking ? <VolumeX size={11} /> : <Volume2 size={11} />}
+                            </button>
+                        )}
+                        {isError && onRetry && (
+                            <button onClick={onRetry} className="flex items-center gap-1 text-[10px] font-medium text-red-500 hover:text-red-600 transition-colors">
+                                <RotateCcw size={10} /> Retry
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
-            {!isBot && (
-                <div className="w-7 h-7 ${c.chatAvatarRound} flex items-center justify-center bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] border border-[${c.avatarBorder}]/50 text-[${c.avatarIcon}] flex-shrink-0 shadow-sm">
+            {/* User Avatar — only on last message in group */}
+            {!isBot && (showAvatar ? (
+                <div className="w-7 h-7 ${c.chatAvatarRound} flex items-center justify-center bg-[${c.cssPrimary}] text-white flex-shrink-0 shadow-sm">
                     <User size={13} />
                 </div>
-            )}
+            ) : <div className="w-7 flex-shrink-0" />)}
         </motion.div>
     );
 }
@@ -1103,7 +1156,6 @@ function genQuickReplies(c) {
         : `group-hover:shadow-[0_2px_16px_rgba(${c.focusRgb.replace(/ /g, '')},0.10)]`;
 
     return `import { motion } from 'framer-motion';
-import { MessageCircle } from 'lucide-preact';
 
 export default function QuickReplies({ options, onSelect }) {
     if (!options || options.length === 0) return null;
@@ -1124,7 +1176,7 @@ export default function QuickReplies({ options, onSelect }) {
                 >
                     <div className="relative flex items-center gap-3 px-3.5 py-2.5">
                         <span className="flex-shrink-0 w-7 h-7 rounded-xl ${iconBg} flex items-center justify-center shadow-sm">
-                            <MessageCircle size={13} className="${iconColor}" />
+                            <span className="text-[10px] font-mono font-bold ${iconColor} opacity-70">{String(idx + 1).padStart(2, '0')}</span>
                         </span>
                         <span className="text-[12px] font-medium leading-snug ${cardText}">{option}</span>
                     </div>
