@@ -1,12 +1,12 @@
 {
-  "clientId": "vanguardbusinesscoaching",
-  "botName": "Andy Turner AI",
-  "welcomeMessage": "Welcome to **Andy Turner**! How can I help you today?",
-  "inputPlaceholder": "Ask a question...",
-  "quickReplies": ["Book a session", "About coaching", "Testimonials", "Contact us"],
+  "clientId": "beat-a-leak-plumbing",
+  "botName": "Beat a Leak AI",
+  "welcomeMessage": "Welcome to **Beat a Leak Plumbing**! 🔧 How can we help you today?",
+  "inputPlaceholder": "Ask about our plumbing services...",
+  "quickReplies": ["Book a plumber", "View services & prices", "Emergency plumbing", "Contact us"],
   "avatar": {
     "type": "initials",
-    "initials": "AT"
+    "initials": "BL"
   },
   "design": {
     "position": "bottom-right"
@@ -23,11 +23,12 @@
     "memory": true,
     "proactive": {
       "delay": 8,
-      "message": "Questions about Andy Turner? We're here to help!"
+      "message": "Need a plumber in Blacktown? We're available 24/7! 🔧"
     }
   },
   "contacts": {
-    "email": "andy@vanguardbusinesscoaching.com",
-    "website": "https://vanguardbusinesscoaching.com"
+    "phone": "+61405113587",
+    "email": "Beataleakplumbing@gmail.com",
+    "website": "https://beataleakplumbing.com.au"
   }
 }

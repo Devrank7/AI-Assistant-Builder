@@ -2,13 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* vanguardbusinesscoaching theme */
+/* Beat a Leak Plumbing — Red & Cyan Theme */
 :host {
-    --aw-primary: #37ca37;
-    --aw-accent: #188bf6;
-    --aw-bg: #031213;
-    --aw-text: #e2e8f0;
-    font-family: 'Lato', -apple-system, sans-serif;
+    --aw-primary: #ED1C24;
+    --aw-accent: #56C8F3;
+    --aw-bg: #ffffff;
+    --aw-text: #374151;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -23,11 +23,11 @@
 }
 
 *:focus-visible {
-    outline: 2px solid rgba(55, 202, 55, 0.35);
+    outline: 2px solid rgba(237, 28, 36, 0.35);
     outline-offset: 2px;
 }
 button:focus-visible {
-    outline: 2px solid rgba(55, 202, 55, 0.35);
+    outline: 2px solid rgba(237, 28, 36, 0.35);
     outline-offset: 2px;
     border-radius: 12px;
 }
@@ -57,7 +57,7 @@ button, a, input, textarea, [role="button"] { touch-action: manipulation; -webki
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #37ca37;
+    background: #ED1C24;
     animation: typing-bounce 1.4s ease-in-out infinite;
 }
 .typing-dot:nth-child(2) { animation-delay: 0.15s; }
@@ -65,7 +65,7 @@ button, a, input, textarea, [role="button"] { touch-action: manipulation; -webki
 
 /* Chat background — clean gradient */
 .chat-pattern {
-    background: linear-gradient(to bottom, #031213, #091d1b);
+    background: linear-gradient(to bottom, rgba(249,250,251,0.8), #ffffff);
 }
 
 /* New messages pill */

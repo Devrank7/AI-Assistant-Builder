@@ -733,6 +733,7 @@ export function Widget({ config }) {
                 className={\`flex-1 overflow-y-auto px-4 py-4 space-y-1 scrollbar-hide chat-pattern font-\${chatFontSize}\`} aria-live="polite">
                 <ChatMessage role="assistant" content={typewriterDone ? welcomeMsg : typewriterText} onImageClick={setExpandedImage}
                     onSpeak={ttsSupported && typewriterDone ? () => speak(welcomeMsg, lang, -1) : null} isSpeaking={speakingIdx === -1} />
+                {showQuickReplies && <div className="mt-2 mb-1"><QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} /></div>}
                 {messages.map((msg, idx) => (
                     <div key={idx}>
                         {shouldShowSeparator(idx) && msg.timestamp && (
@@ -815,7 +816,6 @@ export function Widget({ config }) {
 
             {/* INPUT */}
             <div className="px-4 pt-2 pb-3 border-t ${inputAreaBorder} ${inputAreaBg} space-y-1.5 safe-area-bottom">
-                {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                     <button type="button" onClick={() => setShowTools(!showTools)}

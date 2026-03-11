@@ -4,16 +4,16 @@ import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-preact';
 
 function Card({ card, onAction }) {
     return (
-        <div className="flex-shrink-0 w-[170px] sm:w-[200px] rounded-2xl border overflow-hidden bg-[#091d1b] border-[#11312a] shadow-sm">
+        <div className="flex-shrink-0 w-[170px] sm:w-[200px] rounded-2xl border overflow-hidden bg-white border-gray-100 shadow-sm">
             {card.image && (
                 <img src={card.image} alt={card.title || ''} className="w-full h-[100px] object-cover" loading="lazy" />
             )}
             <div className="p-3 space-y-1.5">
-                <h4 className="font-semibold text-[12.5px] leading-tight text-[#e2e8f0]">{card.title}</h4>
-                {card.description && <p className="text-[11px] leading-relaxed text-[#64748b]">{card.description}</p>}
+                <h4 className="font-semibold text-[12.5px] leading-tight text-gray-800">{card.title}</h4>
+                {card.description && <p className="text-[11px] leading-relaxed text-gray-500">{card.description}</p>}
                 {card.button && (
                     <button onClick={() => onAction?.(card.button.url, card.button.label)}
-                        className="w-full mt-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all bg-[#031615] text-[#e2e8f0] hover:bg-[#0a2221] flex items-center justify-center gap-1">
+                        className="w-full mt-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all bg-[#fde8e9] text-[#c81820] hover:bg-[#f5a0a4] flex items-center justify-center gap-1">
                         {card.button.label} <ExternalLink size={10} />
                     </button>
                 )}
@@ -50,14 +50,14 @@ function Carousel({ items, onAction }) {
             </div>
             {canScrollLeft && (
                 <button onClick={() => scroll(-1)}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#091d1b]/90 border-[#11312a] hover:bg-[#091d1b] shadow-md border flex items-center justify-center transition-all z-10">
-                    <ChevronLeft size={14} className="text-[#64748b]" />
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 border-gray-200 hover:bg-white shadow-md border flex items-center justify-center transition-all z-10">
+                    <ChevronLeft size={14} className="text-gray-600" />
                 </button>
             )}
             {canScrollRight && (
                 <button onClick={() => scroll(1)}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#091d1b]/90 border-[#11312a] hover:bg-[#091d1b] shadow-md border flex items-center justify-center transition-all z-10">
-                    <ChevronRight size={14} className="text-[#64748b]" />
+                    className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 border-gray-200 hover:bg-white shadow-md border flex items-center justify-center transition-all z-10">
+                    <ChevronRight size={14} className="text-gray-600" />
                 </button>
             )}
         </div>
@@ -69,7 +69,7 @@ function ButtonGroup({ buttons, onAction }) {
         <div className="flex flex-wrap gap-1.5">
             {buttons.map((btn, i) => (
                 <button key={i} onClick={() => onAction?.(btn.url, btn.label)}
-                    className="px-2.5 py-1.5 rounded-xl border text-[11px] font-medium transition-all cursor-pointer border-[#11312a] bg-[#091d1b] text-[#e2e8f0] hover:bg-[#031615]">
+                    className="px-2.5 py-1.5 rounded-xl border text-[11px] font-medium transition-all cursor-pointer border-[#f4c0c2] bg-[#fde8e9] text-[#c81820] hover:bg-[#f5a0a4] hover:border-[#f06068]">
                     {btn.label}
                 </button>
             ))}
@@ -93,25 +93,25 @@ function LeadForm({ fields, submitLabel, onSubmit }) {
     if (submitted) {
         return (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="rounded-2xl border p-3 text-center bg-[#091d1b] border-[#11312a]">
-                <p className="text-[12px] font-medium text-[#e2e8f0]">✓ Submitted</p>
+                className="rounded-2xl border p-3 text-center bg-gray-50 border-gray-100">
+                <p className="text-[12px] font-medium text-gray-700">✓ Submitted</p>
             </motion.div>
         );
     }
 
     return (
         <motion.form initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
-            onSubmit={handleSubmit} className="rounded-2xl border p-3 space-y-2 bg-[#091d1b] border-[#11312a]">
+            onSubmit={handleSubmit} className="rounded-2xl border p-3 space-y-2 bg-gray-50 border-gray-100">
             {fields.map((f) => (
                 <input key={f.key} type={f.key === 'email' ? 'email' : f.key === 'phone' ? 'tel' : 'text'}
                     placeholder={f.label}
                     value={values[f.key] || ''}
                     onChange={(e) => setValues(prev => ({ ...prev, [f.key]: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border text-[12px] focus:outline-none focus:ring-1 focus:ring-[#ebfaeb] transition-all bg-[#031615] border-[#11312a] text-[#e2e8f0] placeholder-[#475569] focus:border-[#87df87]"
+                    className="w-full px-3 py-2 rounded-xl border text-[12px] focus:outline-none focus:ring-1 focus:ring-[#fde8e9] transition-all bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-[#f06068]"
                 />
             ))}
             <button type="submit"
-                className="w-full py-2 rounded-xl text-[12px] font-semibold text-white bg-[#37ca37] hover:bg-[#2ca22c] transition-all shadow-sm">
+                className="w-full py-2 rounded-xl text-[12px] font-semibold text-white bg-[#ED1C24] hover:bg-[#c81820] transition-all shadow-sm">
                 {submitLabel}
             </button>
         </motion.form>
