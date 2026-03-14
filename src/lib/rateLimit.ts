@@ -25,7 +25,7 @@ export interface RateLimitConfig {
 }
 
 export const RATE_LIMITS = {
-  auth: { windowMs: 15 * 60 * 1000, maxRequests: 10 },
+  auth: { windowMs: 60000, maxRequests: 5 },
   chat: { windowMs: 60 * 1000, maxRequests: 30 },
   api: { windowMs: 60 * 1000, maxRequests: 100 },
   upload: { windowMs: 60 * 1000, maxRequests: 10 },
