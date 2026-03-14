@@ -1,105 +1,44 @@
+// src/app/api/builder/chat/route.ts
 import { NextRequest } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import connectDB from '@/lib/mongodb';
 import { verifyUser } from '@/lib/auth';
-import { successResponse, Errors } from '@/lib/apiResponse';
-import BuilderSession from '@/models/BuilderSession';
+import { Errors } from '@/lib/apiResponse';
 import { getDefaultModel } from '@/lib/models';
+import BuilderSession from '@/models/BuilderSession';
+import { createSSEStream, createSSEHeaders } from '@/lib/builder/sseUtils';
+import { GEMINI_TOOL_DECLARATIONS, getToolExecutor } from '@/lib/builder/agentTools';
+import type { AgentToolName } from '@/lib/builder/types';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+// Track active streams per session to prevent concurrent connections
+const activeStreams = new Map<string, boolean>();
 
-const BUILDER_SYSTEM_PROMPT = `You are an AI Widget Builder assistant for WinBix AI. Your job is to help users create a custom chat widget for their website through conversation.
+const SYSTEM_PROMPT = `You are an AI widget builder agent for WinBix AI. You help users create customized chat widgets for their businesses.
 
-## Your workflow:
-1. Ask the user about their business: type (dental, restaurant, SaaS, etc.), business name, and website URL.
-2. Ask about their preferred style: colors, dark or light theme, font preferences, overall feel (modern, classic, playful, corporate).
-3. When you have enough information, generate a complete theme.json configuration.
+Your capabilities (use the available tools):
+- analyze_site: Crawl a website to extract colors, fonts, and content
+- generate_themes: Signal the UI to show theme variant comparison
+- select_theme: Apply a selected theme variant
+- build_widget: Build and deploy the widget
+- crawl_knowledge: Upload website content to the widget's knowledge base
+- connect_crm: Validate and activate CRM integrations
+- set_panel_mode: Switch the right panel view
 
-## When generating theme.json:
-- Output it inside a \`\`\`json code block
-- Include ALL required fields (see below)
-- Choose colors that match the user's brand
-- Set a descriptive "label" field like "BusinessName - Theme Description"
-- Set "domain" to the user's website domain
+WORKFLOW:
+1. When user provides a URL, call analyze_site immediately
+2. After analysis, generate 3 theme.json variants and present them (call generate_themes, then output the 3 variants as JSON in your response)
+3. When user picks a variant, call select_theme
+4. Call crawl_knowledge to populate the knowledge base
+5. Call build_widget to build and deploy
+6. After deployment, help the user iterate (color changes, greeting updates)
+7. If user asks about CRM, provide instructions and call connect_crm when they give an API key
 
-## Required theme.json fields:
-domain, font, isDark, widgetW, widgetH, widgetMaxW, widgetMaxH, toggleSize, toggleRadius,
-headerPad, nameSize, avatarHeaderRound, chatAvatarRound,
-headerFrom, headerVia, headerTo, toggleFrom, toggleVia, toggleTo, toggleShadow, toggleHoverRgb,
-sendFrom, sendHoverFrom, onlineDotBg, onlineDotBorder, typingDot,
-userMsgFrom, userMsgTo, userMsgShadow, avatarFrom, avatarTo, avatarBorder, avatarIcon,
-linkColor, linkHover, copyHover, copyActive,
-chipBorder, chipFrom, chipTo, chipText, chipHoverFrom, chipHoverTo, chipHoverBorder,
-focusBorder, focusRing, imgActiveBorder, imgActiveBg, imgActiveText,
-imgHoverText, imgHoverBorder, imgHoverBg, cssPrimary, cssAccent, focusRgb,
-feedbackActive, feedbackHover
+When generating theme variants, output them as a JSON block with this format:
+\`\`\`json
+{"variants": [{"label": "Name", "theme": {theme.json fields...}}, ...]}
+\`\`\`
 
-If isDark is true, also include: surfaceBg, surfaceCard, surfaceBorder, surfaceInput, surfaceInputFocus, textPrimary, textSecondary, textMuted
-
-## Additional fields to include:
-- "label": descriptive label
-- "fontUrl": Google Fonts URL for the chosen font
-- "hasShine": boolean for header shine effect
-- "headerAccent": optional accent text
-- "sendTo": gradient end for send button
-- "sendHoverTo": gradient end for send button hover
-
-## Default dimensions (use unless user specifies otherwise):
-- widgetW: "370px", widgetH: "540px", widgetMaxW: "370px", widgetMaxH: "540px"
-- toggleSize: "w-[58px] h-[58px]", toggleRadius: "rounded-[10px]"
-- headerPad: "px-6 py-5", nameSize: "text-[15px]"
-- avatarHeaderRound: "rounded-lg", chatAvatarRound: "rounded-lg"
-
-## Also generate a widget.config.json with:
-- clientId: slugified business name
-- botName: "BusinessName AI" or similar
-- welcomeMessage: personalized welcome in markdown
-- inputPlaceholder: relevant placeholder text
-- quickReplies: array of 3 relevant quick reply buttons
-- avatar: { type: "initials", initials: "XX" } using business initials
-
-Output the widget.config.json in a separate \`\`\`json code block labeled with "widget.config.json" comment.
-
-## Important:
-- Be conversational and helpful
-- If the user wants changes after you generate the theme, modify and re-output the complete theme.json
-- Always explain your color choices briefly
-- Use hex colors (e.g., #1a2b3c), not rgb/rgba
-- For focusRgb and toggleHoverRgb, use comma-separated RGB values like "26, 43, 60"
-- Set "widgetName" in your response when you know the business name`;
-
-function extractJsonBlocks(text: string): {
-  themeJson: Record<string, unknown> | null;
-  widgetConfig: Record<string, unknown> | null;
-  widgetName: string | null;
-} {
-  const jsonBlockRegex = /```json\s*\n([\s\S]*?)```/g;
-  let themeJson: Record<string, unknown> | null = null;
-  let widgetConfig: Record<string, unknown> | null = null;
-  let widgetName: string | null = null;
-
-  let match;
-  while ((match = jsonBlockRegex.exec(text)) !== null) {
-    try {
-      const parsed = JSON.parse(match[1].trim());
-
-      // Distinguish theme.json from widget.config.json by checking for unique fields
-      if (parsed.clientId && parsed.botName && parsed.welcomeMessage) {
-        widgetConfig = parsed;
-        widgetName = parsed.botName || null;
-      } else if (parsed.headerFrom || parsed.domain) {
-        themeJson = parsed;
-        if (parsed.label) {
-          widgetName = parsed.label;
-        }
-      }
-    } catch {
-      // Skip invalid JSON blocks
-    }
-  }
-
-  return { themeJson, widgetConfig, widgetName };
-}
+Always be conversational and explain what you're doing. Use the tools proactively.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -109,8 +48,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { sessionId, message } = body;
 
-    if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return Errors.badRequest('Message is required');
+    if (!message || typeof message !== 'string') {
+      return Errors.badRequest('message is required');
     }
 
     await connectDB();
@@ -119,79 +58,196 @@ export async function POST(request: NextRequest) {
     let session;
     if (sessionId) {
       session = await BuilderSession.findOne({ _id: sessionId, userId: auth.userId });
-      if (!session) {
-        return Errors.notFound('Session not found');
+      if (!session) return Errors.notFound('Session not found');
+
+      // Check for concurrent stream
+      if (activeStreams.get(sessionId)) {
+        return new Response(JSON.stringify({ success: false, error: 'Another stream is active for this session' }), {
+          status: 409,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
     } else {
-      session = new BuilderSession({
+      session = await BuilderSession.create({
         userId: auth.userId,
         messages: [],
         status: 'chatting',
+        currentStage: 'input',
       });
     }
 
-    // Add user message
+    // Add user message to session
     session.messages.push({
-      role: 'user' as const,
-      content: message.trim(),
+      role: 'user',
+      content: message,
       timestamp: new Date(),
     });
-
-    // Build conversation history for Gemini
-    const conversationHistory = session.messages
-      .map((msg: { role: string; content: string }) => {
-        return `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`;
-      })
-      .join('\n\n');
-
-    // Call Gemini
-    const modelId = getDefaultModel().id;
-    const model = genAI.getGenerativeModel({
-      model: modelId,
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 4096,
-      },
-    });
-
-    const prompt = `${BUILDER_SYSTEM_PROMPT}\n\n---\nConversation:\n${conversationHistory}\n\nAssistant:`;
-
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const assistantMessage = response.text();
-
-    // Parse response for theme JSON
-    const { themeJson, widgetConfig, widgetName } = extractJsonBlocks(assistantMessage);
-
-    if (themeJson) {
-      session.themeJson = themeJson;
-      // Store widgetConfig alongside themeJson if found
-      if (widgetConfig) {
-        session.themeJson = { ...(session.themeJson as Record<string, unknown>), _widgetConfig: widgetConfig };
-      }
-    }
-
-    if (widgetName && !session.widgetName) {
-      session.widgetName = widgetName;
-    }
-
-    // Add assistant message
-    session.messages.push({
-      role: 'assistant' as const,
-      content: assistantMessage,
-      timestamp: new Date(),
-    });
-
+    session.status = 'streaming';
     await session.save();
 
-    return successResponse({
-      sessionId: session._id,
-      message: assistantMessage,
-      themeJson: themeJson || undefined,
-      widgetConfig: widgetConfig || undefined,
-      widgetName: session.widgetName,
-      status: session.status,
+    const currentSessionId = session._id.toString();
+    activeStreams.set(currentSessionId, true);
+
+    // Build conversation history for Gemini
+    const conversationHistory = session.messages.map((m: { role: string; content: string }) => ({
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.content }],
+    }));
+
+    const baseUrl = request.nextUrl.origin;
+    const cookie = request.headers.get('cookie') || '';
+
+    const stream = createSSEStream(async (write) => {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+        const modelId = getDefaultModel().id;
+        const model = genAI.getGenerativeModel({
+          model: modelId,
+          systemInstruction: SYSTEM_PROMPT,
+          tools: [{ functionDeclarations: GEMINI_TOOL_DECLARATIONS }],
+        });
+
+        const chat = model.startChat({
+          history: conversationHistory.slice(0, -1), // All except last user message
+        });
+
+        let response = await chat.sendMessage(message);
+        let fullAssistantText = '';
+
+        // Process response — may include function calls
+        while (true) {
+          const candidate = response.response.candidates?.[0];
+          if (!candidate) break;
+
+          for (const part of candidate.content.parts) {
+            if (part.text) {
+              fullAssistantText += part.text;
+              write({ type: 'text', content: part.text });
+
+              // Check for theme variants JSON in text
+              const variantsMatch = part.text.match(/```json\s*\n([\s\S]*?)```/);
+              if (variantsMatch) {
+                try {
+                  const parsed = JSON.parse(variantsMatch[1]);
+                  if (parsed.variants && Array.isArray(parsed.variants)) {
+                    write({ type: 'ab_variants', variants: parsed.variants });
+                    // Store variants in session
+                    session.abVariants = parsed.variants.map(
+                      (v: { label: string; theme: Record<string, unknown> }) => ({
+                        label: v.label,
+                        themeJson: v.theme,
+                      })
+                    );
+                  }
+                } catch {
+                  /* not valid JSON, skip */
+                }
+              }
+            }
+
+            if (part.functionCall) {
+              const toolName = part.functionCall.name as AgentToolName;
+              const toolArgs = part.functionCall.args as Record<string, unknown>;
+
+              write({ type: 'tool_start', tool: toolName, args: toolArgs });
+
+              const executor = getToolExecutor(toolName);
+              let toolResult: Record<string, unknown>;
+
+              if (executor) {
+                try {
+                  toolResult = await executor(toolArgs, {
+                    sessionId: currentSessionId,
+                    userId: auth.userId,
+                    baseUrl,
+                    cookie,
+                    write,
+                  });
+                } catch (err) {
+                  toolResult = { success: false, error: (err as Error).message };
+                  write({ type: 'error', message: (err as Error).message, recoverable: true });
+                }
+              } else {
+                toolResult = { success: false, error: `Unknown tool: ${toolName}` };
+              }
+
+              write({ type: 'tool_result', tool: toolName, result: toolResult });
+
+              // Update session based on tool results
+              if (toolName === 'analyze_site' && toolResult.success) {
+                session.siteProfile = toolResult.profile;
+                session.currentStage = 'analysis';
+              } else if (toolName === 'select_theme' && toolResult.success) {
+                const idx = toolResult.selectedVariant as number;
+                session.selectedVariant = idx;
+                if (session.abVariants?.[idx]) {
+                  session.themeJson = session.abVariants[idx].themeJson;
+                }
+                session.currentStage = 'design';
+              } else if (toolName === 'build_widget' && toolResult.success) {
+                session.clientId = toolResult.clientId as string;
+                session.currentStage = 'deploy';
+                session.status = 'deployed';
+              } else if (toolName === 'crawl_knowledge' && toolResult.success) {
+                session.knowledgeUploaded = true;
+                session.currentStage = 'knowledge';
+              } else if (toolName === 'connect_crm' && toolResult.success) {
+                const provider = toolArgs.provider as string;
+                const existing = session.connectedIntegrations?.find(
+                  (i: { provider: string }) => i.provider === provider
+                );
+                if (existing) {
+                  existing.status = 'connected';
+                } else {
+                  session.connectedIntegrations = [
+                    ...(session.connectedIntegrations || []),
+                    { provider, status: 'connected' },
+                  ];
+                }
+                session.currentStage = 'integrations';
+              }
+
+              // Feed tool result back to Gemini for continuation
+              response = await chat.sendMessage([
+                {
+                  functionResponse: {
+                    name: toolName,
+                    response: toolResult,
+                  },
+                },
+              ]);
+
+              // Don't break — continue processing the new response
+              continue;
+            }
+          }
+
+          // No more function calls — break the loop
+          break;
+        }
+
+        // Save assistant response to session
+        if (fullAssistantText) {
+          session.messages.push({
+            role: 'assistant',
+            content: fullAssistantText,
+            timestamp: new Date(),
+          });
+        }
+
+        if (session.status === 'streaming') {
+          session.status = 'chatting';
+        }
+        await session.save();
+
+        // Send sessionId to frontend
+        write({ type: 'session', sessionId: currentSessionId });
+      } finally {
+        activeStreams.delete(currentSessionId);
+      }
     });
+
+    return new Response(stream, { headers: createSSEHeaders() });
   } catch (error) {
     console.error('Builder chat error:', error);
     return Errors.internal('Failed to process chat message');
