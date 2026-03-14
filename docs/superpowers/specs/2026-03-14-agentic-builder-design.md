@@ -14,10 +14,10 @@ Transform the existing chat-based widget builder into an **agentic, streaming, a
 
 ## 2. User Flow
 
-```
+```text
 1. INPUT:     User pastes URL  —or—  picks industry template
 2. ANALYZE:   Agent crawls site → extracts colors, fonts, business type, content
-3. DESIGN:    Agent generates 3 theme variants (A/B compare) → user picks one
+3. DESIGN:    Agent generates 3 theme variants → user picks one
 4. KNOWLEDGE: Agent crawls site pages → uploads to knowledge base automatically
 5. BUILD:     Agent runs build pipeline → deploys widget
 6. ITERATE:   User refines via chat ("make header green", "change greeting")
@@ -31,7 +31,7 @@ Each stage updates the progress pipeline at the top. The right panel switches co
 
 The chat API returns Server-Sent Events (SSE) via `ReadableStream`. Each event is a JSON line:
 
-```
+```text
 data: {"type":"text","content":"..."}              // streamed text (char by char)
 data: {"type":"tool_start","tool":"analyze_site","args":{...}}
 data: {"type":"tool_result","tool":"analyze_site","result":{...}}
@@ -40,6 +40,8 @@ data: {"type":"ab_variants","variants":[...]}      // 3 design options
 data: {"type":"panel_mode","mode":"live_preview"}  // switch right panel
 data: {"type":"progress","stage":"design","status":"complete"}
 data: {"type":"crm_instruction","provider":"hubspot","steps":[...]}
+data: {"type":"error","message":"...","recoverable":true}  // error during tool execution
+data: {"type":"knowledge_progress","uploaded":3,"total":8}  // knowledge upload progress
 data: {"type":"done"}
 ```
 
@@ -52,6 +54,8 @@ Frontend handlers per type:
 - `tool_start/tool_result` → inline action indicators in chat
 - `ab_variants` → show 3 widget variants in compare mode
 - `crm_instruction` → render CRM setup card in chat
+- `error` → show error toast/inline message; if `recoverable`, agent retries or suggests alternative
+- `knowledge_progress` → update progress indicator during knowledge upload (e.g., "Uploading 3/8 chunks...")
 
 ## 4. Backend Architecture
 
@@ -60,6 +64,9 @@ Frontend handlers per type:
 The current endpoint does simple prompt→response. New version:
 
 - Returns SSE stream instead of JSON
+- Authenticated via JWT (same `verifyUser()` as other dashboard endpoints)
+- SSE connection timeout: 5 minutes; on disconnect, client restarts the agent turn (no event replay — tool executions are idempotent via session state checks)
+- One active SSE stream per session; second connection returns 409 Conflict
 - Uses Gemini function calling with these tools:
 
 ```typescript
@@ -97,7 +104,7 @@ const AGENT_TOOLS = [
   {
     name: 'set_panel_mode',
     description: 'Switch the right panel context',
-    parameters: { mode: "'live_preview' | 'test_sandbox' | 'ab_compare' | 'crm_status'" },
+    parameters: { mode: "'empty' | 'live_preview' | 'test_sandbox' | 'ab_compare' | 'crm_status'" },
   },
 ];
 ```
@@ -131,12 +138,15 @@ Implementation: uses the existing internal WebFetch pattern (fetch HTML, parse w
 
 ### 4.3 Knowledge Crawler (`src/lib/builder/knowledgeCrawler.ts`)
 
-New module. Crawls site pages, chunks content, uploads via existing `POST /api/knowledge` endpoint:
+New module. Reuses the page content already extracted by `siteAnalyzer` (no second crawl). Chunks and uploads via existing `POST /api/knowledge` endpoint:
 
-1. Takes SiteProfile.pages
-2. Splits content into chunks (max 2000 chars each)
-3. POSTs each chunk to `/api/knowledge` with clientId
-4. Sets AI system prompt via `PUT /api/ai-settings/{clientId}` with niche-appropriate prompt
+1. Takes `SiteProfile.pages` from the analyzer output (up to 5 pages)
+2. Splits each page content into chunks at paragraph boundaries (max 2000 chars per chunk; if a paragraph exceeds 2000 chars, split at sentence boundaries)
+3. Skips pages that returned errors during analysis (4xx/5xx)
+4. POSTs each chunk to `/api/knowledge` with clientId
+5. Sets AI system prompt via `PUT /api/ai-settings/{clientId}` with niche-appropriate prompt
+
+Error handling: if a chunk upload fails, logs the error and continues with remaining chunks. Reports total uploaded/failed count via `tool_result`.
 
 ### 4.4 CRM Setup Handler (`src/lib/builder/crmSetup.ts`)
 
@@ -153,6 +163,8 @@ interface CRMSetupConfig {
 }
 ```
 
+**Supported providers at launch:** HubSpot (adapter already exists in `src/lib/integrations/hubspot.ts`). Additional providers (Salesforce, Pipedrive) follow the same `CRMAdapter` interface and can be added incrementally without architecture changes.
+
 Validation: makes a lightweight API call to the CRM to verify the key works. Creates a test contact to confirm write access. Uses existing adapter pattern from `src/lib/integrations/`.
 
 ### 4.5 New API Endpoints
@@ -160,7 +172,6 @@ Validation: makes a lightweight API call to the CRM to verify the key works. Cre
 | Endpoint                 | Method | Purpose                                              |
 | ------------------------ | ------ | ---------------------------------------------------- |
 | `/api/builder/chat`      | POST   | Rewritten: SSE streaming with agentic tool calls     |
-| `/api/builder/analyze`   | POST   | Standalone site analysis (for non-streaming use)     |
 | `/api/builder/test-chat` | POST   | Sandbox chat — proxies to widget's AI with test flag |
 | `/api/builder/templates` | GET    | Returns industry templates list                      |
 
@@ -172,7 +183,7 @@ Add fields to existing model:
 // New fields
 currentStage: {
   type: String,
-  enum: ['input', 'analyzing', 'designing', 'knowledge', 'integrations', 'deployed'],
+  enum: ['input', 'analysis', 'design', 'knowledge', 'deploy', 'integrations'],
   default: 'input'
 },
 siteProfile: { type: Schema.Types.Mixed },          // SiteProfile object
@@ -198,8 +209,9 @@ Top-level layout:
 
 ### 5.2 ProgressPipeline
 
-Horizontal stepper showing: Input → Analysis → Design → Knowledge → Deploy
+Horizontal stepper showing: Input → Analysis → Design → Knowledge → Deploy → Integrations
 
+- Matches `currentStage` enum from BuilderSession model
 - Each step has icon, label, status (pending/active/complete)
 - Clicking a completed step scrolls chat to that stage's messages
 - Subtle animation on transitions
@@ -236,8 +248,8 @@ Widget preview with hot-reload:
 
 - Renders widget in iframe
 - Listens for `theme_update` SSE events
-- Sends updated theme to iframe via `postMessage`
-- Widget iframe has a listener that applies theme changes without full reload
+- Sends updated theme to iframe via `postMessage` with format: `{ type: 'theme_update', theme: ThemeJSON }`
+- Widget iframe has a `message` listener that receives this format, validates `type === 'theme_update'`, and applies CSS variable changes without full reload
 - Shows widget toggle button + expanded chat view
 
 ### 5.6 TestSandbox
@@ -246,7 +258,7 @@ Full test environment:
 
 - Embedded chat that talks to the widget's AI (via `/api/builder/test-chat`)
 - Integration status panel below: shows which integrations are connected, last test result
-- Real-time log: "Lead created in HubSpot ✓", "Calendar event created ✓"
+- Real-time log: "Lead created in HubSpot ✓", "Integration test passed ✓"
 - Reset button to clear test data
 
 ### 5.7 ABCompare
@@ -279,7 +291,7 @@ interface IndustryTemplate {
   defaultColors: string[];
   defaultFont: string;
   sampleQuickReplies: string[];
-  sampleKnowledge: string[]; // typical FAQs for the niche
+  sampleKnowledge: string[]; // pre-chunked FAQs for the niche (each item ≤ 2000 chars)
   systemPromptHints: string; // hints for AI system prompt
 }
 ```
@@ -329,8 +341,8 @@ Each phase deploys independently and delivers user value. Phase 1 is the core wo
 
 - **Gemini function calling**: Use `tools` parameter in Gemini API. The model returns `functionCall` parts which the server executes, then feeds `functionResponse` back. This is natively supported.
 - **SSE format**: Use `ReadableStream` with `TextEncoder`, write `data: ${JSON.stringify(event)}\n\n` for each event. Set `Content-Type: text/event-stream`.
-- **Live preview hot-reload**: The widget iframe needs a `message` listener that accepts theme updates and re-renders. This requires a small addition to the widget's `script.js` template.
-- **Build pipeline**: Reuse existing `generate-single-theme.js` + `build.js`. No changes needed.
+- **Live preview hot-reload**: The widget iframe needs a `message` listener that accepts theme updates and re-renders. This requires adding a `postMessage` handler to the widget's `Widget.jsx` template in `generate-single-theme.js`. This is a Phase 1 dependency.
+- **Build pipeline**: Reuse existing `generate-single-theme.js` + `build.js`. The only change needed is adding the `postMessage` listener to the widget template (see above). The build pipeline uses a per-client `dist/` output via `clientId`, so concurrent builds are safe.
 - **Knowledge upload**: Reuse existing `POST /api/knowledge` and `PUT /api/ai-settings` endpoints.
 - **CRM validation**: Reuse existing adapter pattern from `src/lib/integrations/`. HubSpot adapter already implemented; others follow same interface.
 - **Voice input**: Client-side only (Web Speech API). No server changes. Pattern exists in `useVoice.js`.
