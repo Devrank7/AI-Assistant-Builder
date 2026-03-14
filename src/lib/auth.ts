@@ -2,8 +2,10 @@ import { NextRequest } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import connectDB from './mongodb';
 import Client from '@/models/Client';
+import User from '@/models/User';
 import { Errors } from './apiResponse';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from './rateLimit';
+import { verifyAccessToken } from './jwt';
 
 /** Constant-time string comparison to prevent timing attacks */
 function safeCompare(a: string, b: string): boolean {
@@ -45,6 +47,28 @@ export async function verifyAdminOrClient(request: NextRequest): Promise<AuthRes
   const adminResult = await verifyAdmin(request);
   if (adminResult.authenticated) return adminResult;
   return verifyClient(request);
+}
+
+export type UserAuthResult =
+  | { authenticated: true; userId: string; user: { email: string; plan: string; subscriptionStatus: string } }
+  | { authenticated: false; response: ReturnType<typeof Errors.unauthorized> };
+
+export async function verifyUser(request: NextRequest): Promise<UserAuthResult> {
+  const accessToken = request.cookies.get('access_token')?.value;
+  if (!accessToken) return { authenticated: false, response: Errors.unauthorized('Not authenticated') };
+  try {
+    const payload = verifyAccessToken(accessToken);
+    await connectDB();
+    const user = await User.findById(payload.userId).select('email plan subscriptionStatus');
+    if (!user) return { authenticated: false, response: Errors.unauthorized('User not found') };
+    return {
+      authenticated: true,
+      userId: payload.userId,
+      user: { email: user.email, plan: user.plan, subscriptionStatus: user.subscriptionStatus },
+    };
+  } catch {
+    return { authenticated: false, response: Errors.unauthorized('Invalid or expired token') };
+  }
 }
 
 export function applyRateLimit(request: NextRequest, type: keyof typeof RATE_LIMITS = 'api') {
