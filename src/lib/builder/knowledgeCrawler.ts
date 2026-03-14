@@ -1,0 +1,129 @@
+// src/lib/builder/knowledgeCrawler.ts
+import type { SiteProfile } from './types';
+
+const MAX_CHUNK_SIZE = 2000;
+
+export function chunkContent(content: string, maxSize: number = MAX_CHUNK_SIZE): string[] {
+  if (!content.trim()) return [];
+
+  const paragraphs = content.split(/\n\n+/).filter((p) => p.trim());
+  const chunks: string[] = [];
+  let currentChunk = '';
+
+  for (const paragraph of paragraphs) {
+    if (paragraph.length > maxSize) {
+      if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+        currentChunk = '';
+      }
+      const sentences = paragraph.match(/[^.!?]+[.!?]+\s*/g) || [paragraph];
+      let sentenceChunk = '';
+      for (const sentence of sentences) {
+        if ((sentenceChunk + sentence).length > maxSize) {
+          if (sentenceChunk.trim()) chunks.push(sentenceChunk.trim());
+          sentenceChunk = sentence;
+        } else {
+          sentenceChunk += sentence;
+        }
+      }
+      if (sentenceChunk.trim()) chunks.push(sentenceChunk.trim());
+    } else if ((currentChunk + '\n\n' + paragraph).length > maxSize) {
+      if (currentChunk.trim()) chunks.push(currentChunk.trim());
+      currentChunk = paragraph;
+    } else {
+      currentChunk = currentChunk ? currentChunk + '\n\n' + paragraph : paragraph;
+    }
+  }
+
+  if (currentChunk.trim()) chunks.push(currentChunk.trim());
+  return chunks;
+}
+
+export interface CrawlResult {
+  uploaded: number;
+  failed: number;
+  total: number;
+}
+
+export async function uploadKnowledge(
+  pages: SiteProfile['pages'],
+  clientId: string,
+  baseUrl: string,
+  cookie: string,
+  onProgress?: (uploaded: number, total: number) => void
+): Promise<CrawlResult> {
+  const allChunks: { content: string; title: string }[] = [];
+
+  for (const page of pages) {
+    if (!page.content) continue;
+    const chunks = chunkContent(page.content);
+    for (const chunk of chunks) {
+      allChunks.push({ content: chunk, title: page.title });
+    }
+  }
+
+  const result: CrawlResult = { uploaded: 0, failed: 0, total: allChunks.length };
+
+  for (const chunk of allChunks) {
+    try {
+      const res = await fetch(`${baseUrl}/api/knowledge`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: cookie,
+        },
+        body: JSON.stringify({
+          clientId,
+          content: chunk.content,
+          title: chunk.title,
+          source: 'builder-crawler',
+        }),
+      });
+
+      if (res.ok) {
+        result.uploaded++;
+      } else {
+        result.failed++;
+      }
+    } catch {
+      result.failed++;
+    }
+
+    onProgress?.(result.uploaded, result.total);
+  }
+
+  return result;
+}
+
+export async function setAIPrompt(
+  clientId: string,
+  businessType: string,
+  businessName: string,
+  baseUrl: string,
+  cookie: string
+): Promise<void> {
+  const nicheHints: Record<string, string> = {
+    dental: 'Focus on appointments, insurance, dental procedures, and patient comfort.',
+    restaurant: 'Focus on menu, reservations, hours, dietary restrictions, and delivery.',
+    saas: 'Focus on features, pricing, integrations, API, and onboarding.',
+    realestate: 'Focus on listings, viewings, buying/selling process, and market conditions.',
+    beauty: 'Focus on services, appointments, pricing, products, and gift cards.',
+    medical: 'Focus on appointments, services, insurance, and patient care.',
+  };
+  const hint = nicheHints[businessType] || 'Answer questions helpfully based on the knowledge base.';
+
+  const systemPrompt = `You are an AI assistant for ${businessName}. You are helpful, friendly, and knowledgeable about the business. ${hint} Answer questions based on the knowledge base provided. If you don't know something, say so honestly and suggest contacting the business directly.`;
+
+  await fetch(`${baseUrl}/api/ai-settings/${clientId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Cookie: cookie,
+    },
+    body: JSON.stringify({
+      systemPrompt,
+      temperature: 0.7,
+      maxTokens: 1024,
+    }),
+  });
+}
