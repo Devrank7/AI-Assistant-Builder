@@ -12,7 +12,6 @@ import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
 import { routeMessage } from '@/lib/channelRouter';
 import { runBeforeAI, runAfterAIResponse, buildScriptContext, buildPreprocessContext } from '@/lib/scriptRunner';
-import { getPricingConfig } from '@/lib/pricingConfig';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -127,8 +126,6 @@ async function handleStatusCommand(chatId: number): Promise<void> {
     return;
   }
 
-  const pricingConfig = await getPricingConfig();
-
   const statusEmoji: Record<string, string> = {
     trial: '🆓',
     active: '✅',
@@ -145,11 +142,6 @@ async function handleStatusCommand(chatId: number): Promise<void> {
     suspended: 'Приостановлена',
   };
 
-  const cost = client.monthlyCostUsd || 0;
-  const extraCredits = client.extraCreditsUsd || 0;
-  const effectiveLimit = pricingConfig.costBlockThreshold + extraCredits;
-  const remaining = effectiveLimit - cost;
-
   let nextPayment = '—';
   if (client.nextPaymentDate) {
     nextPayment = new Date(client.nextPaymentDate).toLocaleDateString('ru-RU');
@@ -159,9 +151,6 @@ async function handleStatusCommand(chatId: number): Promise<void> {
     chatId,
     `📊 <b>Статус: ${client.username}</b>\n\n` +
       `${statusEmoji[client.subscriptionStatus] || '❓'} Подписка: <b>${statusText[client.subscriptionStatus] || client.subscriptionStatus}</b>\n` +
-      `💰 Расходы: <b>$${cost.toFixed(2)}</b> из $${effectiveLimit}\n` +
-      `📈 Остаток: <b>$${remaining.toFixed(2)}</b>\n` +
-      (extraCredits > 0 ? `🔋 Доп. кредиты: <b>$${extraCredits}</b>\n` : '') +
       `📅 Следующий платёж: ${nextPayment}\n` +
       `\n🔗 Виджет: ${client.isActive ? '✅ Включен' : '🚫 Выключен'}`
   );
@@ -171,19 +160,15 @@ async function handleStatusCommand(chatId: number): Promise<void> {
  * Handle /help command
  */
 async function handleHelpCommand(chatId: number): Promise<void> {
-  const pricingConfig = await getPricingConfig();
-
   await sendMessage(
     chatId,
     `📖 <b>Команды бота WinBix AI</b>\n\n` +
       `/start — привязать Telegram\n` +
-      `/status — статус подписки и расходов\n` +
+      `/status — статус подписки\n` +
       `/help — эта справка\n\n` +
       `<b>AI-чат:</b>\n` +
       `Просто напишите любое сообщение, и AI-ассистент ответит вам.\n\n` +
       `<b>Уведомления:</b>\n` +
-      `• ⚠️ Предупреждение при достижении $${pricingConfig.costWarningThreshold}\n` +
-      `• 🚫 Блокировка при $${pricingConfig.costBlockThreshold} (можно докупить кредиты)\n` +
       `• ⏰ Напоминания об оплате\n` +
       `• ✅ Подтверждения платежей\n\n` +
       `Поддержка: @chatbotfusion`

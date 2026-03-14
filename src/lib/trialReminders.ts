@@ -10,8 +10,10 @@
 
 import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
-import { TRIAL_DAYS, GRACE_PERIOD_DAYS } from '@/lib/paymentProviders/types';
 import { sendEmail, sendTelegram, isEmailAllowed, getUnsubscribeFooter } from '@/lib/notifications';
+
+const TRIAL_DAYS = 30;
+const GRACE_PERIOD_DAYS = 3;
 
 interface TrialCheckResult {
   totalChecked: number;

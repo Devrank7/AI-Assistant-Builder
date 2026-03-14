@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
         total: result.inputTokens + result.outputTokens,
       },
       costUsd: result.costUsd,
-      ...(result.costWarning ? { costWarning: result.costWarning } : {}),
     });
   } catch (error) {
     console.error('Error in chat:', error);

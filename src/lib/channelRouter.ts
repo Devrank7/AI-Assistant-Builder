@@ -21,7 +21,6 @@ import Client from '@/models/Client';
 import Correction from '@/models/Correction';
 import { generateEmbedding, findSimilarChunks } from '@/lib/gemini';
 import { calculateCost, getModel, getDefaultModel } from '@/lib/models';
-import { checkCostLimit, trackCost } from '@/lib/costGuard';
 import { parseRichBlocks, type RichBlock } from '@/lib/richMessages';
 import { detectHandoffRequest, getActiveHandoff, createHandoff } from '@/lib/handoff';
 
@@ -47,7 +46,6 @@ export interface RouteMessageResult {
   inputTokens: number;
   outputTokens: number;
   costUsd: number;
-  costWarning?: string;
 }
 
 interface AIConfig {
@@ -169,22 +167,7 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
     };
   }
 
-  // 2. Check cost limits
-  const costCheck = await checkCostLimit(input.clientId);
-  if (!costCheck.allowed) {
-    return {
-      success: false,
-      response: '',
-      richBlocks: [],
-      error: costCheck.message,
-      model: '',
-      inputTokens: 0,
-      outputTokens: 0,
-      costUsd: 0,
-    };
-  }
-
-  // 3. Get AI config (needed before handoff check for handoffEnabled flag)
+  // 2. Get AI config (needed before handoff check for handoffEnabled flag)
   const config = await getAIConfig(input.clientId);
 
   // 4. Handoff check — only if enabled for this client
@@ -268,12 +251,7 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
   const rawText = response.text();
   const { cleanText, richBlocks } = parseRichBlocks(rawText);
 
-  // 10. Track cost (async)
-  trackCost(input.clientId, inputTokens, outputTokens, costUsd).catch((err) =>
-    console.error('Failed to track cost:', err)
-  );
-
-  // 11. Log conversation (async)
+  // 10. Log conversation (async)
   if (input.sessionId) {
     ChatLog.findOneAndUpdate(
       { clientId: input.clientId, sessionId: input.sessionId },
@@ -304,7 +282,6 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
     inputTokens,
     outputTokens,
     costUsd,
-    costWarning: costCheck.status === 'warning' ? costCheck.message : undefined,
   };
 }
 
@@ -326,13 +303,7 @@ export async function routeMessageStream(input: RouteMessageInput): Promise<{
     return { stream: new ReadableStream(), error: 'Widget is disabled', status: 403 };
   }
 
-  // 2. Check cost limits
-  const costCheck = await checkCostLimit(input.clientId);
-  if (!costCheck.allowed) {
-    return { stream: new ReadableStream(), error: costCheck.message, status: 429 };
-  }
-
-  // 3. Get AI config (needed before handoff check for handoffEnabled flag)
+  // 2. Get AI config (needed before handoff check for handoffEnabled flag)
   const config = await getAIConfig(input.clientId);
 
   // 4. Handoff check — only if enabled for this client
@@ -476,23 +447,8 @@ Only use :::form ONCE per conversation. Use plain text for normal responses.`;
       } finally {
         controller.close();
 
-        // After stream ends, log chat and cost
+        // After stream ends, log chat
         try {
-          let inputTokens: number;
-          let outputTokens: number;
-          try {
-            const finalResponse = await streamResult.response;
-            const usage = finalResponse.usageMetadata;
-            inputTokens = usage?.promptTokenCount ?? Math.ceil((fullSystemPrompt.length + input.message.length) / 4);
-            outputTokens = usage?.candidatesTokenCount ?? Math.ceil(fullResponse.length / 4);
-          } catch {
-            inputTokens = Math.ceil((fullSystemPrompt.length + input.message.length) / 4);
-            outputTokens = Math.ceil(fullResponse.length / 4);
-          }
-          const requestCost = calculateCost(config.model, inputTokens, outputTokens);
-
-          await trackCost(input.clientId, inputTokens, outputTokens, requestCost);
-
           if (input.sessionId) {
             await ChatLog.findOneAndUpdate(
               { clientId: input.clientId, sessionId: input.sessionId },
