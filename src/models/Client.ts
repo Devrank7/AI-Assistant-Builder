@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { SubscriptionTier } from '@/lib/pricing';
+
+export type SubscriptionTier = 'monthly' | 'quarterly' | 'semi_annual' | 'annual';
 
 // Subscription status enum
 export type SubscriptionStatus = 'pending' | 'trial' | 'active' | 'past_due' | 'canceled' | 'suspended';
@@ -11,6 +12,7 @@ export interface IClient extends Document {
   clientId: string;
   clientToken: string;
   clientType: ClientType;
+  userId?: string;
   username: string;
   email: string;
   website: string;
@@ -78,6 +80,10 @@ const ClientSchema = new Schema<IClient>(
       type: String,
       enum: ['full', 'quick'],
       default: 'full',
+    },
+    userId: {
+      type: String,
+      index: true,
     },
     username: {
       type: String,
