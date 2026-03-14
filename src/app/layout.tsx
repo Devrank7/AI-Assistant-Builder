@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { ToastProvider } from '@/components/ui/Toast';
 import ClientLanguageProvider from '@/i18n/ClientProvider';
 import CookieConsent from '@/components/CookieConsent';
+import AuthProvider from '@/components/AuthProvider';
 import './globals.css';
 
 const geistSans = Geist({
@@ -35,7 +36,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ClientLanguageProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <AuthProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </AuthProvider>
           <CookieConsent />
         </ClientLanguageProvider>
       </body>

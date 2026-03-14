@@ -8,6 +8,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Dashboard and Plans routes protection (JWT user auth)
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/plans')) {
+    const accessToken = request.cookies.get('access_token')?.value;
+    if (!accessToken) return NextResponse.redirect(new URL('/?auth=login', request.url));
+  }
+
   // Admin routes protection
   if (pathname.startsWith('/admin')) {
     const adminToken = request.cookies.get('admin_token')?.value;

@@ -7,6 +7,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from '@/i18n/useTranslation';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WidgetGenerator from '@/components/WidgetGenerator';
+import AuthModal from '@/components/AuthModal';
+import { useAuth } from '@/components/AuthProvider';
 
 /* ═══════════════════════════════════════════════════════════════
    THEME CSS — injected at runtime (Tailwind v4 strips custom
@@ -283,9 +285,11 @@ export default function LandingPage() {
   const { t: ta } = useTranslation('about');
   const { t: tc } = useTranslation('common');
 
+  const { user } = useAuth();
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showClientModal, setShowClientModal] = useState(false);
-  const [showLoginMenu, setShowLoginMenu] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'login' | 'signup'>('login');
   const [navScrolled, setNavScrolled] = useState(false);
   const [adminToken, setAdminToken] = useState('');
   const [clientToken, setClientToken] = useState('');
@@ -299,13 +303,14 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* ── Close login menu on outside click ── */
+  /* ── Open auth modal from URL param ── */
   useEffect(() => {
-    if (!showLoginMenu) return;
-    const close = () => setShowLoginMenu(false);
-    document.addEventListener('click', close);
-    return () => document.removeEventListener('click', close);
-  }, [showLoginMenu]);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth') === 'login') {
+      setAuthModalTab('login');
+      setShowAuthModal(true);
+    }
+  }, []);
 
   /* ── Auth handlers (unchanged) ── */
   const handleAdminLogin = useCallback(async () => {
@@ -421,58 +426,36 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
 
-            {/* Login dropdown */}
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowLoginMenu((prev) => !prev);
-                }}
-                className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-300 transition hover:border-white/20 hover:text-white"
+            {/* Auth buttons */}
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:shadow-lg hover:shadow-blue-500/25"
               >
-                Login
-              </button>
-              {showLoginMenu && (
-                <div className="wb-login-menu" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    className="wb-login-item"
-                    onClick={() => {
-                      setShowLoginMenu(false);
-                      setShowAdminModal(true);
-                      setError('');
-                    }}
-                  >
-                    <svg className="h-4 w-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-                      />
-                    </svg>
-                    {t('admin.title')}
-                  </button>
-                  <button
-                    className="wb-login-item"
-                    onClick={() => {
-                      setShowLoginMenu(false);
-                      setShowClientModal(true);
-                      setError('');
-                    }}
-                  >
-                    <svg className="h-4 w-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                      />
-                    </svg>
-                    {t('client.title')}
-                  </button>
-                </div>
-              )}
-            </div>
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setAuthModalTab('signup');
+                    setShowAuthModal(true);
+                  }}
+                  className="hidden rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-300 transition hover:border-white/20 hover:text-white sm:inline-flex"
+                >
+                  Sign Up
+                </button>
+                <button
+                  onClick={() => {
+                    setAuthModalTab('login');
+                    setShowAuthModal(true);
+                  }}
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-300 transition hover:border-white/20 hover:text-white"
+                >
+                  Log In
+                </button>
+              </>
+            )}
 
             <button
               onClick={() => scrollTo('try-it')}
@@ -1207,6 +1190,11 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ════════════════════════════════════════════
+          AUTH MODAL
+          ════════════════════════════════════════════ */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} initialTab={authModalTab} />
 
       {/* ════════════════════════════════════════════
           ADMIN MODAL
