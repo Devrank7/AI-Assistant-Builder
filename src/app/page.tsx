@@ -9,6 +9,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WidgetGenerator from '@/components/WidgetGenerator';
 import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/components/AuthProvider';
+import LandingChat from '@/components/LandingChat';
 
 /* ═══════════════════════════════════════════════════════════════
    THEME CSS — injected at runtime (Tailwind v4 strips custom
@@ -416,6 +417,9 @@ export default function LandingPage() {
               className="text-sm text-gray-400 transition hover:text-white"
             >
               Industries
+            </button>
+            <button onClick={() => scrollTo('pricing')} className="text-sm text-gray-400 transition hover:text-white">
+              Pricing
             </button>
             <Link href="/about" className="text-sm text-gray-400 transition hover:text-white">
               {tc('nav.about')}
@@ -1042,6 +1046,170 @@ export default function LandingPage() {
       </Section>
 
       {/* ════════════════════════════════════════════
+          SOCIAL PROOF
+          ════════════════════════════════════════════ */}
+      <Section className="relative z-10 px-6 pb-28 md:px-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-16 text-center">
+            <div className="mb-4 flex justify-center">
+              <span className="wb-badge">Trusted</span>
+            </div>
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Trusted by Businesses <span className="gradient-text">Worldwide</span>
+            </h2>
+            <p className="mx-auto max-w-xl text-lg text-gray-400">
+              Join hundreds of companies automating customer conversations with WinBix AI
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {[
+              { value: '500+', label: 'Widgets Deployed', sub: 'Across 20+ industries', color: 'text-blue-400' },
+              { value: '50K+', label: 'Conversations', sub: 'Handled by AI assistants', color: 'text-indigo-400' },
+              { value: '98%', label: 'Satisfaction Rate', sub: 'From business owners', color: 'text-purple-400' },
+            ].map((stat, i) => (
+              <div
+                key={stat.label}
+                className={`wb-anim wb-card p-8 text-center ${i === 0 ? 'wb-anim-d1' : i === 1 ? 'wb-anim-d2' : 'wb-anim-d3'}`}
+              >
+                <div className={`wb-stat-num mb-3 ${stat.color}`}>{stat.value}</div>
+                <p className="text-base font-medium text-white">{stat.label}</p>
+                <p className="mt-1 text-sm text-gray-500">{stat.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ════════════════════════════════════════════
+          PRICING
+          ════════════════════════════════════════════ */}
+      <Section id="pricing" className="relative z-10 px-6 pb-28 md:px-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-16 text-center">
+            <div className="mb-4 flex justify-center">
+              <span className="wb-badge">Pricing</span>
+            </div>
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Simple, Transparent <span className="gradient-text">Pricing</span>
+            </h2>
+            <p className="mx-auto max-w-xl text-lg text-gray-400">Start with a free trial. No credit card required.</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            {/* Basic Plan */}
+            <div className="wb-anim wb-anim-d1 wb-card relative p-8">
+              <div className="mb-6">
+                <h3 className="mb-2 text-xl font-bold text-white">Basic</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-extrabold text-white">$29</span>
+                  <span className="text-gray-400">/mo</span>
+                </div>
+                <p className="mt-2 text-sm text-gray-400">Perfect for small businesses getting started with AI chat</p>
+              </div>
+              <ul className="mb-8 space-y-3">
+                {[
+                  '1 AI chat widget',
+                  '1,000 conversations/mo',
+                  'Knowledge base training',
+                  'Lead collection',
+                  'Email support',
+                  'Basic analytics',
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-3 text-sm text-gray-300">
+                    <svg
+                      className="h-4 w-4 flex-shrink-0 text-blue-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => {
+                  setAuthModalTab('signup');
+                  setShowAuthModal(true);
+                }}
+                className="wb-btn-secondary w-full justify-center text-base"
+              >
+                Start Free Trial
+              </button>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="wb-anim wb-anim-d2 wb-card relative overflow-hidden border-blue-500/20 p-8">
+              {/* Popular badge */}
+              <div className="absolute top-5 right-5">
+                <span className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-400">
+                  Most Popular
+                </span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.04] via-indigo-500/[0.03] to-transparent" />
+              <div className="relative z-10">
+                <div className="mb-6">
+                  <h3 className="mb-2 text-xl font-bold text-white">Pro</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-extrabold text-white">$79</span>
+                    <span className="text-gray-400">/mo</span>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-400">
+                    For growing businesses that need advanced AI capabilities
+                  </p>
+                </div>
+                <ul className="mb-8 space-y-3">
+                  {[
+                    'Unlimited AI widgets',
+                    'Unlimited conversations',
+                    'Advanced analytics & reports',
+                    'CRM integrations',
+                    'Omnichannel (Telegram, WhatsApp, Instagram)',
+                    'Priority support',
+                    'Custom branding',
+                    'API access',
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-3 text-sm text-gray-300">
+                      <svg
+                        className="h-4 w-4 flex-shrink-0 text-blue-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => {
+                    setAuthModalTab('signup');
+                    setShowAuthModal(true);
+                  }}
+                  className="wb-btn-primary w-full justify-center text-base"
+                >
+                  Start Free Trial
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Need more details?{' '}
+            <Link href="/plans" className="text-blue-400 transition hover:text-blue-300">
+              View full plan comparison
+            </Link>
+          </p>
+        </div>
+      </Section>
+
+      {/* ════════════════════════════════════════════
           CTA
           ════════════════════════════════════════════ */}
       <Section className="relative z-10 px-6 pb-20 md:px-12">
@@ -1052,29 +1220,28 @@ export default function LandingPage() {
 
             <div className="relative z-10">
               <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-                {ta('cta.title.before')}
-                <span className="gradient-text">{ta('cta.title.accent')}</span>?
+                Ready to <span className="gradient-text">Get Started</span>?
               </h2>
-              <p className="mx-auto mb-10 max-w-xl text-lg text-gray-400">{ta('cta.desc')}</p>
+              <p className="mx-auto mb-10 max-w-xl text-lg text-gray-400">
+                Deploy your AI-powered chat widget in minutes and start converting visitors into customers today.
+              </p>
 
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <button onClick={() => scrollTo('try-it')} className="wb-btn-primary text-base">
-                  Get Started Free
+                <button
+                  onClick={() => {
+                    setAuthModalTab('signup');
+                    setShowAuthModal(true);
+                  }}
+                  className="wb-btn-primary text-base"
+                >
+                  Sign Up Free
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </button>
-                <a href="mailto:winbix.ai@gmail.com" className="wb-btn-secondary text-base">
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-                    />
-                  </svg>
-                  {ta('cta.email')}
-                </a>
+                <button onClick={() => scrollTo('try-it')} className="wb-btn-secondary text-base">
+                  Try Live Demo
+                </button>
               </div>
             </div>
           </div>
@@ -1134,6 +1301,12 @@ export default function LandingPage() {
                   className="text-left text-sm text-gray-500 transition hover:text-white"
                 >
                   Live Demo
+                </button>
+                <button
+                  onClick={() => scrollTo('pricing')}
+                  className="text-left text-sm text-gray-500 transition hover:text-white"
+                >
+                  Pricing
                 </button>
               </div>
             </div>
@@ -1371,6 +1544,11 @@ export default function LandingPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ════════════════════════════════════════════
+          LANDING CHATBOT — dogfooding the product
+          ════════════════════════════════════════════ */}
+      <LandingChat />
     </div>
   );
 }

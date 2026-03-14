@@ -17,8 +17,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'WinBix AI - Dashboard',
-  description: 'Manage and monitor your WinBix AI widget clients',
+  title: 'WinBix AI - AI Chat Widgets for Your Business',
+  description:
+    'Deploy AI-powered chat widgets that answer customer questions, collect leads, and integrate with your CRM. Start your free trial today.',
+  keywords: ['AI chatbot', 'chat widget', 'customer support', 'lead generation', 'CRM integration'],
+  openGraph: {
+    title: 'WinBix AI - AI Chat Widgets for Your Business',
+    description:
+      'Deploy AI-powered chat widgets that answer customer questions, collect leads, and integrate with your CRM.',
+    type: 'website',
+  },
   icons: {
     icon: '/favicon.ico',
   },
