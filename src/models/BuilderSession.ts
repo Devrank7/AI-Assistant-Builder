@@ -6,7 +6,7 @@ export interface IBuilderMessage {
   timestamp: Date;
 }
 
-export type BuilderStatus = 'chatting' | 'building' | 'preview' | 'deployed';
+export type BuilderStatus = 'chatting' | 'streaming' | 'building' | 'preview' | 'deployed';
 
 export interface IBuilderSession extends Document {
   userId: string;
@@ -15,6 +15,19 @@ export interface IBuilderSession extends Document {
   clientId: string | null;
   status: BuilderStatus;
   widgetName: string | null;
+  currentStage: 'input' | 'analysis' | 'design' | 'knowledge' | 'deploy' | 'integrations';
+  siteProfile: Record<string, unknown> | null;
+  knowledgeUploaded: boolean;
+  connectedIntegrations: {
+    provider: string;
+    status: 'pending' | 'connected' | 'failed';
+  }[];
+  abVariants: {
+    label: string;
+    themeJson: Record<string, unknown>;
+  }[];
+  selectedVariant: number | null;
+  templateUsed: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,10 +49,26 @@ const builderSessionSchema = new Schema<IBuilderSession>(
     clientId: { type: String, default: null },
     status: {
       type: String,
-      enum: ['chatting', 'building', 'preview', 'deployed'],
+      enum: ['chatting', 'streaming', 'building', 'preview', 'deployed'],
       default: 'chatting',
     },
     widgetName: { type: String, default: null },
+    currentStage: {
+      type: String,
+      enum: ['input', 'analysis', 'design', 'knowledge', 'deploy', 'integrations'],
+      default: 'input',
+    },
+    siteProfile: { type: Schema.Types.Mixed, default: null },
+    knowledgeUploaded: { type: Boolean, default: false },
+    connectedIntegrations: [
+      {
+        provider: String,
+        status: { type: String, enum: ['pending', 'connected', 'failed'] },
+      },
+    ],
+    abVariants: [{ label: String, themeJson: Schema.Types.Mixed }],
+    selectedVariant: { type: Number, default: null },
+    templateUsed: { type: String, default: null },
   },
   { timestamps: true }
 );
