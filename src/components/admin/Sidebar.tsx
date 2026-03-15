@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 const navItems = [
   {
@@ -33,63 +34,84 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isActive = (href: string) => {
     if (href === '/admin') return pathname === '/admin';
     return pathname.startsWith(href);
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+
+  // Listen for custom event to open sidebar from the layout header
+  useEffect(() => {
+    const handler = () => setSidebarOpen(true);
+    document.addEventListener('open-sidebar', handler);
+    return () => document.removeEventListener('open-sidebar', handler);
+  }, []);
+
   return (
-    <aside className="fixed top-0 left-0 z-40 flex h-screen w-[var(--admin-sidebar-width)] flex-col border-r border-[var(--admin-border-subtle)] bg-[var(--admin-bg-card)]">
-      {/* Logo */}
-      <div className="flex h-[var(--admin-header-height)] items-center px-5">
-        <span className="text-lg font-semibold text-[var(--admin-text-primary)]">WinBix AI</span>
-      </div>
+    <>
+      {/* Backdrop overlay — mobile only, shown when sidebar is open */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={closeSidebar} aria-hidden="true" />
+      )}
 
-      {/* Search trigger */}
-      <div className="px-3 pb-4">
-        <button
-          className="flex w-full items-center gap-2 rounded-lg border border-[var(--admin-border-subtle)] bg-[var(--admin-bg-primary)] px-3 py-2 text-sm text-[var(--admin-text-muted)] hover:border-[var(--admin-border-emphasis)]"
-          onClick={() => document.dispatchEvent(new CustomEvent('open-command-palette'))}
-        >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-          <span>Search...</span>
-          <span className="ml-auto rounded bg-[var(--admin-bg-hover)] px-1.5 py-0.5 text-[10px] font-medium">⌘K</span>
-        </button>
-      </div>
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 z-50 flex h-screen w-[var(--admin-sidebar-width)] flex-col border-r border-[var(--admin-border-subtle)] bg-[var(--admin-bg-card)] transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+      >
+        {/* Logo */}
+        <div className="flex h-[var(--admin-header-height)] items-center px-5">
+          <span className="text-lg font-semibold text-[var(--admin-text-primary)]">WinBix AI</span>
+        </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3">
-        <ul className="space-y-1">
-          {navItems.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150 ${
-                    active
-                      ? 'border-l-2 border-[var(--admin-accent-blue)] bg-[var(--admin-bg-active)] text-[var(--admin-accent-blue)]'
-                      : 'text-[var(--admin-text-secondary)] hover:bg-[var(--admin-bg-hover)] hover:text-[var(--admin-text-primary)]'
-                  }`}
-                >
-                  <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                  </svg>
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    </aside>
+        {/* Search trigger */}
+        <div className="px-3 pb-4">
+          <button
+            className="flex w-full items-center gap-2 rounded-lg border border-[var(--admin-border-subtle)] bg-[var(--admin-bg-primary)] px-3 py-2 text-sm text-[var(--admin-text-muted)] hover:border-[var(--admin-border-emphasis)]"
+            onClick={() => document.dispatchEvent(new CustomEvent('open-command-palette'))}
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <span>Search...</span>
+            <span className="ml-auto rounded bg-[var(--admin-bg-hover)] px-1.5 py-0.5 text-[10px] font-medium">⌘K</span>
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3">
+          <ul className="space-y-1">
+            {navItems.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={closeSidebar}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150 ${
+                      active
+                        ? 'border-l-2 border-[var(--admin-accent-blue)] bg-[var(--admin-bg-active)] text-[var(--admin-accent-blue)]'
+                        : 'text-[var(--admin-text-secondary)] hover:bg-[var(--admin-bg-hover)] hover:text-[var(--admin-text-primary)]'
+                    }`}
+                  >
+                    <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                    </svg>
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </aside>
+    </>
   );
 }
