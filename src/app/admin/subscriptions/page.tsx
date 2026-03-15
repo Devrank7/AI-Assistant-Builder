@@ -34,7 +34,7 @@ const filterConfigs: FilterConfig[] = [
     ],
   },
   {
-    key: 'expiring',
+    key: 'expiringWithin',
     label: 'Expiring Within',
     options: [
       { value: '7', label: 'Next 7 days' },
@@ -59,11 +59,20 @@ export default function SubscriptionsPage() {
       const params = new URLSearchParams();
       if (filterValues.plan) params.set('plan', filterValues.plan);
       if (filterValues.status) params.set('status', filterValues.status);
-      if (filterValues.expiring) params.set('expiring', filterValues.expiring);
+      if (filterValues.expiringWithin) params.set('expiringWithin', filterValues.expiringWithin);
       const res = await fetch(`/api/admin/subscriptions?${params.toString()}`);
       if (res.ok) {
         const json = await res.json();
-        setUsers(json.data ?? []);
+        setUsers(json.data?.users ?? []);
+        if (json.data?.summary) {
+          const s = json.data.summary;
+          setStats({
+            activeCount: s.activeSubscriptions ?? 0,
+            trialsExpiringThisWeek: s.trialsExpiringThisWeek ?? 0,
+            pastDueCount: s.pastDue ?? 0,
+            totalMrr: s.mrr ?? 0,
+          });
+        }
       } else {
         toastError('Failed to load subscriptions');
       }

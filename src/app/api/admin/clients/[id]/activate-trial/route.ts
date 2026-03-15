@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
+import { verifyAdmin } from '@/lib/auth';
 import Client from '@/models/Client';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAdmin(request);
+  if (!auth.authenticated) return auth.response;
+
   try {
     const { id } = await params;
     await connectDB();

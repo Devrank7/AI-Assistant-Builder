@@ -13,14 +13,18 @@ export async function GET(request: NextRequest) {
 
   const params = request.nextUrl.searchParams;
   const page = parseInt(params.get('page') ?? '1');
-  const limit = parseInt(params.get('limit') ?? '20');
+  const limit = Math.min(parseInt(params.get('limit') ?? '20'), 100);
   const search = params.get('search')?.trim();
   const clientType = params.get('clientType');
   const status = params.get('status');
 
+  function escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   const filter: Record<string, unknown> = {};
   if (search) {
-    const regex = new RegExp(search, 'i');
+    const regex = new RegExp(escapeRegex(search), 'i');
     filter.$or = [{ name: regex }, { domain: regex }, { clientId: regex }];
   }
   if (clientType) filter.clientType = clientType;

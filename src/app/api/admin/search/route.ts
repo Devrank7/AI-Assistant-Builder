@@ -14,7 +14,10 @@ export async function GET(request: NextRequest) {
 
   await connectDB();
 
-  const regex = new RegExp(q, 'i');
+  function escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  const regex = new RegExp(escapeRegex(q), 'i');
 
   const [users, clients] = await Promise.all([
     User.find({ $or: [{ email: regex }, { name: regex }] })

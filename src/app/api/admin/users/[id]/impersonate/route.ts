@@ -23,6 +23,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   });
 
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const url = `/cabinet?impersonate_token=${token}`;
 
-  return successResponse({ token, expiresAt, email: user.email });
+  return successResponse({ token, url, expiresAt, email: user.email });
 }

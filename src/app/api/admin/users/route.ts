@@ -12,16 +12,20 @@ export async function GET(request: NextRequest) {
 
   const params = request.nextUrl.searchParams;
   const page = parseInt(params.get('page') ?? '1');
-  const limit = parseInt(params.get('limit') ?? '20');
+  const limit = Math.min(parseInt(params.get('limit') ?? '20'), 100);
   const search = params.get('search')?.trim();
   const plan = params.get('plan');
   const status = params.get('status');
   const sortBy = params.get('sortBy') ?? 'createdAt';
   const sortDir = params.get('sortDir') === 'asc' ? 1 : -1;
 
+  function escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   const filter: Record<string, unknown> = {};
   if (search) {
-    const regex = new RegExp(search, 'i');
+    const regex = new RegExp(escapeRegex(search), 'i');
     filter.$or = [{ email: regex }, { name: regex }];
   }
   if (plan) filter.plan = plan;

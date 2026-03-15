@@ -9,7 +9,7 @@ import { generateCsv, downloadCsv } from '@/lib/exportCsv';
 
 const filterConfigs: FilterConfig[] = [
   {
-    key: 'type',
+    key: 'clientType',
     label: 'All Types',
     options: [
       { value: 'full', label: 'Full' },
@@ -40,7 +40,7 @@ export default function ClientsPage() {
     try {
       const params = new URLSearchParams();
       if (search) params.set('search', search);
-      if (filterValues.type) params.set('type', filterValues.type);
+      if (filterValues.clientType) params.set('clientType', filterValues.clientType);
       if (filterValues.status) params.set('status', filterValues.status);
       const res = await fetch(`/api/admin/clients?${params.toString()}`);
       if (res.ok) {

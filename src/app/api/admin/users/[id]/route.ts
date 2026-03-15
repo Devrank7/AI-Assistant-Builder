@@ -51,6 +51,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (body[field] !== undefined) update[field] = body[field];
   }
 
+  if (body.extendTrialDays) {
+    const existingUser = await User.findById(id).select('trialEndsAt').lean();
+    const currentEnd = existingUser?.trialEndsAt ? new Date(existingUser.trialEndsAt as unknown as string) : new Date();
+    currentEnd.setDate(currentEnd.getDate() + parseInt(body.extendTrialDays));
+    update.trialEndsAt = currentEnd;
+  }
+
   if (Object.keys(update).length === 0) return Errors.badRequest('No valid fields to update');
 
   const user = await User.findByIdAndUpdate(id, { $set: update }, { new: true })
