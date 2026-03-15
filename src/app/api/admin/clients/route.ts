@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     Client.countDocuments(filter),
   ]);
 
-  const userIds = [...new Set(clients.map((c) => c.userId).filter(Boolean))];
+  const userIds = [...new Set(clients.map((c) => c.userId).filter((id): id is string => Boolean(id)))];
   const owners =
     userIds.length > 0
       ? await User.find({ _id: { $in: userIds } })

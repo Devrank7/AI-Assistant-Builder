@@ -114,8 +114,8 @@ export async function GET(request: NextRequest) {
     recentClients: recentClients.map((c) => ({
       _id: String(c._id),
       clientId: c.clientId,
-      name: c.name || c.clientId,
-      domain: c.domain || '',
+      name: c.username || c.clientId,
+      domain: c.website || '',
       subscriptionStatus: c.subscriptionStatus,
       createdAt: c.createdAt,
     })),

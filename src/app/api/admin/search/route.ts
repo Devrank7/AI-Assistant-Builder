@@ -21,13 +21,13 @@ export async function GET(request: NextRequest) {
       .select('email name plan subscriptionStatus')
       .limit(10)
       .lean(),
-    Client.find({ $or: [{ name: regex }, { domain: regex }, { clientId: regex }] })
-      .select('clientId name domain subscriptionStatus userId')
+    Client.find({ $or: [{ username: regex }, { website: regex }, { clientId: regex }] })
+      .select('clientId username website subscriptionStatus userId')
       .limit(10)
       .lean(),
   ]);
 
-  const userIds = [...new Set(clients.map((c) => c.userId).filter(Boolean))];
+  const userIds = [...new Set(clients.map((c) => c.userId).filter((id): id is string => Boolean(id)))];
   const owners =
     userIds.length > 0
       ? await User.find({ _id: { $in: userIds } })
@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
     })),
     clients: clients.map((c) => ({
       _id: String(c._id),
-      name: c.name || c.clientId,
-      domain: c.domain || '',
+      name: c.username || c.clientId,
+      domain: c.website || '',
       status: c.subscriptionStatus,
       ownerEmail: c.userId ? (ownerMap.get(String(c.userId)) ?? '') : '',
     })),

@@ -4,7 +4,7 @@ import { DataTable, type Column } from '@/components/admin/ui/DataTable';
 import { StatusBadge } from '@/components/admin/ui/StatusBadge';
 import { QuickActionMenu, type MenuItem } from '@/components/admin/ui/QuickActionMenu';
 
-interface SubRow {
+export interface SubRow extends Record<string, unknown> {
   _id: string;
   email: string;
   name: string;

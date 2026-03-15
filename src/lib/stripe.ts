@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import type { Plan, BillingPeriod } from '@/models/User';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? 'sk_placeholder');
 
 export const PRICE_IDS = {
   basic_monthly: process.env.STRIPE_PRICE_BASIC_MONTHLY || 'price_basic_monthly',

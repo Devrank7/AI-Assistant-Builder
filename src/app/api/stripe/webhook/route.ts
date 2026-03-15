@@ -75,7 +75,8 @@ export async function POST(request: NextRequest) {
         past_due: 'past_due',
         trialing: 'trial',
       };
-      user.subscriptionStatus = statusMap[subscription.status] || subscription.status;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user.subscriptionStatus = (statusMap[subscription.status] || subscription.status) as any;
 
       await user.save();
       break;

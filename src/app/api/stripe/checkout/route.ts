@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
     await user.save();
   }
 
-  const sessionParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sessionParams: any = {
     mode: 'subscription',
     customer: stripeCustomerId,
     line_items: [{ price: getPriceId(plan as Exclude<Plan, 'none'>, period as BillingPeriod), quantity: 1 }],

@@ -3,19 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FilterBar, type FilterConfig } from '@/components/admin/ui/FilterBar';
 import { StatCard } from '@/components/admin/ui/StatCard';
-import { SubscriptionsTable } from '@/components/admin/subscriptions/SubscriptionsTable';
+import { SubscriptionsTable, type SubRow } from '@/components/admin/subscriptions/SubscriptionsTable';
 import { useToast } from '@/components/ui/Toast';
-
-interface SubRow {
-  _id: string;
-  email: string;
-  name: string;
-  plan: string;
-  subscriptionStatus: string;
-  clientsCount: number;
-  mrrAmount: number;
-  trialEndsAt: string | null;
-}
 
 interface SubStats {
   activeCount: number;

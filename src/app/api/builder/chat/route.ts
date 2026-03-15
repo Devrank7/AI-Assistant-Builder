@@ -104,7 +104,8 @@ export async function POST(request: NextRequest) {
         const model = genAI.getGenerativeModel({
           model: modelId,
           systemInstruction: SYSTEM_PROMPT,
-          tools: [{ functionDeclarations: GEMINI_TOOL_DECLARATIONS }],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          tools: [{ functionDeclarations: GEMINI_TOOL_DECLARATIONS as any }],
         });
 
         const chat = model.startChat({
@@ -175,7 +176,8 @@ export async function POST(request: NextRequest) {
 
               // Update session based on tool results
               if (toolName === 'analyze_site' && toolResult.success) {
-                session.siteProfile = toolResult.profile;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                session.siteProfile = (toolResult as any).profile;
                 session.currentStage = 'analysis';
               } else if (toolName === 'select_theme' && toolResult.success) {
                 const idx = toolResult.selectedVariant as number;
