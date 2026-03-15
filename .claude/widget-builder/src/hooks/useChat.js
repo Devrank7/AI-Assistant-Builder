@@ -281,6 +281,32 @@ export default function useChat(config) {
         try { localStorage.setItem(sessionKey, newId); } catch {}
     }, [storageKey, sessionKey]);
 
+    // ── Playground live-preview listener ────────────────────────────
+    // Listens for PLAYGROUND_THEME_UPDATE messages from the playground
+    // control panel and applies CSS variable overrides to the Shadow DOM
+    // host element. No-op in production (no messages are sent).
+    useEffect(() => {
+      const handler = (event) => {
+        if (!event.data || event.data.type !== 'PLAYGROUND_THEME_UPDATE') return;
+        const themeUpdates = event.data.theme;
+        if (!themeUpdates || typeof themeUpdates !== 'object') return;
+
+        // Find the Shadow DOM host element (ai-chat-widget custom element)
+        const host = document.querySelector('ai-chat-widget');
+        if (!host || !host.shadowRoot) return;
+
+        // Apply each theme field as a CSS custom property
+        const kebab = (key) => key.replace(/([A-Z])/g, '-$1').toLowerCase();
+        for (const [key, value] of Object.entries(themeUpdates)) {
+          if (typeof value === 'string') {
+            host.style.setProperty(`--widget-${kebab(key)}`, value);
+          }
+        }
+      };
+      window.addEventListener('message', handler);
+      return () => window.removeEventListener('message', handler);
+    }, []);
+
     return {
         messages,
         sendMessage,
