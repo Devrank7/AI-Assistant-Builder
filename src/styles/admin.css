@@ -1,0 +1,46 @@
+/* src/styles/admin.css */
+
+/* Admin Panel Design Tokens — Enterprise Dark */
+:root {
+  /* Backgrounds */
+  --admin-bg-primary: #0F1117;
+  --admin-bg-card: #1A1D2B;
+  --admin-bg-hover: #252836;
+  --admin-bg-active: #2D3148;
+
+  /* Text */
+  --admin-text-primary: #F1F5F9;
+  --admin-text-secondary: #94A3B8;
+  --admin-text-muted: #475569;
+
+  /* Accent */
+  --admin-accent-blue: #2563EB;
+  --admin-accent-blue-light: #3B82F6;
+
+  /* Status */
+  --admin-status-success: #34D399;
+  --admin-status-warning: #F59E0B;
+  --admin-status-danger: #EF4444;
+  --admin-status-info: #60A5FA;
+
+  /* Borders */
+  --admin-border-subtle: rgba(255, 255, 255, 0.06);
+  --admin-border-emphasis: rgba(255, 255, 255, 0.12);
+
+  /* Spacing */
+  --admin-sidebar-width: 240px;
+  --admin-header-height: 56px;
+}
+
+/* Admin skeleton shimmer */
+@keyframes admin-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.admin-skeleton {
+  background: linear-gradient(90deg, var(--admin-bg-card) 25%, var(--admin-bg-hover) 50%, var(--admin-bg-card) 75%);
+  background-size: 200% 100%;
+  animation: admin-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
