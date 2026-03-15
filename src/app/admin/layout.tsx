@@ -2,6 +2,7 @@
 
 import { Sidebar } from '@/components/admin/Sidebar';
 import { CommandPalette } from '@/components/admin/CommandPalette';
+import { NotificationCenter } from '@/components/admin/NotificationCenter';
 import { type ReactNode } from 'react';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -12,8 +13,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-[var(--admin-header-height)] items-center justify-end border-b border-[var(--admin-border-subtle)] bg-[var(--admin-bg-primary)]/80 px-6 backdrop-blur-sm">
           <div className="flex items-center gap-4">
-            {/* NotificationCenter will be added in Task 13 */}
-            <div id="notification-center-slot" />
+            <NotificationCenter />
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--admin-accent-blue)] text-xs font-medium text-white">
                 A
