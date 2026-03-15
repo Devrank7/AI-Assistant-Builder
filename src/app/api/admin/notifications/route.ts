@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import { verifyAdmin } from '@/lib/auth';
 import { successResponse } from '@/lib/apiResponse';
 import User from '@/models/User';
+import { buildAlerts } from '@/lib/adminAlerts';
 
 export async function GET(request: NextRequest) {
   const auth = await verifyAdmin(request);
@@ -25,24 +26,7 @@ export async function GET(request: NextRequest) {
       .lean(),
   ]);
 
-  const alerts = [
-    ...pastDueUsers.map((u) => ({
-      id: String(u._id),
-      type: 'past_due',
-      title: 'Past Due Payment',
-      message: `${u.email} — payment overdue`,
-      link: `/admin/users/${u._id}`,
-      severity: 'danger' as const,
-    })),
-    ...expiringTrials.map((u) => ({
-      id: String(u._id),
-      type: 'trial_expiring',
-      title: 'Trial Expiring',
-      message: `${u.email} — expires ${u.trialEndsAt ? new Date(u.trialEndsAt).toLocaleDateString() : 'soon'}`,
-      link: `/admin/users/${u._id}`,
-      severity: 'warning' as const,
-    })),
-  ];
+  const alerts = buildAlerts(pastDueUsers, expiringTrials);
 
   return successResponse(alerts);
 }
