@@ -137,6 +137,12 @@ export default function MyWidgetsPage() {
                 >
                   Preview
                 </Link>
+                <Link
+                  href={`/dashboard/playground/${widget.clientId}`}
+                  className="flex-1 rounded-lg px-3 py-1.5 text-center text-sm text-cyan-400 transition-colors hover:bg-cyan-500/10 hover:text-cyan-300"
+                >
+                  Customize
+                </Link>
                 <button
                   onClick={() => handleDelete(widget.clientId)}
                   disabled={deletingId === widget.clientId}
