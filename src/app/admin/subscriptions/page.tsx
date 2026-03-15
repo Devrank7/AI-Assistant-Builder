@@ -52,6 +52,8 @@ export default function SubscriptionsPage() {
   const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batchLoading, setBatchLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -60,10 +62,12 @@ export default function SubscriptionsPage() {
       if (filterValues.plan) params.set('plan', filterValues.plan);
       if (filterValues.status) params.set('status', filterValues.status);
       if (filterValues.expiringWithin) params.set('expiringWithin', filterValues.expiringWithin);
+      params.set('page', String(page));
       const res = await fetch(`/api/admin/subscriptions?${params.toString()}`);
       if (res.ok) {
         const json = await res.json();
         setUsers(json.data?.users ?? []);
+        setTotalPages(json.data?.totalPages ?? 1);
         if (json.data?.summary) {
           const s = json.data.summary;
           setStats({
@@ -81,7 +85,7 @@ export default function SubscriptionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [filterValues, toastError]);
+  }, [filterValues, page, toastError]);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
@@ -97,6 +101,10 @@ export default function SubscriptionsPage() {
       setStatsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterValues]);
 
   useEffect(() => {
     fetchUsers();
@@ -251,6 +259,29 @@ export default function SubscriptionsPage() {
 
       {/* Table */}
       <SubscriptionsTable users={users} loading={loading} onAction={handleAction} onSelectionChange={setSelectedIds} />
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1 || loading}
+            className="rounded-lg border border-[var(--admin-border-subtle)] bg-[var(--admin-bg-primary)] px-3 py-1.5 text-sm text-[var(--admin-text-secondary)] transition-colors hover:bg-[var(--admin-bg-hover)] disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-[var(--admin-text-secondary)]">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages || loading}
+            className="rounded-lg border border-[var(--admin-border-subtle)] bg-[var(--admin-bg-primary)] px-3 py-1.5 text-sm text-[var(--admin-text-secondary)] transition-colors hover:bg-[var(--admin-bg-hover)] disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

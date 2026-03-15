@@ -17,6 +17,9 @@ export async function GET(request: NextRequest) {
   const plan = params.get('plan');
   const status = params.get('status');
   const expiringWithin = params.get('expiringWithin');
+  const page = Math.max(1, parseInt(params.get('page') ?? '1', 10));
+  const limit = Math.min(100, Math.max(1, parseInt(params.get('limit') ?? '20', 10)));
+  const skip = (page - 1) * limit;
 
   const filter: Record<string, unknown> = {};
   if (plan) filter.plan = plan;
@@ -29,10 +32,15 @@ export async function GET(request: NextRequest) {
     filter.subscriptionStatus = 'trial';
   }
 
-  const users = await User.find(filter)
-    .select('-passwordHash -refreshTokens -passwordResetToken -passwordResetExpires -emailVerificationToken')
-    .sort({ createdAt: -1 })
-    .lean();
+  const [users, total] = await Promise.all([
+    User.find(filter)
+      .select('-passwordHash -refreshTokens -passwordResetToken -passwordResetExpires -emailVerificationToken')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    User.countDocuments(filter),
+  ]);
 
   const userIds = users.map((u) => u._id);
   const clientCounts = await Client.aggregate([
@@ -66,5 +74,8 @@ export async function GET(request: NextRequest) {
       clientsCount: countMap.get(String(u._id)) ?? 0,
       mrrAmount: PLAN_PRICES[u.plan] ?? 0,
     })),
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
   });
 }
