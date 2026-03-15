@@ -1,6 +1,7 @@
 'use client';
 
 import { Sidebar } from '@/components/admin/Sidebar';
+import { CommandPalette } from '@/components/admin/CommandPalette';
 import { type ReactNode } from 'react';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -24,6 +25,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {/* Content */}
         <main className="p-6">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   );
 }
