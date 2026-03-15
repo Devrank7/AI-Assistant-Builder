@@ -1,7 +1,7 @@
 interface AlertUser {
   _id: unknown;
   email: string;
-  trialEndsAt?: Date | string;
+  trialEndsAt?: Date | string | null;
 }
 
 export interface AdminAlert {
@@ -27,7 +27,7 @@ export function buildAlerts(pastDueUsers: AlertUser[], expiringTrials: AlertUser
       id: String(u._id),
       type: 'trial_expiring',
       title: 'Trial Expiring',
-      message: `${u.email} — expires ${u.trialEndsAt ? new Date(u.trialEndsAt as string).toLocaleDateString() : 'soon'}`,
+      message: `${u.email} — expires ${u.trialEndsAt ? new Date(u.trialEndsAt as Date).toLocaleDateString() : 'soon'}`,
       link: `/admin/users/${u._id}`,
       severity: 'warning' as const,
     })),
