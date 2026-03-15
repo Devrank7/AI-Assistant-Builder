@@ -37,9 +37,40 @@ export function NotificationCenter() {
   };
 
   useEffect(() => {
-    fetchAlerts();
-    const interval = setInterval(fetchAlerts, 60_000);
-    return () => clearInterval(interval);
+    let eventSource: EventSource | null = null;
+    let interval: NodeJS.Timeout | null = null;
+
+    try {
+      eventSource = new EventSource('/api/admin/notifications/stream');
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          setAlerts(data);
+        } catch {
+          /* ignore parse errors */
+        }
+      };
+
+      eventSource.onerror = () => {
+        // SSE failed, fall back to polling
+        eventSource?.close();
+        eventSource = null;
+        if (!interval) {
+          fetchAlerts();
+          interval = setInterval(fetchAlerts, 60_000);
+        }
+      };
+    } catch {
+      // EventSource not supported, use polling
+      fetchAlerts();
+      interval = setInterval(fetchAlerts, 60_000);
+    }
+
+    return () => {
+      eventSource?.close();
+      if (interval) clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
