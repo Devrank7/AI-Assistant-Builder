@@ -53,7 +53,7 @@ export default function ClientCard({ client, isQuick = false }: ClientCardProps)
       />
 
       <div className="glass relative h-full border-white/[0.04] p-6 transition-colors group-hover:border-white/10 group-hover:bg-white/[0.05]">
-        <Link href={`/admin/client/${client.clientId}`} className="absolute inset-0 z-10">
+        <Link href={`/admin/clients/${client.clientId}`} className="absolute inset-0 z-10">
           <span className="sr-only">View Details</span>
         </Link>
         {/* Header */}
