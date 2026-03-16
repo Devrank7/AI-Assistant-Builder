@@ -16,6 +16,10 @@ export const AGENT_TOOL_NAMES = [
   'crawl_knowledge',
   'connect_crm',
   'set_panel_mode',
+  'read_widget_code',
+  'modify_widget_code',
+  'rollback_widget',
+  'add_integration',
 ] as const;
 export type AgentToolName = (typeof AGENT_TOOL_NAMES)[number];
 
@@ -42,6 +46,8 @@ export type SSEEvent =
   | { type: 'ab_variants'; variants: { label: string; theme: Record<string, unknown> }[] }
   | { type: 'panel_mode'; mode: PanelMode }
   | { type: 'progress'; stage: BuilderStage; status: 'active' | 'complete' }
+  | { type: 'progress'; message: string }
+  | { type: 'widget_ready'; clientId: string }
   | { type: 'crm_instruction'; provider: string; steps: string[] }
   | { type: 'error'; message: string; recoverable: boolean }
   | { type: 'knowledge_progress'; uploaded: number; total: number }

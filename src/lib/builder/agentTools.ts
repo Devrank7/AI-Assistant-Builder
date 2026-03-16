@@ -3,13 +3,17 @@ import type { SSEEvent, AgentToolName, PanelMode, SiteProfile } from './types';
 import { analyzeSite } from './siteAnalyzer';
 import { uploadKnowledge, setAIPrompt } from './knowledgeCrawler';
 import { getCRMSetup } from './crmSetup';
+import { readWidgetCode, validateFilePath, writeWidgetFile, saveVersion, rollbackToVersion } from './widgetCodeManager';
+import { CODEGEN_SYSTEM_PROMPT, buildCodegenUserPrompt } from './codegenPrompt';
+import path from 'path';
+import fs from 'fs';
 
 export interface GeminiToolDeclaration {
   name: string;
   description: string;
   parameters: {
     type: string;
-    properties: Record<string, { type: string; description: string; enum?: string[] }>;
+    properties: Record<string, { type: string; description: string; enum?: string[]; items?: { type: string } }>;
     required: string[];
   };
 }
@@ -99,6 +103,23 @@ export const GEMINI_TOOL_DECLARATIONS: GeminiToolDeclaration[] = [
       required: ['mode'],
     },
   },
+  {
+    name: 'read_widget_code',
+    description:
+      'Read the current widget source code files for a client. Call this before modifying code to understand the current structure.',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        files: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Specific files to read (e.g. ["components/Widget.jsx"]). If omitted, reads all source files.',
+        },
+      },
+      required: ['clientId'],
+    },
+  },
 ];
 
 export interface ToolContext {
@@ -107,6 +128,7 @@ export interface ToolContext {
   baseUrl: string;
   cookie: string;
   write: (event: SSEEvent) => void;
+  userPlan?: string;
 }
 
 type ToolExecutor = (args: Record<string, unknown>, ctx: ToolContext) => Promise<Record<string, unknown>>;
@@ -205,6 +227,22 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     const mode = args.mode as PanelMode;
     ctx.write({ type: 'panel_mode', mode });
     return { success: true, mode };
+  },
+
+  async read_widget_code(args, ctx) {
+    const clientId = args.clientId as string;
+    const files = args.files as string[] | undefined;
+    ctx.write({ type: 'progress', message: 'Reading widget source code...' });
+
+    const bundle = readWidgetCode(clientId, files);
+    const fileCount = Object.keys(bundle).length;
+
+    if (fileCount === 0) {
+      return { error: `No widget source found for client "${clientId}".` };
+    }
+
+    ctx.write({ type: 'progress', message: `Read ${fileCount} source files.` });
+    return { files: bundle };
   },
 };
 
