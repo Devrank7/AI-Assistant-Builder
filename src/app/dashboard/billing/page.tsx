@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { CreditCard, Check, ArrowRight, Crown, Minus } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { PRICING_PLANS, getFeatureComparison, getPlanById } from '@/lib/pricing';
+import { Card, Button, Badge } from '@/components/ui';
 
 export default function BillingPage() {
   const { user } = useAuth();
@@ -24,18 +26,18 @@ export default function BillingPage() {
     }
   };
 
-  const statusColor = (status: string) => {
+  const statusBadgeVariant = (status: string): 'green' | 'blue' | 'amber' | 'red' | 'default' => {
     switch (status) {
       case 'active':
-        return 'bg-green-500/15 text-green-400';
+        return 'green';
       case 'trial':
-        return 'bg-blue-500/15 text-blue-400';
+        return 'blue';
       case 'past_due':
-        return 'bg-yellow-500/15 text-yellow-400';
+        return 'amber';
       case 'canceled':
-        return 'bg-red-500/15 text-red-400';
+        return 'red';
       default:
-        return 'bg-gray-500/15 text-gray-400';
+        return 'default';
     }
   };
 
@@ -46,97 +48,148 @@ export default function BillingPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <h1 className="text-2xl font-bold text-white">Billing</h1>
+      <div className="flex items-center gap-3">
+        <CreditCard className="text-text-secondary h-6 w-6" />
+        <h1 className="text-text-primary text-2xl font-bold">Billing</h1>
+      </div>
 
       {/* Current plan card */}
-      <div className="rounded-xl border border-white/10 bg-[#12121a] p-6">
+      <Card padding="lg">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="mb-1 text-sm text-gray-400">Current Plan</p>
-            <p className="text-2xl font-bold text-white">{currentPlan?.name || 'Free'}</p>
-            {currentPlan && currentPlan.monthlyPrice > 0 && (
-              <p className="mt-1 text-sm text-gray-500">${currentPlan.monthlyPrice}/mo</p>
-            )}
-            <div className="mt-2">
-              <span
-                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusColor(
-                  user?.subscriptionStatus || ''
-                )}`}
-              >
+          <div className="space-y-2">
+            <p className="text-text-tertiary text-sm font-medium">Current Plan</p>
+            <div className="flex items-center gap-3">
+              <p className="text-text-primary text-2xl font-bold">{currentPlan?.name || 'Free'}</p>
+              <Badge variant={statusBadgeVariant(user?.subscriptionStatus || '')} className="capitalize">
                 {user?.subscriptionStatus || 'N/A'}
-              </span>
+              </Badge>
             </div>
+            {currentPlan && currentPlan.monthlyPrice > 0 && (
+              <p className="text-text-tertiary text-sm">${currentPlan.monthlyPrice}/mo</p>
+            )}
           </div>
 
           <div>
             {hasSubscription ? (
-              <button
-                onClick={handleManageSubscription}
-                disabled={loadingPortal}
-                className="rounded-lg border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/10 disabled:opacity-50"
-              >
+              <Button variant="secondary" size="lg" onClick={handleManageSubscription} disabled={loadingPortal}>
                 {loadingPortal ? 'Loading...' : 'Manage Subscription'}
-              </button>
+              </Button>
             ) : (
-              <Link
-                href="/pricing"
-                className="inline-flex rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-600"
-              >
-                Upgrade Plan
+              <Link href="/pricing">
+                <Button variant="primary" size="lg">
+                  Upgrade Plan
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </Link>
             )}
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Plan comparison */}
-      <div>
-        <h2 className="mb-4 text-lg font-semibold text-white">Plan Comparison</h2>
-        <div className="overflow-hidden rounded-xl border border-white/10 bg-[#12121a]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="px-4 py-3 text-left font-medium text-gray-400">Feature</th>
-                {PRICING_PLANS.map((plan) => (
-                  <th
-                    key={plan.id}
-                    className={`px-4 py-3 text-center font-medium ${plan.id === currentPlanId ? 'text-cyan-400' : 'text-gray-400'}`}
-                  >
-                    {plan.name}
+      <div className="space-y-4">
+        <h2 className="text-text-primary text-lg font-semibold">Plan Comparison</h2>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {PRICING_PLANS.map((plan) => {
+            const isCurrentPlan = plan.id === currentPlanId;
+            const isPro = plan.id === 'pro';
+
+            return (
+              <Card
+                key={plan.id}
+                padding="md"
+                className={`relative ${isPro ? 'border-accent' : ''} ${isCurrentPlan ? 'ring-accent/30 ring-1' : ''}`}
+              >
+                {isPro && (
+                  <div className="mb-3 flex items-center gap-1.5">
+                    <Crown className="text-accent h-4 w-4" />
+                    <span className="text-accent text-xs font-medium">Recommended</span>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-text-primary text-base font-semibold">{plan.name}</h3>
+                      {isCurrentPlan && <Badge variant="green">Current</Badge>}
+                    </div>
+                    <p className="text-text-primary mt-1 text-xl font-bold">
+                      {plan.monthlyPrice === 0 ? 'Free' : `$${plan.monthlyPrice}`}
+                      {plan.monthlyPrice > 0 && <span className="text-text-tertiary text-sm font-normal">/mo</span>}
+                    </p>
+                  </div>
+
+                  <ul className="space-y-2">
+                    {features.slice(0, 5).map((row) => {
+                      const value = row[plan.id as keyof typeof row];
+                      if (typeof value === 'boolean' && !value) return null;
+                      return (
+                        <li key={row.feature} className="flex items-start gap-2 text-xs">
+                          <Check className="text-accent mt-0.5 h-3.5 w-3.5 shrink-0" />
+                          <span className="text-text-secondary">
+                            {row.feature}
+                            {typeof value === 'string' && value !== 'true' && (
+                              <span className="text-text-tertiary"> ({value})</span>
+                            )}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Feature comparison table */}
+      <div className="space-y-4">
+        <h2 className="text-text-primary text-lg font-semibold">Detailed Features</h2>
+        <Card padding="sm" className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] text-sm">
+              <thead>
+                <tr className="border-border border-b">
+                  <th className="text-text-tertiary px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
+                    Feature
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {features.map((row) => (
-                <tr key={row.feature} className="border-b border-white/5 last:border-0">
-                  <td className="px-4 py-3 text-gray-300">{row.feature}</td>
-                  {(['free', 'starter', 'pro', 'enterprise'] as const).map((planKey) => (
-                    <td key={planKey} className="px-4 py-3 text-center">
-                      {typeof row[planKey] === 'boolean' ? (
-                        row[planKey] ? (
-                          <svg
-                            className="mx-auto h-5 w-5 text-cyan-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                          </svg>
-                        ) : (
-                          <span className="text-gray-700">&mdash;</span>
-                        )
-                      ) : (
-                        <span className="text-gray-400">{row[planKey]}</span>
-                      )}
-                    </td>
+                  {PRICING_PLANS.map((plan) => (
+                    <th
+                      key={plan.id}
+                      className={`px-4 py-3 text-center text-xs font-medium tracking-wider uppercase ${
+                        plan.id === currentPlanId ? 'text-accent' : 'text-text-tertiary'
+                      }`}
+                    >
+                      {plan.name}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {features.map((row, i) => (
+                  <tr key={row.feature} className={i < features.length - 1 ? 'border-border border-b' : ''}>
+                    <td className="text-text-secondary px-4 py-3">{row.feature}</td>
+                    {(['free', 'starter', 'pro', 'enterprise'] as const).map((planKey) => (
+                      <td key={planKey} className="px-4 py-3 text-center">
+                        {typeof row[planKey] === 'boolean' ? (
+                          row[planKey] ? (
+                            <Check className="text-accent mx-auto h-4 w-4" />
+                          ) : (
+                            <Minus className="text-text-tertiary mx-auto h-4 w-4" />
+                          )
+                        ) : (
+                          <span className="text-text-secondary">{row[planKey]}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
     </div>
   );

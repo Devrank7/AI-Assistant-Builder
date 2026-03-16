@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { Card, Button, Badge } from '@/components/ui';
+import { BarChart3, TrendingUp, MessageSquare, Clock, ThumbsUp, CalendarDays, Hash, Radio } from 'lucide-react';
 
 interface WidgetAnalytics {
   clientId: string;
@@ -59,10 +61,10 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl">
-        <h1 className="mb-6 text-2xl font-bold text-white">Analytics</h1>
+        <h1 className="text-text-primary mb-6 text-2xl font-bold">Analytics</h1>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 animate-pulse rounded-xl bg-white/5" />
+            <Card key={i} className="h-28 animate-pulse opacity-60" />
           ))}
         </div>
       </div>
@@ -72,11 +74,12 @@ export default function AnalyticsPage() {
   if (!data || data.widgets.length === 0) {
     return (
       <div className="mx-auto max-w-7xl">
-        <h1 className="mb-6 text-2xl font-bold text-white">Analytics</h1>
-        <div className="rounded-xl border border-white/10 bg-[#12121a] p-12 text-center">
-          <h2 className="mb-2 text-lg font-semibold text-white">No data yet</h2>
-          <p className="text-gray-500">Create a widget and start getting chats to see analytics here.</p>
-        </div>
+        <h1 className="text-text-primary mb-6 text-2xl font-bold">Analytics</h1>
+        <Card className="p-12 text-center">
+          <BarChart3 className="text-text-tertiary mx-auto mb-3 h-10 w-10" />
+          <h2 className="text-text-primary mb-2 text-lg font-semibold">No data yet</h2>
+          <p className="text-text-tertiary text-sm">Create a widget and start getting chats to see analytics here.</p>
+        </Card>
       </div>
     );
   }
@@ -85,62 +88,113 @@ export default function AnalyticsPage() {
   const activeWidget = selectedWidget ? data.widgets.find((w) => w.clientId === selectedWidget) : null;
 
   const statCards = [
-    { label: 'Total Chats', value: t.totalChats.toLocaleString(), sub: `${t.todayChats} today` },
-    { label: 'Messages', value: t.totalMessages.toLocaleString(), sub: `${days}-day total` },
-    { label: 'Satisfaction', value: `${t.avgSatisfaction}%`, sub: 'avg across widgets' },
-    { label: 'This Week', value: t.weekChats.toLocaleString(), sub: 'chats' },
+    {
+      label: 'Total Chats',
+      value: t.totalChats.toLocaleString(),
+      sub: `${t.todayChats} today`,
+      icon: <MessageSquare className="h-4 w-4" />,
+      changePositive: t.todayChats > 0,
+    },
+    {
+      label: 'Messages',
+      value: t.totalMessages.toLocaleString(),
+      sub: `${days}-day total`,
+      icon: <Hash className="h-4 w-4" />,
+      changePositive: true,
+    },
+    {
+      label: 'Satisfaction',
+      value: `${t.avgSatisfaction}%`,
+      sub: 'avg across widgets',
+      icon: <ThumbsUp className="h-4 w-4" />,
+      changePositive: t.avgSatisfaction >= 70,
+    },
+    {
+      label: 'This Week',
+      value: t.weekChats.toLocaleString(),
+      sub: 'chats',
+      icon: <CalendarDays className="h-4 w-4" />,
+      changePositive: t.weekChats > 0,
+    },
+  ];
+
+  const dayOptions = [
+    { label: '7 days', value: 7 },
+    { label: '30 days', value: 30 },
+    { label: '90 days', value: 90 },
   ];
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Analytics</h1>
-        <select
-          value={days}
-          onChange={(e) => setDays(Number(e.target.value))}
-          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
-        >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
-        </select>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-text-primary text-2xl font-bold">Analytics</h1>
+        <div className="flex items-center gap-1.5">
+          {dayOptions.map((opt) => (
+            <Button
+              key={opt.value}
+              variant={days === opt.value ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setDays(opt.value)}
+            >
+              {opt.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
-          <div key={card.label} className="rounded-xl border border-white/10 bg-[#12121a] p-5">
-            <p className="text-xs font-medium text-gray-500 uppercase">{card.label}</p>
-            <p className="mt-1 text-2xl font-bold text-white">{card.value}</p>
-            <p className="mt-1 text-xs text-gray-600">{card.sub}</p>
-          </div>
+          <Card key={card.label}>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-text-secondary text-xs font-medium uppercase">{card.label}</p>
+                <p className="text-text-primary mt-1 text-2xl font-bold">{card.value}</p>
+              </div>
+              <div className="bg-bg-primary text-text-tertiary flex h-8 w-8 items-center justify-center rounded-lg">
+                {card.icon}
+              </div>
+            </div>
+            <div className="mt-2 flex items-center gap-1.5">
+              {card.changePositive ? (
+                <TrendingUp className="h-3 w-3 text-emerald-500" />
+              ) : (
+                <Clock className="text-text-tertiary h-3 w-3" />
+              )}
+              <span className="text-text-tertiary text-xs">{card.sub}</span>
+            </div>
+          </Card>
         ))}
       </div>
 
       {/* Widget Selector */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => setSelectedWidget(null)}
-          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${!selectedWidget ? 'bg-cyan-500/15 text-cyan-400' : 'bg-white/5 text-gray-400 hover:text-white'}`}
-        >
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-text-tertiary mr-1 text-xs font-medium">Filter:</span>
+        <Button variant={!selectedWidget ? 'primary' : 'secondary'} size="sm" onClick={() => setSelectedWidget(null)}>
           All Widgets
-        </button>
+        </Button>
         {data.widgets.map((w) => (
-          <button
+          <Button
             key={w.clientId}
+            variant={selectedWidget === w.clientId ? 'primary' : 'secondary'}
+            size="sm"
             onClick={() => setSelectedWidget(w.clientId)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${selectedWidget === w.clientId ? 'bg-cyan-500/15 text-cyan-400' : 'bg-white/5 text-gray-400 hover:text-white'}`}
           >
             {w.name || w.clientId}
-          </button>
+          </Button>
         ))}
       </div>
 
-      {/* Per-Widget Cards or Aggregate */}
+      {/* Charts Grid */}
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Daily Chart */}
-        <div className="rounded-xl border border-white/10 bg-[#12121a] p-5">
-          <h3 className="mb-4 text-sm font-semibold text-white">Daily Chats</h3>
+        <Card>
+          <div className="mb-4 flex items-center gap-2">
+            <BarChart3 className="text-text-tertiary h-4 w-4" />
+            <h3 className="text-text-primary text-sm font-semibold">Daily Chats</h3>
+            <Badge className="ml-auto">Last 14 days</Badge>
+          </div>
           <div className="flex items-end gap-1" style={{ height: 120 }}>
             {(activeWidget?.analytics.dailyStats || data.widgets[0]?.analytics.dailyStats || [])
               .slice(-14)
@@ -155,38 +209,56 @@ export default function AnalyticsPage() {
                 return (
                   <div
                     key={i}
-                    className="flex-1 rounded-t bg-gradient-to-t from-cyan-600 to-cyan-400 transition-all"
+                    className="bg-accent flex-1 rounded-t transition-all hover:opacity-80"
                     style={{ height: `${Math.max(h, 2)}%` }}
                     title={`${d.date}: ${d.totalChats} chats`}
                   />
                 );
               })}
           </div>
-          <p className="mt-2 text-xs text-gray-600">Last 14 days</p>
-        </div>
+          <div className="text-text-tertiary mt-2 flex items-center justify-between text-[10px]">
+            {(activeWidget?.analytics.dailyStats || data.widgets[0]?.analytics.dailyStats || [])
+              .slice(-14)
+              .filter((_, i, arr) => i === 0 || i === arr.length - 1)
+              .map((d, i) => (
+                <span key={i}>{d.date.slice(5)}</span>
+              ))}
+          </div>
+        </Card>
 
         {/* Top Questions */}
-        <div className="rounded-xl border border-white/10 bg-[#12121a] p-5">
-          <h3 className="mb-4 text-sm font-semibold text-white">Top Questions</h3>
-          <div className="space-y-2">
+        <Card>
+          <div className="mb-4 flex items-center gap-2">
+            <MessageSquare className="text-text-tertiary h-4 w-4" />
+            <h3 className="text-text-primary text-sm font-semibold">Top Questions</h3>
+          </div>
+          <div className="space-y-3">
             {(activeWidget?.analytics.topQuestions || data.widgets[0]?.analytics.topQuestions || [])
               .slice(0, 5)
               .map((q, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <p className="max-w-[80%] truncate text-sm text-gray-400">{q.text}</p>
-                  <span className="text-xs font-medium text-gray-600">{q.count}x</span>
+                <div key={i} className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="bg-bg-primary text-text-tertiary flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-medium">
+                      {i + 1}
+                    </span>
+                    <p className="text-text-secondary truncate text-sm">{q.text}</p>
+                  </div>
+                  <Badge variant="blue">{q.count}x</Badge>
                 </div>
               ))}
             {(activeWidget?.analytics.topQuestions || data.widgets[0]?.analytics.topQuestions || []).length === 0 && (
-              <p className="text-sm text-gray-600">No questions yet</p>
+              <p className="text-text-tertiary text-sm">No questions yet</p>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Hourly Heatmap */}
-        <div className="rounded-xl border border-white/10 bg-[#12121a] p-5">
-          <h3 className="mb-4 text-sm font-semibold text-white">Peak Hours</h3>
-          <div className="grid grid-cols-12 gap-1">
+        <Card>
+          <div className="mb-4 flex items-center gap-2">
+            <Clock className="text-text-tertiary h-4 w-4" />
+            <h3 className="text-text-primary text-sm font-semibold">Peak Hours</h3>
+          </div>
+          <div className="grid grid-cols-6 gap-1 sm:grid-cols-12">
             {(activeWidget?.analytics.hourlyDistribution || data.widgets[0]?.analytics.hourlyDistribution || [])
               .slice(0, 24)
               .map((h) => {
@@ -204,36 +276,45 @@ export default function AnalyticsPage() {
                     key={h.hour}
                     className="aspect-square rounded"
                     style={{
-                      background: `rgba(6,182,212,${0.1 + intensity * 0.7})`,
+                      backgroundColor: `oklch(0.588 0.158 241.966 / ${0.08 + intensity * 0.72})`,
                     }}
                     title={`${h.hour}:00 — ${h.count} chats`}
                   />
                 );
               })}
           </div>
-          <p className="mt-2 text-xs text-gray-600">0h-23h activity</p>
-        </div>
+          <div className="text-text-tertiary mt-2 flex items-center justify-between text-[10px]">
+            <span>12 AM</span>
+            <span>6 AM</span>
+            <span>12 PM</span>
+            <span>6 PM</span>
+            <span>11 PM</span>
+          </div>
+        </Card>
 
         {/* Channel Distribution */}
-        <div className="rounded-xl border border-white/10 bg-[#12121a] p-5">
-          <h3 className="mb-4 text-sm font-semibold text-white">Channels</h3>
+        <Card>
+          <div className="mb-4 flex items-center gap-2">
+            <Radio className="text-text-tertiary h-4 w-4" />
+            <h3 className="text-text-primary text-sm font-semibold">Channels</h3>
+          </div>
           <div className="space-y-3">
             {(activeWidget?.analytics.channelStats || data.widgets[0]?.analytics.channelStats || []).map((ch) => (
               <div key={ch.channel}>
-                <div className="mb-1 flex items-center justify-between text-sm">
-                  <span className="text-gray-400 capitalize">{ch.channel}</span>
-                  <span className="text-gray-600">{ch.percentage}%</span>
+                <div className="mb-1.5 flex items-center justify-between text-sm">
+                  <span className="text-text-secondary font-medium capitalize">{ch.channel}</span>
+                  <Badge>{ch.percentage}%</Badge>
                 </div>
-                <div className="h-1.5 rounded-full bg-white/5">
-                  <div className="h-1.5 rounded-full bg-cyan-500" style={{ width: `${ch.percentage}%` }} />
+                <div className="bg-bg-primary h-1.5 rounded-full">
+                  <div className="bg-accent h-1.5 rounded-full transition-all" style={{ width: `${ch.percentage}%` }} />
                 </div>
               </div>
             ))}
             {(activeWidget?.analytics.channelStats || data.widgets[0]?.analytics.channelStats || []).length === 0 && (
-              <p className="text-sm text-gray-600">No channel data yet</p>
+              <p className="text-text-tertiary text-sm">No channel data yet</p>
             )}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

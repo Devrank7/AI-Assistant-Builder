@@ -197,21 +197,21 @@ export default function LandingChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed right-4 bottom-4 z-50 flex w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-black/50"
+            className="border-border fixed right-4 bottom-4 z-50 flex w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border shadow-2xl shadow-black/50"
             style={{ height: '520px', background: 'rgba(10, 12, 22, 0.98)' }}
           >
             {/* Header */}
             <div className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-sm font-bold text-white">
+              <div className="text-text-primary flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-sm font-bold">
                 AI
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-white">WinBix AI</p>
-                <p className="text-xs text-white/60">Ask me anything about our platform</p>
+                <p className="text-text-primary text-sm font-semibold">WinBix AI</p>
+                <p className="text-text-secondary text-xs">Ask me anything about our platform</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/70 transition hover:bg-white/20 hover:text-white"
+                className="text-text-secondary hover:bg-bg-tertiary hover:text-text-primary flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 transition"
                 aria-label="Close chat"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,23 +227,23 @@ export default function LandingChat() {
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       msg.role === 'user'
-                        ? 'rounded-tr-sm bg-blue-600/25 text-gray-200'
-                        : 'rounded-tl-sm bg-white/[0.06] text-gray-300'
+                        ? 'text-text-primary rounded-tr-sm bg-blue-600/25'
+                        : 'bg-bg-tertiary text-text-secondary rounded-tl-sm'
                     }`}
                     style={{ whiteSpace: 'pre-wrap' }}
                   >
                     {msg.content || (
                       <span className="inline-flex items-center gap-1">
                         <span
-                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                          className="bg-text-secondary h-1.5 w-1.5 animate-bounce rounded-full"
                           style={{ animationDelay: '0ms' }}
                         />
                         <span
-                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                          className="bg-text-secondary h-1.5 w-1.5 animate-bounce rounded-full"
                           style={{ animationDelay: '150ms' }}
                         />
                         <span
-                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                          className="bg-text-secondary h-1.5 w-1.5 animate-bounce rounded-full"
                           style={{ animationDelay: '300ms' }}
                         />
                       </span>
@@ -256,7 +256,7 @@ export default function LandingChat() {
 
             {/* Quick actions (show only when few messages) */}
             {messages.length <= 2 && (
-              <div className="flex flex-wrap gap-2 border-t border-white/[0.04] px-4 py-2">
+              <div className="border-border flex flex-wrap gap-2 border-t px-4 py-2">
                 {['What features do you offer?', 'Show me pricing', 'How does it work?'].map((q) => (
                   <button
                     key={q}
@@ -345,8 +345,8 @@ export default function LandingChat() {
             )}
 
             {/* Input */}
-            <div className="border-t border-white/[0.06] px-4 py-3">
-              <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5">
+            <div className="border-border border-t px-4 py-3">
+              <div className="border-border bg-bg-tertiary flex items-center gap-2 rounded-xl border px-4 py-2.5">
                 <input
                   ref={inputRef}
                   type="text"
@@ -355,7 +355,7 @@ export default function LandingChat() {
                   onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                   placeholder="Type a message..."
                   disabled={isStreaming}
-                  className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none disabled:opacity-50"
+                  className="text-text-primary placeholder-text-tertiary flex-1 bg-transparent text-sm outline-none disabled:opacity-50"
                 />
                 <button
                   onClick={sendMessage}
@@ -372,7 +372,7 @@ export default function LandingChat() {
                   </svg>
                 </button>
               </div>
-              <p className="mt-1.5 text-center text-[10px] text-gray-600">Powered by WinBix AI</p>
+              <p className="text-text-tertiary mt-1.5 text-center text-[10px]">Powered by WinBix AI</p>
             </div>
           </motion.div>
         )}

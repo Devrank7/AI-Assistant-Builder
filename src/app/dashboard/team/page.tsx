@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { Card, Button, Badge, Avatar, Modal, Input } from '@/components/ui';
+import { Users, UserPlus, Mail, Shield, Trash2, Crown, Eye, Pencil } from 'lucide-react';
 
 interface Member {
   userId: string;
@@ -11,11 +13,18 @@ interface Member {
   joinedAt: string;
 }
 
-const ROLE_COLORS: Record<string, string> = {
-  owner: 'bg-purple-500/15 text-purple-400',
-  admin: 'bg-blue-500/15 text-blue-400',
-  editor: 'bg-cyan-500/15 text-cyan-400',
-  viewer: 'bg-gray-500/15 text-gray-400',
+const ROLE_BADGE_VARIANT: Record<string, 'purple' | 'blue' | 'default' | 'default'> = {
+  owner: 'purple',
+  admin: 'blue',
+  editor: 'default',
+  viewer: 'default',
+};
+
+const ROLE_ICON: Record<string, typeof Shield> = {
+  owner: Crown,
+  admin: Shield,
+  editor: Pencil,
+  viewer: Eye,
 };
 
 export default function TeamPage() {
@@ -26,6 +35,7 @@ export default function TeamPage() {
   const [inviteRole, setInviteRole] = useState('editor');
   const [inviting, setInviting] = useState(false);
   const [error, setError] = useState('');
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const canManage = user?.orgRole === 'owner' || user?.orgRole === 'admin';
 
@@ -58,6 +68,8 @@ export default function TeamPage() {
       const json = await res.json();
       if (json.success) {
         setInviteEmail('');
+        setInviteRole('editor');
+        setInviteModalOpen(false);
         fetchMembers();
       } else {
         setError(json.error || 'Failed to invite');
@@ -78,79 +90,135 @@ export default function TeamPage() {
     fetchMembers();
   };
 
+  const closeModal = () => {
+    setInviteModalOpen(false);
+    setInviteEmail('');
+    setInviteRole('editor');
+    setError('');
+  };
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-2xl font-bold text-white">Team</h1>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-bg-secondary flex h-9 w-9 items-center justify-center rounded-lg">
+            <Users className="text-text-secondary h-4 w-4" />
+          </div>
+          <div>
+            <h1 className="text-text-primary text-lg font-semibold">Team</h1>
+            <p className="text-text-tertiary text-xs">
+              {members.length} {members.length === 1 ? 'member' : 'members'}
+            </p>
+          </div>
+        </div>
+        {canManage && (
+          <Button onClick={() => setInviteModalOpen(true)}>
+            <UserPlus className="h-3.5 w-3.5" />
+            Invite
+          </Button>
+        )}
+      </div>
 
-      {/* Invite Form */}
-      {canManage && (
-        <div className="rounded-xl border border-white/10 bg-[#12121a] p-5">
-          <h2 className="mb-3 text-sm font-semibold text-white">Invite Member</h2>
-          <div className="flex gap-3">
-            <input
-              type="email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="email@example.com"
-              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-gray-600 focus:border-cyan-500/30 focus:outline-none"
-            />
+      {/* Invite Modal */}
+      <Modal
+        open={inviteModalOpen}
+        onClose={closeModal}
+        title="Invite team member"
+        description="Send an invitation to join your organization."
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
+              <Mail className="h-3.5 w-3.5" />
+              {inviting ? 'Sending...' : 'Send invite'}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <Input
+            label="Email address"
+            type="email"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            placeholder="colleague@company.com"
+            error={error || undefined}
+          />
+          <div className="space-y-1.5">
+            <label className="text-text-secondary block text-xs font-medium">Role</label>
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+              className="border-border text-text-primary focus:border-accent focus:ring-accent/10 h-9 w-full rounded-lg border bg-transparent px-3 text-sm transition-colors focus:ring-2 focus:outline-none"
             >
               <option value="admin">Admin</option>
               <option value="editor">Editor</option>
               <option value="viewer">Viewer</option>
             </select>
-            <button
-              onClick={handleInvite}
-              disabled={inviting}
-              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50"
-            >
-              {inviting ? 'Inviting...' : 'Invite'}
-            </button>
           </div>
-          {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
         </div>
-      )}
+      </Modal>
 
       {/* Members List */}
-      <div className="rounded-xl border border-white/10 bg-[#12121a]">
+      <Card padding="sm" className="overflow-hidden">
         {loading ? (
-          <div className="space-y-3 p-5">
+          <div className="space-y-1 p-2">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-14 animate-pulse rounded-lg bg-white/5" />
+              <div key={i} className="bg-bg-tertiary h-14 animate-pulse rounded-lg" />
             ))}
           </div>
         ) : members.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No team members yet</div>
+          <div className="flex flex-col items-center gap-2 py-12 text-center">
+            <Users className="text-text-tertiary h-8 w-8" />
+            <p className="text-text-secondary text-sm">No team members yet</p>
+            {canManage && (
+              <Button size="sm" className="mt-2" onClick={() => setInviteModalOpen(true)}>
+                <UserPlus className="h-3.5 w-3.5" />
+                Invite your first member
+              </Button>
+            )}
+          </div>
         ) : (
-          <div className="divide-y divide-white/5">
-            {members.map((m) => (
-              <div key={m.userId} className="flex items-center justify-between px-5 py-3">
-                <div>
-                  <p className="text-sm font-medium text-white">{m.name || m.email}</p>
-                  <p className="text-xs text-gray-500">{m.email}</p>
+          <div className="divide-border divide-y">
+            {members.map((m) => {
+              const RoleIcon = ROLE_ICON[m.role] || Eye;
+              return (
+                <div
+                  key={m.userId}
+                  className="hover:bg-bg-tertiary/50 flex flex-col gap-2 px-3 py-3 transition-colors first:rounded-t-lg last:rounded-b-lg sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Avatar name={m.name || m.email} size="md" />
+                    <div className="min-w-0">
+                      <p className="text-text-primary truncate text-sm font-medium">{m.name || m.email}</p>
+                      {m.name && <p className="text-text-tertiary truncate text-xs">{m.email}</p>}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2 sm:ml-2">
+                    <Badge variant={ROLE_BADGE_VARIANT[m.role] || 'default'}>
+                      <RoleIcon className="mr-1 inline h-3 w-3" />
+                      {m.role}
+                    </Badge>
+                    {canManage && m.role !== 'owner' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemove(m.userId)}
+                        className="text-text-tertiary hover:text-red-500"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${ROLE_COLORS[m.role]}`}>
-                    {m.role}
-                  </span>
-                  {canManage && m.role !== 'owner' && (
-                    <button
-                      onClick={() => handleRemove(m.userId)}
-                      className="text-xs text-red-400/60 transition hover:text-red-400"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -40,7 +42,7 @@ export default function Pagination({
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       {showInfo && totalItems !== undefined && itemsPerPage !== undefined && (
-        <p className="text-sm text-gray-500">
+        <p className="text-text-secondary text-sm">
           Показано {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}–
           {Math.min(currentPage * itemsPerPage, totalItems)} из {totalItems}
         </p>
@@ -49,13 +51,13 @@ export default function Pagination({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className={`${btnBase} text-gray-400 hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-30`}
+          className={`${btnBase} text-text-secondary hover:bg-bg-tertiary hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30`}
         >
-          ←
+          <ChevronLeft className="h-4 w-4" />
         </button>
         {getPages().map((p, i) =>
           p === '...' ? (
-            <span key={`dots-${i}`} className="px-1 text-gray-600">
+            <span key={`dots-${i}`} className="text-text-tertiary px-1">
               …
             </span>
           ) : (
@@ -64,8 +66,8 @@ export default function Pagination({
               onClick={() => onPageChange(p)}
               className={`${btnBase} ${
                 p === currentPage
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-accent text-text-primary shadow-accent/20 shadow-lg'
+                  : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
               }`}
             >
               {p}
@@ -75,9 +77,9 @@ export default function Pagination({
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className={`${btnBase} text-gray-400 hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-30`}
+          className={`${btnBase} text-text-secondary hover:bg-bg-tertiary hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30`}
         >
-          →
+          <ChevronRight className="h-4 w-4" />
         </button>
       </div>
     </div>

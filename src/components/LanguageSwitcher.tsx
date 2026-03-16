@@ -26,7 +26,7 @@ export default function LanguageSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-gray-300 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+        className="border-border text-text-secondary hover:bg-bg-tertiary hover:text-text-primary flex items-center gap-2 rounded-xl border bg-white/[0.04] px-3 py-2 text-sm backdrop-blur-sm transition-all hover:border-white/20"
         aria-label="Change language"
       >
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,7 +41,7 @@ export default function LanguageSwitcher() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0f]/95 shadow-xl backdrop-blur-xl">
+        <div className="border-border bg-bg-primary/95 absolute right-0 z-50 mt-2 w-44 overflow-hidden rounded-xl border shadow-xl backdrop-blur-xl">
           {LANG_LIST.map(([code, config]) => (
             <button
               key={code}
@@ -50,17 +50,14 @@ export default function LanguageSwitcher() {
                 setOpen(false);
               }}
               className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                code === lang ? 'bg-white/[0.08] text-white' : 'text-gray-400 hover:bg-white/[0.04] hover:text-white'
+                code === lang
+                  ? 'bg-bg-tertiary text-text-primary'
+                  : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
               }`}
             >
               <span className="font-medium">{config.name}</span>
               {code === lang && (
-                <svg
-                  className="ml-auto h-4 w-4 text-[var(--neon-cyan)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="text-accent ml-auto h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
               )}

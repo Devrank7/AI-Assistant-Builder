@@ -2,6 +2,12 @@
 
 import { useAuth } from '@/components/AuthProvider';
 import { useState, useEffect, useCallback } from 'react';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
+import { Plug, Check, ExternalLink, Link2, Unlink, ShieldCheck, Loader2 } from 'lucide-react';
 
 interface IntegrationConfig {
   name: string;
@@ -104,179 +110,177 @@ export default function IntegrationsPage() {
     }
   };
 
+  const connectedIntegrations = integrations.filter((i) => isConnected(i.provider));
+  const availableIntegrations = integrations.filter((i) => !isConnected(i.provider));
+
   return (
     <div className="mx-auto max-w-6xl space-y-8">
+      {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Integrations</h1>
-        <p className="mt-1 text-gray-400">Connect your CRM, Google Calendar, and more.</p>
+        <h1 className="text-text-primary text-2xl font-bold">Integrations</h1>
+        <p className="text-text-secondary mt-1 text-sm">Connect your CRM, Google Calendar, and more.</p>
       </div>
 
+      {/* Pro plan required banner */}
       {!isPro && (
-        <div className="rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-6">
+        <Card padding="lg">
           <div className="mb-2 flex items-center gap-3">
-            <svg
-              className="h-6 w-6 text-purple-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-              />
-            </svg>
-            <h3 className="text-lg font-semibold text-white">Pro Plan Required</h3>
+            <ShieldCheck className="text-accent h-5 w-5" />
+            <h3 className="text-text-primary text-base font-semibold">Pro Plan Required</h3>
           </div>
-          <p className="text-sm text-gray-400">
+          <p className="text-text-secondary text-sm">
             CRM and calendar integrations are available on the Pro plan. Upgrade to connect your favorite tools and
             automatically sync contacts from your AI widget conversations.
           </p>
-          <a
-            href="/dashboard/billing"
-            className="mt-4 inline-block rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
-          >
-            Upgrade to Pro
+          <a href="/dashboard/billing">
+            <Button variant="primary" size="md" className="mt-4">
+              Upgrade to Pro
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Button>
           </a>
+        </Card>
+      )}
+
+      {/* Loading state */}
+      {loading && (
+        <div className="flex justify-center py-8">
+          <Loader2 className="text-text-tertiary h-5 w-5 animate-spin" />
         </div>
       )}
 
-      {isPro && connected.length > 0 && (
-        <div>
-          <h2 className="mb-4 text-lg font-semibold text-white">Connected</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {connected.map((conn) => {
-              const config = integrations.find((i) => i.provider === conn.provider);
-              if (!config) return null;
+      {/* Connected section */}
+      {isPro && !loading && connectedIntegrations.length > 0 && (
+        <section>
+          <h2 className="text-text-tertiary mb-3 text-xs font-medium tracking-wider uppercase">Connected</h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {connectedIntegrations.map((config) => {
+              const conn = connected.find((c) => c.provider === config.provider);
+              if (!conn) return null;
               return (
-                <div key={conn._id} className="rounded-xl border border-green-500/20 bg-[#12121a] p-5">
-                  <div className="mb-3 flex items-center gap-3">
+                <Card key={conn._id} padding="md" className="flex flex-col justify-between">
+                  <div className="flex items-start gap-3">
                     <div
-                      className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold text-white"
-                      style={{ backgroundColor: config.color + '30' }}
+                      className="text-text-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                      style={{ backgroundColor: config.color + '20' }}
                     >
                       {config.name.charAt(0)}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-sm font-semibold text-white">{config.name}</h3>
-                      <p className="text-xs text-gray-500">{config.description}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-text-primary text-sm font-medium">{config.name}</h3>
+                        <Badge variant="green">
+                          <Check className="mr-0.5 h-3 w-3" />
+                          Connected
+                        </Badge>
+                      </div>
+                      <p className="text-text-tertiary mt-0.5 text-xs">{config.description}</p>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded bg-green-500/15 px-2 py-0.5 text-xs font-medium text-green-400">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
-                      Connected
-                    </span>
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-3 w-full text-red-500 hover:bg-red-500/10 hover:text-red-500"
                     onClick={() => handleDisconnect(config.provider)}
-                    className="w-full rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20"
                   >
+                    <Unlink className="h-3.5 w-3.5" />
                     Disconnect
-                  </button>
-                </div>
+                  </Button>
+                </Card>
               );
             })}
           </div>
-        </div>
+        </section>
       )}
 
-      <div>
-        <h2 className="mb-4 text-lg font-semibold text-white">
-          {isPro && connected.length > 0 ? 'Available Integrations' : 'All Integrations'}
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {integrations
-            .filter((i) => !isConnected(i.provider))
-            .map((integration) => (
-              <div
+      {/* Available section */}
+      {!loading && (
+        <section>
+          <h2 className="text-text-tertiary mb-3 text-xs font-medium tracking-wider uppercase">
+            {isPro && connectedIntegrations.length > 0 ? 'Available' : 'All Integrations'}
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {availableIntegrations.map((integration) => (
+              <Card
                 key={integration.provider}
-                className={`relative rounded-xl border border-white/10 bg-[#12121a] p-5 ${!isPro ? 'opacity-60' : ''}`}
+                padding="md"
+                className={`flex flex-col justify-between ${!isPro ? 'opacity-60' : ''}`}
               >
-                <div className="mb-3 flex items-center gap-3">
+                <div className="flex items-start gap-3">
                   <div
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold text-white"
-                    style={{ backgroundColor: integration.color + '30' }}
+                    className="text-text-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                    style={{ backgroundColor: integration.color + '20' }}
                   >
                     {integration.name.charAt(0)}
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-white">{integration.name}</h3>
-                    <p className="text-xs text-gray-500">{integration.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-text-primary text-sm font-medium">{integration.name}</h3>
+                    <p className="text-text-tertiary mt-0.5 text-xs">{integration.description}</p>
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <Badge variant="default">Not Connected</Badge>
+                      <Badge variant="blue">{integration.type === 'crm' ? 'CRM' : 'Calendar'}</Badge>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center rounded bg-gray-500/15 px-2 py-0.5 text-xs font-medium text-gray-400">
-                    Not Connected
-                  </span>
-                  <span className="inline-flex items-center rounded bg-blue-500/15 px-2 py-0.5 text-xs font-medium text-blue-400">
-                    {integration.type === 'crm' ? 'CRM' : 'Calendar'}
-                  </span>
-                </div>
-
                 {isPro && (
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="mt-3 w-full"
                     onClick={() => {
                       setModalProvider(integration);
                       setError('');
                       setTokenInput('');
                     }}
-                    className="mt-3 w-full rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-500"
                   >
+                    <Link2 className="h-3.5 w-3.5" />
                     Connect
-                  </button>
+                  </Button>
                 )}
 
-                {!isPro && <span className="mt-3 block text-center text-xs text-purple-400">Pro Plan Required</span>}
-              </div>
+                {!isPro && <p className="text-text-tertiary mt-3 text-center text-xs">Pro Plan Required</p>}
+              </Card>
             ))}
-        </div>
-      </div>
-
-      {loading && (
-        <div className="flex justify-center py-8">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-        </div>
+          </div>
+        </section>
       )}
 
       {/* Connect Modal */}
-      {modalProvider && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#1a1a2e] p-6 shadow-xl">
-            <h3 className="mb-1 text-lg font-semibold text-white">Connect {modalProvider.name}</h3>
-            <p className="mb-4 text-sm text-gray-400">
-              Enter your API key or access token to connect {modalProvider.name}.
-            </p>
-
-            <label className="mb-1 block text-xs font-medium text-gray-400">API Key / Access Token</label>
-            <input
-              type="password"
-              value={tokenInput}
-              onChange={(e) => setTokenInput(e.target.value)}
-              placeholder="Paste your token here..."
-              className="mb-4 w-full rounded-lg border border-white/10 bg-[#12121a] px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-            />
-
-            {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setModalProvider(null)}
-                className="flex-1 rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:bg-white/5"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConnect}
-                disabled={saving || !tokenInput.trim()}
-                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {saving ? 'Connecting...' : 'Connect'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={!!modalProvider}
+        onClose={() => setModalProvider(null)}
+        title={`Connect ${modalProvider?.name ?? ''}`}
+        description={`Enter your API key or access token to connect ${modalProvider?.name ?? ''}.`}
+        footer={
+          <>
+            <Button variant="ghost" size="md" onClick={() => setModalProvider(null)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="md" disabled={saving || !tokenInput.trim()} onClick={handleConnect}>
+              {saving ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <Plug className="h-3.5 w-3.5" />
+                  Connect
+                </>
+              )}
+            </Button>
+          </>
+        }
+      >
+        <Input
+          label="API Key / Access Token"
+          type="password"
+          value={tokenInput}
+          onChange={(e) => setTokenInput(e.target.value)}
+          placeholder="Paste your token here..."
+          error={error || undefined}
+        />
+      </Modal>
     </div>
   );
 }

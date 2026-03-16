@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { Copy, Check } from 'lucide-react';
 
 interface CopyButtonProps {
   text: string;
@@ -42,10 +43,10 @@ export default function CopyButton({
     return (
       <button
         onClick={handleCopy}
-        className={`rounded-lg p-1.5 text-gray-500 transition-all duration-200 hover:bg-white/5 hover:text-white ${className}`}
+        className={`text-text-secondary hover:bg-bg-tertiary hover:text-text-primary rounded-lg p-1.5 transition-all duration-200 ${className}`}
         title={copied ? 'Скопировано!' : label}
       >
-        {copied ? <span className="text-emerald-400">✓</span> : <span>📋</span>}
+        {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
       </button>
     );
   }
@@ -56,10 +57,10 @@ export default function CopyButton({
       className={`inline-flex items-center gap-1.5 rounded-lg border font-medium transition-all duration-200 ${
         copied
           ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-          : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white'
+          : 'border-border bg-bg-tertiary text-text-secondary hover:bg-bg-tertiary/80 hover:text-text-primary'
       } ${size === 'sm' ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'} ${className}`}
     >
-      <span>{copied ? '✓' : '📋'}</span>
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
       <span>{copied ? 'Скопировано!' : label}</span>
     </button>
   );

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
 
 interface BreadcrumbItem {
   label: string;
@@ -43,16 +44,16 @@ export default function Breadcrumbs({ items, homeLabel = 'Главная', homeH
 
   return (
     <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm">
-      <Link href={homeHref} className="text-gray-500 transition-colors hover:text-gray-300">
+      <Link href={homeHref} className="text-text-secondary hover:text-text-primary transition-colors">
         {homeLabel}
       </Link>
       {crumbs.map((crumb, i) => (
         <span key={i} className="flex items-center gap-1.5">
-          <span className="text-gray-700">/</span>
+          <ChevronRight className="text-text-tertiary h-3.5 w-3.5" />
           {i === crumbs.length - 1 || !crumb.href ? (
-            <span className="font-medium text-gray-300">{crumb.label}</span>
+            <span className="text-text-primary font-medium">{crumb.label}</span>
           ) : (
-            <Link href={crumb.href} className="text-gray-500 transition-colors hover:text-gray-300">
+            <Link href={crumb.href} className="text-text-secondary hover:text-text-primary transition-colors">
               {crumb.label}
             </Link>
           )}

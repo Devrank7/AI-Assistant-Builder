@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { Trash2, AlertTriangle, Info } from 'lucide-react';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -16,17 +17,20 @@ interface ConfirmDialogProps {
 
 const variantStyles = {
   danger: {
-    icon: '🗑️',
+    icon: Trash2,
     iconBg: 'bg-red-500/10',
+    iconColor: 'text-red-400',
     button: 'bg-red-600 hover:bg-red-700',
   },
   warning: {
-    icon: '⚠️',
+    icon: AlertTriangle,
+    iconColor: 'text-amber-400',
     iconBg: 'bg-amber-500/10',
     button: 'bg-amber-600 hover:bg-amber-700',
   },
   info: {
-    icon: 'ℹ️',
+    icon: Info,
+    iconColor: 'text-blue-400',
     iconBg: 'bg-blue-500/10',
     button: 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90',
   },
@@ -66,32 +70,34 @@ export default function ConfirmDialog({
     >
       <div
         ref={dialogRef}
-        className="animate-scale-in mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-[#12121a] p-6 shadow-2xl"
+        className="animate-scale-in border-border bg-bg-secondary mx-4 w-full max-w-md rounded-2xl border p-6 shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
       >
         <div className="flex flex-col items-center text-center">
-          <div className={`h-14 w-14 rounded-full ${style.iconBg} mb-4 flex items-center justify-center text-2xl`}>
-            {style.icon}
+          <div
+            className={`h-14 w-14 rounded-full ${style.iconBg} mb-4 flex items-center justify-center ${style.iconColor}`}
+          >
+            <style.icon className="h-6 w-6" />
           </div>
-          <h3 id="confirm-title" className="mb-2 text-lg font-semibold text-white">
+          <h3 id="confirm-title" className="text-text-primary mb-2 text-lg font-semibold">
             {title}
           </h3>
-          {description && <p className="mb-6 text-sm text-gray-400">{description}</p>}
+          {description && <p className="text-text-secondary mb-6 text-sm">{description}</p>}
         </div>
         <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-white/5 disabled:opacity-50"
+            className="border-border text-text-secondary hover:bg-bg-tertiary flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-all disabled:opacity-50 ${style.button}`}
+            className={`text-text-primary flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all disabled:opacity-50 ${style.button}`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

@@ -105,7 +105,7 @@ export default function BuilderPage() {
   const isEmptyState = stream.stage === 'input' && stream.messages.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-64px)] min-w-0 flex-col overflow-hidden" style={{ background: '#08090d' }}>
+    <div className="bg-bg-primary flex h-[calc(100vh-64px)] min-w-0 flex-col overflow-hidden">
       {/* Font loader */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');`}</style>
 
@@ -113,7 +113,7 @@ export default function BuilderPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {isEmptyState ? (
-          <div className="flex-1" style={{ background: '#08090d' }}>
+          <div className="bg-bg-primary flex-1">
             <TemplateSelector
               onSubmitUrl={handleUrlSubmit}
               sessions={sessions}
@@ -126,13 +126,7 @@ export default function BuilderPage() {
             {/* Chat area - takes remaining space */}
             <div className="flex min-w-0 flex-1 flex-col">
               {stream.stage === 'deploy' && stream.sessionId && (
-                <div
-                  className="flex items-center gap-3 px-5 py-3"
-                  style={{
-                    background: 'rgba(255,255,255,0.015)',
-                    borderBottom: '1px solid rgba(255,255,255,0.04)',
-                  }}
-                >
+                <div className="border-border bg-bg-secondary/30 flex items-center gap-3 border-b px-5 py-3">
                   <Link
                     href={`/dashboard/playground/${stream.sessionId}`}
                     className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300"

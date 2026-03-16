@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { Search, X } from 'lucide-react';
 
 interface FilterOption {
   label: string;
@@ -63,26 +64,26 @@ export default function SearchFilter({
   };
 
   const selectBase =
-    'h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-blue-500/50 transition-colors appearance-none cursor-pointer';
+    'h-10 px-3 bg-bg-tertiary border border-border rounded-lg text-sm text-text-secondary focus:outline-none focus:border-accent/50 transition-colors appearance-none cursor-pointer';
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row">
       {/* Search input */}
       <div className="relative flex-1">
-        <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">🔍</span>
+        <Search className="text-text-secondary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <input
           type="text"
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
           placeholder={placeholder}
-          className="h-10 w-full rounded-lg border border-white/10 bg-white/5 pr-4 pl-10 text-sm text-white placeholder-gray-500 transition-colors focus:border-blue-500/50 focus:outline-none"
+          className="border-border bg-bg-tertiary text-text-primary placeholder-text-secondary focus:border-accent/50 h-10 w-full rounded-lg border pr-4 pl-10 text-sm transition-colors focus:outline-none"
         />
         {query && (
           <button
             onClick={() => handleQueryChange('')}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+            className="text-text-secondary hover:text-text-primary absolute top-1/2 right-3 -translate-y-1/2"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         )}
       </div>

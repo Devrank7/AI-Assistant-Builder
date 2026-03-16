@@ -1,3 +1,5 @@
+import { TrendingUp, TrendingDown } from 'lucide-react';
+
 interface StatsCardProps {
   label: string;
   value: string | number;
@@ -31,15 +33,15 @@ export default function StatsCard({ label, value, change, icon, gradient = 'cyan
     <div className={`relative overflow-hidden rounded-xl border bg-gradient-to-br p-5 ${gradients[gradient]}`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="mb-1 text-sm text-gray-400">{label}</p>
-          <p className="text-3xl font-bold text-white">{value}</p>
+          <p className="text-text-secondary mb-1 text-sm">{label}</p>
+          <p className="text-text-primary text-3xl font-bold">{value}</p>
           {change && (
             <p
               className={`mt-2 flex items-center gap-1 text-xs ${change.value >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
             >
-              <span>{change.value >= 0 ? '↑' : '↓'}</span>
+              {change.value >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
               <span>{Math.abs(change.value)}%</span>
-              {change.label && <span className="ml-1 text-gray-500">{change.label}</span>}
+              {change.label && <span className="text-text-secondary ml-1">{change.label}</span>}
             </p>
           )}
         </div>

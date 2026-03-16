@@ -35,13 +35,13 @@ export default function CookieConsent() {
   if (!visible || isDemo) return null;
 
   return (
-    <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-white/[0.08] bg-[#0a0a0f]/95 p-4 backdrop-blur-xl md:p-6">
+    <div className="border-border bg-bg-secondary/95 fixed right-0 bottom-0 left-0 z-50 border-t p-4 backdrop-blur-xl md:p-6">
       <div className="mx-auto flex max-w-4xl flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
-        <p className="text-sm leading-relaxed text-gray-400">
+        <p className="text-text-secondary text-sm leading-relaxed">
           {t('cookie.text')}{' '}
           <Link
             href="/privacy"
-            className="text-[var(--neon-cyan)] underline underline-offset-2 transition-colors hover:text-white"
+            className="text-accent hover:text-text-primary underline underline-offset-2 transition-colors"
           >
             {t('cookie.link')}
           </Link>
@@ -49,7 +49,7 @@ export default function CookieConsent() {
         </p>
         <button
           onClick={accept}
-          className="flex-shrink-0 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-blue-500/25"
+          className="text-text-primary flex-shrink-0 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-purple)] px-6 py-2.5 text-sm font-semibold transition-all hover:shadow-lg hover:shadow-blue-500/25"
         >
           {t('cookie.accept')}
         </button>
