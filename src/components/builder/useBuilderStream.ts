@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import type { SSEEvent, BuilderStage, PanelMode } from '@/lib/builder/types';
+import type { SSEEvent, BuilderStage, PanelMode, Suggestion } from '@/lib/builder/types';
 
 interface BuilderMessage {
   role: 'user' | 'assistant';
@@ -21,6 +21,7 @@ interface StreamState {
   currentTheme: Record<string, unknown> | null;
   abVariants: { label: string; theme: Record<string, unknown> }[] | null;
   knowledgeProgress: { uploaded: number; total: number } | null;
+  suggestions: Suggestion[] | null;
   error: string | null;
 }
 
@@ -34,6 +35,7 @@ export function useBuilderStream() {
     currentTheme: null,
     abVariants: null,
     knowledgeProgress: null,
+    suggestions: null,
     error: null,
   });
 
@@ -177,6 +179,9 @@ export function useBuilderStream() {
         case 'knowledge_progress':
           return { ...prev, knowledgeProgress: { uploaded: event.uploaded, total: event.total } };
 
+        case 'suggestions':
+          return { ...prev, suggestions: event.suggestions };
+
         case 'done':
           return { ...prev, isStreaming: false, knowledgeProgress: null };
 
@@ -201,6 +206,7 @@ export function useBuilderStream() {
       currentTheme: null,
       abVariants: null,
       knowledgeProgress: null,
+      suggestions: null,
       error: null,
     });
   }, []);
