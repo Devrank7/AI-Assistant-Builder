@@ -12,6 +12,7 @@ interface User {
   organizationId?: string | null;
   orgRole?: string | null;
   orgPlan?: string | null;
+  onboardingCompleted?: boolean;
 }
 
 interface AuthContextType {
