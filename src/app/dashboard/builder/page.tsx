@@ -96,55 +96,49 @@ export default function BuilderPage() {
   const isEmptyState = stream.stage === 'input' && stream.messages.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-64px)] flex-col">
+    <div className="flex h-[calc(100vh-64px)] flex-col" style={{ background: '#08090d' }}>
+      {/* Font loader */}
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');`}</style>
+
       {!isEmptyState && <ProgressPipeline currentStage={stream.stage} />}
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sessions Sidebar */}
-        <div
-          className={`${showSessions ? 'block' : 'hidden'} w-64 flex-shrink-0 overflow-y-auto border-r border-white/10 bg-[#0d0d14] md:block`}
-        >
-          <div className="border-b border-white/10 p-4">
-            <button
-              onClick={startNewSession}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-cyan-400 hover:to-blue-500"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              New Widget
-            </button>
-          </div>
-          <div className="p-2">
-            {sessions.map((s) => (
-              <button
-                key={s._id}
-                onClick={() => loadSession(s._id)}
-                className={`w-full rounded-lg p-3 text-left text-sm transition-colors hover:bg-white/5 ${
-                  stream.sessionId === s._id ? 'border border-cyan-500/30 bg-cyan-500/10' : ''
-                }`}
-              >
-                <p className="truncate font-medium text-gray-200">{s.widgetName || 'Untitled'}</p>
-                <p className="mt-1 text-xs text-gray-500">{new Date(s.updatedAt).toLocaleDateString()}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content */}
+        {/* Main Content — full width */}
         <div className="flex flex-1">
           {isEmptyState ? (
-            <div className="flex-1">
+            <div className="flex-1" style={{ background: '#08090d' }}>
               <TemplateSelector onSubmitUrl={handleUrlSubmit} onSelectTemplate={handleTemplateSelect} />
             </div>
           ) : (
             <>
               <div className="flex flex-1 flex-col">
                 {stream.stage === 'deploy' && stream.sessionId && (
-                  <div className="flex items-center gap-3 border-b border-white/10 bg-[#0d0d14] px-4 py-2">
+                  <div
+                    className="flex items-center gap-3 px-5 py-3"
+                    style={{
+                      background: 'rgba(255,255,255,0.015)',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    }}
+                  >
                     <Link
                       href={`/dashboard/playground/${stream.sessionId}`}
-                      className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/30 px-4 py-2 text-sm text-cyan-400 transition-colors hover:bg-cyan-500/10"
+                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm transition-all duration-200"
+                      style={{
+                        background: 'rgba(6,182,212,0.08)',
+                        border: '1px solid rgba(6,182,212,0.2)',
+                        color: '#22d3ee',
+                        fontFamily: "'Outfit', sans-serif",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(6,182,212,0.12)';
+                        e.currentTarget.style.borderColor = 'rgba(6,182,212,0.35)';
+                        e.currentTarget.style.boxShadow = '0 0 16px rgba(6,182,212,0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(6,182,212,0.08)';
+                        e.currentTarget.style.borderColor = 'rgba(6,182,212,0.2)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path
@@ -164,6 +158,7 @@ export default function BuilderPage() {
                   knowledgeProgress={stream.knowledgeProgress}
                   onSendMessage={(msg) => stream.sendMessage(msg)}
                   suggestions={STAGE_SUGGESTIONS[stream.stage]}
+                  proactiveSuggestions={stream.suggestions}
                 />
               </div>
 
@@ -179,19 +174,6 @@ export default function BuilderPage() {
           )}
         </div>
       </div>
-
-      <button
-        onClick={() => setShowSessions(!showSessions)}
-        className="fixed bottom-4 left-4 rounded-full border border-white/10 bg-[#0d0d14] p-3 text-gray-400 shadow-lg transition-colors hover:text-white md:hidden"
-      >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"
-          />
-        </svg>
-      </button>
     </div>
   );
 }
