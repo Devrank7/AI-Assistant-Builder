@@ -9,10 +9,15 @@ export type NotificationType =
   | 'trial_ending'
   | 'trial_expired'
   | 'widget_error'
-  | 'system_alert';
+  | 'system_alert'
+  | 'ab_test_result'
+  | 'knowledge_gap'
+  | 'team_invite'
+  | 'widget_deployed';
 
 export interface INotification extends Document {
   type: NotificationType;
+  userId?: string | null;
   title: string;
   message: string;
   isRead: boolean;
@@ -27,6 +32,11 @@ const NotificationSchema = new Schema<INotification>(
     type: {
       type: String,
       required: true,
+      index: true,
+    },
+    userId: {
+      type: String,
+      default: null,
       index: true,
     },
     title: {
