@@ -20,9 +20,24 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    const user = await User.findById(payload.userId).select('email name plan subscriptionStatus emailVerified');
+    const user = await User.findById(payload.userId).select(
+      'email name plan subscriptionStatus emailVerified onboardingCompleted niche organizationId'
+    );
     if (!user) {
       return Errors.unauthorized('User not found');
+    }
+
+    let orgRole: string | null = null;
+    let orgPlan: string | null = null;
+    if (user.organizationId) {
+      const OrgMember = (await import('@/models/OrgMember')).default;
+      const Organization = (await import('@/models/Organization')).default;
+      const [member, org] = await Promise.all([
+        OrgMember.findOne({ organizationId: user.organizationId, userId: user._id.toString() }).select('role'),
+        Organization.findById(user.organizationId).select('plan'),
+      ]);
+      orgRole = member?.role || null;
+      orgPlan = org?.plan || null;
     }
 
     return Response.json({
@@ -33,6 +48,10 @@ export async function GET(request: NextRequest) {
         plan: user.plan,
         subscriptionStatus: user.subscriptionStatus,
         emailVerified: user.emailVerified,
+        onboardingCompleted: user.onboardingCompleted,
+        organizationId: user.organizationId,
+        orgRole,
+        orgPlan,
       },
     });
   } catch (error) {
