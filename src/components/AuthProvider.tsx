@@ -38,7 +38,17 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = useCallback(async () => {
     try {
-      const res = await fetch('/api/auth/me');
+      let res = await fetch('/api/auth/me');
+
+      // If access token expired, try refreshing it silently
+      if (res.status === 401) {
+        const refreshRes = await fetch('/api/auth/refresh', { method: 'POST' });
+        if (refreshRes.ok) {
+          // Retry with the new access token cookie
+          res = await fetch('/api/auth/me');
+        }
+      }
+
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.user) {

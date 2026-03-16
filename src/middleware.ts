@@ -11,7 +11,12 @@ export function middleware(request: NextRequest) {
   // Dashboard and Plans routes protection (JWT user auth)
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/plans')) {
     const accessToken = request.cookies.get('access_token')?.value;
-    if (!accessToken) return NextResponse.redirect(new URL('/?auth=login', request.url));
+    const refreshToken = request.cookies.get('refresh_token')?.value;
+    // Only redirect if BOTH tokens are missing. If access expired but refresh is alive,
+    // let the page load — the client-side AuthProvider will auto-refresh.
+    if (!accessToken && !refreshToken) {
+      return NextResponse.redirect(new URL('/?auth=login', request.url));
+    }
   }
 
   // Admin routes protection

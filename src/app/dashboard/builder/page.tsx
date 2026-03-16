@@ -29,10 +29,16 @@ const STAGE_SUGGESTIONS: Record<string, string[]> = {
 export default function BuilderPage() {
   const stream = useBuilderStream();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const hasPaidPlan = user && user.plan !== 'none';
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [showSessions, setShowSessions] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user && !hasPaidPlan) {
+      router.push('/plans');
+    }
+  }, [authLoading, user, hasPaidPlan, router]);
 
   useEffect(() => {
     fetch('/api/builder/sessions')

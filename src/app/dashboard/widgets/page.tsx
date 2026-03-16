@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/components/AuthProvider';
 
 interface Widget {
   clientId: string;
@@ -11,6 +12,9 @@ interface Widget {
 }
 
 export default function MyWidgetsPage() {
+  const { user } = useAuth();
+  const hasPlan = user?.plan && user.plan !== 'none';
+  const builderHref = hasPlan ? '/dashboard/builder' : '/plans';
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -77,7 +81,7 @@ export default function MyWidgetsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">My Widgets</h1>
         <Link
-          href="/dashboard/builder"
+          href={builderHref}
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -95,7 +99,7 @@ export default function MyWidgetsPage() {
           <h3 className="text-lg font-semibold text-white mb-2">No widgets yet</h3>
           <p className="text-gray-400 mb-6">Create your first AI widget to get started.</p>
           <Link
-            href="/dashboard/builder"
+            href={builderHref}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
           >
             Create Your First Widget
