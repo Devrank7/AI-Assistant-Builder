@@ -7,6 +7,7 @@ import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
 import BuilderSession from '@/models/BuilderSession';
 import Client from '@/models/Client';
+import { saveVersion } from '@/lib/builder/widgetCodeManager';
 
 function slugify(text: string): string {
   return text
@@ -114,6 +115,8 @@ export async function POST(request: NextRequest) {
       const distScript = path.join(builderRoot, 'dist', 'script.js');
       if (fs.existsSync(distScript)) {
         fs.copyFileSync(distScript, path.join(quickwidgetsDir, 'script.js'));
+        // Save as v1 for version history
+        saveVersion(clientId, 'Initial build', 'build_widget');
       } else {
         throw new Error('Build completed but script.js not found in dist/');
       }
