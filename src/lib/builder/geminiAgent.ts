@@ -76,8 +76,9 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
     systemInstruction: systemPrompt,
     tools: [{ functionDeclarations }],
     generationConfig: {
-      maxOutputTokens: 8192,
-      temperature: 0.7,
+      maxOutputTokens: 2048,
+      temperature: 0.3,
+      topP: 0.8,
     },
   });
 
@@ -107,23 +108,24 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
   while (loopCount < MAX_TOOL_LOOPS) {
     loopCount++;
 
-    const result = await chat.sendMessage(currentParts);
-    const response = result.response;
-    const parts = response.candidates?.[0]?.content?.parts || [];
-
-    // Collect text parts and function calls
+    // Use streaming to send text chunks in real-time
+    const streamResult = await chat.sendMessageStream(currentParts);
     const functionCalls: { name: string; args: Record<string, unknown> }[] = [];
 
-    for (const part of parts) {
-      if (part.text) {
-        fullAssistantText += part.text;
-        write({ type: 'text', content: part.text });
-      }
-      if (part.functionCall) {
-        functionCalls.push({
-          name: part.functionCall.name,
-          args: (part.functionCall.args as Record<string, unknown>) || {},
-        });
+    // Process stream chunks as they arrive
+    for await (const chunk of streamResult.stream) {
+      const parts = chunk.candidates?.[0]?.content?.parts || [];
+      for (const part of parts) {
+        if (part.text) {
+          fullAssistantText += part.text;
+          write({ type: 'text', content: part.text });
+        }
+        if (part.functionCall) {
+          functionCalls.push({
+            name: part.functionCall.name,
+            args: (part.functionCall.args as Record<string, unknown>) || {},
+          });
+        }
       }
     }
 
@@ -157,10 +159,6 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
 
     // Send function responses back to Gemini for next iteration
     currentParts = functionResponseParts;
-
-    // Check finish reason
-    const finishReason = response.candidates?.[0]?.finishReason;
-    if (finishReason === 'STOP' && functionCalls.length === 0) break;
   }
 
   return { assistantText: fullAssistantText, toolCallsMade };

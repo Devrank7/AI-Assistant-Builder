@@ -1,205 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-
-interface TemplateOption {
-  id: string;
-  label: string;
-  emoji: string;
-  defaultColors: string[];
-  defaultFont: string;
-  sampleQuickReplies: string[];
-}
+import { useState, useEffect, useRef } from 'react';
 
 interface Props {
-  onSelectTemplate: (templateId: string) => void;
   onSubmitUrl: (url: string) => void;
 }
 
-const TEMPLATE_ICONS: Record<string, (props: { gradient: [string, string] }) => React.ReactElement> = {
-  dental: ({ gradient }) => (
-    <svg viewBox="0 0 40 40" fill="none" className="h-9 w-9">
-      <defs>
-        <linearGradient id="dental-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={gradient[0]} />
-          <stop offset="100%" stopColor={gradient[1]} />
-        </linearGradient>
-      </defs>
-      <path
-        d="M20 4c-3.5 0-6.2 1.2-7.8 3.1C10.6 9 10 11.4 10 14c0 3 .8 5.5 1.8 8 1.2 3 2.5 6.2 3 10.2.3 2.2 1.2 3.8 3.2 3.8 1.8 0 2.2-1.5 2-3.5-.1-1.5-.2-3 0-4.5h.2c.2 1.5.1 3-.1 4.5-.2 2 .3 3.5 2 3.5 2 0 2.9-1.6 3.2-3.8.5-4 1.8-7.2 3-10.2 1-2.5 1.8-5 1.8-8 0-2.6-.6-5-2.2-6.9C26.3 5.2 23.5 4 20 4z"
-        fill="url(#dental-g)"
-        opacity="0.9"
-      />
-      <path
-        d="M20 4c-3.5 0-6.2 1.2-7.8 3.1C10.6 9 10 11.4 10 14c0 3 .8 5.5 1.8 8 1.2 3 2.5 6.2 3 10.2.3 2.2 1.2 3.8 3.2 3.8 1.8 0 2.2-1.5 2-3.5-.1-1.5-.2-3 0-4.5h.2c.2 1.5.1 3-.1 4.5-.2 2 .3 3.5 2 3.5 2 0 2.9-1.6 3.2-3.8.5-4 1.8-7.2 3-10.2 1-2.5 1.8-5 1.8-8 0-2.6-.6-5-2.2-6.9C26.3 5.2 23.5 4 20 4z"
-        stroke="url(#dental-g)"
-        strokeWidth="0.5"
-        fill="none"
-        opacity="0.4"
-      />
-      <ellipse cx="16.5" cy="12" rx="2" ry="2.5" fill="white" opacity="0.15" />
-    </svg>
-  ),
-  restaurant: ({ gradient }) => (
-    <svg viewBox="0 0 40 40" fill="none" className="h-9 w-9">
-      <defs>
-        <linearGradient id="resto-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={gradient[0]} />
-          <stop offset="100%" stopColor={gradient[1]} />
-        </linearGradient>
-      </defs>
-      <path
-        d="M10 6v12c0 2.2 1.8 4 4 4h1v12c0 .6.4 1 1 1h0c.6 0 1-.4 1-1V22h1c2.2 0 4-1.8 4-4V6"
-        stroke="url(#resto-g)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <line
-        x1="14"
-        y1="6"
-        x2="14"
-        y2="14"
-        stroke="url(#resto-g)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-      <line
-        x1="18"
-        y1="6"
-        x2="18"
-        y2="14"
-        stroke="url(#resto-g)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-      <path
-        d="M28 6c0 0-3 2-3 8 0 4 1.5 6 3 8v12c0 .6.4 1 1 1h0c.6 0 1-.4 1-1V22c1.5-2 3-4 3-8 0-6-3-8-3-8"
-        stroke="url(#resto-g)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="29" cy="12" r="1.5" fill="url(#resto-g)" opacity="0.3" />
-    </svg>
-  ),
-  saas: ({ gradient }) => (
-    <svg viewBox="0 0 40 40" fill="none" className="h-9 w-9">
-      <defs>
-        <linearGradient id="saas-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={gradient[0]} />
-          <stop offset="100%" stopColor={gradient[1]} />
-        </linearGradient>
-      </defs>
-      <rect x="6" y="6" width="28" height="20" rx="3" stroke="url(#saas-g)" strokeWidth="2" />
-      <line x1="6" y1="22" x2="34" y2="22" stroke="url(#saas-g)" strokeWidth="1.5" opacity="0.4" />
-      <circle cx="20" cy="24" r="0.8" fill="url(#saas-g)" opacity="0.6" />
-      <line x1="16" y1="30" x2="24" y2="30" stroke="url(#saas-g)" strokeWidth="2" strokeLinecap="round" />
-      <line x1="20" y1="26" x2="20" y2="30" stroke="url(#saas-g)" strokeWidth="2" />
-      <path
-        d="M12 12l3 3 5-6"
-        stroke="url(#saas-g)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.7"
-      />
-      <line
-        x1="23"
-        y1="12"
-        x2="28"
-        y2="12"
-        stroke="url(#saas-g)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.4"
-      />
-      <line
-        x1="23"
-        y1="15"
-        x2="27"
-        y2="15"
-        stroke="url(#saas-g)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.3"
-      />
-      <line
-        x1="23"
-        y1="18"
-        x2="26"
-        y2="18"
-        stroke="url(#saas-g)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.2"
-      />
-    </svg>
-  ),
-  realestate: ({ gradient }) => (
-    <svg viewBox="0 0 40 40" fill="none" className="h-9 w-9">
-      <defs>
-        <linearGradient id="real-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={gradient[0]} />
-          <stop offset="100%" stopColor={gradient[1]} />
-        </linearGradient>
-      </defs>
-      <path
-        d="M20 6L6 18h4v14h8v-8h4v8h8V18h4L20 6z"
-        stroke="url(#real-g)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M20 6L6 18h4v14h8v-8h4v8h8V18h4L20 6z" fill="url(#real-g)" opacity="0.08" />
-      <rect x="17" y="14" width="6" height="5" rx="0.5" stroke="url(#real-g)" strokeWidth="1.2" opacity="0.5" />
-      <line x1="20" y1="14" x2="20" y2="19" stroke="url(#real-g)" strokeWidth="0.8" opacity="0.3" />
-      <line x1="17" y1="16.5" x2="23" y2="16.5" stroke="url(#real-g)" strokeWidth="0.8" opacity="0.3" />
-    </svg>
-  ),
-  beauty: ({ gradient }) => (
-    <svg viewBox="0 0 40 40" fill="none" className="h-9 w-9">
-      <defs>
-        <linearGradient id="beauty-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={gradient[0]} />
-          <stop offset="100%" stopColor={gradient[1]} />
-        </linearGradient>
-      </defs>
-      <path
-        d="M20 8c-2 0-3.5 1-4.5 2.5S14 13.5 14 16c0 3 1 5.5 3 7.5V34c0 .6.4 1 1 1h4c.6 0 1-.4 1-1V23.5c2-2 3-4.5 3-7.5 0-2.5-.5-4-1.5-5.5S22 8 20 8z"
-        stroke="url(#beauty-g)"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20 8c-2 0-3.5 1-4.5 2.5S14 13.5 14 16c0 3 1 5.5 3 7.5V34c0 .6.4 1 1 1h4c.6 0 1-.4 1-1V23.5c2-2 3-4.5 3-7.5 0-2.5-.5-4-1.5-5.5S22 8 20 8z"
-        fill="url(#beauty-g)"
-        opacity="0.1"
-      />
-      <ellipse cx="20" cy="5.5" rx="2.5" ry="2" fill="url(#beauty-g)" opacity="0.5" />
-      <ellipse cx="20" cy="5.5" rx="2.5" ry="2" stroke="url(#beauty-g)" strokeWidth="0.8" opacity="0.3" />
-      <path d="M17 28h6" stroke="url(#beauty-g)" strokeWidth="1" strokeLinecap="round" opacity="0.3" />
-      <path d="M17 31h6" stroke="url(#beauty-g)" strokeWidth="1" strokeLinecap="round" opacity="0.2" />
-      <circle cx="20" cy="16" r="1.5" fill="url(#beauty-g)" opacity="0.2" />
-    </svg>
-  ),
-};
-
-export default function TemplateSelector({ onSelectTemplate, onSubmitUrl }: Props) {
+export default function TemplateSelector({ onSubmitUrl }: Props) {
   const [url, setUrl] = useState('');
-  const [templates, setTemplates] = useState<TemplateOption[]>([]);
   const [isFocused, setIsFocused] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch('/api/builder/templates')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.success) setTemplates(d.data);
-      })
-      .catch(() => {});
+    setMounted(true);
   }, []);
 
   const handleUrlSubmit = (e: React.FormEvent) => {
@@ -209,218 +23,339 @@ export default function TemplateSelector({ onSelectTemplate, onSubmitUrl }: Prop
   };
 
   return (
-    <div className="relative flex h-full flex-col items-center justify-center overflow-hidden px-6">
-      {/* Animated background orb */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+    <div className="relative flex h-full flex-col items-center overflow-hidden" style={{ background: '#06070b' }}>
+      {/* === Layered atmospheric background === */}
+      <div className="pointer-events-none absolute inset-0">
+        {/* Noise texture overlay */}
         <div
-          className="absolute h-[500px] w-[500px] rounded-full opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.35]"
           style={{
-            background: 'radial-gradient(circle, #06b6d4 0%, #0891b2 30%, transparent 70%)',
-            animation: 'orbPulse 6s ease-in-out infinite',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
+            backgroundSize: '128px 128px',
           }}
         />
+
+        {/* Primary luminous orb — top center */}
         <div
-          className="absolute h-[300px] w-[300px] rounded-full opacity-[0.04]"
+          className="absolute left-1/2 -translate-x-1/2"
           style={{
-            background: 'radial-gradient(circle, #a78bfa 0%, #7c3aed 40%, transparent 70%)',
-            animation: 'orbFloat 8s ease-in-out infinite',
+            top: '-8%',
+            width: '900px',
+            height: '600px',
+            background:
+              'radial-gradient(ellipse at center, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.04) 35%, transparent 70%)',
+            filter: 'blur(60px)',
+            animation: 'heroOrbBreathe 8s ease-in-out infinite',
+          }}
+        />
+
+        {/* Secondary accent orb — offset right */}
+        <div
+          className="absolute"
+          style={{
+            top: '15%',
+            right: '5%',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 65%)',
+            filter: 'blur(80px)',
+            animation: 'heroOrbDrift 12s ease-in-out infinite',
+          }}
+        />
+
+        {/* Tertiary warm accent — bottom left */}
+        <div
+          className="absolute"
+          style={{
+            bottom: '5%',
+            left: '8%',
+            width: '350px',
+            height: '350px',
+            background: 'radial-gradient(circle, rgba(34,211,238,0.05) 0%, transparent 60%)',
+            filter: 'blur(90px)',
+            animation: 'heroOrbDrift 10s ease-in-out infinite reverse',
+          }}
+        />
+
+        {/* Dot grid — very subtle structural texture */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }}
+        />
+
+        {/* Horizon line glow */}
+        <div
+          className="absolute right-0 left-0"
+          style={{
+            top: '42%',
+            height: '1px',
+            background:
+              'linear-gradient(90deg, transparent, rgba(6,182,212,0.08) 30%, rgba(139,92,246,0.06) 70%, transparent)',
           }}
         />
       </div>
 
-      {/* Subtle grid pattern */}
+      {/* === Content === */}
+      <div className="relative z-10 flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-6">
+        {/* Agent status beacon */}
+        <div
+          className="mb-10 transition-all duration-700"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? 'translateY(0)' : 'translateY(12px)',
+          }}
+        >
+          <div
+            className="flex items-center gap-3 rounded-full px-5 py-2.5"
+            style={{
+              background: 'rgba(6,182,212,0.05)',
+              border: '1px solid rgba(6,182,212,0.1)',
+              boxShadow: '0 0 30px rgba(6,182,212,0.04), inset 0 0 20px rgba(6,182,212,0.02)',
+            }}
+          >
+            <div className="relative">
+              <div
+                className="absolute inset-0 animate-ping rounded-full opacity-40"
+                style={{ background: '#22d3ee', animationDuration: '2s' }}
+              />
+              <div
+                className="h-2 w-2 rounded-full"
+                style={{ background: '#22d3ee', boxShadow: '0 0 8px rgba(34,211,238,0.6)' }}
+              />
+            </div>
+            <span
+              style={{
+                fontFamily: "'Sora', 'Outfit', sans-serif",
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.14em',
+                color: 'rgba(34,211,238,0.85)',
+                textTransform: 'uppercase' as const,
+              }}
+            >
+              AI Agent Online
+            </span>
+          </div>
+        </div>
+
+        {/* Hero headline */}
+        <div
+          className="mb-4 text-center transition-all duration-700"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+            transitionDelay: '100ms',
+          }}
+        >
+          <h1
+            style={{
+              fontFamily: "'Sora', 'Outfit', sans-serif",
+              fontSize: 'clamp(32px, 5vw, 48px)',
+              fontWeight: 300,
+              lineHeight: 1.15,
+              color: '#e8eaed',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            What will you{' '}
+            <span
+              style={{
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 40%, #a78bfa 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              build
+            </span>
+            <span style={{ color: '#4a5068' }}>?</span>
+          </h1>
+        </div>
+
+        {/* Subheadline */}
+        <p
+          className="mb-12 max-w-md text-center transition-all duration-700"
+          style={{
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: '15px',
+            lineHeight: 1.7,
+            color: '#5a6178',
+            letterSpacing: '0.01em',
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? 'translateY(0)' : 'translateY(16px)',
+            transitionDelay: '200ms',
+          }}
+        >
+          Paste a URL to analyze your brand, or describe what you need.
+          <br />
+          Your custom widget deploys in under a minute.
+        </p>
+
+        {/* === Command input === */}
+        <div
+          className="mb-14 w-full max-w-lg transition-all duration-700"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? 'translateY(0)' : 'translateY(16px)',
+            transitionDelay: '300ms',
+          }}
+        >
+          <form onSubmit={handleUrlSubmit}>
+            <div
+              className="relative overflow-hidden rounded-2xl transition-all duration-500"
+              style={{
+                background: isFocused
+                  ? 'linear-gradient(135deg, rgba(6,182,212,0.04), rgba(139,92,246,0.02))'
+                  : 'rgba(255,255,255,0.02)',
+                border: isFocused ? '1px solid rgba(6,182,212,0.2)' : '1px solid rgba(255,255,255,0.06)',
+                boxShadow: isFocused
+                  ? '0 0 0 1px rgba(6,182,212,0.08), 0 8px 40px rgba(6,182,212,0.06), 0 20px 60px rgba(0,0,0,0.3)'
+                  : '0 4px 24px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(20px)',
+              }}
+            >
+              {/* Subtle top border shimmer when focused */}
+              <div
+                className="absolute top-0 right-0 left-0 h-px transition-opacity duration-500"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, rgba(34,211,238,0.4) 50%, transparent)',
+                  opacity: isFocused ? 1 : 0,
+                }}
+              />
+
+              <div className="flex items-center gap-2 px-4 py-1.5">
+                {/* Globe icon */}
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center">
+                  <svg
+                    className="h-[18px] w-[18px] transition-all duration-400"
+                    style={{ color: isFocused ? '#22d3ee' : '#3a3f52' }}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 003 12c0-1.605.42-3.113 1.157-4.418"
+                    />
+                  </svg>
+                </div>
+
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  placeholder="your-website.com or describe your business..."
+                  className="min-w-0 flex-1 bg-transparent py-3.5 text-[14px] outline-none placeholder:transition-colors placeholder:duration-300"
+                  style={{
+                    color: '#e8eaed',
+                    fontFamily: "'Outfit', sans-serif",
+                    letterSpacing: '0.01em',
+                  }}
+                />
+
+                {/* Submit button */}
+                <button
+                  type="submit"
+                  disabled={!url.trim()}
+                  className="flex flex-shrink-0 items-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-medium transition-all duration-400 disabled:cursor-not-allowed"
+                  style={{
+                    fontFamily: "'Sora', 'Outfit', sans-serif",
+                    letterSpacing: '0.02em',
+                    background: url.trim() ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'rgba(255,255,255,0.03)',
+                    color: url.trim() ? '#fff' : '#2a2f42',
+                    boxShadow: url.trim()
+                      ? '0 4px 20px rgba(6,182,212,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                      : 'none',
+                    opacity: url.trim() ? 1 : 0.5,
+                    transform: url.trim() ? 'scale(1)' : 'scale(0.97)',
+                  }}
+                >
+                  Build
+                  <svg
+                    className="h-3.5 w-3.5 transition-transform duration-300"
+                    style={{ transform: url.trim() ? 'translateX(0)' : 'translateX(-2px)' }}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {/* Keyboard hint */}
+          <div className="mt-3 flex justify-center">
+            <span
+              style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: '11px',
+                color: '#2a2f42',
+                letterSpacing: '0.04em',
+              }}
+            >
+              Press{' '}
+              <kbd
+                style={{
+                  display: 'inline-block',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  fontSize: '10px',
+                  fontFamily: "'Sora', monospace",
+                  color: '#4a5068',
+                }}
+              >
+                Enter
+              </kbd>{' '}
+              to start
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* === Bottom fade === */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        className="pointer-events-none absolute right-0 bottom-0 left-0 h-20"
         style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
+          background: 'linear-gradient(to top, #06070b, transparent)',
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center">
-        {/* Agent identity badge */}
-        <div
-          className="mb-8 flex items-center gap-2.5 rounded-full px-4 py-2"
-          style={{
-            background: 'rgba(6,182,212,0.08)',
-            border: '1px solid rgba(6,182,212,0.15)',
-          }}
-        >
-          <div className="relative flex h-2 w-2 items-center justify-center">
-            <div className="absolute h-2 w-2 animate-ping rounded-full bg-cyan-400 opacity-60" />
-            <div className="h-2 w-2 rounded-full bg-cyan-400" />
-          </div>
-          <span
-            className="text-xs tracking-widest uppercase"
-            style={{ color: '#22d3ee', fontFamily: "'Outfit', sans-serif" }}
-          >
-            AI Agent Online
-          </span>
-        </div>
-
-        {/* Headline */}
-        <h1
-          className="mb-3 text-center text-4xl font-light tracking-tight"
-          style={{ fontFamily: "'Outfit', sans-serif", color: '#e8eaed' }}
-        >
-          What will you{' '}
-          <span
-            className="font-medium"
-            style={{
-              background: 'linear-gradient(135deg, #22d3ee, #06b6d4, #a78bfa)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            build
-          </span>
-          ?
-        </h1>
-
-        <p className="mb-10 max-w-md text-center text-sm leading-relaxed" style={{ color: '#7a8194' }}>
-          Paste your website URL and the AI agent will analyze your brand, design a custom widget, and deploy it in
-          under a minute. Or just say hello to get started.
-        </p>
-
-        {/* URL Input */}
-        <form onSubmit={handleUrlSubmit} className="mb-12 w-full max-w-lg">
-          <div
-            className="relative flex items-center gap-3 rounded-2xl p-1 transition-all duration-300"
-            style={{
-              background: isFocused ? 'rgba(6,182,212,0.06)' : 'rgba(255,255,255,0.03)',
-              border: isFocused ? '1px solid rgba(6,182,212,0.3)' : '1px solid rgba(255,255,255,0.08)',
-              boxShadow: isFocused ? '0 0 40px rgba(6,182,212,0.08), inset 0 0 20px rgba(6,182,212,0.03)' : 'none',
-            }}
-          >
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center pl-2">
-              <svg
-                className="h-5 w-5 transition-colors duration-300"
-                style={{ color: isFocused ? '#22d3ee' : '#4a5068' }}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 003 12c0-1.605.42-3.113 1.157-4.418"
-                />
-              </svg>
-            </div>
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder="your-website.com or ask a question..."
-              className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-[#4a5068]"
-              style={{ color: '#e8eaed', fontFamily: "'Outfit', sans-serif" }}
-            />
-            <button
-              type="submit"
-              disabled={!url.trim()}
-              className="flex flex-shrink-0 items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-30"
-              style={{
-                background: url.trim() ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'rgba(255,255,255,0.05)',
-                color: url.trim() ? '#fff' : '#4a5068',
-                boxShadow: url.trim() ? '0 4px 20px rgba(6,182,212,0.25)' : 'none',
-                fontFamily: "'Outfit', sans-serif",
-              }}
-            >
-              Build
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </button>
-          </div>
-        </form>
-
-        {/* Templates */}
-        {templates.length > 0 && (
-          <div className="w-full max-w-xl">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.06)' }} />
-              <span
-                className="text-xs tracking-wider uppercase"
-                style={{ color: '#4a5068', fontFamily: "'Outfit', sans-serif" }}
-              >
-                or start from a template
-              </span>
-              <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.06)' }} />
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {templates.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => onSelectTemplate(t.id)}
-                  className="group relative overflow-hidden rounded-xl p-4 text-center transition-all duration-300 hover:-translate-y-0.5"
-                  style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.2)';
-                    e.currentTarget.style.background = 'rgba(6,182,212,0.04)';
-                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(6,182,212,0.06)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <div className="mb-2.5 flex justify-center">
-                    {TEMPLATE_ICONS[t.id] ? (
-                      <div
-                        className="flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300"
-                        style={{
-                          background: `linear-gradient(135deg, ${t.defaultColors[0]}12, ${t.defaultColors[1] || t.defaultColors[0]}08)`,
-                          border: `1px solid ${t.defaultColors[0]}20`,
-                        }}
-                      >
-                        {TEMPLATE_ICONS[t.id]({
-                          gradient: [t.defaultColors[0], t.defaultColors[1] || t.defaultColors[0]],
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-2xl">{t.emoji}</div>
-                    )}
-                  </div>
-                  <p
-                    className="mb-2.5 text-xs font-medium"
-                    style={{ color: '#c4c9d4', fontFamily: "'Outfit', sans-serif" }}
-                  >
-                    {t.label}
-                  </p>
-                  <div className="flex justify-center gap-1.5">
-                    {t.defaultColors.slice(0, 3).map((c, i) => (
-                      <div
-                        key={i}
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: c, boxShadow: `0 0 8px ${c}30` }}
-                      />
-                    ))}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
+      {/* === Animations & fonts === */}
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
-        @keyframes orbPulse {
-          0%, 100% { transform: scale(1); opacity: 0.07; }
-          50% { transform: scale(1.15); opacity: 0.12; }
+
+        @keyframes heroOrbBreathe {
+          0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+          50% { transform: translateX(-50%) scale(1.08); opacity: 0.7; }
         }
-        @keyframes orbFloat {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -20px) scale(1.1); }
-          66% { transform: translate(-20px, 15px) scale(0.95); }
+
+        @keyframes heroOrbDrift {
+          0%, 100% { transform: translate(0, 0); }
+          33% { transform: translate(15px, -10px); }
+          66% { transform: translate(-10px, 8px); }
+        }
+
+        /* Placeholder color */
+        input::placeholder {
+          color: #2e3346 !important;
+        }
+        input:focus::placeholder {
+          color: #3a4058 !important;
         }
       `}</style>
     </div>

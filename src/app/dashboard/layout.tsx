@@ -158,9 +158,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 lg:pl-64">
+      <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/10 bg-[#0a0a0f]/80 px-4 backdrop-blur-md sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 flex-shrink-0 items-center justify-between border-b border-white/10 bg-[#0a0a0f]/80 px-4 backdrop-blur-md sm:px-6">
           <button
             onClick={() => setSidebarOpen(true)}
             className="-ml-2 rounded-lg p-2 text-gray-400 hover:text-white lg:hidden"
@@ -172,11 +172,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <div className="flex-1" />
 
-          <div className="flex items-center gap-4">
-            <span className="hidden text-sm text-gray-400 sm:inline">{user?.email}</span>
+          <div className="flex flex-shrink-0 items-center gap-4">
+            <span className="hidden max-w-[200px] truncate text-sm text-gray-400 sm:inline">{user?.email}</span>
             <button
               onClick={logout}
-              className="rounded-lg px-3 py-1.5 text-sm text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+              className="flex-shrink-0 rounded-lg px-3 py-1.5 text-sm text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
             >
               Log out
             </button>
@@ -184,7 +184,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page content */}
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className={pathname.startsWith('/dashboard/builder') ? '' : 'p-4 sm:p-6 lg:p-8'}>{children}</main>
       </div>
     </div>
   );

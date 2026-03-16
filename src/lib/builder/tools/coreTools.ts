@@ -344,4 +344,213 @@ export const coreTools: ToolDefinition[] = [
       return { success: true, size: stats.size, exists: true };
     },
   },
+  {
+    name: 'create_theme_from_scratch',
+    description:
+      'Generate a complete theme.json + widget config from user preferences (no website URL needed). Use when user has no website or prefers to describe their widget manually. Delegates to Gemini to generate a full theme.',
+    parameters: {
+      type: 'object',
+      properties: {
+        businessName: { type: 'string', description: 'Business or widget name' },
+        industry: {
+          type: 'string',
+          description: 'Industry/niche (e.g. dental, restaurant, saas, beauty, realestate, ecommerce, other)',
+        },
+        primaryColor: {
+          type: 'string',
+          description: 'Primary brand color hex (e.g. #3B82F6) or color name (e.g. blue, green)',
+        },
+        accentColor: { type: 'string', description: 'Optional accent color hex or name' },
+        isDark: { type: 'string', description: 'Dark theme? "true" or "false". Default: "true"' },
+        botName: { type: 'string', description: 'Bot display name in the widget header' },
+        greeting: { type: 'string', description: 'Welcome message the bot shows when widget opens' },
+        quickReplies: {
+          type: 'string',
+          description: 'Comma-separated quick reply buttons (e.g. "Pricing,Book a demo,Contact us")',
+        },
+        style: {
+          type: 'string',
+          description: 'Style preference: glass, minimal, corporate, neon, playful. Default: glass',
+        },
+      },
+      required: ['businessName', 'industry'],
+    },
+    model_hint: 'gemini',
+    category: 'core',
+    async executor(args, ctx) {
+      ctx.write({ type: 'progress', stage: 'design', status: 'active' });
+      ctx.write({ type: 'progress', message: 'Creating widget design from your preferences...' });
+
+      const businessName = args.businessName as string;
+      const industry = args.industry as string;
+      const primaryColor = (args.primaryColor as string) || '#3B82F6';
+      const accentColor = (args.accentColor as string) || '';
+      const isDark = (args.isDark as string) !== 'false';
+      const botName = (args.botName as string) || businessName;
+      const greeting = (args.greeting as string) || `Welcome to **${businessName}**! How can I help you?`;
+      const quickReplies = (args.quickReplies as string)
+        ?.split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean) || ['Tell me more', 'Contact info', 'Services'];
+      const style = (args.style as string) || 'glass';
+
+      // Use Gemini to generate a complete theme.json
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro-preview' });
+
+      const themePrompt = `Generate a complete theme.json for a chat widget with these specs:
+- Business: "${businessName}" (${industry})
+- Primary color: ${primaryColor}
+- Accent color: ${accentColor || 'derive from primary'}
+- Dark mode: ${isDark}
+- Style: ${style}
+
+Return ONLY valid JSON (no markdown, no explanation) with ALL these fields:
+{
+  "label": "Theme label",
+  "domain": "${businessName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com",
+  "fontUrl": "Google Fonts URL",
+  "font": "font-family CSS string",
+  "isDark": ${isDark},
+  "widgetW": "370px", "widgetH": "540px", "widgetMaxW": "370px", "widgetMaxH": "540px",
+  "toggleSize": "w-[58px] h-[58px]", "toggleRadius": "rounded-2xl",
+  "headerPad": "px-6 py-5", "nameSize": "text-[15px]",
+  "headerAccent": "", "avatarHeaderRound": "rounded-2xl", "chatAvatarRound": "rounded-xl",
+  "hasShine": true,
+  "headerFrom": "#hex", "headerVia": "#hex", "headerTo": "#hex",
+  "toggleFrom": "#hex", "toggleVia": "#hex", "toggleTo": "#hex",
+  "toggleShadow": "#hex", "toggleHoverRgb": "r, g, b",
+  "sendFrom": "#hex", "sendTo": "#hex", "sendHoverFrom": "#hex", "sendHoverTo": "#hex",
+  "onlineDotBg": "#hex", "onlineDotBorder": "#hex", "typingDot": "#hex",
+  "userMsgFrom": "#hex", "userMsgTo": "#hex", "userMsgShadow": "#hex",
+  "avatarFrom": "#hex", "avatarTo": "#hex", "avatarBorder": "#hex", "avatarIcon": "#hex",
+  "linkColor": "#hex", "linkHover": "#hex", "copyHover": "#hex", "copyActive": "#hex",
+  "chipBorder": "#hex", "chipFrom": "#hex", "chipTo": "#hex", "chipText": "#hex",
+  "chipHoverFrom": "#hex", "chipHoverTo": "#hex", "chipHoverBorder": "#hex",
+  "focusBorder": "#hex", "focusRing": "#hex",
+  "imgActiveBorder": "#hex", "imgActiveBg": "#hex", "imgActiveText": "#hex",
+  "imgHoverText": "#hex", "imgHoverBorder": "#hex", "imgHoverBg": "#hex",
+  "cssPrimary": "#hex", "cssAccent": "#hex", "focusRgb": "r, g, b",
+  "feedbackActive": "#hex", "feedbackHover": "#hex",
+  "surfaceBg": "#hex", "surfaceCard": "#hex", "surfaceBorder": "#hex",
+  "surfaceInput": "#hex", "surfaceInputFocus": "#hex",
+  "textPrimary": "#hex", "textSecondary": "#hex", "textMuted": "#hex"
+}
+
+All colors must be harmonious, derived from the primary (${primaryColor}) and accent colors. For dark themes, surfaces should be very dark. For light themes, surfaces should be light/white.`;
+
+      let themeJson: Record<string, unknown>;
+      try {
+        const result = await model.generateContent(themePrompt);
+        const text = result.response
+          .text()
+          .trim()
+          .replace(/^```(?:json)?[\s\n]*/m, '')
+          .replace(/[\s\n]*```$/m, '')
+          .trim();
+        themeJson = JSON.parse(text);
+      } catch (err) {
+        return { error: `Theme generation failed: ${(err as Error).message}` };
+      }
+
+      // Build widget config and embed it in themeJson for the build pipeline
+      const widgetConfig = {
+        clientId: businessName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 40),
+        botName,
+        welcomeMessage: greeting,
+        inputPlaceholder: 'Type your message...',
+        quickReplies,
+        avatar: {
+          type: 'initials',
+          initials: businessName.slice(0, 2).toUpperCase(),
+        },
+        features: {
+          sound: true,
+          voiceInput: true,
+          streaming: true,
+        },
+      };
+
+      // Store in session
+      const BuilderSession = (await import('@/models/BuilderSession')).default;
+      const session = await BuilderSession.findById(ctx.sessionId);
+      if (session) {
+        session.themeJson = { ...themeJson, _widgetConfig: widgetConfig };
+        session.widgetName = businessName;
+        session.currentStage = 'design';
+        await session.save();
+      }
+
+      ctx.write({ type: 'theme_update', theme: themeJson });
+      ctx.write({ type: 'progress', stage: 'design', status: 'complete' });
+
+      return {
+        success: true,
+        message: `Theme created for "${businessName}". Ready to build — call build_deploy with clientId "${widgetConfig.clientId}".`,
+        clientId: widgetConfig.clientId,
+        themePreview: {
+          primaryColor: themeJson.cssPrimary || themeJson.headerFrom,
+          accentColor: themeJson.cssAccent || themeJson.headerTo,
+          isDark: themeJson.isDark,
+          font: themeJson.font,
+        },
+      };
+    },
+  },
+  {
+    name: 'upload_knowledge_text',
+    description:
+      'Upload custom knowledge text to the widget knowledge base. Use when user provides business info manually (no website to crawl). Accepts plain text about the business.',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        text: {
+          type: 'string',
+          description: 'Knowledge text about the business (services, pricing, FAQ, contacts, etc.)',
+        },
+        businessType: { type: 'string', description: 'Type of business (e.g. dental clinic, restaurant)' },
+        businessName: { type: 'string', description: 'Name of the business' },
+      },
+      required: ['clientId', 'text'],
+    },
+    category: 'core',
+    async executor(args, ctx) {
+      const clientId = args.clientId as string;
+      const text = args.text as string;
+      const businessType = (args.businessType as string) || 'business';
+      const businessName = (args.businessName as string) || clientId;
+
+      ctx.write({ type: 'progress', stage: 'knowledge', status: 'active' });
+      ctx.write({ type: 'progress', message: 'Uploading knowledge...' });
+
+      try {
+        // Upload knowledge text
+        const knowledgeRes = await fetch(`${ctx.baseUrl}/api/knowledge`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Cookie: ctx.cookie },
+          body: JSON.stringify({ clientId, text, source: 'builder-manual' }),
+        });
+
+        if (!knowledgeRes.ok) {
+          const errData = await knowledgeRes.json();
+          return { error: `Knowledge upload failed: ${errData.error || 'Unknown error'}` };
+        }
+
+        // Set AI prompt
+        const { setAIPrompt } = await import('../knowledgeCrawler');
+        await setAIPrompt(clientId, businessType, businessName, ctx.baseUrl, ctx.cookie);
+
+        ctx.write({ type: 'progress', stage: 'knowledge', status: 'complete' });
+        return { success: true, message: `Knowledge uploaded for ${businessName}.` };
+      } catch (err) {
+        return { error: `Knowledge upload failed: ${(err as Error).message}` };
+      }
+    },
+  },
 ];

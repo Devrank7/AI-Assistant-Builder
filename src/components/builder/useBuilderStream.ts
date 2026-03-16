@@ -15,6 +15,7 @@ interface BuilderMessage {
 interface StreamState {
   messages: BuilderMessage[];
   sessionId: string | null;
+  widgetClientId: string | null;
   stage: BuilderStage;
   panelMode: PanelMode;
   isStreaming: boolean;
@@ -29,6 +30,7 @@ export function useBuilderStream() {
   const [state, setState] = useState<StreamState>({
     messages: [],
     sessionId: null,
+    widgetClientId: null,
     stage: 'input',
     panelMode: 'empty',
     isStreaming: false,
@@ -185,6 +187,9 @@ export function useBuilderStream() {
         case 'suggestions':
           return { ...prev, suggestions: event.suggestions };
 
+        case 'widget_ready':
+          return { ...prev, widgetClientId: event.clientId, panelMode: 'live_preview' };
+
         case 'done':
           return { ...prev, isStreaming: false, knowledgeProgress: null };
 
@@ -203,6 +208,7 @@ export function useBuilderStream() {
     setState({
       messages: [],
       sessionId: null,
+      widgetClientId: null,
       stage: 'input',
       panelMode: 'empty',
       isStreaming: false,

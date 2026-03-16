@@ -20,7 +20,7 @@ const STAGE_LABELS: Record<BuilderStage, string> = {
 
 const STAGE_ICONS: Record<BuilderStage, React.ReactNode> = {
   input: (
-    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -29,7 +29,7 @@ const STAGE_ICONS: Record<BuilderStage, React.ReactNode> = {
     </svg>
   ),
   analysis: (
-    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -38,25 +38,25 @@ const STAGE_ICONS: Record<BuilderStage, React.ReactNode> = {
     </svg>
   ),
   design: (
-    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"
+        d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Z"
       />
     </svg>
   ),
   knowledge: (
-    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
+        d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25v14.25"
       />
     </svg>
   ),
   deploy: (
-    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -65,12 +65,12 @@ const STAGE_ICONS: Record<BuilderStage, React.ReactNode> = {
     </svg>
   ),
   integrations: (
-    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 2.25 2.25 4.5-4.5m2.25 0 4.5 4.5 2.25-2.25" />
     </svg>
   ),
   suggestions: (
-    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -79,7 +79,7 @@ const STAGE_ICONS: Record<BuilderStage, React.ReactNode> = {
     </svg>
   ),
   workspace: (
-    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -94,10 +94,10 @@ export default function ProgressPipeline({ currentStage }: Props) {
 
   return (
     <div
-      className="flex items-center justify-center gap-1 px-6 py-3"
+      className="relative flex items-center justify-center gap-0.5 overflow-x-auto px-4 py-3 sm:gap-1 sm:px-6"
       style={{
-        background: 'rgba(255,255,255,0.015)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'rgba(255,255,255,0.01)',
+        borderBottom: '1px solid rgba(255,255,255,0.04)',
       }}
     >
       {BUILDER_STAGES.map((stage, i) => {
@@ -108,52 +108,49 @@ export default function ProgressPipeline({ currentStage }: Props) {
           <div key={stage} className="flex items-center">
             {i > 0 && (
               <div
-                className="mx-1 h-px w-8 transition-all duration-700 sm:w-12"
+                className="mx-0.5 h-px w-4 transition-all duration-700 sm:mx-1 sm:w-8 md:w-10"
                 style={{
-                  background: isComplete ? 'linear-gradient(90deg, #10b981, #06b6d4)' : 'rgba(255,255,255,0.06)',
+                  background: isComplete
+                    ? 'linear-gradient(90deg, rgba(16,185,129,0.6), rgba(6,182,212,0.6))'
+                    : 'rgba(255,255,255,0.04)',
                 }}
               />
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <div className="relative">
                 {isActive && (
                   <div
-                    className="absolute -inset-1.5 animate-pulse rounded-full"
+                    className="absolute -inset-1.5 rounded-full"
                     style={{
-                      background: 'rgba(6,182,212,0.12)',
-                      border: '1px solid rgba(6,182,212,0.15)',
+                      background: 'rgba(6,182,212,0.08)',
+                      border: '1px solid rgba(6,182,212,0.12)',
+                      animation: 'stagePulse 2.5s ease-in-out infinite',
                     }}
                   />
                 )}
                 <div
-                  className="relative flex h-7 w-7 items-center justify-center rounded-full transition-all duration-500"
+                  className="relative flex h-6 w-6 items-center justify-center rounded-full transition-all duration-600"
                   style={{
                     background: isComplete
                       ? 'linear-gradient(135deg, #10b981, #059669)'
                       : isActive
                         ? 'linear-gradient(135deg, #06b6d4, #0891b2)'
-                        : 'rgba(255,255,255,0.04)',
+                        : 'rgba(255,255,255,0.03)',
                     border: isComplete
-                      ? '1px solid rgba(16,185,129,0.4)'
+                      ? '1px solid rgba(16,185,129,0.3)'
                       : isActive
-                        ? '1px solid rgba(6,182,212,0.4)'
-                        : '1px solid rgba(255,255,255,0.08)',
-                    color: isComplete || isActive ? '#fff' : '#4a5068',
+                        ? '1px solid rgba(6,182,212,0.3)'
+                        : '1px solid rgba(255,255,255,0.06)',
+                    color: isComplete || isActive ? '#fff' : '#3d4357',
                     boxShadow: isComplete
-                      ? '0 0 12px rgba(16,185,129,0.2)'
+                      ? '0 0 12px rgba(16,185,129,0.15)'
                       : isActive
-                        ? '0 0 16px rgba(6,182,212,0.25)'
+                        ? '0 0 16px rgba(6,182,212,0.2)'
                         : 'none',
                   }}
                 >
                   {isComplete ? (
-                    <svg
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
                   ) : (
@@ -162,9 +159,9 @@ export default function ProgressPipeline({ currentStage }: Props) {
                 </div>
               </div>
               <span
-                className="hidden text-xs font-medium transition-colors duration-300 sm:block"
+                className="hidden text-[11px] font-medium tracking-wide transition-colors duration-300 md:block"
                 style={{
-                  color: isComplete ? '#34d399' : isActive ? '#22d3ee' : '#4a5068',
+                  color: isComplete ? '#34d399' : isActive ? '#22d3ee' : '#3d4357',
                   fontFamily: "'Outfit', sans-serif",
                 }}
               >
@@ -174,6 +171,13 @@ export default function ProgressPipeline({ currentStage }: Props) {
           </div>
         );
       })}
+
+      <style>{`
+        @keyframes stagePulse {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.08); }
+        }
+      `}</style>
     </div>
   );
 }
