@@ -80,15 +80,15 @@ export default function MyWidgetsPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">My Widgets</h1>
-        <Link
+        <a
           href={builderHref}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          New Widget
-        </Link>
+          + New Widget
+        </a>
       </div>
 
       {widgets.length === 0 ? (
@@ -134,23 +134,28 @@ export default function MyWidgetsPage() {
                 Created: {new Date(widget.createdAt).toLocaleDateString()}
               </p>
 
-              <div className="mt-auto flex items-center gap-2 pt-3 border-t border-white/5">
-                <Link
+              <div className="mt-auto flex items-center gap-1 pt-3 border-t border-white/5">
+                <a
                   href={`/demo/client-website?client=${widget.clientId}`}
-                  className="flex-1 text-center px-3 py-1.5 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 text-center px-3 py-2 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer select-none"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   Preview
-                </Link>
-                <Link
+                </a>
+                <a
                   href={`/dashboard/playground/${widget.clientId}`}
-                  className="flex-1 rounded-lg px-3 py-1.5 text-center text-sm text-cyan-400 transition-colors hover:bg-cyan-500/10 hover:text-cyan-300"
+                  className="flex-1 rounded-lg px-3 py-2 text-center text-sm text-cyan-400 transition-colors hover:bg-cyan-500/10 hover:text-cyan-300 cursor-pointer select-none"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   Customize
-                </Link>
+                </a>
                 <button
-                  onClick={() => handleDelete(widget.clientId)}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleDelete(widget.clientId); }}
                   disabled={deletingId === widget.clientId}
-                  className="flex-1 text-center px-3 py-1.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 text-center px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50 cursor-pointer select-none"
                 >
                   {deletingId === widget.clientId ? 'Deleting...' : 'Delete'}
                 </button>

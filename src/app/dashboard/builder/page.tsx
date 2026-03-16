@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { useBuilderStream } from '@/components/builder/useBuilderStream';
@@ -33,10 +33,12 @@ const STAGE_SUGGESTIONS: Record<string, string[]> = {
 export default function BuilderPage() {
   const stream = useBuilderStream();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const hasPaidPlan = user && user.plan !== 'none';
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [showSessions, setShowSessions] = useState(false);
+  const restoredRef = useRef(false);
 
   useEffect(() => {
     if (!authLoading && user && !hasPaidPlan) {
@@ -52,6 +54,15 @@ export default function BuilderPage() {
       })
       .catch(() => {});
   }, []);
+
+  // Auto-restore session from URL query param (?session=ID)
+  useEffect(() => {
+    const sessionId = searchParams.get('session');
+    if (sessionId && !restoredRef.current) {
+      restoredRef.current = true;
+      stream.restoreSession(sessionId);
+    }
+  }, [searchParams, stream]);
 
   const handleUrlSubmit = useCallback(
     (input: string) => {
