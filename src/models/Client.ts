@@ -7,11 +7,13 @@ export type SubscriptionStatus = 'pending' | 'trial' | 'active' | 'past_due' | '
 export type PaymentMethod = 'nowpayments' | 'cryptomus' | 'wayforpay' | 'dodo' | 'liqpay' | null;
 
 export type ClientType = 'full' | 'quick';
+export type WidgetType = 'ai_chat' | 'smart_faq' | 'lead_form';
 
 export interface IClient extends Document {
   clientId: string;
   clientToken: string;
   clientType: ClientType;
+  widgetType: WidgetType;
   userId?: string;
   organizationId?: string;
   username: string;
@@ -84,6 +86,11 @@ const ClientSchema = new Schema<IClient>(
       type: String,
       enum: ['full', 'quick'],
       default: 'full',
+    },
+    widgetType: {
+      type: String,
+      enum: ['ai_chat', 'smart_faq', 'lead_form'],
+      default: 'ai_chat',
     },
     userId: {
       type: String,

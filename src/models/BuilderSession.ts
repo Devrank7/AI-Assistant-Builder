@@ -15,6 +15,7 @@ export interface IBuilderSession extends Document {
   clientId: string | null;
   status: BuilderStatus;
   widgetName: string | null;
+  widgetType: string | null;
   currentStage: 'input' | 'analysis' | 'design' | 'knowledge' | 'deploy' | 'integrations' | 'suggestions' | 'workspace';
   siteProfile: Record<string, unknown> | null;
   knowledgeUploaded: boolean;
@@ -71,6 +72,11 @@ const builderSessionSchema = new Schema<IBuilderSession>(
       default: 'chatting',
     },
     widgetName: { type: String, default: null },
+    widgetType: {
+      type: String,
+      enum: ['ai_chat', 'smart_faq', 'lead_form'],
+      default: null,
+    },
     currentStage: {
       type: String,
       enum: ['input', 'analysis', 'design', 'knowledge', 'deploy', 'integrations', 'suggestions', 'workspace'],
