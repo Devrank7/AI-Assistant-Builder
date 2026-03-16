@@ -23,13 +23,43 @@ export default function ContextPanel({
   onSelectVariant,
 }: Props) {
   return (
-    <div className="flex h-full w-[400px] flex-col border-l border-gray-200 bg-white">
+    <div
+      className="flex h-full w-[420px] flex-col"
+      style={{
+        background: '#0c0d13',
+        borderLeft: '1px solid rgba(255,255,255,0.06)',
+      }}
+    >
       {mode === 'empty' && (
-        <div className="flex h-full items-center justify-center text-gray-400">
+        <div className="flex h-full items-center justify-center">
           <div className="text-center">
-            <div className="mb-4 text-5xl">✨</div>
-            <p className="text-sm">Preview will appear here</p>
-            <p className="mt-1 text-xs text-gray-300">Paste a URL to get started</p>
+            <div className="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center">
+              <div
+                className="absolute inset-0 animate-pulse rounded-2xl"
+                style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.1)' }}
+              />
+              <svg
+                className="relative h-7 w-7"
+                style={{ color: '#4a5068' }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <p className="text-sm" style={{ color: '#4a5068', fontFamily: "'Outfit', sans-serif" }}>
+              Preview will appear here
+            </p>
+            <p className="mt-1 text-xs" style={{ color: '#2d3348' }}>
+              Paste a URL to get started
+            </p>
           </div>
         </div>
       )}
@@ -42,27 +72,53 @@ export default function ContextPanel({
         <TestSandbox clientId={clientId} connectedIntegrations={connectedIntegrations} />
       )}
 
-      {mode === 'crm_status' && (
-        <div className="p-4">
-          <h3 className="mb-4 text-sm font-medium">Connected Integrations</h3>
+      {(mode === 'crm_status' || mode === 'integration_status') && (
+        <div className="p-5">
+          <h3 className="mb-5 text-sm font-medium" style={{ color: '#e8eaed', fontFamily: "'Outfit', sans-serif" }}>
+            Connected Integrations
+          </h3>
           {connectedIntegrations.length === 0 ? (
-            <p className="text-sm text-gray-400">No integrations connected yet</p>
+            <p className="text-sm" style={{ color: '#4a5068' }}>
+              No integrations connected yet
+            </p>
           ) : (
             <div className="space-y-3">
               {connectedIntegrations.map((integration, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-lg border border-gray-200 p-3">
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-xl p-3.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                  }}
+                >
                   <div
-                    className={`h-3 w-3 rounded-full ${
-                      integration.status === 'connected'
-                        ? 'bg-green-500'
-                        : integration.status === 'failed'
-                          ? 'bg-red-500'
-                          : 'bg-yellow-500'
-                    }`}
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{
+                      background:
+                        integration.status === 'connected'
+                          ? '#10b981'
+                          : integration.status === 'failed'
+                            ? '#ef4444'
+                            : '#f59e0b',
+                      boxShadow:
+                        integration.status === 'connected'
+                          ? '0 0 8px rgba(16,185,129,0.4)'
+                          : integration.status === 'failed'
+                            ? '0 0 8px rgba(239,68,68,0.4)'
+                            : '0 0 8px rgba(245,158,11,0.4)',
+                    }}
                   />
                   <div>
-                    <p className="text-sm font-medium capitalize">{integration.provider}</p>
-                    <p className="text-xs text-gray-500 capitalize">{integration.status}</p>
+                    <p
+                      className="text-sm font-medium capitalize"
+                      style={{ color: '#e8eaed', fontFamily: "'Outfit', sans-serif" }}
+                    >
+                      {integration.provider}
+                    </p>
+                    <p className="text-xs capitalize" style={{ color: '#4a5068' }}>
+                      {integration.status}
+                    </p>
                   </div>
                 </div>
               ))}
