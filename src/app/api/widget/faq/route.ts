@@ -14,7 +14,7 @@ interface FaqItem {
  * Parses knowledge chunks into FAQ items.
  * Looks for Q:/A: patterns, or treats first sentence as question.
  */
-function parseChunksToFaq(chunks: { _id: string; text: string; source?: string }[]): FaqItem[] {
+function parseChunksToFaq(chunks: { _id: unknown; text: string; source?: string }[]): FaqItem[] {
   return chunks
     .map((chunk) => {
       const text = chunk.text.trim();
@@ -39,7 +39,7 @@ function parseChunksToFaq(chunks: { _id: string; text: string; source?: string }
       }
 
       return {
-        id: chunk._id.toString(),
+        id: String(chunk._id),
         question,
         answer,
         category: chunk.source || 'General',
