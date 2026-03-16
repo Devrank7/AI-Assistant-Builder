@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useVoiceInput } from './useVoiceInput';
+import { playMessageSound, playSendSound } from '@/lib/sounds';
 import type { Suggestion } from '@/lib/builder/types';
 
 interface ToolCard {
@@ -64,14 +66,27 @@ export default function BuilderChat({
   const { isListening, isSupported, startListening, stopListening } = useVoiceInput((text) =>
     setInput((prev) => prev + ' ' + text)
   );
+  const prevStreamingRef = useRef(isStreaming);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isStreaming]);
 
+  // Play chime when AI finishes responding
+  useEffect(() => {
+    if (prevStreamingRef.current && !isStreaming && messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.role === 'assistant' && lastMsg.content) {
+        playMessageSound();
+      }
+    }
+    prevStreamingRef.current = isStreaming;
+  }, [isStreaming, messages]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isStreaming) return;
+    playSendSound();
     onSendMessage(input.trim());
     setInput('');
   };
@@ -190,10 +205,16 @@ export default function BuilderChat({
                   }
                 >
                   <div
-                    className="text-[13.5px] leading-[1.7] whitespace-pre-wrap"
+                    className="text-[13.5px] leading-[1.7]"
                     style={{ fontFamily: "'Outfit', sans-serif", letterSpacing: '0.01em' }}
                   >
-                    {msg.content}
+                    {msg.role === 'assistant' ? (
+                      <div className="builder-markdown">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{msg.content}</span>
+                    )}
                   </div>
 
                   {/* Tool action cards */}
@@ -732,6 +753,67 @@ export default function BuilderChat({
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 4px; }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+
+        /* Markdown styles for assistant messages */
+        .builder-markdown p { margin: 0 0 0.5em 0; }
+        .builder-markdown p:last-child { margin-bottom: 0; }
+        .builder-markdown strong { color: #e0e4ec; font-weight: 600; }
+        .builder-markdown em { color: #a5b4c8; font-style: italic; }
+        .builder-markdown code {
+          background: rgba(6,182,212,0.08);
+          border: 1px solid rgba(6,182,212,0.15);
+          border-radius: 4px;
+          padding: 1px 5px;
+          font-size: 0.88em;
+          color: #67e8f9;
+          font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        .builder-markdown pre {
+          background: rgba(0,0,0,0.3);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 8px;
+          padding: 12px 14px;
+          margin: 8px 0;
+          overflow-x: auto;
+        }
+        .builder-markdown pre code {
+          background: none;
+          border: none;
+          padding: 0;
+          color: #c8cdd8;
+        }
+        .builder-markdown ul, .builder-markdown ol {
+          margin: 0.4em 0;
+          padding-left: 1.4em;
+        }
+        .builder-markdown li { margin: 0.25em 0; }
+        .builder-markdown li::marker { color: #22d3ee; }
+        .builder-markdown a {
+          color: #22d3ee;
+          text-decoration: underline;
+          text-decoration-color: rgba(34,211,238,0.3);
+          text-underline-offset: 2px;
+        }
+        .builder-markdown a:hover { text-decoration-color: #22d3ee; }
+        .builder-markdown h1, .builder-markdown h2, .builder-markdown h3 {
+          color: #e8eaed;
+          font-weight: 600;
+          margin: 0.6em 0 0.3em;
+        }
+        .builder-markdown h1 { font-size: 1.15em; }
+        .builder-markdown h2 { font-size: 1.08em; }
+        .builder-markdown h3 { font-size: 1em; }
+        .builder-markdown blockquote {
+          border-left: 2px solid rgba(6,182,212,0.3);
+          margin: 0.5em 0;
+          padding: 0.3em 0 0.3em 12px;
+          color: #8b92a5;
+        }
+        .builder-markdown hr {
+          border: none;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          margin: 0.8em 0;
+        }
       `}</style>
     </div>
   );

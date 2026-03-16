@@ -133,26 +133,32 @@ export function useBuilderStream() {
       switch (event.type) {
         case 'text':
           if (lastMsg?.role === 'assistant') {
-            lastMsg.content += event.content;
+            const updated = { ...lastMsg, content: lastMsg.content + event.content };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
           }
-          return { ...prev, messages: msgs };
+          return prev;
 
         case 'tool_start':
           if (lastMsg?.role === 'assistant') {
-            lastMsg.toolCards = [...(lastMsg.toolCards || []), { tool: event.tool, status: 'running' }];
+            const updated = {
+              ...lastMsg,
+              toolCards: [...(lastMsg.toolCards || []), { tool: event.tool, status: 'running' as const }],
+            };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
           }
-          return { ...prev, messages: msgs };
+          return prev;
 
         case 'tool_result':
           if (lastMsg?.role === 'assistant') {
-            const cards = lastMsg.toolCards || [];
-            const card = cards.find((c) => c.tool === event.tool && c.status === 'running');
-            if (card) {
-              card.status = 'done';
-              card.result = event.result;
-            }
+            const cards = (lastMsg.toolCards || []).map((c) =>
+              c.tool === event.tool && c.status === 'running'
+                ? { ...c, status: 'done' as const, result: event.result }
+                : c
+            );
+            const updated = { ...lastMsg, toolCards: cards };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
           }
-          return { ...prev, messages: msgs };
+          return prev;
 
         case 'session':
           return { ...prev, sessionId: event.sessionId };
@@ -174,9 +180,10 @@ export function useBuilderStream() {
 
         case 'crm_instruction':
           if (lastMsg?.role === 'assistant') {
-            lastMsg.crmInstruction = { provider: event.provider, steps: event.steps };
+            const updated = { ...lastMsg, crmInstruction: { provider: event.provider, steps: event.steps } };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
           }
-          return { ...prev, messages: msgs };
+          return prev;
 
         case 'error':
           return { ...prev, error: event.message };
