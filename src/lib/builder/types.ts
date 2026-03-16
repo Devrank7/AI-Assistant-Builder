@@ -106,6 +106,10 @@ export interface VersionEntry {
   scriptPath: string;
 }
 
+// --- Agent Types ---
+
+export type AgentType = 'orchestrator' | 'design' | 'content' | 'knowledge' | 'integration' | 'qa' | 'deploy';
+
 // --- SSE Event Types ---
 
 export type SSEEvent =
@@ -123,6 +127,7 @@ export type SSEEvent =
   | { type: 'knowledge_progress'; uploaded: number; total: number }
   | { type: 'session'; sessionId: string }
   | { type: 'suggestions'; suggestions: Suggestion[] }
+  | { type: 'agent_switch'; agent: AgentType; task: string }
   | { type: 'done' };
 
 // --- CRM Setup (legacy, kept for backward compat) ---

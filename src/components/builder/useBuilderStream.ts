@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import type { SSEEvent, BuilderStage, PanelMode, Suggestion } from '@/lib/builder/types';
+import type { SSEEvent, BuilderStage, PanelMode, Suggestion, AgentType } from '@/lib/builder/types';
 
 interface BuilderMessage {
   role: 'user' | 'assistant';
@@ -23,6 +23,8 @@ interface StreamState {
   abVariants: { label: string; theme: Record<string, unknown> }[] | null;
   knowledgeProgress: { uploaded: number; total: number } | null;
   suggestions: Suggestion[] | null;
+  activeAgent: AgentType | null;
+  agentActivities: { agent: AgentType; task: string; timestamp: number }[];
   error: string | null;
 }
 
@@ -38,6 +40,8 @@ export function useBuilderStream() {
     abVariants: null,
     knowledgeProgress: null,
     suggestions: null,
+    activeAgent: null,
+    agentActivities: [],
     error: null,
   });
 
@@ -194,6 +198,13 @@ export function useBuilderStream() {
         case 'suggestions':
           return { ...prev, suggestions: event.suggestions };
 
+        case 'agent_switch':
+          return {
+            ...prev,
+            activeAgent: event.agent,
+            agentActivities: [...prev.agentActivities, { agent: event.agent, task: event.task, timestamp: Date.now() }],
+          };
+
         case 'widget_ready':
           return { ...prev, widgetClientId: event.clientId, panelMode: 'live_preview' };
 
@@ -223,6 +234,8 @@ export function useBuilderStream() {
       abVariants: null,
       knowledgeProgress: null,
       suggestions: null,
+      activeAgent: null,
+      agentActivities: [],
       error: null,
     });
   }, []);
@@ -254,6 +267,8 @@ export function useBuilderStream() {
         abVariants: null,
         knowledgeProgress: null,
         suggestions: null,
+        activeAgent: null,
+        agentActivities: [],
         error: null,
       });
       return true;
