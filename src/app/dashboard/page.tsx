@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import {
@@ -156,10 +157,27 @@ function Panel({ title, children, className = '' }: { title: string; children: R
 /* ────────────────────────────────────────────────────────── */
 
 export default function DashboardOverview() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const searchParams = useSearchParams();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState(30);
+
+  // Verify Stripe session after checkout redirect (fallback for webhooks)
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    if (!sessionId) return;
+    fetch('/api/stripe/verify-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    })
+      .then((res) => res.json())
+      .then(() => refreshUser())
+      .catch(() => {});
+    // Remove session_id from URL
+    window.history.replaceState({}, '', '/dashboard');
+  }, [searchParams, refreshUser]);
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);

@@ -1,5 +1,5 @@
 // src/lib/builder/geminiAgent.ts
-import { GoogleGenerativeAI, FunctionDeclarationSchemaType, type Part, type Content } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType, type Part, type Content } from '@google/generative-ai';
 import type { ToolRegistry, ToolContext } from './toolRegistry';
 import type { SSEEvent, AgentToolName } from './types';
 
@@ -21,24 +21,24 @@ export interface AgentRunOptions {
 
 /**
  * Map our ToolRegistry parameter types ("string", "number", etc.)
- * to Gemini's FunctionDeclarationSchemaType enum (STRING, NUMBER, etc.)
+ * to Gemini's SchemaType enum (STRING, NUMBER, etc.)
  */
-function mapSchemaType(type: string): FunctionDeclarationSchemaType {
+function mapSchemaType(type: string): SchemaType {
   switch (type.toLowerCase()) {
     case 'string':
-      return FunctionDeclarationSchemaType.STRING;
+      return SchemaType.STRING;
     case 'number':
-      return FunctionDeclarationSchemaType.NUMBER;
+      return SchemaType.NUMBER;
     case 'integer':
-      return FunctionDeclarationSchemaType.INTEGER;
+      return SchemaType.INTEGER;
     case 'boolean':
-      return FunctionDeclarationSchemaType.BOOLEAN;
+      return SchemaType.BOOLEAN;
     case 'array':
-      return FunctionDeclarationSchemaType.ARRAY;
+      return SchemaType.ARRAY;
     case 'object':
-      return FunctionDeclarationSchemaType.OBJECT;
+      return SchemaType.OBJECT;
     default:
-      return FunctionDeclarationSchemaType.STRING;
+      return SchemaType.STRING;
   }
 }
 
@@ -55,7 +55,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
     name: tool.name,
     description: tool.description,
     parameters: {
-      type: FunctionDeclarationSchemaType.OBJECT,
+      type: SchemaType.OBJECT,
       properties: Object.fromEntries(
         Object.entries(tool.parameters.properties).map(([key, prop]) => [
           key,

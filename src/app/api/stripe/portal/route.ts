@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const user = await User.findById(auth.userId);
   if (!user) return Errors.notFound('User not found');
 
-  if (!user.stripeCustomerId) {
+  if (!user.stripeCustomerId || user.stripeCustomerId.startsWith('cus_temp_')) {
     return Errors.badRequest('No billing account found. Please subscribe to a plan first.');
   }
 

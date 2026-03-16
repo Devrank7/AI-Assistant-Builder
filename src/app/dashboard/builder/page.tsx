@@ -50,8 +50,15 @@ export default function BuilderPage() {
   }, []);
 
   const handleUrlSubmit = useCallback(
-    (url: string) => {
-      stream.sendMessage(`Create a widget for ${url}`);
+    (input: string) => {
+      // If it looks like a URL, wrap it; otherwise send raw message for the agent to handle
+      const isUrl = /^https?:\/\//i.test(input) || /^[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}/i.test(input);
+      if (isUrl) {
+        const normalized = input.startsWith('http') ? input : `https://${input}`;
+        stream.sendMessage(`Create a widget for ${normalized}`);
+      } else {
+        stream.sendMessage(input);
+      }
     },
     [stream]
   );

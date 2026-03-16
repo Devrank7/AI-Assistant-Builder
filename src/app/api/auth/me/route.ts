@@ -25,12 +25,15 @@ export async function GET(request: NextRequest) {
       return Errors.unauthorized('User not found');
     }
 
-    return successResponse({
-      email: user.email,
-      name: user.name,
-      plan: user.plan,
-      subscriptionStatus: user.subscriptionStatus,
-      emailVerified: user.emailVerified,
+    return Response.json({
+      success: true,
+      user: {
+        email: user.email,
+        name: user.name,
+        plan: user.plan,
+        subscriptionStatus: user.subscriptionStatus,
+        emailVerified: user.emailVerified,
+      },
     });
   } catch (error) {
     console.error('Me error:', error);

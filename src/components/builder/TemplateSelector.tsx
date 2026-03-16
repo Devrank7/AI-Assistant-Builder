@@ -205,9 +205,7 @@ export default function TemplateSelector({ onSelectTemplate, onSubmitUrl }: Prop
   const handleUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim()) return;
-    let normalized = url.trim();
-    if (!normalized.startsWith('http')) normalized = 'https://' + normalized;
-    onSubmitUrl(normalized);
+    onSubmitUrl(url.trim());
   };
 
   return (
@@ -281,8 +279,8 @@ export default function TemplateSelector({ onSelectTemplate, onSubmitUrl }: Prop
         </h1>
 
         <p className="mb-10 max-w-md text-center text-sm leading-relaxed" style={{ color: '#7a8194' }}>
-          Paste your website URL. The AI agent will analyze your brand, design a custom widget, and deploy it — all in
-          under a minute.
+          Paste your website URL and the AI agent will analyze your brand, design a custom widget, and deploy it in
+          under a minute. Or just say hello to get started.
         </p>
 
         {/* URL Input */}
@@ -317,7 +315,7 @@ export default function TemplateSelector({ onSelectTemplate, onSubmitUrl }: Prop
               onChange={(e) => setUrl(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder="your-website.com"
+              placeholder="your-website.com or ask a question..."
               className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-[#4a5068]"
               style={{ color: '#e8eaed', fontFamily: "'Outfit', sans-serif" }}
             />

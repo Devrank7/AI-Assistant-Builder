@@ -52,7 +52,14 @@ export async function GET(request: NextRequest) {
     }
 
     const { sub: googleId, email, name, email_verified } = payload;
-    console.log('[Google OAuth] Step 2: Token verified, email:', email);
+    console.log(
+      '[Google OAuth] Step 2: Token verified, email:',
+      email,
+      'name:',
+      name,
+      'email_verified:',
+      email_verified
+    );
 
     await connectDB();
     console.log('[Google OAuth] Step 3: DB connected');
@@ -63,11 +70,30 @@ export async function GET(request: NextRequest) {
 
     if (user) {
       console.log('[Google OAuth] Step 4: Existing user found');
+      let needsSave = false;
       if (!user.googleId) {
         user.googleId = googleId;
         user.authProvider = 'google';
-        if (email_verified) user.emailVerified = true;
+        needsSave = true;
+      }
+      if (email_verified && !user.emailVerified) {
+        user.emailVerified = true;
+        needsSave = true;
+      }
+      if (!user.name && name) {
+        user.name = name;
+        needsSave = true;
+      }
+      if (needsSave) {
         await user.save();
+        console.log('[Google OAuth] Step 4a: Updated user - name:', user.name, 'emailVerified:', user.emailVerified);
+      } else {
+        console.log(
+          '[Google OAuth] Step 4a: No updates needed - name:',
+          user.name,
+          'emailVerified:',
+          user.emailVerified
+        );
       }
     } else {
       console.log('[Google OAuth] Step 4: Creating new user...');

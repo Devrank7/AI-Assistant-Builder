@@ -51,8 +51,9 @@ export default function PlansPage() {
         body: JSON.stringify({ plan, period: annual ? 'annual' : 'monthly' }),
       });
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      const checkoutUrl = data.url || data.data?.url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
       }
     } catch {
       // handle error

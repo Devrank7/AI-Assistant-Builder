@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 
 const navItems = [
@@ -89,8 +89,10 @@ const navItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const hasPaidPlan = user && user.plan !== 'none';
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
@@ -111,7 +113,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link
             key={item.href}
             href={item.href}
-            onClick={() => setSidebarOpen(false)}
+            onClick={(e) => {
+              setSidebarOpen(false);
+              if (item.href === '/dashboard/builder' && !hasPaidPlan) {
+                e.preventDefault();
+                router.push('/plans');
+              }
+            }}
             className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
               isActive(item.href) ? 'bg-blue-500/15 text-blue-400' : 'text-gray-400 hover:bg-white/5 hover:text-white'
             }`}

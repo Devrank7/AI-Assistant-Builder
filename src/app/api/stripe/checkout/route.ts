@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
   let stripeCustomerId = user.stripeCustomerId;
 
-  if (!stripeCustomerId) {
+  if (!stripeCustomerId || stripeCustomerId.startsWith('cus_temp_')) {
     const customer = await stripe.customers.create({
       email: user.email,
       metadata: { userId: auth.userId },
