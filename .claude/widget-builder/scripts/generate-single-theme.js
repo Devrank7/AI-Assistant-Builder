@@ -85,6 +85,15 @@ if (c.hasShine === undefined) c.hasShine = true;
 if (!c.headerAccent) c.headerAccent = '';
 if (!c.label) c.label = `${clientId} theme`;
 
+// ── Widget type detection ────────────────────────────────────────────────
+const widgetType = c.widgetType || 'ai_chat';
+const SUPPORTED_TYPES = ['ai_chat', 'smart_faq', 'lead_form'];
+if (!SUPPORTED_TYPES.includes(widgetType)) {
+    console.error(`❌ Unsupported widgetType: ${widgetType}. Supported: ${SUPPORTED_TYPES.join(', ')}`);
+    process.exit(1);
+}
+console.log(`📦 Widget type: ${widgetType}`);
+
 // ── Generators ──────────────────────────────────────────────────────────
 
 function genCSS(c) {
@@ -1356,25 +1365,584 @@ export default function RichBlocks({ blocks, onAction }) {
 `;
 }
 
+function genFaqCSS(c) {
+    return `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ${c.label} — Smart FAQ */
+:host {
+    --aw-primary: ${c.cssPrimary};
+    font-family: ${c.font};
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Toggle button */
+.wbx-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: ${c.toggleSize};
+    height: ${c.toggleSize};
+    border-radius: ${c.toggleRadius};
+    background: linear-gradient(135deg, ${c.toggleFrom}, ${c.toggleVia}, ${c.toggleTo});
+    box-shadow: 0 4px 16px rgba(${c.toggleHoverRgb}, 0.35);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9999;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.wbx-toggle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 30px rgba(${c.toggleHoverRgb}, 0.45);
+}
+
+/* FAQ panel */
+.wbx-faq-panel {
+    position: fixed;
+    bottom: calc(${c.toggleSize} + 36px);
+    right: 24px;
+    width: ${c.widgetW || '360px'};
+    max-width: ${c.widgetMaxW || '360px'};
+    height: ${c.widgetH || '520px'};
+    max-height: ${c.widgetMaxH || '520px'};
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 9998;
+    font-family: ${c.font};
+}
+
+.wbx-faq-header {
+    background: linear-gradient(135deg, ${c.headerFrom}, ${c.headerVia}, ${c.headerTo});
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.wbx-faq-title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.wbx-faq-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.wbx-faq-close:hover { background: rgba(255,255,255,0.25); }
+
+/* Search bar */
+.wbx-faq-search {
+    padding: 12px 16px;
+    border-bottom: 1px solid ${c.faqSearchBorder || '#e5e7eb'};
+    flex-shrink: 0;
+}
+
+.wbx-faq-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid ${c.faqSearchBorder || '#e5e7eb'};
+    background: ${c.faqSearchBg || '#f9fafb'};
+    color: ${c.faqSearchText || '#374151'};
+    font-size: 13px;
+    font-family: ${c.font};
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.wbx-faq-search-input::placeholder { color: ${c.faqSearchPlaceholder || '#9ca3af'}; }
+.wbx-faq-search-input:focus { border-color: ${c.cssPrimary}; }
+
+/* Category pills */
+.wbx-faq-categories {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    scrollbar-width: none;
+}
+.wbx-faq-categories::-webkit-scrollbar { display: none; }
+
+.wbx-faq-cat-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid ${c.faqCategoryBg || '#e5e7eb'};
+    background: ${c.faqCategoryBg || '#f3f4f6'};
+    color: ${c.faqCategoryText || '#374151'};
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: ${c.font};
+    transition: background 0.2s, border-color 0.2s;
+}
+.wbx-faq-cat-btn.active,
+.wbx-faq-cat-btn:hover {
+    background: ${c.faqHighlight || c.cssPrimary};
+    border-color: ${c.faqHighlight || c.cssPrimary};
+    color: #fff;
+}
+
+/* Accordion list */
+.wbx-faq-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 16px;
+    scrollbar-width: thin;
+}
+
+.wbx-faq-item {
+    border: 1px solid ${c.faqAccordionBorder || '#e5e7eb'};
+    border-radius: 12px;
+    background: ${c.faqAccordionBg || '#fff'};
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+.wbx-faq-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+.wbx-faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: ${c.faqAccordionText || '#111827'};
+    font-family: ${c.font};
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    gap: 8px;
+}
+.wbx-faq-question:hover { color: ${c.faqAccordionHover || c.cssPrimary}; }
+.wbx-faq-question.open { color: ${c.faqAccordionActive || c.cssPrimary}; }
+
+.wbx-faq-chevron {
+    flex-shrink: 0;
+    color: ${c.faqAccordionIcon || '#9ca3af'};
+    transition: transform 0.2s;
+}
+.wbx-faq-question.open .wbx-faq-chevron { transform: rotate(180deg); }
+
+.wbx-faq-answer {
+    padding: 0 14px 12px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: ${c.faqAccordionText ? c.faqAccordionText + 'cc' : '#6b7280'};
+    font-family: ${c.font};
+}
+
+/* Footer */
+.wbx-faq-footer {
+    padding: 8px 16px;
+    border-top: 1px solid #f3f4f6;
+    text-align: center;
+    flex-shrink: 0;
+}
+.wbx-faq-footer a {
+    font-size: 10px;
+    color: #9ca3af;
+    text-decoration: none;
+    font-family: ${c.font};
+    transition: color 0.2s;
+}
+.wbx-faq-footer a:hover { color: #6b7280; }
+`;
+}
+
+function genFormCSS(c) {
+    return `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ${c.label} — Lead Form */
+:host {
+    --aw-primary: ${c.cssPrimary};
+    font-family: ${c.font};
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Toggle button */
+.wbx-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: ${c.toggleSize};
+    height: ${c.toggleSize};
+    border-radius: ${c.toggleRadius};
+    background: linear-gradient(135deg, ${c.toggleFrom}, ${c.toggleVia}, ${c.toggleTo});
+    box-shadow: 0 4px 16px rgba(${c.toggleHoverRgb}, 0.35);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9999;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.wbx-toggle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 30px rgba(${c.toggleHoverRgb}, 0.45);
+}
+
+/* Form panel */
+.wbx-form-panel {
+    position: fixed;
+    bottom: calc(${c.toggleSize} + 36px);
+    right: 24px;
+    width: ${c.widgetW || '360px'};
+    max-width: ${c.widgetMaxW || '360px'};
+    height: ${c.widgetH || '520px'};
+    max-height: ${c.widgetMaxH || '520px'};
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 9998;
+    font-family: ${c.font};
+}
+
+.wbx-form-header {
+    background: linear-gradient(135deg, ${c.headerFrom}, ${c.headerVia}, ${c.headerTo});
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.wbx-form-title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Form inputs */
+.wbx-form-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.wbx-form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: ${c.formLabelText || '#374151'};
+    margin-bottom: 4px;
+    font-family: ${c.font};
+}
+
+.wbx-form-required {
+    color: ${c.formErrorText || '#ef4444'};
+    margin-left: 2px;
+}
+
+.wbx-form-input {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid ${c.formInputBorder || '#e5e7eb'};
+    background: ${c.formInputBg || '#f9fafb'};
+    color: ${c.formInputText || '#111827'};
+    font-size: 13px;
+    font-family: ${c.font};
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.wbx-form-input:focus {
+    border-color: ${c.formInputFocus || c.cssPrimary};
+    box-shadow: 0 0 0 3px ${c.formInputFocus ? c.formInputFocus + '33' : c.cssPrimary + '33'};
+}
+.wbx-form-input.wbx-form-input-error {
+    border-color: ${c.formErrorBorder || '#ef4444'};
+}
+
+.wbx-form-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid ${c.formInputBorder || '#e5e7eb'};
+    background: ${c.formInputBg || '#f9fafb'};
+    color: ${c.formInputText || '#111827'};
+    font-size: 13px;
+    font-family: ${c.font};
+    outline: none;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.wbx-form-textarea:focus {
+    border-color: ${c.formInputFocus || c.cssPrimary};
+    box-shadow: 0 0 0 3px ${c.formInputFocus ? c.formInputFocus + '33' : c.cssPrimary + '33'};
+}
+
+.wbx-form-error {
+    font-size: 11px;
+    color: ${c.formErrorText || '#ef4444'};
+    margin-top: 3px;
+    font-family: ${c.font};
+}
+
+/* Progress bar */
+.wbx-form-progress {
+    padding: 10px 16px 0;
+    flex-shrink: 0;
+}
+
+.wbx-form-progress-text {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+    font-family: ${c.font};
+    display: flex;
+    justify-content: space-between;
+}
+
+.wbx-form-progress-bar {
+    height: 4px;
+    border-radius: 4px;
+    background: ${c.formProgressBg || '#e5e7eb'};
+    overflow: hidden;
+}
+
+.wbx-form-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: ${c.formProgressFill || c.cssPrimary};
+    transition: width 0.3s ease;
+}
+
+/* Step indicators */
+.wbx-form-steps {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    flex-shrink: 0;
+}
+
+.wbx-form-step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: ${c.formStepInactive || '#e5e7eb'};
+    transition: background 0.2s, transform 0.2s;
+}
+.wbx-form-step-dot.active {
+    background: ${c.formStepActive || c.cssPrimary};
+    transform: scale(1.3);
+}
+
+/* Navigation buttons */
+.wbx-form-nav {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid #f3f4f6;
+    flex-shrink: 0;
+}
+
+.wbx-form-btn-back {
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: ${c.font};
+    transition: background 0.2s;
+}
+.wbx-form-btn-back:hover { background: #f3f4f6; }
+
+.wbx-form-btn-next {
+    flex: 1;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, ${c.formSubmitFrom || c.cssPrimary}, ${c.formSubmitTo || c.cssPrimary});
+    color: ${c.formSubmitText || '#fff'};
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: ${c.font};
+    transition: opacity 0.2s, transform 0.1s;
+}
+.wbx-form-btn-next:hover { opacity: 0.9; }
+.wbx-form-btn-next:active { transform: scale(0.98); }
+
+.wbx-form-btn-submit {
+    flex: 1;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, ${c.formSubmitFrom || c.cssPrimary}, ${c.formSubmitTo || c.cssPrimary});
+    color: ${c.formSubmitText || '#fff'};
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: ${c.font};
+    transition: opacity 0.2s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.wbx-form-btn-submit:hover { opacity: 0.9; }
+.wbx-form-btn-submit:active { transform: scale(0.98); }
+
+/* Success screen */
+.wbx-form-success {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    background: ${c.formSuccessBg || '#f0fdf4'};
+    text-align: center;
+    gap: 12px;
+}
+
+.wbx-form-success-icon {
+    font-size: 40px;
+    color: ${c.formSuccessIcon || '#22c55e'};
+}
+
+.wbx-form-success-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: ${c.formSuccessText || '#166534'};
+    font-family: ${c.font};
+}
+`;
+}
+
+function genFaqMainJSX(c) {
+    return `import { h, render } from 'preact';
+import SmartFaq from './components/SmartFaq';
+
+const container = document.createElement('div');
+container.id = 'wbx-faq-root';
+const shadow = container.attachShadow({ mode: 'open' });
+
+const style = document.createElement('style');
+style.textContent = window.__WIDGET_CSS__ || '';
+shadow.appendChild(style);
+
+const app = document.createElement('div');
+shadow.appendChild(app);
+
+document.body.appendChild(container);
+render(h(SmartFaq, null), app);
+`;
+}
+
+function genFormMainJSX(c) {
+    return `import { h, render } from 'preact';
+import LeadForm from './components/LeadForm';
+
+const container = document.createElement('div');
+container.id = 'wbx-form-root';
+const shadow = container.attachShadow({ mode: 'open' });
+
+const style = document.createElement('style');
+style.textContent = window.__WIDGET_CSS__ || '';
+shadow.appendChild(style);
+
+const app = document.createElement('div');
+shadow.appendChild(app);
+
+document.body.appendChild(container);
+render(h(LeadForm, null), app);
+`;
+}
+
 // ── Write Files ─────────────────────────────────────────────────────────
 const srcDir = path.join(CLIENTS_DIR, clientId, 'src');
 const compDir = path.join(srcDir, 'components');
 fs.mkdirSync(compDir, { recursive: true });
 
-fs.writeFileSync(path.join(srcDir, 'index.css'), genCSS(c));
-fs.writeFileSync(path.join(srcDir, 'main.jsx'), genMainJSX(c));
-fs.writeFileSync(path.join(compDir, 'Widget.jsx'), genWidget(c));
-fs.writeFileSync(path.join(compDir, 'ChatMessage.jsx'), genChatMessage(c));
-fs.writeFileSync(path.join(compDir, 'QuickReplies.jsx'), genQuickReplies(c));
-fs.writeFileSync(path.join(compDir, 'MessageFeedback.jsx'), genFeedback(c));
-fs.writeFileSync(path.join(compDir, 'RichBlocks.jsx'), genRichBlocks(c));
+if (widgetType === 'ai_chat') {
+    fs.writeFileSync(path.join(srcDir, 'index.css'), genCSS(c));
+    fs.writeFileSync(path.join(srcDir, 'main.jsx'), genMainJSX(c));
+    fs.writeFileSync(path.join(compDir, 'Widget.jsx'), genWidget(c));
+    fs.writeFileSync(path.join(compDir, 'ChatMessage.jsx'), genChatMessage(c));
+    fs.writeFileSync(path.join(compDir, 'QuickReplies.jsx'), genQuickReplies(c));
+    fs.writeFileSync(path.join(compDir, 'MessageFeedback.jsx'), genFeedback(c));
+    fs.writeFileSync(path.join(compDir, 'RichBlocks.jsx'), genRichBlocks(c));
 
-console.log(`✅ ${clientId}: 7 themed source files generated from theme.json`);
-console.log(`   → ${srcDir}/index.css`);
-console.log(`   → ${srcDir}/main.jsx`);
-console.log(`   → ${compDir}/Widget.jsx`);
-console.log(`   → ${compDir}/ChatMessage.jsx`);
-console.log(`   → ${compDir}/QuickReplies.jsx`);
-console.log(`   → ${compDir}/MessageFeedback.jsx`);
-console.log(`   → ${compDir}/RichBlocks.jsx`);
+    console.log(`✅ ${clientId}: 7 themed source files generated from theme.json`);
+    console.log(`   → ${srcDir}/index.css`);
+    console.log(`   → ${srcDir}/main.jsx`);
+    console.log(`   → ${compDir}/Widget.jsx`);
+    console.log(`   → ${compDir}/ChatMessage.jsx`);
+    console.log(`   → ${compDir}/QuickReplies.jsx`);
+    console.log(`   → ${compDir}/MessageFeedback.jsx`);
+    console.log(`   → ${compDir}/RichBlocks.jsx`);
+} else if (widgetType === 'smart_faq') {
+    fs.writeFileSync(path.join(srcDir, 'index.css'), genFaqCSS(c));
+    fs.writeFileSync(path.join(srcDir, 'main.jsx'), genFaqMainJSX(c));
+
+    console.log(`✅ ${clientId}: 2 themed source files generated for smart_faq from theme.json`);
+    console.log(`   → ${srcDir}/index.css`);
+    console.log(`   → ${srcDir}/main.jsx`);
+    console.log(`   (SmartFaq.jsx is shared from src/components/SmartFaq.jsx)`);
+} else if (widgetType === 'lead_form') {
+    fs.writeFileSync(path.join(srcDir, 'index.css'), genFormCSS(c));
+    fs.writeFileSync(path.join(srcDir, 'main.jsx'), genFormMainJSX(c));
+
+    console.log(`✅ ${clientId}: 2 themed source files generated for lead_form from theme.json`);
+    console.log(`   → ${srcDir}/index.css`);
+    console.log(`   → ${srcDir}/main.jsx`);
+    console.log(`   (LeadForm.jsx is shared from src/components/LeadForm.jsx)`);
+}
+
 console.log(`\nNext: node .agent/widget-builder/scripts/build.js ${clientId}`);
