@@ -108,6 +108,28 @@ export async function GET(request: NextRequest) {
         stripeCustomerId: `cus_temp_${Date.now()}`,
       });
       console.log('[Google OAuth] Step 4b: User created');
+
+      // Auto-create organization for new user
+      const Organization = (await import('@/models/Organization')).default;
+      const OrgMember = (await import('@/models/OrgMember')).default;
+      const { PLAN_LIMITS } = await import('@/models/Organization');
+
+      const org = await Organization.create({
+        name: `${user.name}'s Organization`,
+        ownerId: user._id.toString(),
+        plan: 'free',
+        stripeCustomerId: user.stripeCustomerId,
+        limits: PLAN_LIMITS.free,
+      });
+
+      await OrgMember.create({
+        organizationId: org._id.toString(),
+        userId: user._id.toString(),
+        role: 'owner',
+      });
+
+      user.organizationId = org._id.toString();
+      await user.save();
     }
 
     console.log('[Google OAuth] Step 5: Signing tokens...');
