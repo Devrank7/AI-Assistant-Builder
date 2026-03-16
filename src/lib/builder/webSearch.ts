@@ -10,7 +10,15 @@ const BRAVE_API_URL = 'https://api.search.brave.com/res/v1/web/search';
 
 export async function webSearch(query: string, count: number = 10): Promise<SearchResult[]> {
   const apiKey = process.env.BRAVE_SEARCH_API_KEY;
-  if (!apiKey) return [];
+  if (!apiKey) {
+    return [
+      {
+        title: 'No search API configured',
+        url: '',
+        description: `Web search unavailable. Use web_fetch to fetch documentation directly by URL. Query: "${query}"`,
+      },
+    ];
+  }
 
   try {
     const params = new URLSearchParams({ q: query, count: String(count) });

@@ -7,7 +7,7 @@ import BuilderSession from '@/models/BuilderSession';
 import User from '@/models/User';
 import { createSSEStream, createSSEHeaders } from '@/lib/builder/sseUtils';
 import { createToolRegistry } from '@/lib/builder/tools';
-import { runAgentLoop } from '@/lib/builder/anthropicAgent';
+import { runAgentLoop } from '@/lib/builder/geminiAgent';
 import { BUILDER_SYSTEM_PROMPT } from '@/lib/builder/systemPrompt';
 import type { ToolContext } from '@/lib/builder/toolRegistry';
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const currentUser = await User.findById(auth.userId);
     const userPlan = currentUser?.plan || 'none';
 
-    // Build conversation for Claude (convert session messages to simple format)
+    // Build conversation for Gemini (convert session messages to simple format)
     const conversationMessages = session.messages.map((m: { role: string; content: string }) => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
