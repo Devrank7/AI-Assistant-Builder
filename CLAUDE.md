@@ -1,3 +1,12 @@
+# Git Repository
+
+- **Repository**: https://github.com/Devrank7/AI-Assistant-Builder.git
+- **Branch**: main
+- Push ONLY to this repository and ONLY to this branch. No exceptions.
+- CI/CD is disabled (no GitHub Actions workflows).
+
+---
+
 # Agent Instructions
 
 You operate within a 3-layer architecture that separates concerns to maximize reliability. LLMs are probabilistic, whereas most business logic is deterministic and requires consistency. This system fixes that mismatch.
