@@ -2,28 +2,55 @@
 
 // --- Stage & Mode constants ---
 
-export const BUILDER_STAGES = ['input', 'analysis', 'design', 'knowledge', 'deploy', 'integrations'] as const;
+export const BUILDER_STAGES = [
+  'input',
+  'analysis',
+  'design',
+  'knowledge',
+  'deploy',
+  'integrations',
+  'suggestions',
+  'workspace',
+] as const;
 export type BuilderStage = (typeof BUILDER_STAGES)[number];
 
-export const PANEL_MODES = ['empty', 'live_preview', 'test_sandbox', 'ab_compare', 'crm_status'] as const;
+export const PANEL_MODES = [
+  'empty',
+  'live_preview',
+  'test_sandbox',
+  'ab_compare',
+  'crm_status',
+  'integration_status',
+] as const;
 export type PanelMode = (typeof PANEL_MODES)[number];
 
 export const AGENT_TOOL_NAMES = [
+  // Core (9)
   'analyze_site',
-  'generate_themes',
+  'generate_design',
+  'modify_design',
   'select_theme',
-  'build_widget',
+  'build_deploy',
   'crawl_knowledge',
-  'connect_crm',
-  'set_panel_mode',
-  'read_widget_code',
   'modify_widget_code',
-  'rollback_widget',
-  'add_integration',
+  'rollback',
+  'test_widget',
+  // Integration (6)
+  'web_search',
+  'web_fetch',
+  'search_api_docs',
+  'write_integration',
+  'test_integration',
+  'guide_user',
+  // Proactive (4)
+  'analyze_opportunities',
+  'suggest_improvements',
+  'check_knowledge_gaps',
+  'analyze_competitors',
 ] as const;
 export type AgentToolName = (typeof AGENT_TOOL_NAMES)[number];
 
-// --- Site Profile ---
+// --- Site Profile (enhanced) ---
 
 export interface SiteProfile {
   url: string;
@@ -32,8 +59,51 @@ export interface SiteProfile {
   colors: string[];
   fonts: string[];
   favicon?: string;
-  pages: { url: string; title: string; content: string }[];
+  pages: { url: string; title: string; content: string; crawled?: boolean }[];
   contactInfo?: { phone?: string; email?: string; address?: string };
+}
+
+export interface SiteProfileV2 extends SiteProfile {
+  totalPages: number;
+  crawledPages: number;
+  detectedFeatures: string[];
+}
+
+// --- Suggestion ---
+
+export interface Suggestion {
+  id: string;
+  category: 'knowledge_gap' | 'integration' | 'design' | 'feature';
+  title: string;
+  description: string;
+  actions: { label: string; action: string }[];
+}
+
+// --- Integration Entry ---
+
+export interface IntegrationEntry {
+  provider: string;
+  status: 'suggested' | 'configuring' | 'connected' | 'failed';
+  handlerPath?: string;
+  apiKeyEncrypted?: string;
+}
+
+// --- Opportunity ---
+
+export interface Opportunity {
+  id: string;
+  type: 'knowledge_gap' | 'integration' | 'design' | 'feature';
+  description: string;
+  status: 'pending' | 'accepted' | 'dismissed';
+}
+
+// --- Version Entry ---
+
+export interface VersionEntry {
+  number: number;
+  description: string;
+  timestamp: Date;
+  scriptPath: string;
 }
 
 // --- SSE Event Types ---
@@ -52,9 +122,10 @@ export type SSEEvent =
   | { type: 'error'; message: string; recoverable: boolean }
   | { type: 'knowledge_progress'; uploaded: number; total: number }
   | { type: 'session'; sessionId: string }
+  | { type: 'suggestions'; suggestions: Suggestion[] }
   | { type: 'done' };
 
-// --- CRM Setup ---
+// --- CRM Setup (legacy, kept for backward compat) ---
 
 export interface CRMSetupConfig {
   provider: string;
