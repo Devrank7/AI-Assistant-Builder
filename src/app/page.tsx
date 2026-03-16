@@ -9,7 +9,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WidgetGenerator from '@/components/WidgetGenerator';
 import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/components/AuthProvider';
-import LandingChat from '@/components/LandingChat';
+import Script from 'next/script';
 
 /* ═══════════════════════════════════════════════════════════════
    THEME CSS — injected at runtime (Tailwind v4 strips custom
@@ -1546,9 +1546,9 @@ export default function LandingPage() {
       </AnimatePresence>
 
       {/* ════════════════════════════════════════════
-          LANDING CHATBOT — dogfooding the product
+          LANDING CHATBOT — real widget (dogfooding)
           ════════════════════════════════════════════ */}
-      <LandingChat />
+      <Script src="/quickwidgets/winbix-ai/script.js" strategy="lazyOnload" />
     </div>
   );
 }

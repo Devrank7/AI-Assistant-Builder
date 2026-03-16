@@ -216,6 +216,22 @@ export function Widget({ config }) {
         }
     }, [inputValue]);
 
+    // Live preview hot-reload via postMessage
+    useEffect(() => {
+      const handler = (event) => {
+        if (event.data?.type === 'theme_update' && event.data.theme) {
+          const theme = event.data.theme;
+          const root = document.querySelector('[data-widget-root]');
+          if (root) {
+            if (theme.cssPrimary) root.style.setProperty('--aw-primary', theme.cssPrimary);
+            if (theme.cssAccent) root.style.setProperty('--aw-accent', theme.cssAccent);
+          }
+        }
+      };
+      window.addEventListener('message', handler);
+      return () => window.removeEventListener('message', handler);
+    }, []);
+
     const handleImageSelect = useCallback((e) => {
         const file = e.target.files?.[0];
         if (!file || !file.type.startsWith('image/') || file.size > 10 * 1024 * 1024) return;
@@ -539,7 +555,7 @@ export function Widget({ config }) {
                 )}
             </AnimatePresence>
 
-            <div className={`fixed z-[9999] flex flex-col gap-3 antialiased ${positionClasses}`} style={{ fontFamily: "\'Inter\', -apple-system, BlinkMacSystemFont, sans-serif", ...(isMobile && isOpen ? {} : dragStyle) }}>
+            <div data-widget-root className={`fixed z-[9999] flex flex-col gap-3 antialiased ${positionClasses}`} style={{ fontFamily: "\'Inter\', -apple-system, BlinkMacSystemFont, sans-serif", ...(isMobile && isOpen ? {} : dragStyle) }}>
                 {/* Chat panel */}
                 <AnimatePresence>
                     {isOpen && (
