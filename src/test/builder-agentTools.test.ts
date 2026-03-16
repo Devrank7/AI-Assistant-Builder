@@ -3,8 +3,8 @@ import { describe, it, expect } from 'vitest';
 import { GEMINI_TOOL_DECLARATIONS, getToolExecutor } from '@/lib/builder/agentTools';
 
 describe('Agent Tools', () => {
-  it('should have 7 tool declarations', () => {
-    expect(GEMINI_TOOL_DECLARATIONS.length).toBe(7);
+  it('should have 11 tool declarations', () => {
+    expect(GEMINI_TOOL_DECLARATIONS.length).toBe(11);
   });
 
   it('should have name and description on each tool', () => {

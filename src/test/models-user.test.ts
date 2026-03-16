@@ -6,13 +6,13 @@ describe('User model schema', () => {
     expect(User.modelName).toBe('User');
   });
 
-  it('should require email and passwordHash', async () => {
+  it('should require email and stripeCustomerId', async () => {
     const { default: User } = await import('@/models/User');
     const user = new User({});
     const err = user.validateSync();
     expect(err).toBeDefined();
     expect(err!.errors.email).toBeDefined();
-    expect(err!.errors.passwordHash).toBeDefined();
+    expect(err!.errors.stripeCustomerId).toBeDefined();
   });
 
   it('should have correct default values', async () => {
