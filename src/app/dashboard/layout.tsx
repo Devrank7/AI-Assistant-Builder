@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
@@ -106,6 +106,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const hasPaidPlan = user && user.plan !== 'none';
+
+  useEffect(() => {
+    if (user && !user.onboardingCompleted && !pathname.startsWith('/dashboard/onboarding')) {
+      router.push('/dashboard/onboarding');
+    }
+  }, [user, pathname, router]);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
