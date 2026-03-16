@@ -55,6 +55,8 @@ vi.mock('@/lib/auth', async () => {
       authenticated: true,
       userId: 'user123',
       user: { email: 'test@example.com', plan: 'none', subscriptionStatus: 'trial' },
+      organizationId: null,
+      orgRole: null,
     }),
   };
 });
@@ -85,6 +87,30 @@ vi.mock('@/models/User', () => {
     },
   };
 });
+
+// Mock Organization and OrgMember (used by register route for auto-org creation)
+vi.mock('@/models/Organization', () => ({
+  default: {
+    create: vi.fn().mockResolvedValue({
+      _id: { toString: () => 'org123' },
+      name: "Test User's Organization",
+      plan: 'free',
+    }),
+  },
+  PLAN_LIMITS: {
+    free: { maxWidgets: 1, maxMessages: 100, maxTeamMembers: 1, features: ['chat'] },
+  },
+}));
+
+vi.mock('@/models/OrgMember', () => ({
+  default: {
+    create: vi.fn().mockResolvedValue({
+      organizationId: 'org123',
+      userId: 'user123',
+      role: 'owner',
+    }),
+  },
+}));
 
 // --- Imports (after mocks) ---
 import { POST as registerHandler } from '@/app/api/auth/register/route';

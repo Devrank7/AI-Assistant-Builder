@@ -11,10 +11,30 @@
  * Idempotent: skips users that already have an organizationId.
  */
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import path from 'path';
+import { readFileSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+// Load .env.local manually (no dotenv dependency)
+const __dir = typeof __dirname !== 'undefined' ? __dirname : dirname(fileURLToPath(import.meta.url));
+const envPath = resolve(__dir, '../.env.local');
+try {
+  const envContent = readFileSync(envPath, 'utf-8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx === -1) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    const val = trimmed
+      .slice(eqIdx + 1)
+      .trim()
+      .replace(/^["']|["']$/g, '');
+    if (!process.env[key]) process.env[key] = val;
+  }
+} catch {
+  // .env.local may not exist in production
+}
 
 const PLAN_MAP: Record<string, string> = {
   none: 'free',

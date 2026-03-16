@@ -111,6 +111,8 @@ describe('Stripe Routes', () => {
       authenticated: true,
       userId: 'user123',
       user: { email: 'test@example.com', plan: 'none', subscriptionStatus: 'trial' },
+      organizationId: null,
+      orgRole: null,
     });
   });
 

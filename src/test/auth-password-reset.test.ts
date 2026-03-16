@@ -23,6 +23,8 @@ vi.mock('@/lib/auth', () => ({
     authenticated: true,
     userId: 'user123',
     user: { email: 'test@example.com', plan: 'basic', subscriptionStatus: 'active' },
+    organizationId: null,
+    orgRole: null,
   }),
 }));
 
