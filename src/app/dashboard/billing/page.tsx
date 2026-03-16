@@ -3,17 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
-
-const planFeatures = [
-  { feature: 'AI Chat Widget', basic: true, pro: true },
-  { feature: 'Knowledge Base', basic: '1 widget', pro: 'Unlimited' },
-  { feature: 'Monthly Messages', basic: '500', pro: 'Unlimited' },
-  { feature: 'Custom Branding', basic: false, pro: true },
-  { feature: 'CRM Integrations', basic: false, pro: true },
-  { feature: 'Multi-channel (Telegram, WhatsApp)', basic: false, pro: true },
-  { feature: 'Analytics Dashboard', basic: 'Basic', pro: 'Advanced' },
-  { feature: 'Priority Support', basic: false, pro: true },
-];
+import { PRICING_PLANS, getFeatureComparison, getPlanById } from '@/lib/pricing';
 
 export default function BillingPage() {
   const { user } = useAuth();
@@ -49,7 +39,10 @@ export default function BillingPage() {
     }
   };
 
-  const hasSubscription = user?.plan && user.plan !== 'none';
+  const currentPlanId = user?.plan === 'none' || user?.plan === 'basic' ? 'free' : user?.plan || 'free';
+  const currentPlan = getPlanById(currentPlanId as any);
+  const hasSubscription = user?.plan && user.plan !== 'none' && user.plan !== 'free';
+  const features = getFeatureComparison();
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -60,7 +53,10 @@ export default function BillingPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="mb-1 text-sm text-gray-400">Current Plan</p>
-            <p className="text-2xl font-bold text-white capitalize">{user?.plan || 'None'}</p>
+            <p className="text-2xl font-bold text-white">{currentPlan?.name || 'Free'}</p>
+            {currentPlan && currentPlan.monthlyPrice > 0 && (
+              <p className="mt-1 text-sm text-gray-500">${currentPlan.monthlyPrice}/mo</p>
+            )}
             <div className="mt-2">
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusColor(
@@ -83,10 +79,10 @@ export default function BillingPage() {
               </button>
             ) : (
               <Link
-                href="/plans"
+                href="/pricing"
                 className="inline-flex rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-600"
               >
-                Choose a Plan
+                Upgrade Plan
               </Link>
             )}
           </div>
@@ -101,68 +97,41 @@ export default function BillingPage() {
             <thead>
               <tr className="border-b border-white/10">
                 <th className="px-4 py-3 text-left font-medium text-gray-400">Feature</th>
-                <th className="px-4 py-3 text-center font-medium text-gray-400">Basic</th>
-                <th className="px-4 py-3 text-center font-medium text-gray-400">Pro</th>
+                {PRICING_PLANS.map((plan) => (
+                  <th
+                    key={plan.id}
+                    className={`px-4 py-3 text-center font-medium ${plan.id === currentPlanId ? 'text-cyan-400' : 'text-gray-400'}`}
+                  >
+                    {plan.name}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {planFeatures.map((row, i) => (
-                <tr key={i} className="border-b border-white/5 last:border-0">
+              {features.map((row) => (
+                <tr key={row.feature} className="border-b border-white/5 last:border-0">
                   <td className="px-4 py-3 text-gray-300">{row.feature}</td>
-                  <td className="px-4 py-3 text-center">
-                    {typeof row.basic === 'boolean' ? (
-                      row.basic ? (
-                        <svg
-                          className="mx-auto h-5 w-5 text-green-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
+                  {(['free', 'starter', 'pro', 'enterprise'] as const).map((planKey) => (
+                    <td key={planKey} className="px-4 py-3 text-center">
+                      {typeof row[planKey] === 'boolean' ? (
+                        row[planKey] ? (
+                          <svg
+                            className="mx-auto h-5 w-5 text-cyan-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                        ) : (
+                          <span className="text-gray-700">&mdash;</span>
+                        )
                       ) : (
-                        <svg
-                          className="mx-auto h-5 w-5 text-gray-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      )
-                    ) : (
-                      <span className="text-gray-400">{row.basic}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {typeof row.pro === 'boolean' ? (
-                      row.pro ? (
-                        <svg
-                          className="mx-auto h-5 w-5 text-green-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
-                      ) : (
-                        <svg
-                          className="mx-auto h-5 w-5 text-gray-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      )
-                    ) : (
-                      <span className="text-gray-400">{row.pro}</span>
-                    )}
-                  </td>
+                        <span className="text-gray-400">{row[planKey]}</span>
+                      )}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
