@@ -15,7 +15,7 @@ export interface IBuilderSession extends Document {
   clientId: string | null;
   status: BuilderStatus;
   widgetName: string | null;
-  currentStage: 'input' | 'analysis' | 'design' | 'knowledge' | 'deploy' | 'integrations';
+  currentStage: 'input' | 'analysis' | 'design' | 'knowledge' | 'deploy' | 'integrations' | 'suggestions' | 'workspace';
   siteProfile: Record<string, unknown> | null;
   knowledgeUploaded: boolean;
   connectedIntegrations: {
@@ -30,6 +30,24 @@ export interface IBuilderSession extends Document {
   templateUsed: string | null;
   createdAt: Date;
   updatedAt: Date;
+  // New optional fields (v2)
+  integrations?: {
+    provider: string;
+    status: 'suggested' | 'configuring' | 'connected' | 'failed';
+    handlerPath?: string;
+  }[];
+  opportunities?: {
+    id: string;
+    type: 'knowledge_gap' | 'integration' | 'design' | 'feature';
+    description: string;
+    status: 'pending' | 'accepted' | 'dismissed';
+  }[];
+  versions?: {
+    number: number;
+    description: string;
+    timestamp: Date;
+    scriptPath: string;
+  }[];
 }
 
 const messageSchema = new Schema<IBuilderMessage>(
@@ -55,7 +73,7 @@ const builderSessionSchema = new Schema<IBuilderSession>(
     widgetName: { type: String, default: null },
     currentStage: {
       type: String,
-      enum: ['input', 'analysis', 'design', 'knowledge', 'deploy', 'integrations'],
+      enum: ['input', 'analysis', 'design', 'knowledge', 'deploy', 'integrations', 'suggestions', 'workspace'],
       default: 'input',
     },
     siteProfile: { type: Schema.Types.Mixed, default: null },
@@ -69,6 +87,29 @@ const builderSessionSchema = new Schema<IBuilderSession>(
     abVariants: [{ label: String, themeJson: Schema.Types.Mixed }],
     selectedVariant: { type: Number, default: null },
     templateUsed: { type: String, default: null },
+    integrations: [
+      {
+        provider: String,
+        status: { type: String, enum: ['suggested', 'configuring', 'connected', 'failed'] },
+        handlerPath: String,
+      },
+    ],
+    opportunities: [
+      {
+        id: String,
+        type: { type: String, enum: ['knowledge_gap', 'integration', 'design', 'feature'] },
+        description: String,
+        status: { type: String, enum: ['pending', 'accepted', 'dismissed'] },
+      },
+    ],
+    versions: [
+      {
+        number: Number,
+        description: String,
+        timestamp: Date,
+        scriptPath: String,
+      },
+    ],
   },
   { timestamps: true }
 );
