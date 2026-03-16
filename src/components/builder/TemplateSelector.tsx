@@ -2,11 +2,37 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-interface Props {
-  onSubmitUrl: (url: string) => void;
+function getTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export default function TemplateSelector({ onSubmitUrl }: Props) {
+interface SessionSummary {
+  _id: string;
+  widgetName: string | null;
+  status: string;
+  clientId: string | null;
+  currentStage: string;
+  updatedAt: string;
+  messageCount: number;
+  preview: string | null;
+}
+
+interface Props {
+  onSubmitUrl: (url: string) => void;
+  sessions?: SessionSummary[];
+  onSelectSession?: (id: string) => void;
+  onNewSession?: () => void;
+}
+
+export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSession, onNewSession }: Props) {
   const [url, setUrl] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -23,7 +49,10 @@ export default function TemplateSelector({ onSubmitUrl }: Props) {
   };
 
   return (
-    <div className="relative flex h-full flex-col items-center overflow-hidden" style={{ background: '#06070b' }}>
+    <div
+      className="relative flex h-full flex-col items-center overflow-x-hidden overflow-y-auto"
+      style={{ background: '#06070b' }}
+    >
       {/* === Layered atmospheric background === */}
       <div className="pointer-events-none absolute inset-0">
         {/* Noise texture overlay */}
@@ -325,6 +354,164 @@ export default function TemplateSelector({ onSubmitUrl }: Props) {
           </div>
         </div>
       </div>
+
+      {/* === Recent Chats === */}
+      {sessions && sessions.length > 0 && (
+        <div
+          className="relative z-10 w-full max-w-2xl px-6 pb-8 transition-all duration-700"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? 'translateY(0)' : 'translateY(16px)',
+            transitionDelay: '400ms',
+          }}
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <span
+              style={{
+                fontFamily: "'Sora', 'Outfit', sans-serif",
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.12em',
+                color: '#4a5068',
+                textTransform: 'uppercase' as const,
+              }}
+            >
+              Recent Chats
+            </span>
+            {onNewSession && (
+              <button
+                onClick={onNewSession}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-300"
+                style={{
+                  fontFamily: "'Outfit', sans-serif",
+                  color: '#22d3ee',
+                  background: 'rgba(6,182,212,0.06)',
+                  border: '1px solid rgba(6,182,212,0.12)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(6,182,212,0.12)';
+                  e.currentTarget.style.borderColor = 'rgba(6,182,212,0.25)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(6,182,212,0.06)';
+                  e.currentTarget.style.borderColor = 'rgba(6,182,212,0.12)';
+                }}
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                New Chat
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            {sessions.slice(0, 5).map((session, i) => {
+              const timeAgo = getTimeAgo(session.updatedAt);
+              const statusColor =
+                session.status === 'deployed' ? '#34d399' : session.status === 'building' ? '#fbbf24' : '#67e8f9';
+              const statusLabel =
+                session.status === 'deployed' ? 'Deployed' : session.status === 'building' ? 'Building' : 'In Progress';
+
+              return (
+                <button
+                  key={session._id}
+                  onClick={() => onSelectSession?.(session._id)}
+                  className="group flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-left transition-all duration-300"
+                  style={{
+                    background: 'rgba(255,255,255,0.015)',
+                    border: '1px solid rgba(255,255,255,0.04)',
+                    animationDelay: `${i * 0.06}s`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(6,182,212,0.04)';
+                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.15)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(6,182,212,0.06)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.015)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  {/* Chat icon */}
+                  <div
+                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-all duration-300"
+                    style={{
+                      background: 'rgba(6,182,212,0.06)',
+                      border: '1px solid rgba(6,182,212,0.1)',
+                    }}
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      style={{ color: '#22d3ee' }}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="truncate text-[13px] font-medium"
+                        style={{ color: '#c8cdd8', fontFamily: "'Outfit', sans-serif" }}
+                      >
+                        {session.widgetName || session.preview || 'Untitled Chat'}
+                      </span>
+                      <span
+                        className="flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                        style={{
+                          background: `${statusColor}12`,
+                          color: statusColor,
+                          border: `1px solid ${statusColor}25`,
+                        }}
+                      >
+                        {statusLabel}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <span
+                        className="truncate text-[11px]"
+                        style={{ color: '#3a4058', fontFamily: "'Outfit', sans-serif" }}
+                      >
+                        {session.messageCount} messages
+                      </span>
+                      <span style={{ color: '#2a2f42' }}>·</span>
+                      <span
+                        className="flex-shrink-0 text-[11px]"
+                        style={{ color: '#3a4058', fontFamily: "'Outfit', sans-serif" }}
+                      >
+                        {timeAgo}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <svg
+                    className="h-4 w-4 flex-shrink-0 transition-all duration-300"
+                    style={{ color: '#2a2f42' }}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* === Bottom fade === */}
       <div

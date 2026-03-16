@@ -14,7 +14,11 @@ interface SessionSummary {
   _id: string;
   widgetName: string | null;
   status: string;
+  clientId: string | null;
+  currentStage: string;
   updatedAt: string;
+  messageCount: number;
+  preview: string | null;
 }
 
 const STAGE_SUGGESTIONS: Record<string, string[]> = {
@@ -72,14 +76,8 @@ export default function BuilderPage() {
 
   const loadSession = useCallback(
     async (id: string) => {
-      try {
-        const res = await fetch(`/api/builder/sessions?id=${id}`);
-        const data = await res.json();
-        if (data.success) {
-          stream.setSessionId(id);
-          setShowSessions(false);
-        }
-      } catch {}
+      await stream.restoreSession(id);
+      setShowSessions(false);
     },
     [stream]
   );
@@ -105,7 +103,12 @@ export default function BuilderPage() {
       <div className="flex flex-1 overflow-hidden">
         {isEmptyState ? (
           <div className="flex-1" style={{ background: '#08090d' }}>
-            <TemplateSelector onSubmitUrl={handleUrlSubmit} />
+            <TemplateSelector
+              onSubmitUrl={handleUrlSubmit}
+              sessions={sessions}
+              onSelectSession={loadSession}
+              onNewSession={startNewSession}
+            />
           </div>
         ) : (
           <>

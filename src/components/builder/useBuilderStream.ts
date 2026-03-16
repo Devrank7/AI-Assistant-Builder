@@ -227,11 +227,47 @@ export function useBuilderStream() {
     });
   }, []);
 
+  /** Restore a previous session from the API (full messages + state) */
+  const restoreSession = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/builder/sessions?id=${id}`);
+      const data = await res.json();
+      if (!data.success || !data.data) return false;
+
+      const session = data.data;
+      const restoredMessages: BuilderMessage[] = (session.messages || []).map(
+        (m: { role: string; content: string; timestamp: string }) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+          timestamp: m.timestamp || new Date().toISOString(),
+        })
+      );
+
+      setState({
+        messages: restoredMessages,
+        sessionId: id,
+        widgetClientId: session.clientId || null,
+        stage: session.currentStage || 'input',
+        panelMode: session.clientId ? 'live_preview' : 'empty',
+        isStreaming: false,
+        currentTheme: session.themeJson || null,
+        abVariants: null,
+        knowledgeProgress: null,
+        suggestions: null,
+        error: null,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   return {
     ...state,
     sendMessage,
     stopStreaming,
     resetSession,
+    restoreSession,
     setSessionId: (id: string) => setState((prev) => ({ ...prev, sessionId: id })),
   };
 }

@@ -25,17 +25,23 @@ export async function GET(request: NextRequest) {
 
     // Otherwise return summary list
     const sessions = await BuilderSession.find({ userId: auth.userId })
-      .select('widgetName status updatedAt clientId')
+      .select('widgetName status updatedAt clientId currentStage messages')
       .sort({ updatedAt: -1 })
       .limit(50);
 
-    const summaries = sessions.map((s) => ({
-      _id: s._id,
-      widgetName: s.widgetName,
-      status: s.status,
-      clientId: s.clientId,
-      updatedAt: s.updatedAt,
-    }));
+    const summaries = sessions.map((s) => {
+      const firstUserMsg = s.messages?.find((m: { role: string }) => m.role === 'user');
+      return {
+        _id: s._id,
+        widgetName: s.widgetName,
+        status: s.status,
+        clientId: s.clientId,
+        currentStage: s.currentStage,
+        updatedAt: s.updatedAt,
+        messageCount: s.messages?.length || 0,
+        preview: firstUserMsg?.content?.slice(0, 100) || null,
+      };
+    });
 
     return successResponse(summaries);
   } catch (error) {
