@@ -24,6 +24,8 @@ export interface IUser extends Document {
   passwordResetExpires: Date | null;
   emailVerificationToken: string | null;
   organizationId: string | null;
+  onboardingCompleted: boolean;
+  niche: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +49,8 @@ const UserSchema = new Schema<IUser>(
     passwordResetExpires: { type: Date, default: null },
     emailVerificationToken: { type: String, default: null },
     organizationId: { type: String, default: null, index: true },
+    onboardingCompleted: { type: Boolean, default: false },
+    niche: { type: String, default: null },
   },
   { timestamps: true }
 );
