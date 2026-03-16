@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { WIDGET_TYPES, type WidgetTypeId } from '@/lib/builder/widgetTypes';
 
 function getTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -26,7 +27,7 @@ interface SessionSummary {
 }
 
 interface Props {
-  onSubmitUrl: (url: string) => void;
+  onSubmitUrl: (url: string, widgetType?: WidgetTypeId) => void;
   sessions?: SessionSummary[];
   onSelectSession?: (id: string) => void;
   onNewSession?: () => void;
@@ -36,6 +37,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
   const [url, setUrl] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [selectedType, setSelectedType] = useState<WidgetTypeId>('ai_chat');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
   const handleUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim()) return;
-    onSubmitUrl(url.trim());
+    onSubmitUrl(url.trim(), selectedType);
   };
 
   return (
@@ -223,6 +225,43 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
           <br />
           Your custom widget deploys in under a minute.
         </p>
+
+        {/* === Widget Type Selector === */}
+        <div
+          className="mb-8 w-full max-w-lg transition-all duration-700"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? 'translateY(0)' : 'translateY(16px)',
+            transitionDelay: '250ms',
+          }}
+        >
+          <div className="grid grid-cols-3 gap-2">
+            {WIDGET_TYPES.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setSelectedType(type.id)}
+                className="rounded-xl px-3 py-3 text-center transition-all duration-300"
+                style={{
+                  background: selectedType === type.id ? 'rgba(6,182,212,0.08)' : 'rgba(255,255,255,0.02)',
+                  border:
+                    selectedType === type.id ? '1px solid rgba(6,182,212,0.25)' : '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: selectedType === type.id ? '0 0 20px rgba(6,182,212,0.06)' : 'none',
+                }}
+              >
+                <span className="mb-1 block text-xl">{type.icon}</span>
+                <span
+                  className="block text-xs font-medium"
+                  style={{
+                    fontFamily: "'Outfit', sans-serif",
+                    color: selectedType === type.id ? '#22d3ee' : '#5a6178',
+                  }}
+                >
+                  {type.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* === Command input === */}
         <div

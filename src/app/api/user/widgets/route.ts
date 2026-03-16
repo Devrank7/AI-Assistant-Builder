@@ -15,13 +15,14 @@ export async function GET(request: NextRequest) {
       ? { organizationId: auth.organizationId }
       : { userId: auth.userId };
     const clients = await Client.find(query)
-      .select('clientId username clientType createdAt')
+      .select('clientId username clientType widgetType createdAt')
       .sort({ createdAt: -1 });
 
     const widgets = clients.map((c) => ({
       clientId: c.clientId,
       widgetName: c.username,
       clientType: c.clientType,
+      widgetType: c.widgetType || 'ai_chat',
       createdAt: c.createdAt,
     }));
 
