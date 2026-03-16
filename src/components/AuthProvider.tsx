@@ -9,6 +9,9 @@ interface User {
   plan: string;
   subscriptionStatus: string;
   emailVerified: boolean;
+  organizationId?: string | null;
+  orgRole?: string | null;
+  orgPlan?: string | null;
 }
 
 interface AuthContextType {
