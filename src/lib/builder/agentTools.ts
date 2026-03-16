@@ -134,6 +134,19 @@ export const GEMINI_TOOL_DECLARATIONS: GeminiToolDeclaration[] = [
       required: ['clientId', 'file', 'instruction'],
     },
   },
+  {
+    name: 'rollback_widget',
+    description:
+      'Revert widget to a previous version. Use when user says "undo", "revert", or "go back to previous version".',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        version: { type: 'string', description: 'Version number (e.g. "2") or "previous" for the last version' },
+      },
+      required: ['clientId', 'version'],
+    },
+  },
 ];
 
 export interface ToolContext {
@@ -387,6 +400,30 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     return {
       success: true,
       message: `Widget code modified and deployed. File: ${file}`,
+    };
+  },
+
+  async rollback_widget(args, ctx) {
+    const clientId = args.clientId as string;
+    const versionArg = args.version as string;
+
+    const version = versionArg === 'previous' ? 'previous' : parseInt(versionArg, 10);
+    if (typeof version === 'number' && isNaN(version)) {
+      return { error: `Invalid version: "${versionArg}". Use a number or "previous".` };
+    }
+
+    ctx.write({ type: 'progress', message: 'Rolling back widget...' });
+
+    const result = rollbackToVersion(clientId, version);
+    if (!result.success) {
+      return { error: result.error };
+    }
+
+    ctx.write({ type: 'widget_ready', clientId });
+
+    return {
+      success: true,
+      message: `Widget rolled back to version ${result.version}.`,
     };
   },
 };
