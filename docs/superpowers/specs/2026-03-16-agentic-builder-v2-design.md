@@ -463,3 +463,110 @@ Key migration points:
 7. Brave Search API key provisioned
 
 Existing `/api/generate-demo` (30-second self-service) stays on Gemini — no changes needed. Only the dashboard builder agent switches to Claude.
+
+### Tool Name Migration Map
+
+| Old name (Gemini)    | New name (Claude)                  | Notes                                                        |
+| -------------------- | ---------------------------------- | ------------------------------------------------------------ |
+| `analyze_site`       | `analyze_site`                     | Enhanced with sitemap/WP API                                 |
+| `generate_themes`    | `generate_design`                  | Renamed, delegates to Gemini                                 |
+| `select_theme`       | `select_theme`                     | Unchanged                                                    |
+| `build_widget`       | `build_deploy`                     | Renamed                                                      |
+| `crawl_knowledge`    | `crawl_knowledge`                  | Enhanced (100 pages)                                         |
+| `connect_crm`        | (removed)                          | Replaced by generic `write_integration` + `test_integration` |
+| `set_panel_mode`     | (removed)                          | Agent sets panel via SSE events directly                     |
+| `read_widget_code`   | (folded into `modify_widget_code`) | Agent reads code as first step of modify                     |
+| `modify_widget_code` | `modify_widget_code`               | Logic preserved                                              |
+| `rollback_widget`    | `rollback`                         | Renamed                                                      |
+| `add_integration`    | `write_integration`                | Rewritten for open platform                                  |
+
+### Data Migration
+
+All new `BuilderSession` fields (`siteProfile`, `integrations`, `opportunities`, `versions`) are optional. Code must handle `undefined` with sensible defaults. No backfill script needed — existing sessions continue to work, new fields populate on next interaction.
+
+### New npm Dependencies
+
+- `@anthropic-ai/sdk` — Claude API client
+- Node.js built-in `crypto` module for AES-256-GCM (no external package needed)
+- Brave Search via raw `fetch` (no SDK)
+- HTML-to-markdown: reuse existing `htmlToMarkdown` utility already in `siteAnalyzer.ts`
+
+### Environment Variables
+
+Update `.env.example` with:
+
+```env
+ANTHROPIC_API_KEY=          # Claude Sonnet 4.6 for builder agent
+BRAVE_SEARCH_API_KEY=       # Brave Search API (web search tool)
+INTEGRATION_ENCRYPTION_KEY= # 32-byte hex for AES-256-GCM encryption
+```
+
+---
+
+## 9. Architecture Note
+
+**The 3-layer architecture (Skills → Orchestration → Scripts) defined in CLAUDE.md applies to the CLI agent workflow** — where Claude Code reads skill files and calls deterministic scripts. The dashboard builder is a separate user-facing agentic system with its own architecture:
+
+- The builder agent runs server-side via Anthropic API (not Claude Code CLI)
+- It intentionally puts code generation into the LLM layer because the user interacts conversationally, and deterministic scripts cannot handle open-ended requests like "connect my Calendly"
+- The build pipeline (generate-single-theme.js → build.js) remains deterministic — only the orchestration and code-generation layers are agentic
+- Generated code passes through validation before deployment (see Section 6)
+
+This is an intentional architectural departure, not a contradiction.
+
+---
+
+## 10. Safety Constraints
+
+### `modify_widget_code` Boundaries
+
+The agent can only modify files matching this allowlist:
+
+- `components/Widget.jsx`
+- `components/ChatMessage.jsx`
+- `components/QuickReplies.jsx`
+- `components/MessageFeedback.jsx`
+- `components/RichBlocks.jsx`
+- `index.css`
+- `main.jsx`
+
+**Forbidden**: `hooks/*` (shared hooks must never be per-client modified), `theme.json` (use `modify_design` instead), `widget.config.json` (use dedicated config tools).
+
+### `write_integration` Allowlist Model
+
+Generated integration handlers are restricted to an allowlist of permitted APIs:
+
+**Allowed imports**: `fetch` (global), `crypto` (Node built-in), `@/lib/builder/integrationManager` (for key decryption).
+
+**Allowed operations**: HTTP requests to external APIs only, JSON parsing, response formatting.
+
+**Blocked** (validated before file write):
+
+- Any `import`/`require` not on the allowlist
+- `child_process`, `fs`, `net`, `dgram`, `cluster`, `worker_threads`
+- `eval`, `Function()`, `new Function`, `vm.runInNewContext`
+- `process.exit`, `process.kill`, `process.env` (except via integrationManager)
+- `global`, `globalThis` assignment
+- Template literal construction of database queries
+
+If validation fails, agent is told the code was rejected and asked to rewrite.
+
+### Web Fetch SSRF Prevention (enhanced)
+
+1. Parse URL and resolve DNS **before** connecting
+2. Validate resolved IP (not just hostname) against blocklist
+3. Block: private ranges (10.x, 172.16-31.x, 192.168.x), localhost, IPv6 link-local (fe80::), cloud metadata (169.254.169.254)
+4. Follow redirects manually, validating IP at each hop
+5. Max 3 redirects, timeout 10s
+
+---
+
+## 11. Deferred to v2
+
+The following features are designed but deferred from the initial implementation:
+
+- `analyze_competitors` tool — requires multiple web searches with subjective analysis
+- `site_map` panel mode — visual tree of crawled pages
+- `knowledge_browser` panel mode — browse uploaded knowledge chunks
+- `code_editor` panel mode — read-only widget source view
+- Gemini fallback on Anthropic 529 — maintaining two agent implementations is out of scope; Anthropic outages handled by retry + user-facing error message
