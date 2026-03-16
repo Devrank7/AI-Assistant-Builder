@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    const clients = await Client.find({ userId: auth.userId })
+    const query = auth.organizationId
+      ? { organizationId: auth.organizationId }
+      : { userId: auth.userId };
+    const clients = await Client.find(query)
       .select('clientId username clientType createdAt')
       .sort({ createdAt: -1 });
 
@@ -43,7 +46,10 @@ export async function DELETE(request: NextRequest) {
 
     await connectDB();
 
-    const client = await Client.findOne({ clientId, userId: auth.userId });
+    const ownershipQuery = auth.organizationId
+      ? { clientId, organizationId: auth.organizationId }
+      : { clientId, userId: auth.userId };
+    const client = await Client.findOne(ownershipQuery);
     if (!client) {
       return Errors.notFound('Widget not found');
     }
@@ -60,7 +66,7 @@ export async function DELETE(request: NextRequest) {
       ]);
     }
 
-    await Client.deleteOne({ clientId, userId: auth.userId });
+    await Client.deleteOne(ownershipQuery);
 
     return successResponse(undefined, 'Widget deleted successfully');
   } catch (error) {
