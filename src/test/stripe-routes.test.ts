@@ -70,7 +70,8 @@ import { verifyUser } from '@/lib/auth';
 // Helper
 function createRequest(body?: Record<string, unknown>, headers?: Record<string, string>) {
   const url = 'http://localhost:3000/api/stripe/test';
-  const init: RequestInit & { headers: Record<string, string> } = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const init: Record<string, any> = {
     method: 'POST',
     headers: {
       'content-type': 'application/json',

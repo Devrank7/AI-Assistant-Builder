@@ -25,7 +25,8 @@ describe('QuickActionMenu', () => {
     render(<QuickActionMenu items={items} />);
     fireEvent.click(screen.getByLabelText('Actions'));
     fireEvent.click(screen.getByText('Edit'));
-    expect(items[0].onClick).toHaveBeenCalled();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((items[0] as any).onClick).toHaveBeenCalled();
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
   });
 

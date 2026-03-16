@@ -17,8 +17,8 @@ describe('Agent Tools', () => {
 
   it('should return executor for known tools', () => {
     expect(getToolExecutor('analyze_site')).toBeDefined();
-    expect(getToolExecutor('build_widget')).toBeDefined();
-    expect(getToolExecutor('set_panel_mode')).toBeDefined();
+    expect(getToolExecutor('build_deploy')).toBeDefined();
+    expect(getToolExecutor('generate_design')).toBeDefined();
   });
 
   it('should return undefined for unknown tool', () => {

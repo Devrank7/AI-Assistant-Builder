@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return Errors.notFound('User not found');
     }
 
-    const isValid = await comparePassword(currentPassword, user.passwordHash);
+    const isValid = await comparePassword(currentPassword, user.passwordHash as string);
     if (!isValid) {
       return Errors.badRequest('Current password is incorrect');
     }

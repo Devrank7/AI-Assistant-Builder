@@ -165,7 +165,10 @@ export function useBuilderStream() {
           return { ...prev, panelMode: event.mode };
 
         case 'progress':
-          return { ...prev, stage: event.stage };
+          if ('stage' in event) {
+            return { ...prev, stage: event.stage };
+          }
+          return prev;
 
         case 'crm_instruction':
           if (lastMsg?.role === 'assistant') {

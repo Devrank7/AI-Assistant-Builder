@@ -176,8 +176,8 @@ export interface ToolContext {
 
 type ToolExecutor = (args: Record<string, unknown>, ctx: ToolContext) => Promise<Record<string, unknown>>;
 
-const executors: Record<AgentToolName, ToolExecutor> = {
-  async analyze_site(args, ctx) {
+const executors: Partial<Record<AgentToolName, ToolExecutor>> = {
+  async analyze_site(args: Record<string, unknown>, ctx: ToolContext) {
     const url = args.url as string;
     const profile = await analyzeSite(url);
     ctx.write({ type: 'panel_mode', mode: 'live_preview' });
@@ -185,20 +185,20 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     return { success: true, profile };
   },
 
-  async generate_themes(args, ctx) {
+  async generate_design(args: Record<string, unknown>, ctx: ToolContext) {
     ctx.write({ type: 'panel_mode', mode: 'ab_compare' });
     ctx.write({ type: 'progress', stage: 'design', status: 'active' });
     return { success: true, message: 'Generate 3 theme variants in your response as JSON' };
   },
 
-  async select_theme(args, ctx) {
+  async select_theme(args: Record<string, unknown>, ctx: ToolContext) {
     const variantIndex = parseInt(args.variantIndex as string, 10);
     ctx.write({ type: 'panel_mode', mode: 'live_preview' });
     ctx.write({ type: 'progress', stage: 'design', status: 'complete' });
     return { success: true, selectedVariant: variantIndex };
   },
 
-  async build_widget(args, ctx) {
+  async build_deploy(args: Record<string, unknown>, ctx: ToolContext) {
     const clientId = args.clientId as string;
     ctx.write({ type: 'progress', stage: 'deploy', status: 'active' });
 
@@ -221,7 +221,7 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     return { success: true, clientId, previewUrl: data.data?.previewUrl };
   },
 
-  async crawl_knowledge(args, ctx) {
+  async crawl_knowledge(args: Record<string, unknown>, ctx: ToolContext) {
     const clientId = args.clientId as string;
     ctx.write({ type: 'progress', stage: 'knowledge', status: 'active' });
 
@@ -243,7 +243,7 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     return { success: true, ...result };
   },
 
-  async connect_crm(args, ctx) {
+  async guide_user(args: Record<string, unknown>, ctx: ToolContext) {
     const provider = args.provider as string;
     const apiKey = args.apiKey as string;
 
@@ -266,13 +266,7 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     }
   },
 
-  async set_panel_mode(args, ctx) {
-    const mode = args.mode as PanelMode;
-    ctx.write({ type: 'panel_mode', mode });
-    return { success: true, mode };
-  },
-
-  async read_widget_code(args, ctx) {
+  async test_widget(args: Record<string, unknown>, ctx: ToolContext) {
     const clientId = args.clientId as string;
     const files = args.files as string[] | undefined;
     ctx.write({ type: 'progress', message: 'Reading widget source code...' });
@@ -288,7 +282,7 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     return { files: bundle };
   },
 
-  async modify_widget_code(args, ctx) {
+  async modify_widget_code(args: Record<string, unknown>, ctx: ToolContext) {
     const clientId = args.clientId as string;
     const file = args.file as string;
     const instruction = args.instruction as string;
@@ -419,7 +413,7 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     };
   },
 
-  async rollback_widget(args, ctx) {
+  async rollback(args: Record<string, unknown>, ctx: ToolContext) {
     const clientId = args.clientId as string;
     const versionArg = args.version as string;
 
@@ -443,7 +437,7 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     };
   },
 
-  async add_integration(args, ctx) {
+  async write_integration(args: Record<string, unknown>, ctx: ToolContext) {
     const clientId = args.clientId as string;
     const provider = args.provider as string;
     const apiDocUrl = args.apiDocUrl as string | undefined;

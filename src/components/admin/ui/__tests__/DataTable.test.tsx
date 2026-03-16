@@ -2,7 +2,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DataTable, type Column } from '../DataTable';
 
-interface Row {
+interface Row extends Record<string, unknown> {
   id: string;
   name: string;
   email: string;

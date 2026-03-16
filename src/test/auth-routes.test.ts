@@ -101,7 +101,8 @@ import { applyRateLimit } from '@/lib/auth';
 // Helper to create NextRequest
 function createRequest(method: string, body?: Record<string, unknown>, cookieEntries?: Record<string, string>) {
   const url = 'http://localhost:3000/api/auth/test';
-  const init: RequestInit & { headers: Record<string, string> } = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const init: Record<string, any> = {
     method,
     headers: {
       'content-type': 'application/json',
