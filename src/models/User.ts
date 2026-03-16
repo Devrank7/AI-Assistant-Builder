@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type Plan = 'none' | 'basic' | 'pro';
+export type Plan = 'none' | 'basic' | 'pro' | 'free' | 'starter' | 'enterprise';
 export type BillingPeriod = 'monthly' | 'annual';
 export type SubStatus = 'trial' | 'active' | 'past_due' | 'canceled';
 
@@ -23,6 +23,7 @@ export interface IUser extends Document {
   passwordResetToken: string | null;
   passwordResetExpires: Date | null;
   emailVerificationToken: string | null;
+  organizationId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,7 +37,7 @@ const UserSchema = new Schema<IUser>(
     authProvider: { type: String, enum: ['email', 'google'], default: 'email' },
     emailVerified: { type: Boolean, default: false },
     stripeCustomerId: { type: String, required: true, unique: true },
-    plan: { type: String, enum: ['none', 'basic', 'pro'], default: 'none' },
+    plan: { type: String, enum: ['none', 'basic', 'pro', 'free', 'starter', 'enterprise'], default: 'none' },
     billingPeriod: { type: String, enum: ['monthly', 'annual'], default: 'monthly' },
     subscriptionStatus: { type: String, enum: ['trial', 'active', 'past_due', 'canceled'], default: 'trial' },
     trialEndsAt: { type: Date, default: null },
@@ -45,6 +46,7 @@ const UserSchema = new Schema<IUser>(
     passwordResetToken: { type: String, default: null },
     passwordResetExpires: { type: Date, default: null },
     emailVerificationToken: { type: String, default: null },
+    organizationId: { type: String, default: null, index: true },
   },
   { timestamps: true }
 );

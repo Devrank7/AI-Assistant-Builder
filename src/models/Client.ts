@@ -13,6 +13,7 @@ export interface IClient extends Document {
   clientToken: string;
   clientType: ClientType;
   userId?: string;
+  organizationId?: string;
   username: string;
   email: string;
   website: string;
@@ -85,6 +86,10 @@ const ClientSchema = new Schema<IClient>(
       default: 'full',
     },
     userId: {
+      type: String,
+      index: true,
+    },
+    organizationId: {
       type: String,
       index: true,
     },
