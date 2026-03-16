@@ -37,7 +37,7 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
   const cookieOptions = {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'strict' as const,
+    sameSite: 'lax' as const,
     path: '/',
   };
 

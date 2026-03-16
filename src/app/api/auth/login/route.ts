@@ -25,6 +25,10 @@ export async function POST(request: NextRequest) {
       return Errors.unauthorized('Invalid email or password');
     }
 
+    if (!user.passwordHash) {
+      return Errors.badRequest('This account uses Google Sign-In. Please log in with Google.');
+    }
+
     const isValid = await comparePassword(password, user.passwordHash);
     if (!isValid) {
       return Errors.unauthorized('Invalid email or password');

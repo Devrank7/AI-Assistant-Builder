@@ -4,10 +4,14 @@ export type Plan = 'none' | 'basic' | 'pro';
 export type BillingPeriod = 'monthly' | 'annual';
 export type SubStatus = 'trial' | 'active' | 'past_due' | 'canceled';
 
+export type AuthProvider = 'email' | 'google';
+
 export interface IUser extends Document {
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   name: string;
+  googleId?: string;
+  authProvider: AuthProvider;
   emailVerified: boolean;
   stripeCustomerId: string;
   plan: Plan;
@@ -26,8 +30,10 @@ export interface IUser extends Document {
 const UserSchema = new Schema<IUser>(
   {
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, default: null },
     name: { type: String, required: true, trim: true },
+    googleId: { type: String, default: null, sparse: true },
+    authProvider: { type: String, enum: ['email', 'google'], default: 'email' },
     emailVerified: { type: Boolean, default: false },
     stripeCustomerId: { type: String, required: true, unique: true },
     plan: { type: String, enum: ['none', 'basic', 'pro'], default: 'none' },
@@ -43,6 +49,7 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
+UserSchema.index({ googleId: 1 }, { sparse: true });
 UserSchema.index({ stripeCustomerId: 1 });
 UserSchema.index({ passwordResetToken: 1 });
 UserSchema.index({ emailVerificationToken: 1 });
