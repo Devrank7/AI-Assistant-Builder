@@ -59,6 +59,9 @@ export interface IClient extends Document {
   // Notification preferences
   emailNotifications: boolean; // false = unsubscribed from all emails
 
+  // Integration API keys (encrypted, Pro plan only)
+  integrationKeys?: { provider: string; encryptedKey: string; iv: string }[];
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -229,6 +232,15 @@ const ClientSchema = new Schema<IClient>(
       type: Boolean,
       default: true, // Opt-in by default; client can unsubscribe
     },
+
+    // Integration API keys (encrypted, Pro plan only)
+    integrationKeys: [
+      {
+        provider: { type: String, required: true },
+        encryptedKey: { type: String, required: true },
+        iv: { type: String, required: true },
+      },
+    ],
 
     // Provider-specific IDs
     cryptomusSubscriptionId: {

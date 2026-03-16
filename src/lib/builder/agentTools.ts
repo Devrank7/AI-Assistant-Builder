@@ -147,6 +147,22 @@ export const GEMINI_TOOL_DECLARATIONS: GeminiToolDeclaration[] = [
       required: ['clientId', 'version'],
     },
   },
+  {
+    name: 'add_integration',
+    description:
+      'Connect the widget to an external API (e.g., Google Calendar, Stripe, custom CRM). Fetches API documentation, generates server-side handler and client-side UI code. Requires Pro plan.',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        provider: { type: 'string', description: 'Integration name (e.g., "Google Calendar", "Stripe")' },
+        apiDocUrl: { type: 'string', description: 'URL to the API documentation' },
+        apiKey: { type: 'string', description: 'API key or token for the service' },
+        description: { type: 'string', description: 'What the integration should do' },
+      },
+      required: ['clientId', 'provider', 'description'],
+    },
+  },
 ];
 
 export interface ToolContext {
@@ -424,6 +440,222 @@ const executors: Record<AgentToolName, ToolExecutor> = {
     return {
       success: true,
       message: `Widget rolled back to version ${result.version}.`,
+    };
+  },
+
+  async add_integration(args, ctx) {
+    const clientId = args.clientId as string;
+    const provider = args.provider as string;
+    const apiDocUrl = args.apiDocUrl as string | undefined;
+    const apiKey = args.apiKey as string | undefined;
+    const description = args.description as string;
+
+    // 1. Tariff check (uses ctx.userPlan — set in chat/route.ts, no extra DB lookup)
+    if (ctx.userPlan !== 'pro') {
+      return {
+        error: 'Custom integrations require the Pro plan. Please upgrade at Settings → Billing to unlock this feature.',
+      };
+    }
+
+    ctx.write({ type: 'progress', message: `Setting up ${provider} integration...` });
+
+    // 2. Fetch API docs if URL provided
+    let apiDocs = '';
+    if (apiDocUrl) {
+      ctx.write({ type: 'progress', message: 'Fetching API documentation...' });
+      try {
+        const resp = await fetch(apiDocUrl);
+        apiDocs = await resp.text();
+        // Truncate to 10K chars to fit context
+        if (apiDocs.length > 10000) {
+          apiDocs = apiDocs.slice(0, 10000) + '\n... (truncated)';
+        }
+      } catch {
+        apiDocs = `Could not fetch docs from ${apiDocUrl}`;
+      }
+    }
+
+    // 3. Generate server-side handler
+    ctx.write({ type: 'progress', message: 'Generating integration handler...' });
+
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro' });
+
+    const providerSlug = provider.toLowerCase().replace(/\s+/g, '-');
+
+    const handlerPrompt = `Generate a Next.js API route handler (TypeScript) for integrating with ${provider}.
+
+PURPOSE: ${description}
+
+${apiDocs ? `API DOCUMENTATION:\n${apiDocs}\n` : ''}
+
+The handler should:
+- Export async POST and GET functions
+- Read the encrypted API key from MongoDB using this pattern:
+  import Client from '@/models/Client';
+  import crypto from 'crypto';
+  const client = await Client.findOne({ clientId: '${clientId}' });
+  const keyEntry = client?.integrationKeys?.find(k => k.provider === '${providerSlug}');
+  // Decrypt: const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(process.env.INTEGRATION_ENCRYPTION_KEY!.slice(0,32).padEnd(32,'0')), Buffer.from(keyEntry.iv, 'hex'));
+  // decipher.setAuthTag(Buffer.from(authTag, 'hex')); // authTag is after ':' in encryptedKey
+- Handle errors gracefully with try/catch
+- Return JSON responses
+- Include CORS headers for widget access
+- Be a complete, working file
+
+Return ONLY the TypeScript code. No explanations.`;
+
+    let handlerCode: string;
+    try {
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: handlerPrompt }] }],
+      });
+      handlerCode = result.response
+        .text()
+        .trim()
+        .replace(/^```(?:typescript|ts)?\n/m, '')
+        .replace(/\n```$/m, '')
+        .trim();
+    } catch (err) {
+      return { error: `Failed to generate integration handler: ${(err as Error).message}` };
+    }
+
+    // 4. Write handler file
+    const handlerDir = path.join(process.cwd(), 'src/app/api/integrations', clientId, providerSlug);
+    fs.mkdirSync(handlerDir, { recursive: true });
+    fs.writeFileSync(path.join(handlerDir, 'route.ts'), handlerCode, 'utf-8');
+
+    // 5. Store encrypted API key if provided
+    if (apiKey) {
+      const crypto = await import('crypto');
+      const encryptionKey = process.env.INTEGRATION_ENCRYPTION_KEY || 'default-key-change-me-32chars!!';
+      const iv = crypto.randomBytes(16);
+      const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(encryptionKey.slice(0, 32).padEnd(32, '0')), iv);
+      let encrypted = cipher.update(apiKey, 'utf8', 'hex');
+      encrypted += cipher.final('hex');
+      const authTag = cipher.getAuthTag().toString('hex');
+
+      const ClientModel = (await import('@/models/Client')).default;
+      await ClientModel.findOneAndUpdate(
+        { clientId },
+        {
+          $push: {
+            integrationKeys: {
+              provider: providerSlug,
+              encryptedKey: encrypted + ':' + authTag,
+              iv: iv.toString('hex'),
+            },
+          },
+        }
+      );
+    }
+
+    // 6. Modify widget to include integration UI
+    ctx.write({ type: 'progress', message: 'Adding integration UI to widget...' });
+
+    const bundle = readWidgetCode(clientId, ['components/Widget.jsx']);
+    const widgetCode = bundle['components/Widget.jsx'];
+    if (widgetCode) {
+      const integrationInstruction = `Add a UI section for ${provider} integration. ${description}. The integration endpoint is at /api/integrations/${clientId}/${providerSlug}. Add a button or form as appropriate, and use fetch() to call the endpoint.`;
+
+      const userPrompt = buildCodegenUserPrompt({
+        currentCode: widgetCode,
+        instruction: integrationInstruction,
+        themeJson: bundle['theme.json'],
+        widgetConfig: bundle['widget.config.json'],
+      });
+
+      try {
+        const result = await model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+          systemInstruction: CODEGEN_SYSTEM_PROMPT,
+        });
+        const newWidgetCode = result.response
+          .text()
+          .trim()
+          .replace(/^```(?:jsx|javascript|js)?\n/m, '')
+          .replace(/\n```$/m, '')
+          .trim();
+
+        writeWidgetFile(clientId, 'components/Widget.jsx', newWidgetCode);
+
+        // Rebuild with retry (same pattern as modify_widget_code)
+        const { execSync } = await import('child_process');
+        const buildScript = path.join(process.cwd(), '.claude/widget-builder/scripts/build.js');
+        let buildSuccess = false;
+        let buildError = '';
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            execSync(`node "${buildScript}" "${clientId}"`, {
+              cwd: process.cwd(),
+              timeout: 60000,
+              stdio: 'pipe',
+            });
+            buildSuccess = true;
+            break;
+          } catch (err) {
+            buildError = (err as Error).message || 'Build failed';
+            if (attempt === 0) {
+              ctx.write({ type: 'progress', message: 'Build failed, retrying with fix...' });
+              try {
+                const retryPrompt = buildCodegenUserPrompt({
+                  currentCode: newWidgetCode,
+                  instruction: `The previous code had a build error. Fix it:\n${buildError}\n\nOriginal instruction: ${integrationInstruction}`,
+                  themeJson: bundle['theme.json'],
+                  widgetConfig: bundle['widget.config.json'],
+                });
+                const retryResult = await model.generateContent({
+                  contents: [{ role: 'user', parts: [{ text: retryPrompt }] }],
+                  systemInstruction: CODEGEN_SYSTEM_PROMPT,
+                });
+                const fixedCode = retryResult.response
+                  .text()
+                  .trim()
+                  .replace(/^```(?:jsx|javascript|js)?\n/m, '')
+                  .replace(/\n```$/m, '')
+                  .trim();
+                writeWidgetFile(clientId, 'components/Widget.jsx', fixedCode);
+              } catch {
+                break;
+              }
+            }
+          }
+        }
+
+        if (!buildSuccess) {
+          return {
+            error: `Integration handler created but widget build failed after retry: ${buildError}. Server handler is at /api/integrations/${clientId}/${providerSlug}.`,
+          };
+        }
+
+        // Deploy
+        const distScript = path.join(process.cwd(), '.claude/widget-builder/dist/script.js');
+        const deployDir = path.join(process.cwd(), 'quickwidgets', clientId);
+        if (fs.existsSync(distScript) && fs.existsSync(deployDir)) {
+          saveVersion(clientId, `Added ${provider} integration`, 'add_integration');
+          fs.copyFileSync(distScript, path.join(deployDir, 'script.js'));
+        }
+
+        ctx.write({ type: 'widget_ready', clientId });
+      } catch (err) {
+        return {
+          error: `Integration handler created but widget UI update failed: ${(err as Error).message}. The server-side handler is ready at /api/integrations/${clientId}/${providerSlug}.`,
+        };
+      }
+    }
+
+    // 7. Update session
+    const BuilderSession = (await import('@/models/BuilderSession')).default;
+    await BuilderSession.findByIdAndUpdate(ctx.sessionId, {
+      $push: {
+        connectedIntegrations: { provider: providerSlug, status: 'connected' },
+      },
+    });
+
+    return {
+      success: true,
+      message: `${provider} integration added. Server handler: /api/integrations/${clientId}/${providerSlug}. Widget UI updated.`,
     };
   },
 };
