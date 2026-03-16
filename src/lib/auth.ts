@@ -50,7 +50,13 @@ export async function verifyAdminOrClient(request: NextRequest): Promise<AuthRes
 }
 
 export type UserAuthResult =
-  | { authenticated: true; userId: string; user: { email: string; plan: string; subscriptionStatus: string } }
+  | {
+      authenticated: true;
+      userId: string;
+      user: { email: string; plan: string; subscriptionStatus: string };
+      organizationId: string | null;
+      orgRole: string | null;
+    }
   | { authenticated: false; response: ReturnType<typeof Errors.unauthorized> };
 
 export async function verifyUser(request: NextRequest): Promise<UserAuthResult> {
@@ -59,12 +65,26 @@ export async function verifyUser(request: NextRequest): Promise<UserAuthResult> 
   try {
     const payload = verifyAccessToken(accessToken);
     await connectDB();
-    const user = await User.findById(payload.userId).select('email plan subscriptionStatus');
+    const user = await User.findById(payload.userId).select('email plan subscriptionStatus organizationId');
     if (!user) return { authenticated: false, response: Errors.unauthorized('User not found') };
+
+    // Fetch org role if user belongs to an org
+    let orgRole: string | null = null;
+    if (user.organizationId) {
+      const OrgMember = (await import('@/models/OrgMember')).default;
+      const membership = await OrgMember.findOne({
+        organizationId: user.organizationId,
+        userId: payload.userId,
+      }).select('role');
+      orgRole = membership?.role || null;
+    }
+
     return {
       authenticated: true,
       userId: payload.userId,
       user: { email: user.email, plan: user.plan, subscriptionStatus: user.subscriptionStatus },
+      organizationId: user.organizationId || null,
+      orgRole,
     };
   } catch {
     return { authenticated: false, response: Errors.unauthorized('Invalid or expired token') };
