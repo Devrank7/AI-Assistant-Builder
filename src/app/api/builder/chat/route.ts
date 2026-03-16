@@ -9,6 +9,7 @@ import BuilderSession from '@/models/BuilderSession';
 import { createSSEStream, createSSEHeaders } from '@/lib/builder/sseUtils';
 import { GEMINI_TOOL_DECLARATIONS, getToolExecutor } from '@/lib/builder/agentTools';
 import type { AgentToolName } from '@/lib/builder/types';
+import User from '@/models/User';
 
 // Track active streams per session to prevent concurrent connections
 const activeStreams = new Map<string, boolean>();
@@ -23,6 +24,10 @@ Your capabilities (use the available tools):
 - crawl_knowledge: Upload website content to the widget's knowledge base
 - connect_crm: Validate and activate CRM integrations
 - set_panel_mode: Switch the right panel view
+- read_widget_code: Read widget source code to understand structure
+- modify_widget_code: Modify widget code with AI, auto-rebuild and deploy
+- rollback_widget: Revert widget to a previous version
+- add_integration: Connect to external APIs (Pro plan only)
 
 WORKFLOW:
 1. When user provides a URL, call analyze_site immediately
@@ -38,7 +43,31 @@ When generating theme variants, output them as a JSON block with this format:
 {"variants": [{"label": "Name", "theme": {theme.json fields...}}, ...]}
 \`\`\`
 
-Always be conversational and explain what you're doing. Use the tools proactively.`;
+Always be conversational and explain what you're doing. Use the tools proactively.
+
+## Code Modification Capabilities
+
+You can directly modify widget source code. When a user asks to change
+the widget's appearance, add UI features, or modify behavior:
+
+1. Call read_widget_code to see current source
+2. Understand what needs to change
+3. Call modify_widget_code with the file and instruction
+4. The widget will automatically rebuild and deploy
+5. Tell the user what you changed in 1-2 sentences
+
+For custom integrations (connecting external APIs like calendars, CRMs,
+payment systems): use add_integration tool. This fetches API documentation,
+generates integration code, and deploys it.
+
+RULES:
+- Never break existing chat, voice, or drag functionality
+- Keep all shared hook imports intact
+- Use Tailwind v3 classes (not v4)
+- For integrations: check user's plan first. If Basic, explain they need Pro.
+- If build fails: try to fix the error once. If still fails, tell the user.
+- Always explain what you changed in 1-2 sentences after modification.
+- When user says "undo" or "revert": use rollback_widget tool.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -96,6 +125,10 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = request.nextUrl.origin;
     const cookie = request.headers.get('cookie') || '';
+
+    // Fetch user plan for tariff gating in tools
+    const currentUser = await User.findById(auth.userId);
+    const userPlan = currentUser?.plan || 'none';
 
     const stream = createSSEStream(async (write) => {
       try {
@@ -163,6 +196,7 @@ export async function POST(request: NextRequest) {
                     baseUrl,
                     cookie,
                     write,
+                    userPlan,
                   });
                 } catch (err) {
                   toolResult = { success: false, error: (err as Error).message };
