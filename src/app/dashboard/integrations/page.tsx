@@ -40,7 +40,7 @@ const staggerItem = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: 'spring', stiffness: 100, damping: 15 },
+    transition: { type: 'spring' as const, stiffness: 100, damping: 15 },
   },
 };
 
