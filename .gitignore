@@ -45,3 +45,4 @@ next-env.d.ts
 # Google service account credentials (never commit!)
 service_account.json
 .worktrees/
+.worktrees/
