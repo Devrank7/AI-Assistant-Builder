@@ -16,6 +16,11 @@ const integrationSchema = new mongoose.Schema(
         'monday',
         'google_calendar',
         'calendly',
+        'stripe',
+        'telegram',
+        'whatsapp',
+        'email_smtp',
+        'google_sheets',
       ],
     },
     accessToken: { type: String }, // encrypted
@@ -23,6 +28,14 @@ const integrationSchema = new mongoose.Schema(
     tokenExpiry: { type: Date },
     metadata: { type: mongoose.Schema.Types.Mixed }, // provider-specific data (instance URL, etc.)
     isActive: { type: Boolean, default: true },
+    status: {
+      type: String,
+      enum: ['connected', 'error', 'disconnected'],
+      default: 'connected',
+    },
+    lastHealthCheck: { type: Date },
+    lastError: { type: String, default: null },
+    aiDiagnostic: { type: String, default: null },
   },
   { timestamps: true }
 );
