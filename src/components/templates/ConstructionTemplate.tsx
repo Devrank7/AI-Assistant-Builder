@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { HardHat } from 'lucide-react';
 
 interface ConstructionTemplateProps {
   scriptUrl: string;
@@ -43,7 +44,7 @@ export default function ConstructionTemplate({ scriptUrl }: ConstructionTemplate
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-600">
-                <span className="text-2xl text-white">🏗️</span>
+                <HardHat className="h-5 w-5 text-white" />
               </div>
               <div>
                 <span className="text-2xl font-bold text-white">BuildPro</span>
@@ -321,7 +322,7 @@ export default function ConstructionTemplate({ scriptUrl }: ConstructionTemplate
             <div>
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-600">
-                  <span className="text-2xl text-white">🏗️</span>
+                  <HardHat className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-2xl font-bold">BuildPro</span>
               </div>

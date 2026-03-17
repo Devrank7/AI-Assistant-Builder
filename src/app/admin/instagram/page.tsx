@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { MessageSquare, Mic, Camera } from 'lucide-react';
 
 interface InstagramConfigState {
   systemPrompt: string;
@@ -358,17 +359,23 @@ export default function AdminInstagramPage() {
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">Supported Message Types</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="rounded-lg bg-white/5 p-4">
-              <div className="mb-2 text-2xl">💬</div>
+              <div className="mb-2">
+                <MessageSquare className="h-6 w-6 text-cyan-400" />
+              </div>
               <h3 className="text-sm font-medium text-white">Text Messages</h3>
               <p className="mt-1 text-xs text-gray-500">Responds to regular text DMs with AI-generated answers</p>
             </div>
             <div className="rounded-lg bg-white/5 p-4">
-              <div className="mb-2 text-2xl">🎤</div>
+              <div className="mb-2">
+                <Mic className="h-6 w-6 text-cyan-400" />
+              </div>
               <h3 className="text-sm font-medium text-white">Voice Messages</h3>
               <p className="mt-1 text-xs text-gray-500">Transcribes voice messages and responds with text</p>
             </div>
             <div className="rounded-lg bg-white/5 p-4">
-              <div className="mb-2 text-2xl">📸</div>
+              <div className="mb-2">
+                <Camera className="h-6 w-6 text-cyan-400" />
+              </div>
               <h3 className="text-sm font-medium text-white">Photos</h3>
               <p className="mt-1 text-xs text-gray-500">Analyzes images using multimodal AI and responds</p>
             </div>

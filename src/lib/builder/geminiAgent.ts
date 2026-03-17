@@ -74,6 +74,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
   const model = genAI.getGenerativeModel({
     model: MODEL_ID,
     systemInstruction: systemPrompt,
+    // @ts-expect-error — Gemini SDK Schema type mismatch with dynamic tool declarations
     tools: [{ functionDeclarations }],
     generationConfig: {
       maxOutputTokens: 2048,

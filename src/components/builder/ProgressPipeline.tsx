@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import type { BuilderStage } from '@/lib/builder/types';
 import { BUILDER_STAGES } from '@/lib/builder/types';
+import { playStageSound } from '@/lib/sounds';
 
 interface Props {
   currentStage: BuilderStage;
@@ -91,6 +93,19 @@ const STAGE_ICONS: Record<BuilderStage, React.ReactNode> = {
 
 export default function ProgressPipeline({ currentStage }: Props) {
   const currentIndex = BUILDER_STAGES.indexOf(currentStage);
+  const prevStageRef = useRef<BuilderStage>(currentStage);
+
+  // Play sound when stage advances
+  useEffect(() => {
+    if (prevStageRef.current !== currentStage) {
+      const prevIndex = BUILDER_STAGES.indexOf(prevStageRef.current);
+      const newIndex = BUILDER_STAGES.indexOf(currentStage);
+      if (newIndex > prevIndex) {
+        playStageSound();
+      }
+      prevStageRef.current = currentStage;
+    }
+  }, [currentStage]);
 
   return (
     <div
@@ -103,66 +118,139 @@ export default function ProgressPipeline({ currentStage }: Props) {
       {BUILDER_STAGES.map((stage, i) => {
         const isComplete = i < currentIndex;
         const isActive = i === currentIndex;
+        const isPending = i > currentIndex;
 
         return (
           <div key={stage} className="flex items-center">
+            {/* Animated connecting line */}
             {i > 0 && (
               <div
-                className="mx-0.5 h-px w-4 transition-all duration-700 sm:mx-1 sm:w-8 md:w-10"
+                className="relative mx-0.5 h-[1.5px] w-4 overflow-hidden rounded-full sm:mx-1 sm:w-8 md:w-10"
                 style={{
-                  background: isComplete
-                    ? 'linear-gradient(90deg, rgba(16,185,129,0.6), rgba(6,182,212,0.6))'
-                    : 'rgba(255,255,255,0.04)',
+                  background: 'rgba(255,255,255,0.04)',
                 }}
-              />
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: 'inherit',
+                    background: isComplete
+                      ? 'linear-gradient(90deg, rgba(16,185,129,0.7), rgba(6,182,212,0.7))'
+                      : isActive
+                        ? 'linear-gradient(90deg, rgba(16,185,129,0.7), rgba(6,182,212,0.5))'
+                        : 'transparent',
+                    transform: isComplete ? 'scaleX(1)' : isActive ? 'scaleX(0.5)' : 'scaleX(0)',
+                    transformOrigin: 'left',
+                    transition: 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  }}
+                />
+              </div>
             )}
+
             <div className="flex items-center gap-1.5">
               <div className="relative">
+                {/* Active stage outer glow ring */}
                 {isActive && (
+                  <>
+                    {/* Soft ambient glow */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: '-6px',
+                        borderRadius: '9999px',
+                        background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)',
+                        animation: 'stageGlow 3s ease-in-out infinite',
+                      }}
+                    />
+                    {/* Refined pulse ring */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: '-4px',
+                        borderRadius: '9999px',
+                        border: '1px solid rgba(6,182,212,0.15)',
+                        animation: 'stagePulse 2.5s ease-in-out infinite',
+                      }}
+                    />
+                  </>
+                )}
+
+                {/* Completed stage subtle shimmer */}
+                {isComplete && (
                   <div
-                    className="absolute -inset-1.5 rounded-full"
                     style={{
-                      background: 'rgba(6,182,212,0.08)',
-                      border: '1px solid rgba(6,182,212,0.12)',
-                      animation: 'stagePulse 2.5s ease-in-out infinite',
+                      position: 'absolute',
+                      inset: '-2px',
+                      borderRadius: '9999px',
+                      background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)',
                     }}
                   />
                 )}
+
+                {/* Stage indicator circle */}
                 <div
-                  className="relative flex h-6 w-6 items-center justify-center rounded-full transition-all duration-600"
                   style={{
+                    position: 'relative',
+                    display: 'flex',
+                    height: '24px',
+                    width: '24px',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '9999px',
+                    transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
                     background: isComplete
-                      ? 'linear-gradient(135deg, #10b981, #059669)'
+                      ? 'linear-gradient(145deg, #10b981, #059669)'
                       : isActive
-                        ? 'linear-gradient(135deg, #06b6d4, #0891b2)'
-                        : 'rgba(255,255,255,0.03)',
+                        ? 'linear-gradient(145deg, #06b6d4, #0891b2)'
+                        : 'rgba(255,255,255,0.025)',
                     border: isComplete
-                      ? '1px solid rgba(16,185,129,0.3)'
+                      ? '1px solid rgba(16,185,129,0.35)'
                       : isActive
-                        ? '1px solid rgba(6,182,212,0.3)'
+                        ? '1px solid rgba(6,182,212,0.35)'
                         : '1px solid rgba(255,255,255,0.06)',
-                    color: isComplete || isActive ? '#fff' : '#3d4357',
+                    color: isComplete ? '#fff' : isActive ? '#fff' : 'rgba(61,67,87,0.7)',
                     boxShadow: isComplete
-                      ? '0 0 12px rgba(16,185,129,0.15)'
+                      ? '0 0 12px rgba(16,185,129,0.18), 0 2px 4px rgba(16,185,129,0.1), inset 0 1px 0 rgba(255,255,255,0.12)'
                       : isActive
-                        ? '0 0 16px rgba(6,182,212,0.2)'
-                        : 'none',
+                        ? '0 0 20px rgba(6,182,212,0.22), 0 2px 8px rgba(6,182,212,0.15), inset 0 1px 0 rgba(255,255,255,0.12)'
+                        : 'inset 0 1px 0 rgba(255,255,255,0.02)',
+                    transform: isActive ? 'scale(1.05)' : 'scale(1)',
                   }}
                 >
                   {isComplete ? (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <svg
+                      className="h-3 w-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                      style={{
+                        filter: 'drop-shadow(0 0 1px rgba(255,255,255,0.3))',
+                      }}
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
                   ) : (
-                    STAGE_ICONS[stage]
+                    <span style={{ opacity: isPending ? 0.5 : 1, transition: 'opacity 0.4s ease' }}>
+                      {STAGE_ICONS[stage]}
+                    </span>
                   )}
                 </div>
               </div>
+
+              {/* Stage label */}
               <span
-                className="hidden text-[11px] font-medium tracking-wide transition-colors duration-300 md:block"
+                className="hidden text-[11px] font-medium tracking-wide md:block"
                 style={{
-                  color: isComplete ? '#34d399' : isActive ? '#22d3ee' : '#3d4357',
+                  color: isComplete ? '#34d399' : isActive ? '#22d3ee' : 'rgba(61,67,87,0.6)',
                   fontFamily: "'Outfit', sans-serif",
+                  transition: 'color 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease',
+                  textShadow: isActive
+                    ? '0 0 12px rgba(34,211,238,0.25)'
+                    : isComplete
+                      ? '0 0 8px rgba(52,211,153,0.15)'
+                      : 'none',
                 }}
               >
                 {STAGE_LABELS[stage]}
@@ -174,8 +262,12 @@ export default function ProgressPipeline({ currentStage }: Props) {
 
       <style>{`
         @keyframes stagePulse {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.08); }
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.12); }
+        }
+        @keyframes stageGlow {
+          0%, 100% { opacity: 0.6; transform: scale(0.95); }
+          50% { opacity: 1; transform: scale(1.1); }
         }
       `}</style>
     </div>

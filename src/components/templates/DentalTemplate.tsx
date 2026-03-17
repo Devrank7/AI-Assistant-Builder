@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Stethoscope } from 'lucide-react';
 
 interface DentalTemplateProps {
   scriptUrl: string;
@@ -43,7 +44,7 @@ export default function DentalTemplate({ scriptUrl }: DentalTemplateProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600">
-                <span className="text-xl text-white">🦷</span>
+                <Stethoscope className="h-5 w-5 text-white" />
               </div>
               <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
                 SmileCare
@@ -296,7 +297,7 @@ export default function DentalTemplate({ scriptUrl }: DentalTemplateProps) {
             <div>
               <div className="mb-4 flex items-center gap-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600">
-                  <span className="text-xl text-white">🦷</span>
+                  <Stethoscope className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-2xl font-bold">SmileCare</span>
               </div>

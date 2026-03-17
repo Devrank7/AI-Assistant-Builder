@@ -67,10 +67,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [user, pathname, router]);
 
+  const isOnboarding = pathname.startsWith('/dashboard/onboarding');
+
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
     return pathname.startsWith(href);
   };
+
+  // During onboarding — render children full-screen, no sidebar/topbar
+  if (isOnboarding) {
+    return <>{children}</>;
+  }
 
   const sidebarContent = (
     <>

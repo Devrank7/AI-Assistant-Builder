@@ -8,6 +8,44 @@ import { PageTransition, MotionList, MotionItem, AnimatedNumber } from '@/compon
 import { IClient } from '@/models/Client';
 import { useMoodTheme } from '@/hooks/use-mood-theme';
 import ChannelDetailTab from '@/components/admin/tabs/ChannelDetailTab';
+import {
+  Instagram,
+  MessageCircle,
+  Send,
+  BarChart3,
+  Bot,
+  BookOpen,
+  MessageSquare,
+  CreditCard,
+  Plug,
+  Settings,
+  TrendingUp,
+  Clock,
+  LayoutGrid,
+  Brain,
+  FlaskConical,
+  FileText,
+  Plus,
+  AlertTriangle,
+  Calendar,
+  Mail,
+  Trash2,
+  Stethoscope,
+  Hotel,
+  ShoppingCart,
+  Home,
+  Sparkles,
+  UtensilsCrossed,
+} from 'lucide-react';
+
+const EMOJI_ICON_MAP: Record<string, React.ReactNode> = {
+  '\u{1F9B7}': <Stethoscope className="h-6 w-6" />,
+  '\u{1F3E8}': <Hotel className="h-6 w-6" />,
+  '\u{1F6D2}': <ShoppingCart className="h-6 w-6" />,
+  '\u{1F3E0}': <Home className="h-6 w-6" />,
+  '\u{1F485}': <Sparkles className="h-6 w-6" />,
+  '\u{1F37D}\uFE0F': <UtensilsCrossed className="h-6 w-6" />,
+};
 
 type DetectedChannel = 'instagram' | 'whatsapp' | 'telegram-bot';
 
@@ -285,12 +323,12 @@ function ClientCabinetContent() {
       });
       const result = await response.json();
       if (result.success) {
-        setAiSettingsMessage('✅ Settings saved!');
+        setAiSettingsMessage('Settings saved successfully');
         setTimeout(() => setAiSettingsMessage(null), 3000);
       }
     } catch (err) {
       console.error(err);
-      setAiSettingsMessage('❌ Save failed');
+      setAiSettingsMessage('Save failed');
     } finally {
       setAiSettingsSaving(false);
     }
@@ -395,14 +433,14 @@ function ClientCabinetContent() {
       const result = await response.json();
 
       if (result.success) {
-        setUploadMessage(`✅ ${result.metadata.filename}: ${result.chunksCreated} chunks added`);
+        setUploadMessage(`${result.metadata.filename}: ${result.chunksCreated} chunks added`);
         fetchKnowledge();
       } else {
-        setUploadMessage(`❌ Error: ${result.error}`);
+        setUploadMessage(`Error: ${result.error}`);
       }
     } catch (err) {
       console.error(err);
-      setUploadMessage('❌ Upload failed');
+      setUploadMessage('Upload failed');
     } finally {
       setUploadingFile(false);
     }
@@ -496,10 +534,10 @@ function ClientCabinetContent() {
         }),
       });
       const result = await response.json();
-      if (result.success) setExportMessage(`✅ Exported ${result.rowsExported} rows!`);
-      else setExportMessage(`❌ ${result.error}`);
+      if (result.success) setExportMessage(`Exported ${result.rowsExported} rows!`);
+      else setExportMessage(`${result.error}`);
     } catch (err) {
-      setExportMessage('❌ Export error');
+      setExportMessage('Export error');
       console.error(err);
     } finally {
       setSheetsExporting(false);
@@ -537,10 +575,10 @@ function ClientCabinetContent() {
   const { client } = data;
   const scriptUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/widgets/${client.folderPath}/script.js`;
 
-  const CHANNEL_TAB_META: Record<DetectedChannel, { tabId: TabType; label: string; icon: string }> = {
-    instagram: { tabId: 'channel-instagram', label: 'Instagram', icon: '📸' },
-    whatsapp: { tabId: 'channel-whatsapp', label: 'WhatsApp', icon: '💬' },
-    'telegram-bot': { tabId: 'channel-telegram', label: 'Telegram Bot', icon: '📱' },
+  const CHANNEL_TAB_META: Record<DetectedChannel, { tabId: TabType; label: string; icon: React.ReactNode }> = {
+    instagram: { tabId: 'channel-instagram', label: 'Instagram', icon: <Instagram className="h-4 w-4" /> },
+    whatsapp: { tabId: 'channel-whatsapp', label: 'WhatsApp', icon: <MessageCircle className="h-4 w-4" /> },
+    'telegram-bot': { tabId: 'channel-telegram', label: 'Telegram Bot', icon: <Send className="h-4 w-4" /> },
   };
 
   const dynamicChannelTabs = detectedChannels.map((ch) => ({
@@ -549,15 +587,15 @@ function ClientCabinetContent() {
     icon: CHANNEL_TAB_META[ch.channel].icon,
   }));
 
-  const tabs: { id: TabType; label: string; icon: string }[] = [
-    { id: 'analytics', label: 'Analytics', icon: '📊' },
-    { id: 'ai-settings', label: 'AI Settings', icon: '🤖' },
-    { id: 'knowledge', label: 'Knowledge', icon: '📚' },
-    { id: 'history', label: 'History', icon: '💬' },
+  const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
+    { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="h-4 w-4" /> },
+    { id: 'ai-settings', label: 'AI Settings', icon: <Bot className="h-4 w-4" /> },
+    { id: 'knowledge', label: 'Knowledge', icon: <BookOpen className="h-4 w-4" /> },
+    { id: 'history', label: 'History', icon: <MessageSquare className="h-4 w-4" /> },
     ...dynamicChannelTabs,
-    { id: 'billing', label: 'Billing', icon: '💳' },
-    { id: 'embed', label: 'Install', icon: '🔌' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' },
+    { id: 'billing', label: 'Billing', icon: <CreditCard className="h-4 w-4" /> },
+    { id: 'embed', label: 'Install', icon: <Plug className="h-4 w-4" /> },
+    { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
   ];
 
   return (
@@ -708,7 +746,7 @@ function ClientCabinetContent() {
               onClick={() => setActiveTab(tab.id)}
               className={`tab-item flex items-center gap-2.5 ${activeTab === tab.id ? 'active' : ''}`}
             >
-              <span className="text-lg">{tab.icon}</span>
+              {tab.icon}
               {tab.label}
             </button>
           ))}
@@ -736,7 +774,7 @@ function ClientCabinetContent() {
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                       <MotionItem className="card-premium p-6">
                         <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-white">
-                          <span className="text-[var(--neon-cyan)]">📈</span> Daily Activity (30 Days)
+                          <TrendingUp className="h-5 w-5 text-[var(--neon-cyan)]" /> Daily Activity (30 Days)
                         </h3>
                         <div className="flex h-64 items-end gap-2 px-2 pb-2">
                           {analyticsData.dailyStats.map((stat, i) => (
@@ -762,7 +800,7 @@ function ClientCabinetContent() {
                       </MotionItem>
                       <MotionItem className="card-premium p-6">
                         <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-white">
-                          <span className="text-[var(--neon-purple)]">⏰</span> Hourly Distribution
+                          <Clock className="h-5 w-5 text-[var(--neon-purple)]" /> Hourly Distribution
                         </h3>
                         <div className="flex h-64 items-end gap-1 px-2 pb-2">
                           {analyticsData.hourlyDistribution.map((stat, i) => (
@@ -807,7 +845,7 @@ function ClientCabinetContent() {
                           </div>
                           {exportMessage && (
                             <p
-                              className={`mt-2 text-sm ${exportMessage.includes('❌') ? 'text-red-400' : 'text-green-400'}`}
+                              className={`mt-2 text-sm ${exportMessage.includes('Exported') ? 'text-green-400' : 'text-red-400'}`}
                             >
                               {exportMessage}
                             </p>
@@ -816,7 +854,7 @@ function ClientCabinetContent() {
 
                         <div className="glass-card p-6">
                           <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-white">
-                            <span className="text-blue-400">✈️</span> Telegram Notifications
+                            <Send className="h-5 w-5 text-blue-400" /> Telegram Notifications
                           </h3>
                           <div className="flex items-center justify-between">
                             <div>
@@ -874,7 +912,7 @@ function ClientCabinetContent() {
                 {/* Templates */}
                 <div className="card-premium p-6">
                   <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
-                    <span>📋</span> Quick Templates
+                    <LayoutGrid className="h-5 w-5" /> Quick Templates
                   </h3>
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
                     {templates.map((template) => (
@@ -884,7 +922,7 @@ function ClientCabinetContent() {
                         className="group rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-center transition-all hover:-translate-y-1 hover:border-[var(--neon-cyan)]/30 hover:bg-white/[0.08] hover:shadow-lg"
                       >
                         <span className="mb-2 block transform text-2xl transition-transform group-hover:scale-110">
-                          {template.icon}
+                          {EMOJI_ICON_MAP[template.icon] || template.icon}
                         </span>
                         <span className="text-xs font-medium text-gray-300">{template.name}</span>
                       </button>
@@ -898,7 +936,9 @@ function ClientCabinetContent() {
                   <>
                     <div className="card-premium border-l-4 border-l-[var(--neon-cyan)] p-6">
                       <div className="mb-4 flex items-center justify-between">
-                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">🧠 AI Model</h3>
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
+                          <Brain className="h-5 w-5" /> AI Model
+                        </h3>
                         <span className="rounded-full border border-[var(--neon-cyan)]/20 bg-[var(--neon-cyan)]/10 px-2.5 py-1 text-xs font-medium text-[var(--neon-cyan)]">
                           {availableModels.find((m) => m.id === aiSettings.model)?.name ||
                             aiSettings.model ||
@@ -924,7 +964,9 @@ function ClientCabinetContent() {
                     </div>
 
                     <div className="card-premium p-6">
-                      <h3 className="mb-4 text-lg font-bold text-white">🤖 System Prompt</h3>
+                      <h3 className="mb-4 text-lg font-bold text-white">
+                        <Bot className="h-5 w-5" /> System Prompt
+                      </h3>
                       <textarea
                         value={aiSettings.systemPrompt}
                         onChange={(e) => setAiSettings({ ...aiSettings, systemPrompt: e.target.value })}
@@ -936,7 +978,9 @@ function ClientCabinetContent() {
 
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div className="card-premium p-6">
-                        <h3 className="mb-4 text-lg font-bold text-white">💬 Greeting Message</h3>
+                        <h3 className="mb-4 text-lg font-bold text-white">
+                          <MessageCircle className="h-5 w-5" /> Greeting Message
+                        </h3>
                         <input
                           type="text"
                           value={aiSettings.greeting}
@@ -1006,7 +1050,9 @@ function ClientCabinetContent() {
                       <div className="absolute top-0 right-0 -mt-6 -mr-6">
                         <div className="pointer-events-none h-24 w-24 rounded-full bg-[var(--neon-cyan)]/20 blur-2xl" />
                       </div>
-                      <h3 className="relative z-10 mb-4 text-lg font-bold text-white">🧪 Test Your Bot</h3>
+                      <h3 className="relative z-10 mb-4 text-lg font-bold text-white">
+                        <FlaskConical className="h-5 w-5" /> Test Your Bot
+                      </h3>
                       <div className="relative z-10 mb-4 flex gap-4">
                         <input
                           type="text"
@@ -1066,7 +1112,7 @@ function ClientCabinetContent() {
                   ) : (
                     <div className="relative z-10 transform transition-transform duration-300 group-hover:scale-105">
                       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--neon-cyan)]/10 shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-shadow group-hover:shadow-[0_0_30px_rgba(59,130,246,0.25)]">
-                        <span className="text-3xl">📄</span>
+                        <FileText className="h-5 w-5" />
                       </div>
                       <h3 className="mb-2 text-2xl font-bold text-white transition-colors group-hover:text-[var(--neon-cyan)]">
                         Upload Document
@@ -1081,7 +1127,9 @@ function ClientCabinetContent() {
 
                 {/* Add Text Manual */}
                 <div className="card-premium p-6">
-                  <h3 className="mb-4 text-lg font-bold text-white">➕ Add Knowledge Manually</h3>
+                  <h3 className="mb-4 text-lg font-bold text-white">
+                    <Plus className="h-5 w-5" /> Add Knowledge Manually
+                  </h3>
                   <textarea
                     value={newKnowledgeText}
                     onChange={(e) => setNewKnowledgeText(e.target.value)}
@@ -1102,7 +1150,7 @@ function ClientCabinetContent() {
                 {/* Knowledge List */}
                 <div className="space-y-4">
                   <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-                    <span>📚</span> Knowledge Chunks{' '}
+                    <BookOpen className="h-5 w-5" /> Knowledge Chunks{' '}
                     <span className="rounded-full bg-white/5 px-2 py-0.5 text-sm font-normal text-gray-500">
                       ({knowledgeChunks.length})
                     </span>
@@ -1245,7 +1293,7 @@ function ClientCabinetContent() {
                   ) : (
                     <div className="flex flex-1 flex-col items-center justify-center text-gray-500 opacity-50">
                       <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
-                        <span className="text-4xl">💬</span>
+                        <MessageSquare className="h-10 w-10" />
                       </div>
                       <p className="font-medium">Select a chat session to view history</p>
                     </div>
@@ -1260,7 +1308,10 @@ function ClientCabinetContent() {
                 <div className="pointer-events-none absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-[var(--neon-cyan)]/5 blur-3xl"></div>
 
                 <h3 className="relative z-10 mb-8 flex items-center gap-3 text-2xl font-bold text-white">
-                  <span className="rounded-lg bg-white/5 p-2">🔌</span> Installation Instructions
+                  <span className="rounded-lg bg-white/5 p-2">
+                    <Plug className="h-5 w-5" />
+                  </span>{' '}
+                  Installation Instructions
                 </h3>
 
                 <div className="relative z-10 space-y-8">
@@ -1309,7 +1360,7 @@ function ClientCabinetContent() {
                   </div>
 
                   <div className="flex items-start gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4">
-                    <span className="mt-0.5 text-xl text-yellow-500">⚠️</span>
+                    <AlertTriangle className="mt-0.5 h-4 w-4 text-yellow-400" />
                     <p className="text-sm leading-relaxed text-yellow-200/80">
                       It might take up to <strong>60 seconds</strong> for changes in settings to propagate to the live
                       widget due to global CDN caching.
@@ -1337,7 +1388,10 @@ function ClientCabinetContent() {
                   <div className="pointer-events-none absolute top-0 right-0 -mt-20 -mr-20 h-96 w-96 rounded-full bg-gradient-to-b from-[var(--neon-purple)]/10 to-transparent blur-3xl"></div>
 
                   <h2 className="relative z-10 mb-8 flex items-center gap-3 text-2xl font-bold text-white">
-                    <span className="rounded-lg bg-white/5 p-2">💳</span> Billing & Usage
+                    <span className="rounded-lg bg-white/5 p-2">
+                      <CreditCard className="h-5 w-5" />
+                    </span>{' '}
+                    Billing & Usage
                   </h2>
 
                   {/* Subscription Status */}
@@ -1383,7 +1437,8 @@ function ClientCabinetContent() {
                         ${(client.monthlyCostUsd || 0).toFixed(2)}
                       </p>
                       <p className="mt-3 flex items-center gap-1 text-[10px] text-gray-500">
-                        <span>📅</span> Reset on {new Date(client.costResetDate || Date.now()).toLocaleDateString()}
+                        <Calendar className="h-4 w-4" /> Reset on{' '}
+                        {new Date(client.costResetDate || Date.now()).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="group rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 transition-colors hover:bg-white/[0.05]">
@@ -1443,7 +1498,10 @@ function ClientCabinetContent() {
                 {/* Email Notifications */}
                 <div className="card-premium p-6">
                   <h3 className="mb-6 flex items-center gap-3 text-lg font-bold text-white">
-                    <span className="rounded-lg bg-white/5 p-2">📧</span> Email-уведомления
+                    <span className="rounded-lg bg-white/5 p-2">
+                      <Mail className="h-5 w-5" />
+                    </span>{' '}
+                    Email-уведомления
                   </h3>
                   <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
                     <div>
@@ -1494,7 +1552,10 @@ function ClientCabinetContent() {
                 {/* Delete My Data */}
                 <div className="card-premium border border-red-500/20 p-6">
                   <h3 className="mb-4 flex items-center gap-3 text-lg font-bold text-white">
-                    <span className="rounded-lg bg-red-500/10 p-2">🗑️</span> Удаление данных
+                    <span className="rounded-lg bg-red-500/10 p-2">
+                      <Trash2 className="h-5 w-5" />
+                    </span>{' '}
+                    Удаление данных
                   </h3>
                   <p className="mb-4 text-sm leading-relaxed text-gray-400">
                     Вы можете удалить все свои данные в соответствии с GDPR. Это действие удалит вашу историю чатов,

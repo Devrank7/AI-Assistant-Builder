@@ -3,7 +3,15 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useVoiceInput } from './useVoiceInput';
-import { playMessageSound, playSendSound } from '@/lib/sounds';
+import {
+  playMessageSound,
+  playSendSound,
+  playToolStartSound,
+  playToolCompleteSound,
+  playErrorSound,
+  playSuccessSound,
+  playClickSound,
+} from '@/lib/sounds';
 import type { Suggestion } from '@/lib/builder/types';
 
 interface ToolCard {
@@ -68,6 +76,10 @@ export default function BuilderChat({
   );
   const prevStreamingRef = useRef(isStreaming);
 
+  // Track tool card states for sound triggers
+  const prevToolCardsRef = useRef<Map<string, string>>(new Map());
+  const prevErrorRef = useRef<string | null>(null);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isStreaming]);
@@ -82,6 +94,45 @@ export default function BuilderChat({
     }
     prevStreamingRef.current = isStreaming;
   }, [isStreaming, messages]);
+
+  // Sound triggers for tool_start, tool_complete, errors, and widget_ready
+  useEffect(() => {
+    const currentToolCards = new Map<string, string>();
+    for (const msg of messages) {
+      if (msg.toolCards) {
+        for (const card of msg.toolCards) {
+          currentToolCards.set(`${msg.timestamp}-${card.tool}`, card.status);
+        }
+      }
+    }
+
+    // Check for new or changed tool cards
+    for (const [key, status] of currentToolCards) {
+      const prevStatus = prevToolCardsRef.current.get(key);
+      if (!prevStatus && status === 'running') {
+        playToolStartSound();
+      } else if (prevStatus === 'running' && status === 'done') {
+        // Play success arpeggio for build_deploy completion (widget_ready)
+        if (key.includes('build_deploy')) {
+          playSuccessSound();
+        } else {
+          playToolCompleteSound();
+        }
+      } else if (prevStatus === 'running' && status === 'error') {
+        playErrorSound();
+      }
+    }
+
+    prevToolCardsRef.current = currentToolCards;
+  }, [messages]);
+
+  // Play error sound when error prop changes
+  useEffect(() => {
+    if (error && error !== prevErrorRef.current) {
+      playErrorSound();
+    }
+    prevErrorRef.current = error;
+  }, [error]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +191,7 @@ export default function BuilderChat({
 
       {/* Messages area */}
       <div className="scrollbar-thin relative flex-1 overflow-y-auto px-4 py-6 sm:px-8">
-        <div className="mx-auto max-w-2xl space-y-6">
+        <div className="mx-auto max-w-2xl space-y-7">
           {messages.map((msg, i) => {
             // Skip empty assistant messages (placeholder before streaming starts)
             if (msg.role === 'assistant' && !msg.content && (!msg.toolCards || msg.toolCards.length === 0)) {
@@ -156,11 +207,11 @@ export default function BuilderChat({
                 {msg.role === 'assistant' && (
                   <div className="mt-1 mr-3 flex-shrink-0">
                     <div
-                      className="relative flex h-8 w-8 items-center justify-center rounded-xl"
+                      className="agent-avatar relative flex h-8 w-8 items-center justify-center rounded-xl"
                       style={{
-                        background: 'linear-gradient(135deg, rgba(6,182,212,0.12), rgba(139,92,246,0.08))',
-                        border: '1px solid rgba(6,182,212,0.18)',
-                        boxShadow: '0 2px 12px rgba(6,182,212,0.08)',
+                        background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(139,92,246,0.10))',
+                        border: '1px solid rgba(6,182,212,0.22)',
+                        boxShadow: '0 2px 16px rgba(6,182,212,0.10), 0 0 0 1px rgba(6,182,212,0.05)',
                       }}
                     >
                       <svg
@@ -183,29 +234,30 @@ export default function BuilderChat({
 
                 {/* Message bubble */}
                 <div
-                  className="group relative max-w-[80%] sm:max-w-[75%]"
+                  className={`group relative max-w-[80%] sm:max-w-[75%] ${msg.role === 'user' ? 'user-bubble' : 'assistant-bubble'}`}
                   style={
                     msg.role === 'user'
                       ? {
                           background: 'linear-gradient(135deg, #0e7490, #0891b2)',
                           borderRadius: '20px 20px 6px 20px',
-                          padding: '12px 18px',
+                          padding: '13px 20px',
                           color: '#fff',
-                          boxShadow: '0 4px 24px rgba(6,182,212,0.12), 0 1px 3px rgba(0,0,0,0.2)',
+                          boxShadow:
+                            '0 4px 28px rgba(6,182,212,0.15), 0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
                         }
                       : {
-                          background: 'rgba(255,255,255,0.025)',
-                          border: '1px solid rgba(255,255,255,0.06)',
+                          background: 'rgba(255,255,255,0.028)',
+                          border: '1px solid rgba(255,255,255,0.07)',
                           borderRadius: '20px 20px 20px 6px',
-                          padding: '14px 18px',
+                          padding: '15px 20px',
                           color: '#c8cdd8',
-                          backdropFilter: 'blur(12px)',
-                          boxShadow: '0 2px 16px rgba(0,0,0,0.1)',
+                          backdropFilter: 'blur(16px)',
+                          boxShadow: '0 2px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.03)',
                         }
                   }
                 >
                   <div
-                    className="text-[13.5px] leading-[1.7]"
+                    className="text-[13.5px] leading-[1.75]"
                     style={{ fontFamily: "'Outfit', sans-serif", letterSpacing: '0.01em' }}
                   >
                     {msg.role === 'assistant' ? (
@@ -219,33 +271,40 @@ export default function BuilderChat({
 
                   {/* Tool action cards */}
                   {msg.toolCards && msg.toolCards.length > 0 && (
-                    <div className="mt-3 space-y-2">
+                    <div className="mt-4 space-y-2.5">
                       {msg.toolCards.map((card, j) => (
                         <div
                           key={j}
-                          className="tool-card-appear flex items-center gap-2.5 rounded-xl px-3.5 py-2.5"
+                          className={`tool-card-appear flex items-center gap-3 rounded-xl px-4 py-3 ${card.status === 'done' ? 'tool-card-done' : card.status === 'error' ? 'tool-card-error' : 'tool-card-running'}`}
                           style={{
                             animationDelay: `${j * 0.1}s`,
                             background:
                               card.status === 'done'
-                                ? 'rgba(16,185,129,0.06)'
+                                ? 'linear-gradient(135deg, rgba(16,185,129,0.06), rgba(52,211,153,0.03))'
                                 : card.status === 'error'
-                                  ? 'rgba(239,68,68,0.06)'
-                                  : 'rgba(6,182,212,0.05)',
+                                  ? 'linear-gradient(135deg, rgba(239,68,68,0.06), rgba(248,113,113,0.03))'
+                                  : 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.03))',
                             border:
                               card.status === 'done'
-                                ? '1px solid rgba(16,185,129,0.12)'
+                                ? '1px solid rgba(16,185,129,0.15)'
                                 : card.status === 'error'
-                                  ? '1px solid rgba(239,68,68,0.12)'
-                                  : '1px solid rgba(6,182,212,0.12)',
+                                  ? '1px solid rgba(239,68,68,0.15)'
+                                  : '1px solid rgba(6,182,212,0.15)',
+                            boxShadow:
+                              card.status === 'done'
+                                ? '0 2px 12px rgba(16,185,129,0.06)'
+                                : card.status === 'error'
+                                  ? '0 2px 12px rgba(239,68,68,0.06)'
+                                  : '0 2px 12px rgba(6,182,212,0.06)',
+                            transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                           }}
                         >
                           {card.status === 'running' && (
-                            <div className="relative h-4 w-4">
+                            <div className="relative h-[18px] w-[18px] flex-shrink-0">
                               <div
                                 className="absolute inset-0 rounded-full"
                                 style={{
-                                  border: '2px solid rgba(6,182,212,0.15)',
+                                  border: '2px solid rgba(6,182,212,0.12)',
                                 }}
                               />
                               <div
@@ -256,12 +315,20 @@ export default function BuilderChat({
                                   animation: 'toolSpin 0.8s linear infinite',
                                 }}
                               />
+                              {/* Subtle glow behind spinner */}
+                              <div
+                                className="absolute inset-[-2px] rounded-full"
+                                style={{
+                                  background: 'radial-gradient(circle, rgba(6,182,212,0.15), transparent 70%)',
+                                  animation: 'streamPulse 2s ease-in-out infinite',
+                                }}
+                              />
                             </div>
                           )}
                           {card.status === 'done' && (
                             <div
-                              className="flex h-4 w-4 items-center justify-center rounded-full"
-                              style={{ background: 'rgba(16,185,129,0.15)' }}
+                              className="tool-check-appear flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full"
+                              style={{ background: 'rgba(16,185,129,0.18)' }}
                             >
                               <svg
                                 className="h-2.5 w-2.5"
@@ -277,8 +344,8 @@ export default function BuilderChat({
                           )}
                           {card.status === 'error' && (
                             <div
-                              className="flex h-4 w-4 items-center justify-center rounded-full"
-                              style={{ background: 'rgba(239,68,68,0.15)' }}
+                              className="flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full"
+                              style={{ background: 'rgba(239,68,68,0.18)' }}
                             >
                               <svg
                                 className="h-2.5 w-2.5"
@@ -293,15 +360,31 @@ export default function BuilderChat({
                             </div>
                           )}
                           <span
-                            className="text-xs font-medium"
+                            className="text-xs font-medium tracking-wide"
                             style={{
                               color:
                                 card.status === 'done' ? '#34d399' : card.status === 'error' ? '#f87171' : '#67e8f9',
                               fontFamily: "'Outfit', sans-serif",
+                              letterSpacing: '0.02em',
                             }}
                           >
                             {TOOL_LABELS[card.tool] || card.tool}
                           </span>
+                          {card.status === 'running' && (
+                            <div className="ml-auto flex items-center gap-1">
+                              {[0, 1, 2].map((k) => (
+                                <div
+                                  key={k}
+                                  className="h-[3px] w-[3px] rounded-full"
+                                  style={{
+                                    background: '#22d3ee',
+                                    animation: 'streamPulse 1.4s ease-in-out infinite',
+                                    animationDelay: `${k * 0.2}s`,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -347,10 +430,11 @@ export default function BuilderChat({
                 {/* Avatar */}
                 <div className="mt-1 mr-3 flex-shrink-0">
                   <div
-                    className="relative flex h-8 w-8 items-center justify-center rounded-xl"
+                    className="agent-avatar relative flex h-8 w-8 items-center justify-center rounded-xl"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.12), rgba(139,92,246,0.08))',
-                      border: '1px solid rgba(6,182,212,0.18)',
+                      background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(139,92,246,0.10))',
+                      border: '1px solid rgba(6,182,212,0.22)',
+                      boxShadow: '0 2px 16px rgba(6,182,212,0.10)',
                     }}
                   >
                     <svg
@@ -371,47 +455,48 @@ export default function BuilderChat({
                 </div>
                 {/* Skeleton bubble */}
                 <div
-                  className="max-w-[75%] overflow-hidden"
+                  className="thinking-bubble max-w-[75%] overflow-hidden"
                   style={{
-                    background: 'rgba(255,255,255,0.025)',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    background: 'rgba(255,255,255,0.028)',
+                    border: '1px solid rgba(255,255,255,0.07)',
                     borderRadius: '20px 20px 20px 6px',
-                    padding: '16px 20px',
-                    backdropFilter: 'blur(12px)',
+                    padding: '18px 22px',
+                    backdropFilter: 'blur(16px)',
+                    boxShadow: '0 2px 20px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.03)',
                   }}
                 >
                   <div className="space-y-3">
                     {/* Shimmer lines */}
                     <div
-                      className="shimmer-line h-3 w-52 rounded-full"
+                      className="shimmer-line h-[10px] w-52 rounded-full"
                       style={{ background: 'rgba(255,255,255,0.04)' }}
                     />
                     <div
-                      className="shimmer-line h-3 w-40 rounded-full"
+                      className="shimmer-line h-[10px] w-36 rounded-full"
                       style={{ background: 'rgba(255,255,255,0.04)', animationDelay: '0.15s' }}
                     />
                     <div
-                      className="shimmer-line h-3 w-48 rounded-full"
+                      className="shimmer-line h-[10px] w-44 rounded-full"
                       style={{ background: 'rgba(255,255,255,0.04)', animationDelay: '0.3s' }}
                     />
                   </div>
-                  {/* Typing dots below skeleton */}
-                  <div className="mt-4 flex items-center gap-2">
+                  {/* Typing indicator below skeleton */}
+                  <div className="mt-5 flex items-center gap-2.5">
                     <span
-                      className="text-[11px] font-medium"
-                      style={{ color: '#4a5068', fontFamily: "'Outfit', sans-serif" }}
+                      className="thinking-label text-[11px] font-medium tracking-wider uppercase"
+                      style={{ color: '#3d4560', fontFamily: "'Outfit', sans-serif", letterSpacing: '0.08em' }}
                     >
                       Thinking
                     </span>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       {[0, 1, 2].map((i) => (
                         <div
                           key={i}
-                          className="h-[4px] w-[4px] rounded-full"
+                          className="thinking-dot h-[5px] w-[5px] rounded-full"
                           style={{
-                            background: '#06b6d4',
-                            animation: 'streamPulse 1.4s ease-in-out infinite',
-                            animationDelay: `${i * 0.2}s`,
+                            background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+                            animation: 'thinkingDotPulse 1.8s ease-in-out infinite',
+                            animationDelay: `${i * 0.25}s`,
                           }}
                         />
                       ))}
@@ -488,14 +573,34 @@ export default function BuilderChat({
           {error && (
             <div className="pl-11">
               <div
-                className="rounded-xl px-4 py-3 text-xs"
+                className="error-appear flex items-center gap-3 rounded-xl px-4 py-3.5 text-xs"
                 style={{
-                  background: 'rgba(239,68,68,0.05)',
-                  border: '1px solid rgba(239,68,68,0.12)',
+                  background: 'linear-gradient(135deg, rgba(239,68,68,0.06), rgba(248,113,113,0.03))',
+                  border: '1px solid rgba(239,68,68,0.15)',
                   color: '#fca5a5',
                   fontFamily: "'Outfit', sans-serif",
+                  boxShadow: '0 2px 12px rgba(239,68,68,0.06)',
                 }}
               >
+                <div
+                  className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full"
+                  style={{ background: 'rgba(239,68,68,0.15)' }}
+                >
+                  <svg
+                    className="h-3 w-3"
+                    style={{ color: '#f87171' }}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                    />
+                  </svg>
+                </div>
                 {error}
               </div>
             </div>
@@ -503,30 +608,37 @@ export default function BuilderChat({
 
           {/* Suggestion chips */}
           {suggestions && suggestions.length > 0 && !isStreaming && (
-            <div className="flex flex-wrap gap-2 pl-11">
+            <div className="flex flex-wrap gap-2.5 pl-11">
               {suggestions.map((s, i) => (
                 <button
                   key={i}
-                  onClick={() => onSendMessage(s)}
-                  className="chip-appear rounded-full px-4 py-2 text-xs font-medium transition-all duration-300 hover:scale-[1.03]"
+                  onClick={() => {
+                    playClickSound();
+                    onSendMessage(s);
+                  }}
+                  className="chip-appear rounded-full px-4 py-2.5 text-xs font-medium transition-all duration-300"
                   style={{
                     animationDelay: `${i * 0.08}s`,
                     background: 'rgba(255,255,255,0.025)',
-                    border: '1px solid rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.08)',
                     color: '#8b92a5',
                     fontFamily: "'Outfit', sans-serif",
+                    letterSpacing: '0.01em',
+                    backdropFilter: 'blur(8px)',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.3)';
+                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.35)';
                     e.currentTarget.style.color = '#67e8f9';
-                    e.currentTarget.style.background = 'rgba(6,182,212,0.06)';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(6,182,212,0.08)';
+                    e.currentTarget.style.background = 'rgba(6,182,212,0.07)';
+                    e.currentTarget.style.boxShadow = '0 0 24px rgba(6,182,212,0.10), 0 4px 16px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.transform = 'translateY(-1px) scale(1.02)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
                     e.currentTarget.style.color = '#8b92a5';
                     e.currentTarget.style.background = 'rgba(255,255,255,0.025)';
                     e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
                   }}
                 >
                   {s}
@@ -588,7 +700,10 @@ export default function BuilderChat({
                     {s.actions.map((a, i) => (
                       <button
                         key={i}
-                        onClick={() => onSendMessage(a.action)}
+                        onClick={() => {
+                          playClickSound();
+                          onSendMessage(a.action);
+                        }}
                         className="rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all duration-300 hover:scale-[1.02]"
                         style={{
                           background: 'rgba(6,182,212,0.07)',
@@ -598,7 +713,7 @@ export default function BuilderChat({
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'rgba(6,182,212,0.14)';
-                          e.currentTarget.style.boxShadow = '0 0 16px rgba(6,182,212,0.12)';
+                          e.currentTarget.style.boxShadow = '0 0 20px rgba(6,182,212,0.12)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'rgba(6,182,212,0.07)';
@@ -622,23 +737,23 @@ export default function BuilderChat({
       <div className="relative z-10 px-4 pt-2 pb-5 sm:px-8">
         {/* Top fade gradient */}
         <div
-          className="pointer-events-none absolute -top-12 right-0 left-0 h-12"
+          className="pointer-events-none absolute -top-16 right-0 left-0 h-16"
           style={{ background: 'linear-gradient(to top, #08090d, transparent)' }}
         />
 
         <form
           onSubmit={handleSubmit}
-          className="mx-auto max-w-2xl overflow-hidden rounded-2xl transition-all duration-400"
+          className="input-form mx-auto max-w-2xl overflow-hidden rounded-2xl transition-all duration-500"
           style={{
-            background: isFocused ? 'rgba(6,182,212,0.03)' : 'rgba(255,255,255,0.025)',
-            border: isFocused ? '1px solid rgba(6,182,212,0.2)' : '1px solid rgba(255,255,255,0.06)',
+            background: isFocused ? 'rgba(6,182,212,0.035)' : 'rgba(255,255,255,0.025)',
+            border: isFocused ? '1px solid rgba(6,182,212,0.25)' : '1px solid rgba(255,255,255,0.07)',
             boxShadow: isFocused
-              ? '0 0 40px rgba(6,182,212,0.06), 0 8px 32px rgba(0,0,0,0.2)'
-              : '0 4px 24px rgba(0,0,0,0.15)',
-            backdropFilter: 'blur(16px)',
+              ? '0 0 48px rgba(6,182,212,0.08), 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(6,182,212,0.06)'
+              : '0 4px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(20px)',
           }}
         >
-          <div className="flex items-center gap-2 px-3 py-2">
+          <div className="flex items-center gap-2 px-3 py-2.5">
             {isSupported && (
               <button
                 type="button"
@@ -677,17 +792,18 @@ export default function BuilderChat({
                 color: '#e0e4ec',
                 fontFamily: "'Outfit', sans-serif",
                 letterSpacing: '0.01em',
+                caretColor: '#22d3ee',
               }}
             />
             <button
               type="submit"
               disabled={!input.trim() || isStreaming}
-              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-400 disabled:cursor-not-allowed disabled:opacity-20"
+              className="send-btn flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-500 disabled:cursor-not-allowed disabled:opacity-20"
               style={{
                 background: input.trim() ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'transparent',
                 color: input.trim() ? '#fff' : '#4a5068',
-                boxShadow: input.trim() ? '0 2px 16px rgba(6,182,212,0.25)' : 'none',
-                transform: input.trim() ? 'scale(1)' : 'scale(0.95)',
+                boxShadow: input.trim() ? '0 2px 20px rgba(6,182,212,0.30), 0 0 0 1px rgba(6,182,212,0.1)' : 'none',
+                transform: input.trim() ? 'scale(1)' : 'scale(0.92)',
               }}
             >
               <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -715,16 +831,51 @@ export default function BuilderChat({
           0%, 100% { opacity: 0.7; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.15); }
         }
+        @keyframes thinkingDotPulse {
+          0%, 100% { opacity: 0.2; transform: scale(0.7); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes toolCheckPop {
+          0% { opacity: 0; transform: scale(0.3); }
+          60% { transform: scale(1.15); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes errorAppear {
+          from { opacity: 0; transform: translateX(-8px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
         .thinking-appear {
           animation: thinkingAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .thinking-icon {
           animation: iconPulse 2s ease-in-out infinite;
         }
+        .thinking-bubble {
+          position: relative;
+        }
+        .thinking-bubble::before {
+          content: '';
+          position: absolute;
+          inset: -1px;
+          border-radius: inherit;
+          padding: 1px;
+          background: linear-gradient(135deg, rgba(6,182,212,0.15), rgba(139,92,246,0.08), rgba(6,182,212,0.15));
+          background-size: 200% 200%;
+          animation: gradientShift 3s ease-in-out infinite;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor;
+          pointer-events: none;
+        }
+        @keyframes gradientShift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
         .shimmer-line {
-          background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(6,182,212,0.08) 40%, rgba(255,255,255,0.03) 80%) !important;
+          background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(6,182,212,0.10) 40%, rgba(255,255,255,0.03) 80%) !important;
           background-size: 200px 100%;
-          animation: shimmer 1.8s ease-in-out infinite;
+          animation: shimmer 2s ease-in-out infinite;
         }
         @keyframes toolSpin {
           to { transform: rotate(360deg); }
@@ -743,12 +894,81 @@ export default function BuilderChat({
         .tool-card-appear {
           animation: chipAppear 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
+        .tool-check-appear {
+          animation: toolCheckPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .error-appear {
+          animation: errorAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
         .chip-appear {
           animation: chipAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .suggestion-appear {
           animation: msgAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
+
+        /* Agent avatar subtle breathing glow */
+        .agent-avatar::after {
+          content: '';
+          position: absolute;
+          inset: -3px;
+          border-radius: inherit;
+          background: radial-gradient(circle, rgba(6,182,212,0.12), transparent 70%);
+          opacity: 0;
+          animation: avatarGlow 3s ease-in-out infinite;
+          pointer-events: none;
+        }
+        @keyframes avatarGlow {
+          0%, 100% { opacity: 0; }
+          50% { opacity: 1; }
+        }
+
+        /* User bubble subtle shine */
+        .user-bubble::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+          border-radius: inherit;
+          pointer-events: none;
+        }
+
+        /* Assistant bubble top edge highlight */
+        .assistant-bubble::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+          border-radius: inherit;
+          pointer-events: none;
+        }
+
+        /* Send button hover glow */
+        .send-btn:not(:disabled):hover {
+          box-shadow: 0 4px 28px rgba(6,182,212,0.35), 0 0 0 1px rgba(6,182,212,0.15) !important;
+          transform: scale(1.05) !important;
+        }
+
+        /* Input form subtle transition */
+        .input-form {
+          position: relative;
+        }
+
+        /* Placeholder styling */
+        .input-form input::placeholder {
+          color: #3d4560;
+          transition: color 0.3s ease;
+        }
+        .input-form input:focus::placeholder {
+          color: #4a5068;
+        }
+
         .scrollbar-thin::-webkit-scrollbar { width: 4px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 4px; }
