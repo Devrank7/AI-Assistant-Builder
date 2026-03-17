@@ -317,7 +317,7 @@ export const integrationTools: ToolDefinition[] = [
 
       const { pluginRegistry } = await import('@/lib/integrations/core/PluginRegistry');
       const result = await pluginRegistry.executeAction(slug, action, params, userId, widgetId);
-      return result;
+      return result as unknown as Record<string, unknown>;
     },
   },
   {

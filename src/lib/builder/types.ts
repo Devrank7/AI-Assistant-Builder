@@ -128,6 +128,7 @@ export type SSEEvent =
   | { type: 'session'; sessionId: string }
   | { type: 'suggestions'; suggestions: Suggestion[] }
   | { type: 'agent_switch'; agent: AgentType; task: string }
+  | { type: 'open_connection_wizard'; slug: string }
   | { type: 'done' };
 
 // --- CRM Setup (legacy, kept for backward compat) ---
