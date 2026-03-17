@@ -1,0 +1,34 @@
+{
+  "slug": "hubspot",
+  "name": "HubSpot",
+  "category": "crm",
+  "description": "CRM & Marketing Automation. Manage contacts, deals, and marketing campaigns.",
+  "icon": "/integrations/hubspot.svg",
+  "color": "#FF7A59",
+  "authFields": [
+    { "key": "apiKey", "label": "API Key", "type": "password", "required": true, "placeholder": "pat-na1-xxxxxxxx" }
+  ],
+  "actions": [
+    {
+      "id": "createContact",
+      "name": "Create Contact",
+      "description": "Save a new contact with name, email, and phone",
+      "inputSchema": { "email": "string", "name": "string?", "phone": "string?", "company": "string?" }
+    },
+    {
+      "id": "createDeal",
+      "name": "Create Deal",
+      "description": "Create a new deal in the sales pipeline",
+      "inputSchema": { "dealname": "string", "amount": "string?", "pipeline": "string?" }
+    },
+    {
+      "id": "searchContacts",
+      "name": "Search Contacts",
+      "description": "Search for existing contacts by email or name",
+      "inputSchema": { "query": "string" }
+    }
+  ],
+  "healthEndpoint": "/crm/v3/objects/contacts?limit=1",
+  "docsUrl": "https://developers.hubspot.com/docs/api/crm/contacts",
+  "status": "active"
+}
