@@ -1,0 +1,26 @@
+{
+  "slug": "whatsapp",
+  "name": "WhatsApp",
+  "category": "notification",
+  "description": "WhatsApp Messaging. Send messages and templates via WhatsApp API.",
+  "icon": "/integrations/whatsapp.svg",
+  "color": "#25D366",
+  "authFields": [
+    { "key": "apiKey", "label": "API Token", "type": "password", "required": true, "placeholder": "whapi_..." }
+  ],
+  "actions": [
+    {
+      "id": "sendMessage",
+      "name": "Send Message",
+      "description": "Send a text message to a WhatsApp phone number",
+      "inputSchema": { "phone": "string", "text": "string" }
+    },
+    {
+      "id": "sendTemplate",
+      "name": "Send Template",
+      "description": "Send a WhatsApp template message to a phone number",
+      "inputSchema": { "phone": "string", "templateName": "string", "parameters": "string?" }
+    }
+  ],
+  "status": "active"
+}

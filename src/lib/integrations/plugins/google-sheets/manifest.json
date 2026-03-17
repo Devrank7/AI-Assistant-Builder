@@ -1,0 +1,38 @@
+{
+  "slug": "google-sheets",
+  "name": "Google Sheets",
+  "category": "data",
+  "description": "Google Sheets. Read, write, and search data in spreadsheets.",
+  "icon": "/integrations/google-sheets.svg",
+  "color": "#0F9D58",
+  "authFields": [
+    {
+      "key": "apiKey",
+      "label": "Service Account JSON Key",
+      "type": "password",
+      "required": true,
+      "placeholder": "paste JSON..."
+    }
+  ],
+  "actions": [
+    {
+      "id": "appendRow",
+      "name": "Append Row",
+      "description": "Append a new row to a Google Sheets spreadsheet",
+      "inputSchema": { "spreadsheetId": "string", "range": "string", "values": "string" }
+    },
+    {
+      "id": "readRange",
+      "name": "Read Range",
+      "description": "Read a range of cells from a Google Sheets spreadsheet",
+      "inputSchema": { "spreadsheetId": "string", "range": "string" }
+    },
+    {
+      "id": "searchRows",
+      "name": "Search Rows",
+      "description": "Search for rows matching a query in a Google Sheets spreadsheet",
+      "inputSchema": { "spreadsheetId": "string", "range": "string", "query": "string" }
+    }
+  ],
+  "status": "active"
+}

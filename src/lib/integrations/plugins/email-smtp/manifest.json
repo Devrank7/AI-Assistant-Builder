@@ -1,0 +1,27 @@
+{
+  "slug": "email-smtp",
+  "name": "Email (SMTP)",
+  "category": "notification",
+  "description": "Email via SMTP. Send transactional and marketing emails.",
+  "icon": "/integrations/email-smtp.svg",
+  "color": "#EA4335",
+  "authFields": [
+    {
+      "key": "apiKey",
+      "label": "SMTP Password / API Key",
+      "type": "password",
+      "required": true,
+      "placeholder": "SG.xxx..."
+    },
+    { "key": "host", "label": "SMTP Host", "type": "text", "required": false, "placeholder": "smtp.gmail.com" }
+  ],
+  "actions": [
+    {
+      "id": "sendEmail",
+      "name": "Send Email",
+      "description": "Send an email to a recipient",
+      "inputSchema": { "to": "string", "subject": "string", "body": "string", "from": "string?" }
+    }
+  ],
+  "status": "active"
+}

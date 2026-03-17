@@ -1,0 +1,32 @@
+{
+  "slug": "google-calendar",
+  "name": "Google Calendar",
+  "category": "calendar",
+  "description": "Google Calendar. Manage events, availability, and scheduling.",
+  "icon": "/integrations/google-calendar.svg",
+  "color": "#4285F4",
+  "authFields": [
+    { "key": "apiKey", "label": "API Key", "type": "password", "required": true, "placeholder": "AIza..." }
+  ],
+  "actions": [
+    {
+      "id": "getSlots",
+      "name": "Get Available Slots",
+      "description": "Get available time slots for a given date and duration",
+      "inputSchema": { "date": "string", "duration": "string?" }
+    },
+    {
+      "id": "createEvent",
+      "name": "Create Event",
+      "description": "Create a new calendar event",
+      "inputSchema": { "title": "string", "start": "string", "end": "string", "description": "string?" }
+    },
+    {
+      "id": "cancelEvent",
+      "name": "Cancel Event",
+      "description": "Cancel an existing calendar event",
+      "inputSchema": { "eventId": "string" }
+    }
+  ],
+  "status": "active"
+}

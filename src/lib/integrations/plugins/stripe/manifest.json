@@ -1,0 +1,32 @@
+{
+  "slug": "stripe",
+  "name": "Stripe",
+  "category": "payment",
+  "description": "Stripe Payments. Create payment links, check payment status, and list products.",
+  "icon": "/integrations/stripe.svg",
+  "color": "#635BFF",
+  "authFields": [
+    { "key": "apiKey", "label": "Secret Key", "type": "password", "required": true, "placeholder": "sk_live_..." }
+  ],
+  "actions": [
+    {
+      "id": "createPaymentLink",
+      "name": "Create Payment Link",
+      "description": "Create a Stripe payment link for a given amount",
+      "inputSchema": { "amount": "string", "currency": "string?", "description": "string?" }
+    },
+    {
+      "id": "checkPayment",
+      "name": "Check Payment",
+      "description": "Check the status of an existing payment",
+      "inputSchema": { "paymentId": "string" }
+    },
+    {
+      "id": "listProducts",
+      "name": "List Products",
+      "description": "List available products in the Stripe account",
+      "inputSchema": { "limit": "string?" }
+    }
+  ],
+  "status": "active"
+}

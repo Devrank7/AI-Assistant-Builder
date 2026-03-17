@@ -1,0 +1,26 @@
+{
+  "slug": "telegram",
+  "name": "Telegram",
+  "category": "notification",
+  "description": "Telegram Bot. Send messages and photos to Telegram chats.",
+  "icon": "/integrations/telegram.svg",
+  "color": "#26A5E4",
+  "authFields": [
+    { "key": "apiKey", "label": "Bot Token", "type": "password", "required": true, "placeholder": "123456:ABC-DEF..." }
+  ],
+  "actions": [
+    {
+      "id": "sendMessage",
+      "name": "Send Message",
+      "description": "Send a text message to a Telegram chat",
+      "inputSchema": { "chatId": "string", "text": "string" }
+    },
+    {
+      "id": "sendPhoto",
+      "name": "Send Photo",
+      "description": "Send a photo to a Telegram chat with optional caption",
+      "inputSchema": { "chatId": "string", "photoUrl": "string", "caption": "string?" }
+    }
+  ],
+  "status": "active"
+}

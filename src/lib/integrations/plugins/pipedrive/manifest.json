@@ -1,0 +1,32 @@
+{
+  "slug": "pipedrive",
+  "name": "Pipedrive",
+  "category": "crm",
+  "description": "Pipedrive CRM. Manage persons, deals, and sales pipeline.",
+  "icon": "/integrations/pipedrive.svg",
+  "color": "#1E1E1E",
+  "authFields": [
+    { "key": "apiKey", "label": "API Token", "type": "password", "required": true, "placeholder": "xxxxxxxx..." }
+  ],
+  "actions": [
+    {
+      "id": "createPerson",
+      "name": "Create Person",
+      "description": "Create a new person contact in Pipedrive",
+      "inputSchema": { "name": "string", "email": "string?", "phone": "string?" }
+    },
+    {
+      "id": "createDeal",
+      "name": "Create Deal",
+      "description": "Create a new deal in the Pipedrive pipeline",
+      "inputSchema": { "title": "string", "value": "string?", "currency": "string?" }
+    },
+    {
+      "id": "searchPersons",
+      "name": "Search Persons",
+      "description": "Search for existing persons by name or keyword",
+      "inputSchema": { "query": "string" }
+    }
+  ],
+  "status": "active"
+}

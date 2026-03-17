@@ -1,0 +1,32 @@
+{
+  "slug": "salesforce",
+  "name": "Salesforce",
+  "category": "crm",
+  "description": "Salesforce CRM. Manage leads, opportunities, and accounts.",
+  "icon": "/integrations/salesforce.svg",
+  "color": "#00A1E0",
+  "authFields": [
+    { "key": "apiKey", "label": "Access Token", "type": "password", "required": true, "placeholder": "00Dxx..." }
+  ],
+  "actions": [
+    {
+      "id": "createLead",
+      "name": "Create Lead",
+      "description": "Create a new lead in Salesforce",
+      "inputSchema": { "email": "string", "name": "string?", "company": "string?" }
+    },
+    {
+      "id": "createOpportunity",
+      "name": "Create Opportunity",
+      "description": "Create a new opportunity in the sales pipeline",
+      "inputSchema": { "name": "string", "amount": "string?", "stage": "string?" }
+    },
+    {
+      "id": "searchAccounts",
+      "name": "Search Accounts",
+      "description": "Search for existing accounts by name or keyword",
+      "inputSchema": { "query": "string" }
+    }
+  ],
+  "status": "active"
+}

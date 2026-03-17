@@ -1,0 +1,38 @@
+{
+  "slug": "calendly",
+  "name": "Calendly",
+  "category": "calendar",
+  "description": "Calendly Scheduling. Manage event types, availability, and invitees.",
+  "icon": "/integrations/calendly.svg",
+  "color": "#006BFF",
+  "authFields": [
+    {
+      "key": "apiKey",
+      "label": "Personal Access Token",
+      "type": "password",
+      "required": true,
+      "placeholder": "eyJra..."
+    }
+  ],
+  "actions": [
+    {
+      "id": "getEventTypes",
+      "name": "Get Event Types",
+      "description": "List all available event types for the account",
+      "inputSchema": {}
+    },
+    {
+      "id": "getAvailability",
+      "name": "Get Availability",
+      "description": "Get available time slots for a given event type and date range",
+      "inputSchema": { "eventTypeUri": "string", "startDate": "string", "endDate": "string" }
+    },
+    {
+      "id": "createInvitee",
+      "name": "Create Invitee",
+      "description": "Book a Calendly event for an invitee",
+      "inputSchema": { "eventUri": "string", "email": "string", "name": "string?" }
+    }
+  ],
+  "status": "active"
+}

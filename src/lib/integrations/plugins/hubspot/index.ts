@@ -15,7 +15,7 @@ async function hubspotFetch(path: string, apiKey: string, options?: RequestInit)
 }
 
 export const hubspotPlugin: IntegrationPlugin = {
-  manifest: manifest as IntegrationPlugin['manifest'],
+  manifest: manifest as unknown as IntegrationPlugin['manifest'],
 
   async connect(credentials) {
     const result = await this.testConnection(credentials);
