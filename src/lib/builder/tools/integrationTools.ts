@@ -180,4 +180,179 @@ export const integrationTools: ToolDefinition[] = [
       return { success: true, message: `Instructions displayed for: ${topic}` };
     },
   },
+  {
+    name: 'list_user_integrations',
+    description: 'List all integrations connected by the current user, with their status and available actions.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
+    category: 'integration',
+    async executor(_args, ctx) {
+      const { pluginRegistry } = await import('@/lib/integrations/core/PluginRegistry');
+      const userId = ctx.userId;
+      if (!userId) return { success: false, error: 'No user context available' };
+      const connected = await pluginRegistry.getConnectedManifests(userId);
+      if (connected.length === 0) {
+        return {
+          success: true,
+          integrations: [],
+          message: 'No integrations connected yet. Guide the user to /dashboard/integrations to connect their tools.',
+        };
+      }
+      return {
+        success: true,
+        integrations: connected.map((m) => ({
+          slug: m.slug,
+          name: m.name,
+          category: m.category,
+          status: m.status,
+          actions: m.actions.map((a) => ({ id: a.id, name: a.name, description: a.description })),
+        })),
+      };
+    },
+  },
+  {
+    name: 'open_connection_wizard',
+    description: 'Instruct the UI to open the integration connection wizard for a specific provider.',
+    parameters: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'Integration slug (e.g., "hubspot", "stripe")' },
+      },
+      required: ['slug'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      const slug = args.slug as string;
+      ctx.write({ type: 'open_connection_wizard', slug });
+      return {
+        success: true,
+        message: `Opening connection wizard for ${slug}. The user will complete the setup in the marketplace UI.`,
+      };
+    },
+  },
+  {
+    name: 'attach_integration_to_widget',
+    description: 'Attach a connected integration to the current widget, enabling specific actions.',
+    parameters: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'Integration slug' },
+        widgetId: { type: 'string', description: 'Widget client ID' },
+        actions: { type: 'string', description: 'JSON array of action IDs to enable' },
+      },
+      required: ['slug', 'widgetId'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      const slug = args.slug as string;
+      const widgetId = args.widgetId as string;
+      const userId = ctx.userId;
+      if (!userId) return { success: false, error: 'No user context available' };
+
+      let actionIds: string[] = [];
+      try {
+        actionIds = JSON.parse((args.actions as string) || '[]');
+      } catch {
+        actionIds = [];
+      }
+
+      const { default: connectDB } = await import('@/lib/mongodb');
+      const { default: Integration } = await import('@/models/Integration');
+      const { default: WidgetIntegration } = await import('@/models/WidgetIntegration');
+
+      await connectDB();
+      const connection = await Integration.findOne({ userId, provider: slug, status: 'connected' });
+      if (!connection)
+        return { success: false, error: `No active connection for "${slug}". Guide the user to connect it first.` };
+
+      const { pluginRegistry } = await import('@/lib/integrations/core/PluginRegistry');
+      const plugin = pluginRegistry.get(slug);
+      if (!plugin) return { success: false, error: `Plugin "${slug}" not found` };
+
+      const allActions = plugin.manifest.actions.map((a) => a.id);
+      const enabledActions = actionIds.length > 0 ? actionIds : allActions;
+
+      await WidgetIntegration.findOneAndUpdate(
+        { userId, widgetId, integrationSlug: slug },
+        { connectionId: connection._id, enabled: true, enabledActions },
+        { upsert: true, new: true }
+      );
+
+      return {
+        success: true,
+        message: `${plugin.manifest.name} attached to widget with actions: ${enabledActions.join(', ')}`,
+      };
+    },
+  },
+  {
+    name: 'execute_integration_action',
+    description: 'Execute an action on a connected integration (e.g., create a contact in HubSpot).',
+    parameters: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'Integration slug' },
+        action: { type: 'string', description: 'Action ID (e.g., "createContact")' },
+        params: { type: 'string', description: 'JSON object of action parameters' },
+        widgetId: { type: 'string', description: 'Widget client ID for auth validation' },
+      },
+      required: ['slug', 'action', 'widgetId'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      const slug = args.slug as string;
+      const action = args.action as string;
+      const widgetId = args.widgetId as string;
+      const userId = ctx.userId;
+      if (!userId) return { success: false, error: 'No user context available' };
+
+      let params: Record<string, unknown> = {};
+      try {
+        params = JSON.parse((args.params as string) || '{}');
+      } catch {
+        params = {};
+      }
+
+      const { pluginRegistry } = await import('@/lib/integrations/core/PluginRegistry');
+      const result = await pluginRegistry.executeAction(slug, action, params, userId, widgetId);
+      return result;
+    },
+  },
+  {
+    name: 'check_integration_health',
+    description: "Check the health status of a user's connected integration.",
+    parameters: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'Integration slug to check' },
+      },
+      required: ['slug'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      const slug = args.slug as string;
+      const userId = ctx.userId;
+      if (!userId) return { success: false, error: 'No user context available' };
+
+      const { default: connectDB } = await import('@/lib/mongodb');
+      const { default: Integration } = await import('@/models/Integration');
+
+      await connectDB();
+      const connection = await Integration.findOne({ userId, provider: slug })
+        .select('status lastHealthCheck lastError aiDiagnostic')
+        .lean();
+      if (!connection) return { success: false, error: `No connection found for "${slug}"` };
+
+      return {
+        success: true,
+        slug,
+        status: connection.status,
+        lastHealthCheck: connection.lastHealthCheck,
+        lastError: connection.lastError,
+        aiDiagnostic: connection.aiDiagnostic,
+      };
+    },
+  },
 ];
