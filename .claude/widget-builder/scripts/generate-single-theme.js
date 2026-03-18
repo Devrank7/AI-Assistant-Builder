@@ -269,8 +269,6 @@ import { Widget } from './components/Widget';
 import './index.css';
 
 window.__WIDGET_CONFIG__ = __WIDGET_CONFIG__;
-// Store Widget component on window so re-injected scripts always use the LATEST version
-window.__WIDGET_COMPONENT__ = Widget;
 
 class AIChatWidget extends HTMLElement {
     constructor() {
@@ -296,9 +294,7 @@ ${fontInject}
         this.shadowRoot.appendChild(styleSheet);
         this.shadowRoot.appendChild(container);
 
-        // Use window.__WIDGET_COMPONENT__ — always the latest version from the most recent script load
-        const WidgetComponent = window.__WIDGET_COMPONENT__ || Widget;
-        render(h(WidgetComponent, { config: window.__WIDGET_CONFIG__ }), container);
+        render(h(Widget, { config: window.__WIDGET_CONFIG__ }), container);
     }
 
     disconnectedCallback() {
@@ -1940,39 +1936,53 @@ const srcDir = path.join(CLIENTS_DIR, clientId, 'src');
 const compDir = path.join(srcDir, 'components');
 fs.mkdirSync(compDir, { recursive: true });
 
-if (widgetType === 'ai_chat') {
-    fs.writeFileSync(path.join(srcDir, 'index.css'), genCSS(c));
-    fs.writeFileSync(path.join(srcDir, 'main.jsx'), genMainJSX(c));
-    fs.writeFileSync(path.join(compDir, 'Widget.jsx'), genWidget(c));
-    fs.writeFileSync(path.join(compDir, 'ChatMessage.jsx'), genChatMessage(c));
-    fs.writeFileSync(path.join(compDir, 'QuickReplies.jsx'), genQuickReplies(c));
-    fs.writeFileSync(path.join(compDir, 'MessageFeedback.jsx'), genFeedback(c));
-    fs.writeFileSync(path.join(compDir, 'RichBlocks.jsx'), genRichBlocks(c));
+// NOTE: main.jsx is NEVER written to client directories.
+// The shared src/main.jsx contains critical fixes (Shadow DOM cleanup,
+// localStorage cleanup) that must not be overwritten. build.js protects it during client src copy.
 
-    console.log(`✅ ${clientId}: 7 themed source files generated from theme.json`);
+if (widgetType === 'ai_chat') {
+    // Always regenerate CSS (contains theme colors that change with modify_design)
+    fs.writeFileSync(path.join(srcDir, 'index.css'), genCSS(c));
+
+    // Only generate JSX files if they DON'T already exist.
+    // If they exist, they may have been customized by modify_widget_code (e.g. mic button removed).
+    // Overwriting them would lose those customizations.
+    const jsxFiles = [
+        [path.join(compDir, 'Widget.jsx'), () => genWidget(c)],
+        [path.join(compDir, 'ChatMessage.jsx'), () => genChatMessage(c)],
+        [path.join(compDir, 'QuickReplies.jsx'), () => genQuickReplies(c)],
+        [path.join(compDir, 'MessageFeedback.jsx'), () => genFeedback(c)],
+        [path.join(compDir, 'RichBlocks.jsx'), () => genRichBlocks(c)],
+    ];
+
+    let generated = 0;
+    let skipped = 0;
+    for (const [filePath, generator] of jsxFiles) {
+        if (fs.existsSync(filePath)) {
+            skipped++;
+            console.log(`   ⏭ ${path.basename(filePath)} (exists — preserving custom code)`);
+        } else {
+            fs.writeFileSync(filePath, generator());
+            generated++;
+            console.log(`   → ${filePath}`);
+        }
+    }
+
+    console.log(`✅ ${clientId}: ${generated + 1} files generated, ${skipped} preserved`);
     console.log(`   → ${srcDir}/index.css`);
-    console.log(`   → ${srcDir}/main.jsx`);
-    console.log(`   → ${compDir}/Widget.jsx`);
-    console.log(`   → ${compDir}/ChatMessage.jsx`);
-    console.log(`   → ${compDir}/QuickReplies.jsx`);
-    console.log(`   → ${compDir}/MessageFeedback.jsx`);
-    console.log(`   → ${compDir}/RichBlocks.jsx`);
+    console.log(`   (main.jsx is shared — not generated per client)`);
 } else if (widgetType === 'smart_faq') {
     fs.writeFileSync(path.join(srcDir, 'index.css'), genFaqCSS(c));
-    fs.writeFileSync(path.join(srcDir, 'main.jsx'), genFaqMainJSX(c));
 
-    console.log(`✅ ${clientId}: 2 themed source files generated for smart_faq from theme.json`);
+    console.log(`✅ ${clientId}: 1 themed source file generated for smart_faq from theme.json`);
     console.log(`   → ${srcDir}/index.css`);
-    console.log(`   → ${srcDir}/main.jsx`);
-    console.log(`   (SmartFaq.jsx is shared from src/components/SmartFaq.jsx)`);
+    console.log(`   (main.jsx + SmartFaq.jsx are shared)`);
 } else if (widgetType === 'lead_form') {
     fs.writeFileSync(path.join(srcDir, 'index.css'), genFormCSS(c));
-    fs.writeFileSync(path.join(srcDir, 'main.jsx'), genFormMainJSX(c));
 
-    console.log(`✅ ${clientId}: 2 themed source files generated for lead_form from theme.json`);
+    console.log(`✅ ${clientId}: 1 themed source file generated for lead_form from theme.json`);
     console.log(`   → ${srcDir}/index.css`);
-    console.log(`   → ${srcDir}/main.jsx`);
-    console.log(`   (LeadForm.jsx is shared from src/components/LeadForm.jsx)`);
+    console.log(`   (main.jsx + LeadForm.jsx are shared)`);
 }
 
 console.log(`\nNext: node .agent/widget-builder/scripts/build.js ${clientId}`);
