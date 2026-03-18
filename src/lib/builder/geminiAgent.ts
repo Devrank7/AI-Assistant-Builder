@@ -1,5 +1,7 @@
 // src/lib/builder/geminiAgent.ts
-import { GoogleGenerativeAI, SchemaType, type Part, type Content } from '@google/generative-ai';
+// Uses @google/genai (new SDK) which automatically handles thought_signatures
+// for Gemini 3.1 Pro thinking model function calling
+import { GoogleGenAI, Type } from '@google/genai';
 import type { ToolRegistry, ToolContext } from './toolRegistry';
 import type { SSEEvent, AgentToolName } from './types';
 
@@ -19,26 +21,16 @@ export interface AgentRunOptions {
   write: (event: SSEEvent) => void;
 }
 
-/**
- * Map our ToolRegistry parameter types ("string", "number", etc.)
- * to Gemini's SchemaType enum (STRING, NUMBER, etc.)
- */
-function mapSchemaType(type: string): SchemaType {
+/** Map our tool parameter types to the SDK's Type enum */
+function mapType(type: string): Type {
   switch (type.toLowerCase()) {
-    case 'string':
-      return SchemaType.STRING;
-    case 'number':
-      return SchemaType.NUMBER;
-    case 'integer':
-      return SchemaType.INTEGER;
-    case 'boolean':
-      return SchemaType.BOOLEAN;
-    case 'array':
-      return SchemaType.ARRAY;
-    case 'object':
-      return SchemaType.OBJECT;
-    default:
-      return SchemaType.STRING;
+    case 'string': return Type.STRING;
+    case 'number': return Type.NUMBER;
+    case 'integer': return Type.INTEGER;
+    case 'boolean': return Type.BOOLEAN;
+    case 'array': return Type.ARRAY;
+    case 'object': return Type.OBJECT;
+    default: return Type.STRING;
   }
 }
 
@@ -48,22 +40,22 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
 }> {
   const { systemPrompt, toolRegistry, toolContext, write } = options;
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
   // Convert ToolRegistry to Gemini FunctionDeclarations
   const functionDeclarations = toolRegistry.getAll().map((tool) => ({
     name: tool.name,
     description: tool.description,
     parameters: {
-      type: SchemaType.OBJECT,
+      type: Type.OBJECT,
       properties: Object.fromEntries(
         Object.entries(tool.parameters.properties).map(([key, prop]) => [
           key,
           {
-            type: mapSchemaType(prop.type),
+            type: mapType(prop.type),
             description: prop.description,
             ...(prop.enum ? { enum: prop.enum } : {}),
-            ...(prop.items ? { items: { type: mapSchemaType(prop.items.type) } } : {}),
+            ...(prop.items ? { items: { type: mapType(prop.items.type) } } : {}),
           },
         ])
       ),
@@ -71,115 +63,91 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
     },
   }));
 
-  const model = genAI.getGenerativeModel({
-    model: MODEL_ID,
-    systemInstruction: systemPrompt,
-    // @ts-expect-error — Gemini SDK Schema type mismatch with dynamic tool declarations
-    tools: [{ functionDeclarations }],
-    generationConfig: {
-      maxOutputTokens: 2048,
-      temperature: 0.3,
-      topP: 0.8,
-    },
-  });
-
-  // Build conversation history manually (we manage it ourselves instead of
-  // relying on chat.sendMessageStream which has unreliable history tracking)
-  const contents: Content[] = [];
-
-  // Add previous conversation messages (skip the last — it's the new user message)
+  // Build conversation history
   const allMessages = options.messages;
   const lastMessage = allMessages[allMessages.length - 1];
   const historyMessages = allMessages.slice(0, -1);
 
-  for (const msg of historyMessages) {
-    contents.push({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }],
-    });
-  }
+  const history = historyMessages.map((msg) => ({
+    role: msg.role === 'assistant' ? 'model' as const : 'user' as const,
+    parts: [{ text: msg.content }],
+  }));
 
-  // Add the latest user message
-  contents.push({ role: 'user', parts: [{ text: lastMessage.content }] });
+  // Create chat — the new SDK handles thought_signatures automatically
+  const chat = ai.chats.create({
+    model: MODEL_ID,
+    config: {
+      systemInstruction: systemPrompt,
+      tools: [{ functionDeclarations }],
+      maxOutputTokens: 65536,
+      temperature: 0.3,
+      topP: 0.8,
+    },
+    history,
+  });
 
   let fullAssistantText = '';
   const toolCallsMade: string[] = [];
   let loopCount = 0;
 
+  // First message is the user's text
+  let nextSendArgs: { message: string } | { message: string; parts: unknown[] } = {
+    message: lastMessage.content,
+  };
+
   while (loopCount < MAX_TOOL_LOOPS) {
     loopCount++;
 
-    // Call Gemini with full history (streaming for real-time text output)
-    const streamResult = await model.generateContentStream({ contents });
-    const functionCalls: { name: string; args: Record<string, unknown> }[] = [];
-    const modelParts: Part[] = [];
-
-    // Process stream chunks as they arrive
-    for await (const chunk of streamResult.stream) {
-      const parts = chunk.candidates?.[0]?.content?.parts || [];
-      for (const part of parts) {
-        if (part.text) {
-          fullAssistantText += part.text;
-          write({ type: 'text', content: part.text });
-        }
-        if (part.functionCall) {
-          functionCalls.push({
-            name: part.functionCall.name,
-            args: (part.functionCall.args as Record<string, unknown>) || {},
-          });
-        }
-        // Preserve the FULL part object (includes thought_signature, thought, etc.)
-        // Gemini requires these fields when replaying history with function calls
-        modelParts.push(part as Part);
-      }
+    // BUG-002 fix: error recovery for Gemini API calls
+    let response;
+    try {
+      response = await chat.sendMessage(nextSendArgs);
+    } catch (err) {
+      const errMsg = (err as Error).message || 'Gemini API error';
+      console.error('[geminiAgent] sendMessage error:', errMsg);
+      write({ type: 'error', message: errMsg, recoverable: true });
+      break;
     }
 
-    // Finalize stream and get the aggregated response — use its parts for history
-    // as they contain complete metadata (thought_signature etc.) that streaming
-    // chunks may deliver incrementally
-    const finalResponse = await streamResult.response;
-    const finalParts = finalResponse.candidates?.[0]?.content?.parts;
-
-    // Record the model's response in our manual history
-    // Prefer the finalized parts over streamed parts for complete metadata
-    if (finalParts && finalParts.length > 0) {
-      contents.push({ role: 'model', parts: finalParts as Part[] });
-    } else if (modelParts.length > 0) {
-      contents.push({ role: 'model', parts: modelParts });
+    // Extract text
+    const text = response.text;
+    if (text) {
+      fullAssistantText += text;
+      write({ type: 'text', content: text });
     }
 
-    // If no function calls, we're done
+    // Extract function calls
+    const functionCalls = response.functionCalls || [];
     if (functionCalls.length === 0) break;
 
-    // Execute each function call and build response parts
-    const functionResponseParts: Part[] = [];
+    // Execute each function call
+    const functionResponseParts: unknown[] = [];
 
     for (const fc of functionCalls) {
-      write({ type: 'tool_start', tool: fc.name as AgentToolName, args: fc.args });
-      toolCallsMade.push(fc.name);
+      const toolName = fc.name || 'unknown';
+      write({ type: 'tool_start', tool: toolName as AgentToolName, args: (fc.args || {}) as Record<string, unknown> });
+      toolCallsMade.push(toolName);
 
       let toolResult: Record<string, unknown>;
       try {
-        toolResult = await toolRegistry.execute(fc.name, fc.args, toolContext);
+        toolResult = await toolRegistry.execute(toolName, (fc.args as Record<string, unknown>) || {}, toolContext);
       } catch (err) {
         toolResult = { success: false, error: (err as Error).message };
         write({ type: 'error', message: (err as Error).message, recoverable: true });
       }
 
-      write({ type: 'tool_result', tool: fc.name as AgentToolName, result: toolResult });
+      write({ type: 'tool_result', tool: toolName as AgentToolName, result: toolResult });
 
       functionResponseParts.push({
         functionResponse: {
-          name: fc.name,
+          name: toolName,
           response: toolResult,
         },
       });
     }
 
-    // Add function responses as the next user turn in our history
-    contents.push({ role: 'user', parts: functionResponseParts });
-
-    // Next iteration will call generateContentStream with the updated history
+    // Send function responses in next iteration
+    nextSendArgs = { message: '', parts: functionResponseParts };
   }
 
   return { assistantText: fullAssistantText, toolCallsMade };

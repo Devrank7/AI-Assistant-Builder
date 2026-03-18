@@ -29,10 +29,12 @@ export function createSSEStream(
         await handler(write);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
-        write({ type: 'error', message, recoverable: false });
+        try { write({ type: 'error', message, recoverable: false }); } catch { /* controller may be closed */ }
       } finally {
-        write({ type: 'done' });
-        controller.close();
+        try {
+          write({ type: 'done' });
+          controller.close();
+        } catch { /* controller may already be closed */ }
       }
     },
   });

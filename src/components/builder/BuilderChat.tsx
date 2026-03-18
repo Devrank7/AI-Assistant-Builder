@@ -694,7 +694,7 @@ export default function BuilderChat({
                         fontFamily: "'Outfit', sans-serif",
                       }}
                     >
-                      {s.category.replace('_', ' ')}
+                      {(s.category || 'suggestion').replace('_', ' ')}
                     </span>
                     <span
                       className="text-sm font-medium"
@@ -710,7 +710,7 @@ export default function BuilderChat({
                     {s.description}
                   </p>
                   <div className="flex gap-2">
-                    {s.actions.map((a, i) => (
+                    {(s.actions || []).map((a, i) => (
                       <button
                         key={i}
                         onClick={() => {

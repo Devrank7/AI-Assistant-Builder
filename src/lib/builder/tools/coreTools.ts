@@ -13,6 +13,10 @@ import { CODEGEN_SYSTEM_PROMPT, buildCodegenUserPrompt } from '../codegenPrompt'
 import type { SiteProfile } from '../types';
 import path from 'path';
 import fs from 'fs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 export const coreTools: ToolDefinition[] = [
   {
@@ -31,6 +35,11 @@ export const coreTools: ToolDefinition[] = [
       const url = args.url as string;
       ctx.write({ type: 'progress', stage: 'analysis', status: 'active' });
       const profile = await analyzeSite(url);
+
+      if (!profile || (!profile.pages?.length && !profile.businessName)) {
+        ctx.write({ type: 'progress', stage: 'analysis', status: 'complete' });
+        return { success: false, error: `Could not extract any meaningful data from ${url}. The site may block crawlers or require JavaScript rendering.` };
+      }
 
       // Save profile to session for crawl_knowledge and playground
       try {
@@ -119,9 +128,8 @@ export const coreTools: ToolDefinition[] = [
       const style = prefs.style || 'glass';
 
       // 3. Call Gemini to generate theme.json
-      const { GoogleGenerativeAI } = await import('@google/generative-ai');
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro-preview' });
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
       const themePrompt = `Generate a complete theme.json for a chat widget based on this real website analysis:
 - Business: "${businessName}" (${businessType})
@@ -170,9 +178,12 @@ All colors must be harmonious, derived from the site's actual colors (${primaryC
 
       let themeJson: Record<string, unknown>;
       try {
-        const result = await model.generateContent(themePrompt);
-        const text = result.response
-          .text()
+        const result = await ai.models.generateContent({
+          model: 'gemini-3.1-pro-preview',
+          contents: themePrompt,
+          config: { temperature: 0.3 },
+        });
+        const text = (result.text || '')
           .trim()
           .replace(/^```(?:json)?[\s\n]*/m, '')
           .replace(/[\s\n]*```$/m, '')
@@ -441,9 +452,8 @@ All colors must be harmonious, derived from the site's actual colors (${primaryC
       const fullBundle = readWidgetCode(clientId);
 
       ctx.write({ type: 'progress', message: 'Generating modified code...' });
-      const { GoogleGenerativeAI } = await import('@google/generative-ai');
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro' });
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
       const userPrompt = buildCodegenUserPrompt({
         currentCode,
@@ -454,12 +464,12 @@ All colors must be harmonious, derived from the site's actual colors (${primaryC
 
       let generatedCode: string;
       try {
-        const result = await model.generateContent({
+        const result = await ai.models.generateContent({
+          model: 'gemini-3.1-pro-preview',
           contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-          systemInstruction: CODEGEN_SYSTEM_PROMPT,
+          config: { systemInstruction: CODEGEN_SYSTEM_PROMPT, temperature: 0.3 },
         });
-        generatedCode = result.response
-          .text()
+        generatedCode = (result.text || '')
           .trim()
           .replace(/^```(?:jsx|javascript|js)?\n/m, '')
           .replace(/\n```$/m, '')
@@ -471,14 +481,13 @@ All colors must be harmonious, derived from the site's actual colors (${primaryC
       ctx.write({ type: 'progress', message: 'Writing and building...' });
       writeWidgetFile(clientId, file, generatedCode);
 
-      const { execSync } = await import('child_process');
       const buildScript = path.join(process.cwd(), '.claude/widget-builder/scripts/build.js');
 
       let buildSuccess = false;
       let buildError = '';
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          execSync(`node "${buildScript}" "${clientId}"`, { cwd: process.cwd(), timeout: 60000, stdio: 'pipe' });
+          await execAsync(`node "${buildScript}" "${clientId}"`, { cwd: process.cwd(), timeout: 60000 });
           buildSuccess = true;
           break;
         } catch (err) {
@@ -492,12 +501,12 @@ All colors must be harmonious, derived from the site's actual colors (${primaryC
                 themeJson: fullBundle['theme.json'],
                 widgetConfig: fullBundle['widget.config.json'],
               });
-              const retryResult = await model.generateContent({
+              const retryResult = await ai.models.generateContent({
+                model: 'gemini-3.1-pro-preview',
                 contents: [{ role: 'user', parts: [{ text: retryPrompt }] }],
-                systemInstruction: CODEGEN_SYSTEM_PROMPT,
+                config: { systemInstruction: CODEGEN_SYSTEM_PROMPT, temperature: 0.3 },
               });
-              generatedCode = retryResult.response
-                .text()
+              generatedCode = (retryResult.text || '')
                 .trim()
                 .replace(/^```(?:jsx|javascript|js)?\n/m, '')
                 .replace(/\n```$/m, '')
@@ -625,9 +634,8 @@ All colors must be harmonious, derived from the site's actual colors (${primaryC
       const style = (args.style as string) || 'glass';
 
       // Use Gemini to generate a complete theme.json
-      const { GoogleGenerativeAI } = await import('@google/generative-ai');
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro-preview' });
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
       const themePrompt = `Generate a complete theme.json for a chat widget with these specs:
 - Business: "${businessName}" (${industry})
@@ -672,9 +680,12 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
 
       let themeJson: Record<string, unknown>;
       try {
-        const result = await model.generateContent(themePrompt);
-        const text = result.response
-          .text()
+        const result = await ai.models.generateContent({
+          model: 'gemini-3.1-pro-preview',
+          contents: themePrompt,
+          config: { temperature: 0.3 },
+        });
+        const text = (result.text || '')
           .trim()
           .replace(/^```(?:json)?[\s\n]*/m, '')
           .replace(/[\s\n]*```$/m, '')

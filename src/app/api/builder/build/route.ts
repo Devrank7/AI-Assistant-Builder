@@ -1,7 +1,10 @@
 import { NextRequest } from 'next/server';
-import { execSync } from 'child_process';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+
+const execAsync = promisify(exec);
 import connectDB from '@/lib/mongodb';
 import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
@@ -95,17 +98,15 @@ export async function POST(request: NextRequest) {
 
       // 4. Run generate-single-theme.js
       const generateScript = path.join(builderRoot, 'scripts', 'generate-single-theme.js');
-      execSync(`node "${generateScript}" "${clientId}"`, {
+      await execAsync(`node "${generateScript}" "${clientId}"`, {
         cwd: builderRoot,
-        stdio: 'pipe',
         timeout: 30000,
       });
 
       // 5. Run build.js
       const buildScript = path.join(builderRoot, 'scripts', 'build.js');
-      execSync(`node "${buildScript}" "${clientId}"`, {
+      await execAsync(`node "${buildScript}" "${clientId}"`, {
         cwd: builderRoot,
-        stdio: 'pipe',
         timeout: 60000,
       });
 
@@ -114,9 +115,9 @@ export async function POST(request: NextRequest) {
 
       const distScript = path.join(builderRoot, 'dist', 'script.js');
       if (fs.existsSync(distScript)) {
-        fs.copyFileSync(distScript, path.join(quickwidgetsDir, 'script.js'));
-        // Save as v1 for version history
+        // Save version before overwriting deployed script (so rollback has the previous state)
         saveVersion(clientId, 'Initial build', 'build_widget');
+        fs.copyFileSync(distScript, path.join(quickwidgetsDir, 'script.js'));
       } else {
         throw new Error('Build completed but script.js not found in dist/');
       }
@@ -164,7 +165,7 @@ export async function POST(request: NextRequest) {
           clientType: 'quick',
           userId: auth.userId,
           username: session.widgetName || clientId,
-          email: auth.user.email,
+          email: auth.user?.email || '',
           website: (cleanThemeJson.domain as string) || '',
           folderPath: `quickwidgets/${clientId}`,
           isActive: true,
