@@ -1,5 +1,5 @@
 {
-  "current": 20,
+  "current": 22,
   "versions": [
     {
       "v": 1,
@@ -120,6 +120,18 @@
       "date": "2026-03-18T16:11:54.956Z",
       "description": "удалить кнопку в виджете, которая касается вложения фотографий",
       "tool": "modify_widget_code"
+    },
+    {
+      "v": 21,
+      "date": "2026-03-18T16:47:15.463Z",
+      "description": "Окей, ты можешь убрать кнопку микрофона в виджете?",
+      "tool": "modify_widget_code"
+    },
+    {
+      "v": 22,
+      "date": "2026-03-18T16:50:59.545Z",
+      "description": "Initial build",
+      "tool": "build_widget"
     }
   ]
 }

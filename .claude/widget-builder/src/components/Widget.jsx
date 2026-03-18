@@ -22,9 +22,11 @@ export function Widget({ config }) {
     const { messages, sendMessage, isLoading, isTyping, isOffline, retryLastMessage, clearMessages, sessionId, isReturningUser } =
         useChat(config);
     const [inputValue, setInputValue] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
     const [expandedImage, setExpandedImage] = useState(null);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     // Typewriter welcome
     const rawWelcome = config.welcomeMessage || config.bot?.greeting || '';
@@ -230,12 +232,30 @@ export function Widget({ config }) {
       return () => window.removeEventListener('message', handler);
     }, []);
 
+    const handleImageSelect = useCallback((e) => {
+        const file = e.target.files?.[0];
+        if (!file || !file.type.startsWith('image/') || file.size > 10 * 1024 * 1024) return;
+        setSelectedImage({ file, previewUrl: URL.createObjectURL(file) });
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    }, []);
+
+    const removeSelectedImage = useCallback(() => {
+        if (selectedImage?.previewUrl) URL.revokeObjectURL(selectedImage.previewUrl);
+        setSelectedImage(null);
+    }, [selectedImage]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!inputValue.trim()) return;
-        const text = inputValue.trim();
+        if (!inputValue.trim() && !selectedImage) return;
+        const text = inputValue.trim() || (selectedImage ? 'Analyze this image' : '');
         detectLang(text);
-        sendMessage(text);
+        if (selectedImage) {
+            sendMessage(text, undefined, selectedImage.file);
+            URL.revokeObjectURL(selectedImage.previewUrl);
+            setSelectedImage(null);
+        } else {
+            sendMessage(text);
+        }
         setInputValue('');
         if (inputRef.current) inputRef.current.style.height = 'auto';
     };
@@ -290,9 +310,9 @@ export function Widget({ config }) {
         <>
             {/* Mobile swipe handle */}
             {isMobile && (
-                <div className="flex justify-center pt-2 pb-0.5 cursor-grab active:cursor-grabbing bg-[#0f1117]"
+                <div className="flex justify-center pt-2 pb-0.5 cursor-grab active:cursor-grabbing bg-white"
                     onTouchStart={handleSwipeStart} onTouchMove={handleSwipeMove} onTouchEnd={handleSwipeEnd}>
-                    <div className="w-10 h-1 rounded-full bg-[#2a2d35]" />
+                    <div className="w-10 h-1 rounded-full bg-gray-300" />
                 </div>
             )}
 
@@ -324,23 +344,23 @@ export function Widget({ config }) {
                             <MoreVertical size={15} />
                         </button>
                         {showMenu && (
-                            <div className="absolute right-0 top-full mt-1.5 w-[168px] rounded-2xl shadow-xl border overflow-hidden z-50 bg-[#1a1d23]/95 border-[#2a2d35]" style={{ backdropFilter: 'blur(16px)' }}>
+                            <div className="absolute right-0 top-full mt-1.5 w-[168px] rounded-2xl shadow-xl border overflow-hidden z-50 bg-white/95 border-gray-200/80" style={{ backdropFilter: 'blur(16px)' }}>
                                 <button onClick={() => { clearMessages(); setShowMenu(false); }}
-                                    className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors text-[#ffffff] hover:bg-[#1e212b]">
+                                    className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors text-gray-700 hover:bg-gray-50">
                                     <Trash2 size={13} /> {uiStrings.newChat}
                                 </button>
                                 <button onClick={() => { toggleMute(); setShowMenu(false); }}
-                                    className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors text-[#ffffff] hover:bg-[#1e212b]">
+                                    className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors text-gray-700 hover:bg-gray-50">
                                     {isMuted ? <Volume2 size={13} /> : <VolumeX size={13} />} {isMuted ? uiStrings.unmute : uiStrings.mute}
                                 </button>
                                 <button onClick={() => { cycleFontSize(); }}
-                                    className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center justify-between transition-colors text-[#ffffff] hover:bg-[#1e212b]">
+                                    className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center justify-between transition-colors text-gray-700 hover:bg-gray-50">
                                     <span className="flex items-center gap-2.5"><Type size={13} /> {uiStrings.fontSize}</span>
                                     <span className="text-[10px] opacity-60 font-bold tracking-wider">{chatFontSize.toUpperCase()}</span>
                                 </button>
                                 {messages.length > 0 && (
                                     <button onClick={exportChat}
-                                        className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors text-[#ffffff] hover:bg-[#1e212b]">
+                                        className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors text-gray-700 hover:bg-gray-50">
                                         <Download size={13} /> {uiStrings.exportChat}
                                     </button>
                                 )}
@@ -355,19 +375,19 @@ export function Widget({ config }) {
 
             {/* CONTACT BAR */}
             {contacts && Object.keys(contacts).length > 0 && (
-                <div className="flex items-center gap-1.5 px-4 py-1.5 border-b overflow-x-auto scrollbar-hide bg-[#1a1d23]/80 border-[#2a2d35]">
+                <div className="flex items-center gap-1.5 px-4 py-1.5 border-b overflow-x-auto scrollbar-hide bg-gray-50/60 border-gray-100">
                     {contacts.phone && (
-                        <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-[#9ca3af] hover:text-[#ffffff] hover:bg-[#1e212b]" target="_blank" rel="noopener">
+                        <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#3b82f6] hover:bg-white" target="_blank" rel="noopener">
                             <Phone size={12} /> {uiStrings.call}
                         </a>
                     )}
                     {contacts.email && (
-                        <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-[#9ca3af] hover:text-[#ffffff] hover:bg-[#1e212b]">
+                        <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#3b82f6] hover:bg-white">
                             <Mail size={12} /> Email
                         </a>
                     )}
                     {contacts.website && (
-                        <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-[#9ca3af] hover:text-[#ffffff] hover:bg-[#1e212b]">
+                        <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap text-gray-500 hover:text-[#3b82f6] hover:bg-white">
                             <Globe size={12} /> {uiStrings.website}
                         </a>
                     )}
@@ -376,11 +396,11 @@ export function Widget({ config }) {
 
             {/* CONTEXT BANNER */}
             {pageTitle && !contextDismissed && messages.length === 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 border-b bg-[#3b82f6]/10 border-[#2a2d35] text-[#ffffff]">
+                <div className="flex items-center gap-2 px-4 py-2 border-b bg-[#3b82f6]/5 border-[#3b82f6]/10 text-gray-700">
                     <Globe size={13} className="text-[#3b82f6]" />
                     <span className="flex-1 text-[11.5px] font-medium truncate">{uiStrings.contextBanner}: <strong>{pageTitle}</strong></span>
                     <button onClick={() => { setContextDismissed(true); try { sessionStorage.setItem('aw-ctx-' + config.clientId, '1'); } catch {} }}
-                        className="p-0.5 text-[#6b7280] hover:text-[#9ca3af] transition-colors">
+                        className="p-0.5 text-gray-400 hover:text-gray-600 transition-colors">
                         <X size={12} />
                     </button>
                 </div>
@@ -395,9 +415,9 @@ export function Widget({ config }) {
                     <div key={idx}>
                         {shouldShowSeparator(idx) && msg.timestamp && (
                             <div className="flex items-center gap-3 my-3">
-                                <div className="flex-1 h-px bg-[#2a2d35]/50" />
-                                <span className="text-[10px] font-medium text-[#6b7280] whitespace-nowrap">{getDayLabel(msg.timestamp)}</span>
-                                <div className="flex-1 h-px bg-[#2a2d35]/50" />
+                                <div className="flex-1 h-px bg-gray-200/70" />
+                                <span className="text-[10px] font-medium text-gray-400 whitespace-nowrap">{getDayLabel(msg.timestamp)}</span>
+                                <div className="flex-1 h-px bg-gray-200/70" />
                             </div>
                         )}
                         <ChatMessage
@@ -420,7 +440,7 @@ export function Widget({ config }) {
                                 className="flex flex-wrap gap-1.5 ml-7 sm:ml-9 mt-2 mb-1">
                                 {msg.suggestions.map((s, si) => (
                                     <button key={si} onClick={() => { detectLang(s); sendMessage(s); }}
-                                        className="px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-200 cursor-pointer border-[#2a2d35] bg-[#1a1d23] text-[#ffffff] hover:bg-[#1e212b] hover:border-[#3b82f6]">
+                                        className="px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-200 cursor-pointer border-[#424242] bg-[#f1f5f9] text-[#111827] hover:bg-[#3b82f6] hover:border-[#3b82f6]">
                                         {s}
                                     </button>
                                 ))}
@@ -430,12 +450,12 @@ export function Widget({ config }) {
                 ))}
                 {isTyping && (
                     <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
-                        <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#424242] to-[#616161] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#0f1117]/50">
-                            <Sparkles size={13} className="text-[#ffffff]" />
+                        <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#424242] to-[#616161] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#e5e7eb]/50">
+                            <Sparkles size={13} className="text-[#111827]" />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-[11px] font-medium text-[#9ca3af] ml-1">{config.botName || 'AI'} {uiStrings.isTyping}</span>
-                            <div className="bg-[#1a1d23] border border-[#2a2d35] rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
+                            <span className="text-[11px] font-medium text-gray-400 ml-1">{config.botName || 'AI'} {uiStrings.isTyping}</span>
+                            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
                                 <span className="typing-dot" />
                                 <span className="typing-dot" />
                                 <span className="typing-dot" />
@@ -447,7 +467,7 @@ export function Widget({ config }) {
                 {hasNewMessages && !isAtBottom && (
                     <div className="sticky bottom-2 left-0 right-0 flex justify-center z-10">
                         <button onClick={scrollToBottom}
-                            className="new-msg-pill px-3.5 py-1.5 rounded-full text-[12px] font-semibold shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:shadow-xl bg-[#1a1d23] text-[#ffffff] border border-[#2a2d35] shadow-black/30">
+                            className="new-msg-pill px-3.5 py-1.5 rounded-full text-[12px] font-semibold shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:shadow-xl bg-white text-gray-700 border border-gray-200 shadow-black/10">
                             <ArrowDown size={12} /> {uiStrings.newMessages}
                         </button>
                     </div>
@@ -455,13 +475,33 @@ export function Widget({ config }) {
                 <div ref={messagesEndRef} />
             </div>
 
+            {/* IMAGE PREVIEW */}
+            <AnimatePresence>
+                {selectedImage && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-4 overflow-hidden bg-white border-t border-gray-50">
+                        <div className="relative inline-block my-2.5">
+                            <img src={selectedImage.previewUrl} alt="" className="h-16 w-auto rounded-xl border border-gray-200 object-cover shadow-sm" />
+                            <button onClick={removeSelectedImage} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors">
+                                <X size={11} />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* INPUT */}
-            <div className="px-4 pt-2 pb-3 border-t border-[#2a2d35] bg-[#0f1117] space-y-1.5 safe-area-bottom">
+            <div className="px-4 pt-2 pb-3 border-t border-gray-100 bg-white space-y-1.5 safe-area-bottom">
                 {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                    <button type="button" onClick={() => fileInputRef.current?.click()}
+                        className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-[#3b82f6] bg-[#ffffff] text-[#3b82f6] shadow-sm' : 'border-gray-200 text-gray-400 hover:text-[#1e40af] hover:border-[#1e40af] hover:bg-[#2563eb]'}`}
+                        aria-label="Upload photo">
+                        <ImagePlus size={16} />
+                    </button>
                     {voiceSupported && config.features?.voiceInput !== false && (
                         <button type="button" onClick={handleVoiceToggle}
-                            className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#3b82f6] bg-[#1e212b] text-[#3b82f6] shadow-sm animate-pulse' : 'border-[#2a2d35] text-[#9ca3af] hover:text-[#1e40af] hover:border-[#1e40af] hover:bg-[#2563eb]'}`}
+                            className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#3b82f6] bg-[#ffffff] text-[#3b82f6] shadow-sm animate-pulse' : 'border-gray-200 text-gray-400 hover:text-[#1e40af] hover:border-[#1e40af] hover:bg-[#2563eb]'}`}
                             aria-label={isListening ? 'Stop recording' : 'Voice input'}>
                             {isListening ? <MicOff size={16} /> : <Mic size={16} />}
                         </button>
@@ -469,10 +509,10 @@ export function Widget({ config }) {
                     <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                         placeholder={uiStrings.placeholder}
                         rows={1}
-                        className="flex-1 min-w-0 bg-[#1e212b] text-[#ffffff] placeholder-[#9ca3af] rounded-xl py-2.5 pl-3.5 pr-3.5 border border-[#2a2d35] focus:outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6] focus:bg-[#616161] transition-all resize-none text-[13.5px] leading-relaxed"
+                        className="flex-1 min-w-0 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl py-2.5 pl-3.5 pr-3.5 border border-gray-200 focus:outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6] focus:bg-white transition-all resize-none text-[13.5px] leading-relaxed"
                         style={{ maxHeight: '100px' }}
                     />
-                    <button type="submit" disabled={!inputValue.trim() || isLoading}
+                    <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
                         className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#3b82f6] text-white flex items-center justify-center hover:bg-[#1e40af] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[#3b82f6]/25">
                         <Send size={16} />
                     </button>
@@ -480,9 +520,9 @@ export function Widget({ config }) {
             </div>
 
             {/* POWERED BY */}
-            <div className="flex justify-center py-1.5 bg-[#0f1117]">
+            <div className="flex justify-center py-1.5 bg-gray-50/50">
                 <a href="https://winbixai.com" target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[10px] font-medium text-[#6b7280] hover:text-[#9ca3af] transition-colors opacity-70 hover:opacity-100">
+                    className="flex items-center gap-1 text-[10px] font-medium text-gray-400 hover:text-gray-500 transition-colors opacity-70 hover:opacity-100">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                     Powered by WinBix AI
                 </a>
@@ -526,8 +566,8 @@ export function Widget({ config }) {
                             exit={isMobile ? { y: '100%' } : { opacity: 0, y: 20, scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 300, damping: isMobile ? 30 : 25 }}
                             className={isMobile
-                                ? 'fixed inset-x-0 bottom-0 flex flex-col bg-[#0f1117] shadow-2xl shadow-black/40 rounded-t-3xl overflow-hidden'
-                                : 'relative w-[85vw] max-w-[370px] h-[60vh] max-h-[540px] sm:w-[370px] sm:h-[540px] rounded-3xl overflow-hidden flex flex-col bg-[#0f1117] shadow-2xl shadow-black/40 border border-[#2a2d35]'}
+                                ? 'fixed inset-x-0 bottom-0 flex flex-col bg-white shadow-2xl shadow-black/15 rounded-t-3xl overflow-hidden'
+                                : 'relative w-[85vw] max-w-[370px] h-[60vh] max-h-[540px] sm:w-[370px] sm:h-[540px] rounded-3xl overflow-hidden flex flex-col bg-white shadow-2xl shadow-black/15 border border-gray-100'}
                             ref={isMobile ? panelRef : undefined}
                             style={isMobile ? { height: '90dvh', maxHeight: '90dvh' } : {}}
                             role="dialog"
@@ -546,11 +586,11 @@ export function Widget({ config }) {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.9 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                            className="max-w-[200px] sm:max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl shadow-black/30 border cursor-pointer relative bg-[#1a1d23] border-[#2a2d35] text-[#ffffff]"
+                            className="max-w-[200px] sm:max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl shadow-black/10 border cursor-pointer relative bg-white border-gray-100 text-gray-700"
                             onClick={() => { dismissNudge(); setIsOpen(true); }}
                         >
                             <button onClick={(e) => { e.stopPropagation(); dismissNudge(); }}
-                                className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-colors bg-[#2a2d35] text-[#9ca3af] hover:bg-[#1e212b]">
+                                className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-colors bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600">
                                 <X size={11} />
                             </button>
                             <p className="text-[12.5px] leading-relaxed pr-2">{nudgeMessage}</p>
@@ -588,7 +628,7 @@ export function Widget({ config }) {
                             </AnimatePresence>
                         </motion.button>
                         {!isOpen && unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#0f1117] shadow-sm pointer-events-none">
+                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-sm pointer-events-none">
                                 {unreadCount}
                             </span>
                         )}

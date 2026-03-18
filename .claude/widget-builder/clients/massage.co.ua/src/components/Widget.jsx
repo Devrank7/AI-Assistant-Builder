@@ -459,13 +459,6 @@ export function Widget({ config }) {
             <div className="px-4 pt-2 pb-3 border-t border-[#2a2d35] bg-[#0f1117] space-y-1.5 safe-area-bottom">
                 {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
-                    {voiceSupported && config.features?.voiceInput !== false && (
-                        <button type="button" onClick={handleVoiceToggle}
-                            className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-[#3b82f6] bg-[#1e212b] text-[#3b82f6] shadow-sm animate-pulse' : 'border-[#2a2d35] text-[#9ca3af] hover:text-[#1e40af] hover:border-[#1e40af] hover:bg-[#2563eb]'}`}
-                            aria-label={isListening ? 'Stop recording' : 'Voice input'}>
-                            {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-                        </button>
-                    )}
                     <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                         placeholder={uiStrings.placeholder}
                         rows={1}
