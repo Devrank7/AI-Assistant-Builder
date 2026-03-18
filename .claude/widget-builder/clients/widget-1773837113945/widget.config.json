@@ -1,0 +1,16 @@
+{
+  "clientId": "widget-1773837113945",
+  "botName": "Студия массажа Михаила Гузь",
+  "welcomeMessage": "Welcome to **Студия массажа Михаила Гузь**! How can I help you?",
+  "inputPlaceholder": "Type your message...",
+  "quickReplies": ["Book Now", "Services & Prices", "Gift Cards"],
+  "avatar": {
+    "type": "initials",
+    "initials": "СТ"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "streaming": true
+  }
+}

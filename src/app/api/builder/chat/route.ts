@@ -99,7 +99,8 @@ export async function POST(request: NextRequest) {
 
         // Update session stage based on tool calls
         if (toolCallsMade.includes('analyze_site')) session.currentStage = 'analysis';
-        if (toolCallsMade.includes('generate_design') || toolCallsMade.includes('select_theme')) session.currentStage = 'design';
+        if (toolCallsMade.includes('generate_design') || toolCallsMade.includes('select_theme'))
+          session.currentStage = 'design';
         if (toolCallsMade.includes('build_deploy')) {
           session.currentStage = 'deploy';
           session.status = 'deployed';
@@ -108,8 +109,29 @@ export async function POST(request: NextRequest) {
           session.knowledgeUploaded = true;
         }
 
-        if (session.status === 'streaming') session.status = 'chatting';
-        await session.save();
+        // Reload session from DB — tools may have updated clientId, stage, etc.
+        const freshSession = await BuilderSession.findById(currentSessionId);
+        if (freshSession) {
+          // Merge: keep messages from our local session, take other fields from DB
+          freshSession.messages = session.messages;
+          if (freshSession.status === 'streaming') freshSession.status = 'chatting';
+          await freshSession.save();
+
+          // Emit widget_ready AFTER all tools complete (build + knowledge + ai-settings)
+          if (freshSession.clientId) {
+            const builtWidget =
+              toolCallsMade.includes('generate_design') ||
+              toolCallsMade.includes('build_deploy') ||
+              toolCallsMade.includes('modify_widget_code') ||
+              toolCallsMade.includes('rollback');
+            if (builtWidget) {
+              write({ type: 'widget_ready', clientId: freshSession.clientId });
+            }
+          }
+        } else {
+          if (session.status === 'streaming') session.status = 'chatting';
+          await session.save();
+        }
 
         write({ type: 'session', sessionId: currentSessionId });
       } finally {

@@ -16,6 +16,7 @@ interface StreamState {
   messages: BuilderMessage[];
   sessionId: string | null;
   widgetClientId: string | null;
+  widgetVersion: number;
   stage: BuilderStage;
   panelMode: PanelMode;
   isStreaming: boolean;
@@ -33,6 +34,7 @@ export function useBuilderStream() {
     messages: [],
     sessionId: null,
     widgetClientId: null,
+    widgetVersion: 0,
     stage: 'input',
     panelMode: 'empty',
     isStreaming: false,
@@ -206,7 +208,8 @@ export function useBuilderStream() {
           };
 
         case 'widget_ready':
-          return { ...prev, widgetClientId: event.clientId, panelMode: 'live_preview' };
+          // Store clientId + version — version forces re-injection even for same clientId
+          return { ...prev, widgetClientId: event.clientId, widgetVersion: Date.now() };
 
         case 'done':
           return { ...prev, isStreaming: false, knowledgeProgress: null };
@@ -227,6 +230,7 @@ export function useBuilderStream() {
       messages: [],
       sessionId: null,
       widgetClientId: null,
+      widgetVersion: 0,
       stage: 'input',
       panelMode: 'empty',
       isStreaming: false,
@@ -260,8 +264,9 @@ export function useBuilderStream() {
         messages: restoredMessages,
         sessionId: id,
         widgetClientId: session.clientId || null,
+        widgetVersion: session.clientId ? Date.now() : 0,
         stage: session.currentStage || 'input',
-        panelMode: session.clientId ? 'live_preview' : 'empty',
+        panelMode: 'empty',
         isStreaming: false,
         currentTheme: session.themeJson || null,
         abVariants: null,

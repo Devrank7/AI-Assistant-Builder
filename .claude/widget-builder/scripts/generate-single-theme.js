@@ -269,24 +269,44 @@ import { Widget } from './components/Widget';
 import './index.css';
 
 window.__WIDGET_CONFIG__ = __WIDGET_CONFIG__;
+// Store Widget component on window so re-injected scripts always use the LATEST version
+window.__WIDGET_COMPONENT__ = Widget;
 
 class AIChatWidget extends HTMLElement {
     constructor() {
         super();
-        this.attachShadow({ mode: 'open' });
+        if (!this.shadowRoot) {
+            this.attachShadow({ mode: 'open' });
+        }
     }
 
-    connectedCallback() {${fontInject}
+    connectedCallback() {
+        // Clear shadow DOM completely (handles re-connection with fresh config)
+        while (this.shadowRoot.firstChild) {
+            this.shadowRoot.removeChild(this.shadowRoot.firstChild);
+        }
+${fontInject}
 
         const container = document.createElement('div');
         container.id = 'widget-root';
+        this._widgetContainer = container;
 
         const styleSheet = document.createElement('style');
         styleSheet.textContent = window.__WIDGET_CSS__ || '';
         this.shadowRoot.appendChild(styleSheet);
         this.shadowRoot.appendChild(container);
 
-        render(h(Widget, { config: window.__WIDGET_CONFIG__ }), container);
+        // Use window.__WIDGET_COMPONENT__ — always the latest version from the most recent script load
+        const WidgetComponent = window.__WIDGET_COMPONENT__ || Widget;
+        render(h(WidgetComponent, { config: window.__WIDGET_CONFIG__ }), container);
+    }
+
+    disconnectedCallback() {
+        // Unmount Preact tree to prevent memory leaks and stale state
+        if (this._widgetContainer) {
+            render(null, this._widgetContainer);
+            this._widgetContainer = null;
+        }
     }
 }
 
@@ -296,8 +316,18 @@ if (!customElements.get(_aw_tag)) {
 }
 
 function mountWidget() {
-    // Remove any previous widget instances from other clients
+    // Remove any previous widget instances
     document.querySelectorAll('[data-aw]').forEach(el => el.remove());
+
+    // Clear stale chat data from localStorage for this client
+    const clientId = window.__WIDGET_CONFIG__?.clientId;
+    if (clientId) {
+        try {
+            localStorage.removeItem('aiwidget_' + clientId + '_messages');
+            localStorage.removeItem('aiwidget_' + clientId + '_session');
+        } catch {}
+    }
+
     const el = document.createElement(_aw_tag);
     el.setAttribute('data-aw', '1');
     document.body.appendChild(el);

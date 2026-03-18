@@ -1,0 +1,125 @@
+{
+  "current": 20,
+  "versions": [
+    {
+      "v": 1,
+      "date": "2026-03-18T11:38:07.676Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 2,
+      "date": "2026-03-18T11:42:27.881Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 3,
+      "date": "2026-03-18T12:09:06.693Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 4,
+      "date": "2026-03-18T12:39:21.022Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 5,
+      "date": "2026-03-18T12:55:39.430Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 6,
+      "date": "2026-03-18T12:55:48.592Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 7,
+      "date": "2026-03-18T13:09:47.279Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 8,
+      "date": "2026-03-18T13:19:41.029Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 9,
+      "date": "2026-03-18T13:25:40.970Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 10,
+      "date": "2026-03-18T13:32:25.613Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 11,
+      "date": "2026-03-18T13:50:15.852Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 12,
+      "date": "2026-03-18T14:08:11.736Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 13,
+      "date": "2026-03-18T14:51:04.980Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 14,
+      "date": "2026-03-18T14:56:03.631Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 15,
+      "date": "2026-03-18T15:12:02.655Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 16,
+      "date": "2026-03-18T15:19:54.721Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 17,
+      "date": "2026-03-18T15:20:49.256Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 18,
+      "date": "2026-03-18T15:24:03.556Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 19,
+      "date": "2026-03-18T16:02:01.399Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 20,
+      "date": "2026-03-18T16:11:54.956Z",
+      "description": "удалить кнопку в виджете, которая касается вложения фотографий",
+      "tool": "modify_widget_code"
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import ProgressPipeline from '@/components/builder/ProgressPipeline';
 import BuilderChat from '@/components/builder/BuilderChat';
 import ContextPanel from '@/components/builder/ContextPanel';
 import TemplateSelector from '@/components/builder/TemplateSelector';
+import WidgetInjector from '@/components/builder/WidgetInjector';
 
 interface SessionSummary {
   _id: string;
@@ -19,6 +20,77 @@ interface SessionSummary {
   updatedAt: string;
   messageCount: number;
   preview: string | null;
+}
+
+/** "Preview on Site" button — opens demo page with widget embedded on the client's website */
+function PreviewOnSiteButton({
+  clientId,
+  currentTheme,
+}: {
+  clientId: string;
+  currentTheme: Record<string, unknown> | null;
+}) {
+  const [siteUrl, setSiteUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!clientId) return;
+    // Try to get site URL from theme or info.json
+    const domain = currentTheme?.domain as string;
+    if (domain) {
+      const url = domain.startsWith('http') ? domain : `https://${domain}`;
+      setSiteUrl(url);
+      return;
+    }
+    fetch(`/quickwidgets/${clientId}/info.json`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.website) {
+          const url = d.website.startsWith('http') ? d.website : `https://${d.website}`;
+          setSiteUrl(url);
+        }
+      })
+      .catch(() => {});
+  }, [clientId, currentTheme]);
+
+  const handleClick = () => {
+    if (!siteUrl) return;
+    const demoUrl = `/demo/client-website?client=${clientId}&website=${encodeURIComponent(siteUrl)}`;
+    window.open(demoUrl, '_blank');
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={!siteUrl}
+      className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-40"
+      style={{
+        background: 'rgba(168,85,247,0.07)',
+        border: '1px solid rgba(168,85,247,0.18)',
+        color: '#c084fc',
+        fontFamily: "'Outfit', sans-serif",
+      }}
+      onMouseEnter={(e) => {
+        if (!siteUrl) return;
+        e.currentTarget.style.background = 'rgba(168,85,247,0.12)';
+        e.currentTarget.style.borderColor = 'rgba(168,85,247,0.3)';
+        e.currentTarget.style.boxShadow = '0 0 20px rgba(168,85,247,0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(168,85,247,0.07)';
+        e.currentTarget.style.borderColor = 'rgba(168,85,247,0.18)';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
+    >
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+        />
+      </svg>
+      Preview on Site
+    </button>
+  );
 }
 
 const STAGE_SUGGESTIONS: Record<string, string[]> = {
@@ -55,12 +127,32 @@ export default function BuilderPage() {
       .catch(() => {});
   }, []);
 
-  // Auto-restore session from URL query param (?session=ID)
+  // Auto-restore session from URL query param (?session=ID or ?client=CLIENT_ID)
   useEffect(() => {
+    if (restoredRef.current) return;
+
     const sessionId = searchParams.get('session');
-    if (sessionId && !restoredRef.current) {
+    if (sessionId) {
       restoredRef.current = true;
       stream.restoreSession(sessionId);
+      return;
+    }
+
+    const clientParam = searchParams.get('client');
+    if (clientParam) {
+      restoredRef.current = true;
+      // Find session by clientId
+      fetch('/api/builder/sessions')
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success && d.data) {
+            const match = d.data.find((s: SessionSummary) => s.clientId === clientParam);
+            if (match) {
+              stream.restoreSession(match._id);
+            }
+          }
+        })
+        .catch(() => {});
     }
   }, [searchParams, stream]);
 
@@ -123,39 +215,45 @@ export default function BuilderPage() {
           </div>
         ) : (
           <>
-            {/* Chat area - takes remaining space */}
+            {/* Chat area - takes full width (widget is injected directly on page) */}
             <div className="flex min-w-0 flex-1 flex-col">
-              {stream.stage === 'deploy' && stream.sessionId && (
+              {/* Action bar — shows when widget is built or deployed */}
+              {stream.widgetClientId && (
                 <div className="border-border bg-bg-secondary/30 flex items-center gap-3 border-b px-5 py-3">
-                  <Link
-                    href={`/dashboard/playground/${stream.sessionId}`}
-                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300"
-                    style={{
-                      background: 'rgba(6,182,212,0.07)',
-                      border: '1px solid rgba(6,182,212,0.18)',
-                      color: '#22d3ee',
-                      fontFamily: "'Outfit', sans-serif",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(6,182,212,0.12)';
-                      e.currentTarget.style.borderColor = 'rgba(6,182,212,0.3)';
-                      e.currentTarget.style.boxShadow = '0 0 20px rgba(6,182,212,0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(6,182,212,0.07)';
-                      e.currentTarget.style.borderColor = 'rgba(6,182,212,0.18)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"
-                      />
-                    </svg>
-                    Open Playground
-                  </Link>
+                  {/* Preview on Site button */}
+                  <PreviewOnSiteButton clientId={stream.widgetClientId} currentTheme={stream.currentTheme} />
+
+                  {stream.stage === 'deploy' && stream.sessionId && (
+                    <Link
+                      href={`/dashboard/playground/${stream.sessionId}`}
+                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300"
+                      style={{
+                        background: 'rgba(6,182,212,0.07)',
+                        border: '1px solid rgba(6,182,212,0.18)',
+                        color: '#22d3ee',
+                        fontFamily: "'Outfit', sans-serif",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(6,182,212,0.12)';
+                        e.currentTarget.style.borderColor = 'rgba(6,182,212,0.3)';
+                        e.currentTarget.style.boxShadow = '0 0 20px rgba(6,182,212,0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(6,182,212,0.07)';
+                        e.currentTarget.style.borderColor = 'rgba(6,182,212,0.18)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"
+                        />
+                      </svg>
+                      Open Playground
+                    </Link>
+                  )}
                 </div>
               )}
               <BuilderChat
@@ -169,15 +267,20 @@ export default function BuilderPage() {
               />
             </div>
 
-            {/* Right panel - responsive: hidden on mobile, sidebar on desktop */}
-            <ContextPanel
-              mode={stream.panelMode}
-              clientId={stream.widgetClientId || stream.sessionId}
-              currentTheme={stream.currentTheme}
-              abVariants={stream.abVariants}
-              connectedIntegrations={[]}
-              onSelectVariant={handleVariantSelect}
-            />
+            {/* Right panel — only for AB compare, integrations, etc. (NOT for live preview) */}
+            {stream.panelMode !== 'empty' && stream.panelMode !== 'live_preview' && (
+              <ContextPanel
+                mode={stream.panelMode}
+                clientId={stream.widgetClientId || stream.sessionId}
+                currentTheme={stream.currentTheme}
+                abVariants={stream.abVariants}
+                connectedIntegrations={[]}
+                onSelectVariant={handleVariantSelect}
+              />
+            )}
+
+            {/* Inject widget script directly into the page */}
+            <WidgetInjector clientId={stream.widgetClientId} version={stream.widgetVersion} />
           </>
         )}
       </div>

@@ -64,19 +64,22 @@ export async function uploadKnowledge(
 
   const result: CrawlResult = { uploaded: 0, failed: 0, total: allChunks.length };
 
+  // Use admin token for internal API calls (builder runs server-side)
+  const adminToken = process.env.ADMIN_SECRET_TOKEN || '';
+  const authCookie = `${cookie}; admin_token=${adminToken}`;
+
   for (const chunk of allChunks) {
     try {
       const res = await fetch(`${baseUrl}/api/knowledge`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: cookie,
+          Cookie: authCookie,
         },
         body: JSON.stringify({
           clientId,
-          content: chunk.content,
-          title: chunk.title,
-          source: 'builder-crawler',
+          text: chunk.content,
+          source: `builder-crawler: ${chunk.title}`,
         }),
       });
 
@@ -112,18 +115,29 @@ export async function setAIPrompt(
   };
   const hint = nicheHints[businessType] || 'Answer questions helpfully based on the knowledge base.';
 
-  const systemPrompt = `You are an AI assistant for ${businessName}. You are helpful, friendly, and knowledgeable about the business. ${hint} Answer questions based on the knowledge base provided. If you don't know something, say so honestly and suggest contacting the business directly.`;
+  const systemPrompt = `You are a helpful AI assistant for "${businessName}". ${hint}
+
+RULES:
+- Answer in the same language the user writes in.
+- Base your answers ONLY on the knowledge base provided below. Do not invent facts, numbers, or details.
+- If the knowledge base does not contain the answer, say honestly that you don't have that information and suggest contacting the business directly.
+- Give complete, informative answers. Do not cut off mid-sentence.
+- Be concise but thorough — 2-4 sentences is ideal for most questions.
+- Be friendly and professional.`;
+
+  const adminToken = process.env.ADMIN_SECRET_TOKEN || '';
+  const authCookie = `${cookie}; admin_token=${adminToken}`;
 
   await fetch(`${baseUrl}/api/ai-settings/${clientId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      Cookie: cookie,
+      Cookie: authCookie,
     },
     body: JSON.stringify({
       systemPrompt,
       temperature: 0.7,
-      maxTokens: 1024,
+      maxTokens: 4096,
     }),
   });
 }

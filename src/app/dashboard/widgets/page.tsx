@@ -208,6 +208,16 @@ function WidgetCard({
 
         {/* Actions */}
         <div className="flex items-center gap-2 border-t border-gray-100 pt-4 dark:border-white/[0.04]">
+          <Link
+            href={`/dashboard/builder?client=${widget.clientId}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex-1"
+          >
+            <Button variant="secondary" size="sm" className="w-full gap-1.5 text-[11px]">
+              <MessageSquare className="h-3 w-3" />
+              Edit
+            </Button>
+          </Link>
           <a
             href={`/demo/client-website?client=${widget.clientId}`}
             target="_blank"
@@ -331,18 +341,23 @@ function WidgetRow({
 
       {/* Actions */}
       <div className="flex items-center gap-1">
+        <Link href={`/dashboard/builder?client=${widget.clientId}`} onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit in Builder">
+            <MessageSquare className="h-3.5 w-3.5" />
+          </Button>
+        </Link>
         <a
           href={`/demo/client-website?client=${widget.clientId}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
         >
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Preview">
             <ExternalLink className="h-3.5 w-3.5" />
           </Button>
         </a>
         <a href={`/dashboard/playground/${widget.clientId}`} onClick={(e) => e.stopPropagation()}>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Settings">
             <Settings className="h-3.5 w-3.5" />
           </Button>
         </a>

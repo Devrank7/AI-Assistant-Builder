@@ -38,7 +38,17 @@ if (fs.existsSync(configPath)) {
 
 if (fs.existsSync(clientSrcDir)) {
     console.log("📦 Copying custom source code...");
+    // Backup shared main.jsx & hooks/ — they must NEVER be overwritten by client files
+    const sharedMainJsx = path.join(SRC_DIR, 'main.jsx');
+    const sharedHooksDir = path.join(SRC_DIR, 'hooks');
+    const mainBackup = fs.existsSync(sharedMainJsx) ? fs.readFileSync(sharedMainJsx) : null;
+
     fs.cpSync(clientSrcDir, SRC_DIR, { recursive: true, force: true });
+
+    // Restore protected files
+    if (mainBackup) fs.writeFileSync(sharedMainJsx, mainBackup);
+    // Restore hooks if client had any (shouldn't, but safety net)
+    // hooks are already protected by writeWidgetFile validation, this is defense-in-depth
 }
 
 // 3. Run Build

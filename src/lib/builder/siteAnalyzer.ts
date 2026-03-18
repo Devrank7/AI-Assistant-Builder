@@ -29,6 +29,7 @@ export async function analyzeSite(url: string): Promise<SiteProfile> {
   // Extract design tokens from the homepage
   profile.businessName = extractTitle(homeHtml) || profile.businessName;
   profile.colors = extractColors(homeHtml);
+  profile.backgroundColors = extractBackgroundColors(homeHtml);
   profile.fonts = extractFonts(homeHtml);
   profile.favicon = extractFavicon(homeHtml, url);
   profile.contactInfo = extractContactInfo(homeHtml);
@@ -114,7 +115,9 @@ async function discoverFromSitemap(origin: string): Promise<string[]> {
               const childUrls = [...childXml.matchAll(/<url>\s*<loc>([^<]+)<\/loc>/gi)].map((m) => m[1].trim());
               urls.push(...childUrls);
             }
-          } catch { /* skip */ }
+          } catch {
+            /* skip */
+          }
         }
       }
 
@@ -123,15 +126,24 @@ async function discoverFromSitemap(origin: string): Promise<string[]> {
       urls.push(...directUrls);
 
       if (urls.length > 0) break; // Found a working sitemap
-    } catch { /* try next */ }
+    } catch {
+      /* try next */
+    }
   }
 
   // Filter to same origin and dedupe
   const base = new URL(origin);
-  return [...new Set(urls.filter((u) => {
-    try { return new URL(u).hostname === base.hostname; }
-    catch { return false; }
-  }))];
+  return [
+    ...new Set(
+      urls.filter((u) => {
+        try {
+          return new URL(u).hostname === base.hostname;
+        } catch {
+          return false;
+        }
+      })
+    ),
+  ];
 }
 
 async function discoverFromWordPress(origin: string): Promise<string[]> {
@@ -148,7 +160,9 @@ async function discoverFromWordPress(origin: string): Promise<string[]> {
             if (p.link) urls.push(p.link);
           }
         }
-      } catch { /* not JSON */ }
+      } catch {
+        /* not JSON */
+      }
     }
 
     // WP REST API — posts
@@ -161,9 +175,13 @@ async function discoverFromWordPress(origin: string): Promise<string[]> {
             if (p.link) urls.push(p.link);
           }
         }
-      } catch { /* not JSON */ }
+      } catch {
+        /* not JSON */
+      }
     }
-  } catch { /* not WordPress */ }
+  } catch {
+    /* not WordPress */
+  }
 
   return urls;
 }
@@ -185,7 +203,9 @@ function extractInternalLinks(html: string, baseUrl: string): string[] {
       ) {
         links.push(linkUrl.origin + linkUrl.pathname);
       }
-    } catch { /* skip invalid */ }
+    } catch {
+      /* skip invalid */
+    }
   }
 
   return [...new Set(links)];
@@ -283,7 +303,11 @@ async function fetchPage(url: string): Promise<string | null> {
     if (!res.ok) return null;
 
     const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('text/') && !contentType.includes('application/json') && !contentType.includes('application/xml')) {
+    if (
+      !contentType.includes('text/') &&
+      !contentType.includes('application/json') &&
+      !contentType.includes('application/xml')
+    ) {
       return null; // Skip binary content
     }
 
@@ -342,6 +366,40 @@ function extractColors(html: string): string[] {
   return [...colors].slice(0, 15);
 }
 
+function extractBackgroundColors(html: string): string[] {
+  const colors = new Set<string>();
+
+  // 1. background-color CSS declarations (includes white/black which extractColors filters)
+  const bgColorRegex = /background(?:-color)?\s*:\s*(#[0-9a-fA-F]{3,6})\b/gi;
+  let match;
+  while ((match = bgColorRegex.exec(html)) !== null) {
+    let hex = match[1].toLowerCase();
+    // Normalize 3-digit hex to 6-digit
+    if (hex.length === 4) {
+      hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+    }
+    colors.add(hex);
+  }
+
+  // 2. background-color with rgb/rgba
+  const bgRgbRegex = /background(?:-color)?\s*:\s*rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/gi;
+  while ((match = bgRgbRegex.exec(html)) !== null) {
+    const r = parseInt(match[1]);
+    const g = parseInt(match[2]);
+    const b = parseInt(match[3]);
+    const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    colors.add(hex);
+  }
+
+  // 3. CSS variables used for backgrounds
+  const bgVarRegex = /--(?:bg|background|surface|body-bg|page-bg)[^:]*:\s*(#[0-9a-fA-F]{6})/gi;
+  while ((match = bgVarRegex.exec(html)) !== null) {
+    colors.add(match[1].toLowerCase());
+  }
+
+  return [...colors].slice(0, 10);
+}
+
 function extractFonts(html: string): string[] {
   const fonts = new Set<string>();
 
@@ -350,7 +408,20 @@ function extractFonts(html: string): string[] {
   let match;
   while ((match = fontFamilyRegex.exec(html)) !== null) {
     const font = match[1].trim().replace(/["']/g, '');
-    const genericFonts = ['inherit', 'initial', 'unset', 'sans-serif', 'serif', 'monospace', 'system-ui', 'cursive', 'fantasy', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI'];
+    const genericFonts = [
+      'inherit',
+      'initial',
+      'unset',
+      'sans-serif',
+      'serif',
+      'monospace',
+      'system-ui',
+      'cursive',
+      'fantasy',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      'Segoe UI',
+    ];
     if (!genericFonts.some((g) => g.toLowerCase() === font.toLowerCase())) {
       fonts.add(font);
     }
@@ -389,7 +460,9 @@ function extractFavicon(html: string, baseUrl: string): string | undefined {
     if (match) {
       try {
         return new URL(match[1], baseUrl).href;
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
   }
 
@@ -451,15 +524,41 @@ function detectBusinessType(html: string): string {
 
   const keywords: Record<string, { words: string[]; weight: number }> = {
     dental: { words: ['dental', 'dentist', 'teeth', 'orthodont', 'стоматолог', 'зуб'], weight: 0 },
-    restaurant: { words: ['restaurant', 'menu', 'cuisine', 'dining', 'reservation', 'ресторан', 'меню', 'кухня'], weight: 0 },
-    ecommerce: { words: ['add to cart', 'buy now', 'checkout', 'shop', 'store', 'product', 'корзина', 'купить', 'магазин', 'товар'], weight: 0 },
+    restaurant: {
+      words: ['restaurant', 'menu', 'cuisine', 'dining', 'reservation', 'ресторан', 'меню', 'кухня'],
+      weight: 0,
+    },
+    ecommerce: {
+      words: [
+        'add to cart',
+        'buy now',
+        'checkout',
+        'shop',
+        'store',
+        'product',
+        'корзина',
+        'купить',
+        'магазин',
+        'товар',
+      ],
+      weight: 0,
+    },
     saas: { words: ['software', 'platform', 'api', 'dashboard', 'analytics', 'pricing plan', 'free trial'], weight: 0 },
-    realestate: { words: ['real estate', 'property', 'listing', 'apartment', 'rent', 'недвижимость', 'квартира', 'аренда'], weight: 0 },
+    realestate: {
+      words: ['real estate', 'property', 'listing', 'apartment', 'rent', 'недвижимость', 'квартира', 'аренда'],
+      weight: 0,
+    },
     beauty: { words: ['salon', 'beauty', 'spa', 'nail', 'hair', 'cosmetic', 'салон', 'красота', 'манікюр'], weight: 0 },
-    medical: { words: ['medical', 'clinic', 'doctor', 'health', 'patient', 'клиника', 'врач', 'здоровье', 'лікар'], weight: 0 },
+    medical: {
+      words: ['medical', 'clinic', 'doctor', 'health', 'patient', 'клиника', 'врач', 'здоровье', 'лікар'],
+      weight: 0,
+    },
     legal: { words: ['law', 'attorney', 'legal', 'lawyer', 'юрист', 'адвокат', 'право'], weight: 0 },
     fitness: { words: ['gym', 'fitness', 'workout', 'training', 'фитнес', 'тренажер', 'тренировк'], weight: 0 },
-    education: { words: ['course', 'learn', 'education', 'training', 'school', 'university', 'курс', 'обучение', 'школа'], weight: 0 },
+    education: {
+      words: ['course', 'learn', 'education', 'training', 'school', 'university', 'курс', 'обучение', 'школа'],
+      weight: 0,
+    },
     travel: { words: ['hotel', 'travel', 'booking', 'tour', 'отель', 'путешеств', 'бронир', 'тур'], weight: 0 },
     auto: { words: ['car', 'auto', 'vehicle', 'dealer', 'авто', 'машин', 'автомобил', 'СТО'], weight: 0 },
     construction: { words: ['construction', 'build', 'renovation', 'строительст', 'ремонт', 'будівництв'], weight: 0 },

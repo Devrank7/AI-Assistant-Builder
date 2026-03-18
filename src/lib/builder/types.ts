@@ -57,6 +57,7 @@ export interface SiteProfile {
   businessName: string;
   businessType: string;
   colors: string[];
+  backgroundColors?: string[];
   fonts: string[];
   favicon?: string;
   pages: { url: string; title: string; content: string; crawled?: boolean }[];

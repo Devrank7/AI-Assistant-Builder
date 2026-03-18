@@ -41,7 +41,7 @@ export async function generateResponse(
   context: string,
   userMessage: string,
   temperature: number = 0.7,
-  maxTokens: number = 1024,
+  maxTokens: number = 4096,
   modelId: string = getDefaultModel().id
 ): Promise<GenerateResponseResult> {
   const model = genAI.getGenerativeModel({

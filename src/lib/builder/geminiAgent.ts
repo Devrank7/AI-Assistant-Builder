@@ -2,6 +2,7 @@
 // Uses @google/genai (new SDK) which automatically handles thought_signatures
 // for Gemini 3.1 Pro thinking model function calling
 import { GoogleGenAI, Type } from '@google/genai';
+import type { Part } from '@google/genai';
 import type { ToolRegistry, ToolContext } from './toolRegistry';
 import type { SSEEvent, AgentToolName } from './types';
 
@@ -24,13 +25,20 @@ export interface AgentRunOptions {
 /** Map our tool parameter types to the SDK's Type enum */
 function mapType(type: string): Type {
   switch (type.toLowerCase()) {
-    case 'string': return Type.STRING;
-    case 'number': return Type.NUMBER;
-    case 'integer': return Type.INTEGER;
-    case 'boolean': return Type.BOOLEAN;
-    case 'array': return Type.ARRAY;
-    case 'object': return Type.OBJECT;
-    default: return Type.STRING;
+    case 'string':
+      return Type.STRING;
+    case 'number':
+      return Type.NUMBER;
+    case 'integer':
+      return Type.INTEGER;
+    case 'boolean':
+      return Type.BOOLEAN;
+    case 'array':
+      return Type.ARRAY;
+    case 'object':
+      return Type.OBJECT;
+    default:
+      return Type.STRING;
   }
 }
 
@@ -69,7 +77,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
   const historyMessages = allMessages.slice(0, -1);
 
   const history = historyMessages.map((msg) => ({
-    role: msg.role === 'assistant' ? 'model' as const : 'user' as const,
+    role: msg.role === 'assistant' ? ('model' as const) : ('user' as const),
     parts: [{ text: msg.content }],
   }));
 
@@ -90,8 +98,8 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
   const toolCallsMade: string[] = [];
   let loopCount = 0;
 
-  // First message is the user's text
-  let nextSendArgs: { message: string } | { message: string; parts: unknown[] } = {
+  // First message is the user's text; for function responses, pass Part[] as message
+  let nextSendArgs: { message: string | Part[] } = {
     message: lastMessage.content,
   };
 
@@ -121,7 +129,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
     if (functionCalls.length === 0) break;
 
     // Execute each function call
-    const functionResponseParts: unknown[] = [];
+    const functionResponseParts: Part[] = [];
 
     for (const fc of functionCalls) {
       const toolName = fc.name || 'unknown';
@@ -141,13 +149,13 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
       functionResponseParts.push({
         functionResponse: {
           name: toolName,
-          response: toolResult,
+          response: toolResult as Record<string, unknown>,
         },
-      });
+      } as Part);
     }
 
-    // Send function responses in next iteration
-    nextSendArgs = { message: '', parts: functionResponseParts };
+    // Send function responses in next iteration — pass Part[] directly as message
+    nextSendArgs = { message: functionResponseParts };
   }
 
   return { assistantText: fullAssistantText, toolCallsMade };
