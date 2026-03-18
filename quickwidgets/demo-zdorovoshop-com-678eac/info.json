@@ -1,0 +1,18 @@
+{
+  "name": "Здорово",
+  "clientId": "demo-zdorovoshop-com-678eac",
+  "username": "demo-zdorovoshop-com-678eac",
+  "email": "",
+  "website": "https://zdorovoshop.com/",
+  "clientType": "quick",
+  "features": [
+    "streaming",
+    "quick-replies",
+    "feedback",
+    "sound",
+    "voice-input"
+  ],
+  "createdAt": "2026-03-17T17:00:55.553Z",
+  "version": "2.0.0",
+  "selfService": true
+}

@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
           {
             clientType: 'quick',
             widgetName: session.widgetName || clientId,
+            website: (cleanThemeJson.domain as string) || '',
             userId: auth.userId,
             builtAt: new Date().toISOString(),
           },
@@ -135,6 +136,24 @@ export async function POST(request: NextRequest) {
           2
         )
       );
+
+      // 7b. Generate preview.html for LivePreview iframe
+      const previewHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Widget Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #111318; overflow: hidden; }
+</style>
+</head>
+<body>
+<script src="/quickwidgets/${clientId}/script.js"><\/script>
+</body>
+</html>`;
+      fs.writeFileSync(path.join(quickwidgetsDir, 'preview.html'), previewHtml);
 
       // 8. Create or update Client record in DB
       const existingClient = await Client.findOne({ clientId });

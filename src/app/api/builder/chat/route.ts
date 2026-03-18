@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
         // Update session stage based on tool calls
         if (toolCallsMade.includes('analyze_site')) session.currentStage = 'analysis';
-        if (toolCallsMade.includes('select_theme')) session.currentStage = 'design';
+        if (toolCallsMade.includes('generate_design') || toolCallsMade.includes('select_theme')) session.currentStage = 'design';
         if (toolCallsMade.includes('build_deploy')) {
           session.currentStage = 'deploy';
           session.status = 'deployed';

@@ -80,9 +80,22 @@ export default function BuilderChat({
   const prevToolCardsRef = useRef<Map<string, string>>(new Map());
   const prevErrorRef = useRef<string | null>(null);
 
+  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isStreaming]);
+
+  // Re-scroll to bottom when chat container resizes (e.g. right panel appearing)
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = chatContainerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Play chime when AI finishes responding
   useEffect(() => {
@@ -190,7 +203,7 @@ export default function BuilderChat({
       </div>
 
       {/* Messages area */}
-      <div className="scrollbar-thin relative flex-1 overflow-y-auto px-4 py-6 sm:px-8">
+      <div ref={chatContainerRef} className="scrollbar-thin relative flex-1 overflow-y-auto px-4 py-6 sm:px-8">
         <div className="mx-auto max-w-2xl space-y-7">
           {messages.map((msg, i) => {
             // Skip empty assistant messages (placeholder before streaming starts)

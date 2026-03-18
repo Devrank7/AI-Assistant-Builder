@@ -31,8 +31,28 @@ export const coreTools: ToolDefinition[] = [
       const url = args.url as string;
       ctx.write({ type: 'progress', stage: 'analysis', status: 'active' });
       const profile = await analyzeSite(url);
+
+      // Save profile to session for crawl_knowledge and playground
+      try {
+        const BuilderSession = (await import('@/models/BuilderSession')).default;
+        await BuilderSession.findByIdAndUpdate(ctx.sessionId, { siteProfile: profile });
+      } catch { /* non-critical */ }
+
       ctx.write({ type: 'progress', stage: 'analysis', status: 'complete' });
-      return { success: true, profile };
+      return {
+        success: true,
+        profile: {
+          ...profile,
+          // Truncate page content in the tool result to save tokens
+          pages: profile.pages.map((p) => ({
+            url: p.url,
+            title: p.title,
+            contentLength: p.content.length,
+            preview: p.content.slice(0, 200),
+          })),
+          totalPagesCrawled: profile.pages.length,
+        },
+      };
     },
   },
   {
@@ -54,12 +74,222 @@ export const coreTools: ToolDefinition[] = [
     category: 'core',
     async executor(args, ctx) {
       ctx.write({ type: 'progress', stage: 'design', status: 'active' });
-      ctx.write({ type: 'panel_mode', mode: 'ab_compare' });
-      return {
-        success: true,
-        message:
-          'Generate 3 theme.json variants using the site profile. Return them as JSON with format: {"variants": [{"label": "Name", "theme": {theme.json fields...}}, ...]}',
+      ctx.write({ type: 'progress', message: 'Generating widget design from site analysis...' });
+
+      // 1. Parse site profile from args or load from session
+      let siteProfile: Record<string, unknown> | null = null;
+      try {
+        if (args.siteProfile) {
+          siteProfile = JSON.parse(args.siteProfile as string);
+        }
+      } catch { /* ignore parse errors */ }
+
+      const BuilderSession = (await import('@/models/BuilderSession')).default;
+      const session = await BuilderSession.findById(ctx.sessionId);
+      if (!session) {
+        return { error: 'Session not found' };
+      }
+
+      // Fall back to session's stored siteProfile
+      if (!siteProfile && session.siteProfile) {
+        siteProfile = session.siteProfile as Record<string, unknown>;
+      }
+
+      if (!siteProfile) {
+        return { error: 'No site profile available. Run analyze_site first.' };
+      }
+
+      // 2. Extract design data from site profile
+      const colors = (siteProfile.colors as string[]) || [];
+      const fonts = (siteProfile.fonts as string[]) || [];
+      const businessName = (siteProfile.businessName as string) || (siteProfile.title as string) || 'Business';
+      const businessType = (siteProfile.businessType as string) || 'other';
+      const primaryColor = colors[0] || '#3B82F6';
+      const accentColor = colors[1] || '';
+      const fontFamily = fonts[0] || 'Inter, sans-serif';
+
+      // Parse user preferences if provided
+      let prefs: Record<string, string> = {};
+      try {
+        if (args.preferences) {
+          prefs = JSON.parse(args.preferences as string);
+        }
+      } catch { /* ignore */ }
+      const isDark = prefs.isDark !== 'false';
+      const style = prefs.style || 'glass';
+
+      // 3. Call Gemini to generate theme.json
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro-preview' });
+
+      const themePrompt = `Generate a complete theme.json for a chat widget based on this real website analysis:
+- Business: "${businessName}" (${businessType})
+- Primary color from site: ${primaryColor}
+- Accent color from site: ${accentColor || 'derive from primary'}
+- Font from site: ${fontFamily}
+- All site colors: ${colors.slice(0, 8).join(', ')}
+- Dark mode: ${isDark}
+- Style: ${style}
+
+Return ONLY valid JSON (no markdown, no explanation) with ALL these fields:
+{
+  "label": "Theme label",
+  "domain": "${(siteProfile.url as string || '').replace(/^https?:\/\//, '').replace(/\/.*$/, '') || businessName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com'}",
+  "fontUrl": "Google Fonts URL matching or close to ${fontFamily}",
+  "font": "${fontFamily}",
+  "isDark": ${isDark},
+  "widgetW": "370px", "widgetH": "540px", "widgetMaxW": "370px", "widgetMaxH": "540px",
+  "toggleSize": "w-[58px] h-[58px]", "toggleRadius": "rounded-2xl",
+  "headerPad": "px-6 py-5", "nameSize": "text-[15px]",
+  "headerAccent": "", "avatarHeaderRound": "rounded-2xl", "chatAvatarRound": "rounded-xl",
+  "hasShine": true,
+  "headerFrom": "#hex", "headerVia": "#hex", "headerTo": "#hex",
+  "toggleFrom": "#hex", "toggleVia": "#hex", "toggleTo": "#hex",
+  "toggleShadow": "#hex", "toggleHoverRgb": "r, g, b",
+  "sendFrom": "#hex", "sendTo": "#hex", "sendHoverFrom": "#hex", "sendHoverTo": "#hex",
+  "onlineDotBg": "#hex", "onlineDotBorder": "#hex", "typingDot": "#hex",
+  "userMsgFrom": "#hex", "userMsgTo": "#hex", "userMsgShadow": "#hex",
+  "avatarFrom": "#hex", "avatarTo": "#hex", "avatarBorder": "#hex", "avatarIcon": "#hex",
+  "linkColor": "#hex", "linkHover": "#hex", "copyHover": "#hex", "copyActive": "#hex",
+  "chipBorder": "#hex", "chipFrom": "#hex", "chipTo": "#hex", "chipText": "#hex",
+  "chipHoverFrom": "#hex", "chipHoverTo": "#hex", "chipHoverBorder": "#hex",
+  "focusBorder": "#hex", "focusRing": "#hex",
+  "imgActiveBorder": "#hex", "imgActiveBg": "#hex", "imgActiveText": "#hex",
+  "imgHoverText": "#hex", "imgHoverBorder": "#hex", "imgHoverBg": "#hex",
+  "cssPrimary": "#hex", "cssAccent": "#hex", "focusRgb": "r, g, b",
+  "feedbackActive": "#hex", "feedbackHover": "#hex",
+  "surfaceBg": "#hex", "surfaceCard": "#hex", "surfaceBorder": "#hex",
+  "surfaceInput": "#hex", "surfaceInputFocus": "#hex",
+  "textPrimary": "#hex", "textSecondary": "#hex", "textMuted": "#hex"
+}
+
+All colors must be harmonious, derived from the site's actual colors (${primaryColor}, ${accentColor || 'auto'}). Match the site's visual identity as closely as possible.`;
+
+      ctx.write({ type: 'progress', message: 'AI is designing your widget theme...' });
+
+      let themeJson: Record<string, unknown>;
+      try {
+        const result = await model.generateContent(themePrompt);
+        const text = result.response
+          .text()
+          .trim()
+          .replace(/^```(?:json)?[\s\n]*/m, '')
+          .replace(/[\s\n]*```$/m, '')
+          .trim();
+        themeJson = JSON.parse(text);
+      } catch (err) {
+        return { error: `Theme generation failed: ${(err as Error).message}` };
+      }
+
+      // 4. Build widget config
+      // Derive clientId: try businessName first, fall back to domain from URL
+      const slugFromName = businessName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 40);
+
+      const domainSlug = ((siteProfile.url as string) || '')
+        .replace(/^https?:\/\//, '')
+        .replace(/\/.*$/, '')
+        .replace(/^www\./, '')
+        .replace(/[^a-z0-9]+/gi, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase()
+        .slice(0, 40);
+
+      const clientId = slugFromName || domainSlug || `widget-${Date.now()}`;
+
+      const quickReplies = businessType === 'dental'
+        ? ['Book Appointment', 'Services', 'Insurance Info']
+        : businessType === 'restaurant'
+          ? ['Menu', 'Reservations', 'Hours']
+          : businessType === 'beauty'
+            ? ['Book Now', 'Services & Prices', 'Gift Cards']
+            : ['Tell me more', 'Contact info', 'Services'];
+
+      const widgetConfig = {
+        clientId,
+        botName: businessName,
+        welcomeMessage: `Welcome to **${businessName}**! How can I help you?`,
+        inputPlaceholder: 'Type your message...',
+        quickReplies,
+        avatar: {
+          type: 'initials',
+          initials: businessName.slice(0, 2).toUpperCase(),
+        },
+        features: {
+          sound: true,
+          voiceInput: true,
+          streaming: true,
+        },
       };
+
+      // 5. Save theme + config to session
+      session.themeJson = { ...themeJson, _widgetConfig: widgetConfig };
+      session.widgetName = businessName;
+      session.clientId = clientId;
+      session.currentStage = 'design';
+      await session.save();
+
+      ctx.write({ type: 'theme_update', theme: themeJson });
+
+      // Show preview panel immediately (even before build completes)
+      ctx.write({ type: 'widget_ready', clientId });
+      ctx.write({ type: 'panel_mode', mode: 'live_preview' });
+      ctx.write({ type: 'progress', message: 'Building widget...' });
+
+      // 6. Auto-build the widget
+      try {
+        const buildRes = await fetch(`${ctx.baseUrl}/api/builder/build`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Cookie: ctx.cookie },
+          body: JSON.stringify({ sessionId: ctx.sessionId }),
+        });
+
+        if (buildRes.ok) {
+          const buildData = await buildRes.json();
+          const finalClientId = buildData.data?.clientId || clientId;
+
+          // Update clientId if build pipeline changed it
+          if (finalClientId !== clientId) {
+            ctx.write({ type: 'widget_ready', clientId: finalClientId });
+          }
+          ctx.write({ type: 'progress', stage: 'design', status: 'complete' });
+
+          return {
+            success: true,
+            message: `Widget designed and built for "${businessName}". Preview is now showing in the right panel. ClientId: "${finalClientId}".`,
+            clientId: finalClientId,
+            themePreview: {
+              primaryColor: themeJson.cssPrimary || themeJson.headerFrom,
+              accentColor: themeJson.cssAccent || themeJson.headerTo,
+              isDark: themeJson.isDark,
+              font: themeJson.font,
+            },
+          };
+        } else {
+          const errText = await buildRes.text();
+          console.error('[generate_design] Build API failed:', errText);
+          ctx.write({ type: 'progress', stage: 'design', status: 'complete' });
+          return {
+            success: true,
+            message: `Theme generated and preview panel is open. Build had an issue: ${errText}. Call build_deploy to retry. ClientId: "${clientId}".`,
+            clientId,
+            buildFailed: true,
+          };
+        }
+      } catch (buildErr) {
+        console.error('[generate_design] Build error:', (buildErr as Error).message);
+        ctx.write({ type: 'progress', stage: 'design', status: 'complete' });
+        return {
+          success: true,
+          message: `Theme generated and preview panel is open. Build error: ${(buildErr as Error).message}. Call build_deploy to retry. ClientId: "${clientId}".`,
+          clientId,
+          buildFailed: true,
+        };
+      }
     },
   },
   {
@@ -455,12 +685,14 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
       }
 
       // Build widget config and embed it in themeJson for the build pipeline
+      const scratchSlug = businessName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 40) || `widget-${Date.now()}`;
+
       const widgetConfig = {
-        clientId: businessName
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 40),
+        clientId: scratchSlug,
         botName,
         welcomeMessage: greeting,
         inputPlaceholder: 'Type your message...',

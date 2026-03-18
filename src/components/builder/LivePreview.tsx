@@ -269,6 +269,21 @@ export default function LivePreview({ clientId, currentTheme }: Props) {
     );
   }
 
+  // Dynamic preview srcdoc (fallback when preview.html doesn't exist)
+  const previewSrcDoc = clientId
+    ? `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:#111318;overflow:hidden}</style>
+</head>
+<body>
+<script src="/quickwidgets/${clientId}/script.js"><\/script>
+</body>
+</html>`
+    : undefined;
+
   // Widget preview mode (default)
   return (
     <div className="flex h-full flex-col">
@@ -321,7 +336,7 @@ export default function LivePreview({ clientId, currentTheme }: Props) {
       <div className="relative flex-1 overflow-hidden" style={{ background: '#111318' }}>
         <iframe
           ref={iframeRef}
-          src={`/quickwidgets/${clientId}/preview.html`}
+          srcDoc={previewSrcDoc}
           className="absolute inset-0 h-full w-full border-0"
           sandbox="allow-scripts allow-same-origin"
           title="Widget Preview"

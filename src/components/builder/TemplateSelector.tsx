@@ -534,171 +534,272 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
         </div>
       </div>
 
-      {/* === Recent Chats === */}
+      {/* === Recent Chats — Premium Liquid Glass Design === */}
       {sessions && sessions.length > 0 && (
         <div
-          className="relative z-10 w-full max-w-2xl px-6 pb-8 transition-all duration-700"
+          className="relative z-10 w-full max-w-3xl px-6 pb-10 transition-all duration-700"
           style={{
             opacity: mounted ? 1 : 0,
-            transform: mounted ? 'translateY(0)' : 'translateY(16px)',
+            transform: mounted ? 'translateY(0)' : 'translateY(20px)',
             transitionDelay: '400ms',
           }}
         >
-          <div className="mb-4 flex items-center justify-between">
-            <span
-              style={{
-                fontFamily: "'Sora', 'Outfit', sans-serif",
-                fontSize: '11px',
-                fontWeight: 500,
-                letterSpacing: '0.12em',
-                color: '#4a5068',
-                textTransform: 'uppercase' as const,
-              }}
-            >
-              Recent Chats
-            </span>
-            {onNewSession && (
-              <button
-                onClick={onNewSession}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-300"
+          {/* Section header */}
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-6 w-6 items-center justify-center rounded-md"
                 style={{
-                  fontFamily: "'Outfit', sans-serif",
-                  color: '#22d3ee',
-                  background: 'rgba(6,182,212,0.06)',
-                  border: '1px solid rgba(6,182,212,0.12)',
-                  backdropFilter: 'blur(8px)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(6,182,212,0.12)';
-                  e.currentTarget.style.borderColor = 'rgba(6,182,212,0.25)';
-                  e.currentTarget.style.boxShadow = '0 0 16px rgba(6,182,212,0.08)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(6,182,212,0.06)';
-                  e.currentTarget.style.borderColor = 'rgba(6,182,212,0.12)';
-                  e.currentTarget.style.boxShadow = 'none';
+                  background: 'linear-gradient(135deg, rgba(6,182,212,0.12), rgba(139,92,246,0.08))',
+                  boxShadow: '0 0 12px rgba(6,182,212,0.06)',
                 }}
               >
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-3 w-3" style={{ color: '#67e8f9' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span
+                style={{
+                  fontFamily: "'Sora', sans-serif",
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  color: '#8b92a8',
+                }}
+              >
+                Recent Projects
+              </span>
+              <span
+                className="rounded-full px-2 py-0.5"
+                style={{
+                  fontFamily: "'Outfit', sans-serif",
+                  fontSize: '10px',
+                  fontWeight: 500,
+                  color: '#4a5068',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.04)',
+                }}
+              >
+                {sessions.length}
+              </span>
+            </div>
+            {onNewSession && (
+              <button
+                onClick={() => { playClickSound(); onNewSession(); }}
+                className="group/new flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium transition-all duration-400"
+                style={{
+                  fontFamily: "'Outfit', sans-serif",
+                  color: '#a5f3fc',
+                  background: 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.03))',
+                  border: '1px solid rgba(6,182,212,0.10)',
+                  backdropFilter: 'blur(12px)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, rgba(6,182,212,0.14), rgba(139,92,246,0.06))';
+                  e.currentTarget.style.borderColor = 'rgba(6,182,212,0.28)';
+                  e.currentTarget.style.boxShadow = '0 0 24px rgba(6,182,212,0.10), inset 0 1px 0 rgba(255,255,255,0.04)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.03))';
+                  e.currentTarget.style.borderColor = 'rgba(6,182,212,0.10)';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <svg className="h-3.5 w-3.5 transition-transform duration-300 group-hover/new:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                New Chat
+                New Project
               </button>
             )}
           </div>
 
-          <div className="space-y-2">
-            {sessions.slice(0, 5).map((session, i) => {
+          {/* Cards grid */}
+          <div className="grid gap-3" style={{ gridTemplateColumns: sessions.length === 1 ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+            {sessions.slice(0, 6).map((session, i) => {
               const timeAgo = getTimeAgo(session.updatedAt);
-              const statusColor =
-                session.status === 'deployed' ? '#34d399' : session.status === 'building' ? '#fbbf24' : '#67e8f9';
-              const statusLabel =
-                session.status === 'deployed' ? 'Deployed' : session.status === 'building' ? 'Building' : 'In Progress';
+              const isDeployed = session.status === 'deployed';
+              const isBuilding = session.status === 'building';
+              const statusColor = isDeployed ? '#34d399' : isBuilding ? '#fbbf24' : '#67e8f9';
+              const statusGlow = isDeployed ? 'rgba(52,211,153,0.15)' : isBuilding ? 'rgba(251,191,36,0.15)' : 'rgba(103,232,249,0.15)';
+              const statusLabel = isDeployed ? 'Live' : isBuilding ? 'Building' : 'Draft';
+              const accentGradient = isDeployed
+                ? 'linear-gradient(135deg, rgba(52,211,153,0.08), rgba(6,182,212,0.04))'
+                : isBuilding
+                ? 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,146,60,0.04))'
+                : 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(139,92,246,0.04))';
 
               return (
                 <button
                   key={session._id}
-                  onClick={() => onSelectSession?.(session._id)}
-                  className="group flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-left transition-all duration-300"
+                  onClick={() => { playClickSound(); onSelectSession?.(session._id); }}
+                  className="group relative flex flex-col rounded-2xl p-[1px] text-left transition-all duration-500"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.018), rgba(255,255,255,0.012))',
-                    border: '1px solid rgba(255,255,255,0.04)',
-                    backdropFilter: 'blur(8px)',
-                    animationDelay: `${i * 0.06}s`,
+                    opacity: mounted ? 1 : 0,
+                    transform: mounted ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.97)',
+                    transitionDelay: `${450 + i * 80}ms`,
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01))',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background =
-                      'linear-gradient(135deg, rgba(6,182,212,0.05), rgba(139,92,246,0.02))';
-                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.18)';
-                    e.currentTarget.style.boxShadow =
-                      '0 4px 24px rgba(6,182,212,0.06), inset 0 1px 0 rgba(255,255,255,0.02)';
-                    e.currentTarget.style.transform = 'translateX(4px)';
+                    const card = e.currentTarget;
+                    card.style.background = `linear-gradient(135deg, ${statusColor}30, rgba(139,92,246,0.12))`;
+                    card.style.transform = 'translateY(-3px) scale(1.01)';
+                    card.style.boxShadow = `0 8px 40px ${statusGlow}, 0 0 0 1px ${statusColor}15`;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      'linear-gradient(135deg, rgba(255,255,255,0.018), rgba(255,255,255,0.012))';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)';
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.transform = 'translateX(0)';
+                    const card = e.currentTarget;
+                    card.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01))';
+                    card.style.transform = 'translateY(0) scale(1)';
+                    card.style.boxShadow = 'none';
                   }}
                 >
-                  {/* Chat icon */}
+                  {/* Inner card — glass layer */}
                   <div
-                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-all duration-300"
+                    className="relative flex flex-1 flex-col overflow-hidden rounded-[15px] px-5 py-4"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(139,92,246,0.04))',
-                      border: '1px solid rgba(6,182,212,0.10)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                      background: 'linear-gradient(160deg, rgba(12,14,22,0.92), rgba(8,10,18,0.97))',
+                      backdropFilter: 'blur(20px)',
                     }}
                   >
-                    <svg
-                      className="h-4 w-4"
-                      style={{ color: '#22d3ee' }}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
-                      />
-                    </svg>
-                  </div>
+                    {/* Ambient glow — top-right corner */}
+                    <div
+                      className="pointer-events-none absolute -top-8 -right-8 h-24 w-24 rounded-full opacity-40 transition-opacity duration-500 group-hover:opacity-70"
+                      style={{ background: `radial-gradient(circle, ${statusColor}20, transparent 70%)` }}
+                    />
 
-                  {/* Content */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="truncate text-[13px] font-medium"
-                        style={{ color: '#c8cdd8', fontFamily: "'Outfit', sans-serif" }}
-                      >
-                        {session.widgetName || session.preview || 'Untitled Chat'}
-                      </span>
-                      <span
-                        className="flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                    {/* Top row: icon + status */}
+                    <div className="mb-3.5 flex items-start justify-between">
+                      <div
+                        className="relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-400 group-hover:scale-110"
                         style={{
-                          background: `${statusColor}12`,
-                          color: statusColor,
-                          border: `1px solid ${statusColor}25`,
+                          background: accentGradient,
+                          border: `1px solid ${statusColor}18`,
+                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px ${statusColor}08`,
                         }}
                       >
-                        {statusLabel}
-                      </span>
+                        {isDeployed ? (
+                          <svg className="h-4.5 w-4.5" style={{ color: statusColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ) : isBuilding ? (
+                          <svg className="h-4.5 w-4.5 animate-spin" style={{ color: statusColor, animationDuration: '3s' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.183" />
+                          </svg>
+                        ) : (
+                          <svg className="h-4.5 w-4.5" style={{ color: statusColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                          </svg>
+                        )}
+                        {/* Pulse ring for deployed */}
+                        {isDeployed && (
+                          <div
+                            className="absolute inset-0 rounded-xl"
+                            style={{
+                              border: `1px solid ${statusColor}30`,
+                              animation: 'pulse-ring 3s ease-in-out infinite',
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      {/* Status pill */}
+                      <div
+                        className="flex items-center gap-1.5 rounded-full px-2.5 py-1 transition-all duration-300 group-hover:scale-105"
+                        style={{
+                          background: `${statusColor}08`,
+                          border: `1px solid ${statusColor}18`,
+                        }}
+                      >
+                        <div
+                          className="h-1.5 w-1.5 rounded-full"
+                          style={{
+                            background: statusColor,
+                            boxShadow: `0 0 6px ${statusColor}60`,
+                            animation: isBuilding ? 'pulse-dot 1.5s ease-in-out infinite' : 'none',
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontFamily: "'Outfit', sans-serif",
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            letterSpacing: '0.05em',
+                            color: statusColor,
+                            textTransform: 'uppercase' as const,
+                          }}
+                        >
+                          {statusLabel}
+                        </span>
+                      </div>
                     </div>
-                    <div className="mt-0.5 flex items-center gap-2">
-                      <span
-                        className="truncate text-[11px]"
-                        style={{ color: '#3a4058', fontFamily: "'Outfit', sans-serif" }}
-                      >
-                        {session.messageCount} messages
-                      </span>
-                      <span style={{ color: '#2a2f42' }}>·</span>
-                      <span
-                        className="flex-shrink-0 text-[11px]"
-                        style={{ color: '#3a4058', fontFamily: "'Outfit', sans-serif" }}
-                      >
+
+                    {/* Widget name */}
+                    <h3
+                      className="mb-1 truncate text-[14px] font-semibold transition-colors duration-300 group-hover:text-white"
+                      style={{ color: '#d1d5e0', fontFamily: "'Sora', sans-serif", lineHeight: 1.3 }}
+                    >
+                      {session.widgetName || session.preview || 'Untitled Project'}
+                    </h3>
+
+                    {/* Meta row */}
+                    <div className="mt-auto flex items-center gap-2 pt-3">
+                      <div className="flex items-center gap-1.5">
+                        <svg className="h-3 w-3" style={{ color: '#3a4058' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                        </svg>
+                        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '11px', color: '#3a4058', fontWeight: 500 }}>
+                          {session.messageCount}
+                        </span>
+                      </div>
+                      <div
+                        className="h-3"
+                        style={{ width: '1px', background: 'rgba(255,255,255,0.04)' }}
+                      />
+                      <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '11px', color: '#2e3348', fontWeight: 500 }}>
                         {timeAgo}
                       </span>
-                    </div>
-                  </div>
 
-                  {/* Arrow */}
-                  <svg
-                    className="h-4 w-4 flex-shrink-0 transition-all duration-300 group-hover:translate-x-0.5"
-                    style={{ color: '#2a2f42' }}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
+                      {/* Arrow — slides in on hover */}
+                      <div className="ml-auto flex items-center">
+                        <svg
+                          className="h-4 w-4 translate-x-1 opacity-0 transition-all duration-400 group-hover:translate-x-0 group-hover:opacity-60"
+                          style={{ color: statusColor }}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Bottom accent line */}
+                    <div
+                      className="absolute right-5 bottom-0 left-5 h-[1px] scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
+                      style={{
+                        background: `linear-gradient(90deg, transparent, ${statusColor}40, transparent)`,
+                        transformOrigin: 'left',
+                      }}
+                    />
+                  </div>
                 </button>
               );
             })}
           </div>
+
+          {/* Keyframe animations */}
+          <style>{`
+            @keyframes pulse-ring {
+              0%, 100% { opacity: 0.3; transform: scale(1); }
+              50% { opacity: 0.6; transform: scale(1.08); }
+            }
+            @keyframes pulse-dot {
+              0%, 100% { opacity: 0.6; transform: scale(1); }
+              50% { opacity: 1; transform: scale(1.4); }
+            }
+          `}</style>
         </div>
       )}
 

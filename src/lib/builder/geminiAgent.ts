@@ -83,35 +83,36 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
     },
   });
 
-  // Build conversation history for Gemini (convert our messages to Gemini Content format)
-  const history: Content[] = [];
-  // Skip the last message — it will be sent as the new message via sendMessage()
+  // Build conversation history manually (we manage it ourselves instead of
+  // relying on chat.sendMessageStream which has unreliable history tracking)
+  const contents: Content[] = [];
+
+  // Add previous conversation messages (skip the last — it's the new user message)
   const allMessages = options.messages;
   const lastMessage = allMessages[allMessages.length - 1];
   const historyMessages = allMessages.slice(0, -1);
 
   for (const msg of historyMessages) {
-    history.push({
+    contents.push({
       role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.content }],
     });
   }
 
-  const chat = model.startChat({ history });
+  // Add the latest user message
+  contents.push({ role: 'user', parts: [{ text: lastMessage.content }] });
 
   let fullAssistantText = '';
   const toolCallsMade: string[] = [];
   let loopCount = 0;
 
-  // Send the latest user message
-  let currentParts: Part[] = [{ text: lastMessage.content }];
-
   while (loopCount < MAX_TOOL_LOOPS) {
     loopCount++;
 
-    // Use streaming to send text chunks in real-time
-    const streamResult = await chat.sendMessageStream(currentParts);
+    // Call Gemini with full history (streaming for real-time text output)
+    const streamResult = await model.generateContentStream({ contents });
     const functionCalls: { name: string; args: Record<string, unknown> }[] = [];
+    const modelParts: Part[] = [];
 
     // Process stream chunks as they arrive
     for await (const chunk of streamResult.stream) {
@@ -127,7 +128,24 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
             args: (part.functionCall.args as Record<string, unknown>) || {},
           });
         }
+        // Preserve the FULL part object (includes thought_signature, thought, etc.)
+        // Gemini requires these fields when replaying history with function calls
+        modelParts.push(part as Part);
       }
+    }
+
+    // Finalize stream and get the aggregated response — use its parts for history
+    // as they contain complete metadata (thought_signature etc.) that streaming
+    // chunks may deliver incrementally
+    const finalResponse = await streamResult.response;
+    const finalParts = finalResponse.candidates?.[0]?.content?.parts;
+
+    // Record the model's response in our manual history
+    // Prefer the finalized parts over streamed parts for complete metadata
+    if (finalParts && finalParts.length > 0) {
+      contents.push({ role: 'model', parts: finalParts as Part[] });
+    } else if (modelParts.length > 0) {
+      contents.push({ role: 'model', parts: modelParts });
     }
 
     // If no function calls, we're done
@@ -158,8 +176,10 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
       });
     }
 
-    // Send function responses back to Gemini for next iteration
-    currentParts = functionResponseParts;
+    // Add function responses as the next user turn in our history
+    contents.push({ role: 'user', parts: functionResponseParts });
+
+    // Next iteration will call generateContentStream with the updated history
   }
 
   return { assistantText: fullAssistantText, toolCallsMade };

@@ -36,9 +36,6 @@ export default function ContextPanel({
     prevModeRef.current = mode;
   }, [mode]);
 
-  // Don't render anything when there's no content
-  if (!hasContent) return null;
-
   const statusConfig: Record<string, { color: string; glow: string; bg: string; label: string }> = {
     connected: {
       color: '#10b981',
@@ -106,15 +103,20 @@ export default function ContextPanel({
         }}
       />
 
-      {/* Panel — glass sidebar */}
+      {/* Panel — glass sidebar with smooth width transition on desktop */}
       <div
-        className={`fixed top-0 right-0 z-40 h-full w-[340px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative lg:z-auto lg:w-[380px] lg:translate-x-0 ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}`}
+        className={`fixed top-0 right-0 z-40 h-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative lg:z-auto lg:translate-x-0 ${
+          hasContent
+            ? `w-[340px] lg:w-[380px] ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}`
+            : 'w-0 translate-x-full lg:w-0 lg:translate-x-0'
+        }`}
         style={{
-          background: 'rgba(10,11,16,0.85)',
-          backdropFilter: 'blur(40px) saturate(150%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(150%)',
-          borderLeft: '1px solid rgba(255,255,255,0.06)',
-          boxShadow: '-8px 0 40px rgba(0,0,0,0.3)',
+          background: hasContent ? 'rgba(10,11,16,0.85)' : 'transparent',
+          backdropFilter: hasContent ? 'blur(40px) saturate(150%)' : 'none',
+          WebkitBackdropFilter: hasContent ? 'blur(40px) saturate(150%)' : 'none',
+          borderLeft: hasContent ? '1px solid rgba(255,255,255,0.06)' : 'none',
+          boxShadow: hasContent ? '-8px 0 40px rgba(0,0,0,0.3)' : 'none',
+          overflow: 'hidden',
         }}
       >
         {/* Mobile close header */}
@@ -176,6 +178,40 @@ export default function ContextPanel({
           {mode === 'live_preview' && <LivePreview clientId={clientId} currentTheme={currentTheme} />}
 
           {mode === 'ab_compare' && abVariants && <ABCompare variants={abVariants} onSelect={onSelectVariant} />}
+
+          {mode === 'ab_compare' && !abVariants && (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <div className="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center">
+                  <div
+                    className="absolute inset-0 rounded-2xl"
+                    style={{
+                      background: 'rgba(6,182,212,0.04)',
+                      border: '1px solid rgba(6,182,212,0.08)',
+                      animation: 'ctxIndicatorPulse 2s ease-in-out infinite',
+                    }}
+                  />
+                  <div
+                    className="absolute inset-2 rounded-xl"
+                    style={{
+                      background: 'rgba(139,92,246,0.04)',
+                      border: '1px solid rgba(139,92,246,0.08)',
+                      animation: 'ctxIndicatorPulse 2s ease-in-out infinite 0.4s',
+                    }}
+                  />
+                  <svg className="relative h-6 w-6" style={{ color: '#4a5068' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium" style={{ color: '#4a5068', fontFamily: "'Outfit', sans-serif" }}>
+                  Generating Design
+                </p>
+                <p className="mt-1.5 text-xs" style={{ color: '#2d3348', fontFamily: "'Outfit', sans-serif" }}>
+                  Your widget preview will appear shortly
+                </p>
+              </div>
+            </div>
+          )}
 
           {mode === 'test_sandbox' && clientId && (
             <TestSandbox clientId={clientId} connectedIntegrations={connectedIntegrations} />
