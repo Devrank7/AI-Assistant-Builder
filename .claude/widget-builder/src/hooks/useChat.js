@@ -208,6 +208,30 @@ export default function useChat(config) {
                                         return newMsgs;
                                     });
                                 }
+                                // Action events (agentic mode)
+                                if (data.action_start) {
+                                    setMessages((prev) => {
+                                        const newMsgs = [...prev];
+                                        const last = newMsgs[newMsgs.length - 1];
+                                        const actions = [...(last.actions || [])];
+                                        actions.push({ name: data.action_start, status: 'running', args: data.args });
+                                        newMsgs[newMsgs.length - 1] = { ...last, actions };
+                                        return newMsgs;
+                                    });
+                                }
+                                if (data.action_result) {
+                                    setMessages((prev) => {
+                                        const newMsgs = [...prev];
+                                        const last = newMsgs[newMsgs.length - 1];
+                                        const actions = [...(last.actions || [])];
+                                        const idx = actions.findIndex(a => a.name === data.action_result && a.status === 'running');
+                                        if (idx !== -1) {
+                                            actions[idx] = { ...actions[idx], status: data.result?.success ? 'done' : 'error', result: data.result };
+                                        }
+                                        newMsgs[newMsgs.length - 1] = { ...last, actions };
+                                        return newMsgs;
+                                    });
+                                }
                             } catch (e) {}
                         }
                     }

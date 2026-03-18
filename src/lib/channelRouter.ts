@@ -23,6 +23,7 @@ import { generateEmbedding, findSimilarChunks } from '@/lib/gemini';
 import { calculateCost, getModel, getDefaultModel } from '@/lib/models';
 import { parseRichBlocks, type RichBlock } from '@/lib/richMessages';
 import { detectHandoffRequest, getActiveHandoff, createHandoff } from '@/lib/handoff';
+import { agenticChatStream } from '@/lib/agenticRouter';
 
 export type ChannelType = 'website' | 'telegram' | 'whatsapp' | 'instagram';
 
@@ -301,6 +302,14 @@ export async function routeMessageStream(input: RouteMessageInput): Promise<{
   const client = await Client.findOne({ clientId: input.clientId }).select('isActive');
   if (!client || !client.isActive) {
     return { stream: new ReadableStream(), error: 'Widget is disabled', status: 403 };
+  }
+
+  // 1.5. Check if agentic mode is enabled — delegate to agenticRouter if so
+  const settingsForCheck = (await AISettings.findOne({ clientId: input.clientId }).select('actionsEnabled').lean()) as {
+    actionsEnabled?: boolean;
+  } | null;
+  if (settingsForCheck?.actionsEnabled) {
+    return agenticChatStream(input);
   }
 
   // 2. Get AI config (needed before handoff check for handoffEnabled flag)

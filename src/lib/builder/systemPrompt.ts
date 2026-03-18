@@ -35,6 +35,16 @@ export const BUILDER_SYSTEM_PROMPT = `You are an AI widget builder agent for Win
 - suggest_improvements: Show interactive suggestion cards
 - check_knowledge_gaps: Compare crawled pages vs knowledge base
 
+### AI Actions (Widget Tool-Use)
+The widget supports **Autonomous Actions** — the AI can execute real actions during conversations with visitors:
+- Book appointments (Google Calendar, Calendly)
+- Create CRM contacts (HubSpot, Salesforce, Pipedrive)
+- Process payments (Stripe)
+- Save leads, send notifications, search knowledge
+
+To enable: set actionsEnabled=true in AI Settings after connecting integrations.
+Built-in tools (collect_lead, search_knowledge, send_notification) are always available when actions are enabled.
+
 ## First Message Handling
 
 **CRITICAL:** Before doing ANYTHING, check if the user's message contains a valid website URL (http/https).
@@ -109,6 +119,7 @@ After deployment, call analyze_opportunities, then ALWAYS:
 3. **After EVERY user interaction in Phase 2/3**, end your response with a new suggestion or question. Never leave the conversation hanging. Always propose the next step.
 
 **Suggestion categories (rotate through these):**
+- 🤖 **AI Actions (TOP PRIORITY)**: "Хотите, чтобы виджет мог сам записывать клиентов на приём? Подключим Calendar и включим AI Actions — бот будет бронировать встречи прямо в чате!" / "Могу включить автоматический сбор лидов — бот будет сохранять контакты посетителей и уведомлять вас в Telegram."
 - 🔗 **Integrations**: CRM (HubSpot, Bitrix24, AmoCRM), booking (Calendly, Cal.com), payments (Stripe, LiqPay), messaging (Telegram, WhatsApp, Instagram)
 - 🎨 **UI improvements**: proactive greeting bubble, custom quick-reply buttons, different layout, animations, branding tweaks
 - 🧠 **Knowledge**: add FAQ page, upload pricing, add team info, improve AI responses, add multilingual support

@@ -420,6 +420,19 @@ export function Widget({ config }) {
                                 <div className="flex-1 h-px bg-gray-200/70" />
                             </div>
                         )}
+                        {/* Action indicators (agentic mode) */}
+                        {msg.role === 'assistant' && msg.actions?.length > 0 && (
+                            <div className="ml-7 sm:ml-9 mb-1.5 space-y-1">
+                                {msg.actions.map((action, ai) => (
+                                    <div key={ai} className="flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-md bg-[#f1f5f9] border border-[#e5e7eb] text-[#6b7280]">
+                                        {action.status === 'running' && <span className="inline-block w-3 h-3 border-2 border-[#3b82f6] border-t-transparent rounded-full animate-spin" />}
+                                        {action.status === 'done' && <span className="text-[#22c55e]">✓</span>}
+                                        {action.status === 'error' && <span className="text-[#ef4444]">✗</span>}
+                                        <span>{action.name.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                         <ChatMessage
                             role={msg.role} content={msg.content} timestamp={msg.timestamp}
                             isError={msg.isError} onRetry={msg.isError ? retryLastMessage : undefined}

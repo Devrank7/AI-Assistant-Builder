@@ -9,6 +9,9 @@ export interface IAISettings extends Document {
   maxTokens: number;
   topK: number; // Number of knowledge chunks to retrieve
   handoffEnabled: boolean; // Enable "Handoff to Human" feature
+  actionsEnabled: boolean; // Enable AI actions (tool use) in widget chat
+  actionsSystemPrompt: string; // Custom instructions for action behavior
+  maxActionsPerSession: number; // Rate limit: max tool calls per chat session
   createdAt: Date;
   updatedAt: Date;
 }
@@ -62,6 +65,20 @@ const AISettingsSchema = new Schema<IAISettings>(
     handoffEnabled: {
       type: Boolean,
       default: false,
+    },
+    actionsEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    actionsSystemPrompt: {
+      type: String,
+      default: '',
+    },
+    maxActionsPerSession: {
+      type: Number,
+      default: 10,
+      min: 1,
+      max: 50,
     },
   },
   {
