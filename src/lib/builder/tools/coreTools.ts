@@ -1077,15 +1077,8 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
 
       try {
         const result = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview',
+          model: 'gemini-3.1-pro-preview',
           contents: `${CODEGEN_SYSTEM_PROMPT}
-
-IMPORTANT RULES FOR THIS COMPONENT:
-- All colors use CSS variable Tailwind classes (bg-aw-surface-bg, text-aw-text-primary, etc.)
-- NEVER use hardcoded hex colors like bg-[#2a2d3f] — always use aw-* classes
-- This component receives a single \`ctx\` prop with all state and handlers
-- Keep the same export pattern (default export)
-- Available CSS variable classes: bg-aw-surface-bg, bg-aw-surface-card, bg-aw-surface-border, bg-aw-surface-input, text-aw-text-primary, text-aw-text-secondary, text-aw-text-muted, from-aw-header-from, via-aw-header-via, to-aw-header-to, bg-aw-send, hover:bg-aw-send-hover, text-aw-link, and many more.
 
 CURRENT CODE:
 \`\`\`jsx
@@ -1197,19 +1190,11 @@ Return ONLY the complete modified component file. No markdown fences, no explana
 
       try {
         const result = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview',
+          model: 'gemini-3.1-pro-preview',
           contents: `${CODEGEN_SYSTEM_PROMPT}
 
-Generate a Preact component file for: ${componentName}
-
-RULES:
-- Default export a function component that receives a single \`ctx\` prop
-- ctx contains: config, messages, sendMessage, uiStrings, lang, and all widget state/handlers
-- All colors use CSS variable Tailwind classes (bg-aw-surface-card, text-aw-text-primary, border-aw-surface-border, etc.)
-- NEVER use hardcoded hex colors — always use aw-* classes
-- Import from 'react' (aliased to preact/compat), 'framer-motion', 'lucide-preact'
-- Keep it under 100 lines
-- Make it visually consistent with the rest of the widget (rounded corners, subtle shadows, clean typography)
+Generate a NEW Preact component file named: ${componentName}
+This component will be placed in slot: ${slot}
 
 DESCRIPTION: ${instruction}
 
