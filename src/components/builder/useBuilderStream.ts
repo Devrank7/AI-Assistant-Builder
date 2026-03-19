@@ -49,6 +49,94 @@ export function useBuilderStream() {
 
   const abortRef = useRef<AbortController | null>(null);
 
+  const handleEvent = useCallback((event: SSEEvent) => {
+    setState((prev) => {
+      const msgs = [...prev.messages];
+      const lastMsg = msgs[msgs.length - 1];
+
+      switch (event.type) {
+        case 'text':
+          if (lastMsg?.role === 'assistant') {
+            const updated = { ...lastMsg, content: lastMsg.content + event.content };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
+          }
+          return prev;
+
+        case 'tool_start':
+          if (lastMsg?.role === 'assistant') {
+            const updated = {
+              ...lastMsg,
+              toolCards: [...(lastMsg.toolCards || []), { tool: event.tool, status: 'running' as const }],
+            };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
+          }
+          return prev;
+
+        case 'tool_result':
+          if (lastMsg?.role === 'assistant') {
+            const cards = (lastMsg.toolCards || []).map((c) =>
+              c.tool === event.tool && c.status === 'running'
+                ? { ...c, status: 'done' as const, result: event.result }
+                : c
+            );
+            const updated = { ...lastMsg, toolCards: cards };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
+          }
+          return prev;
+
+        case 'session':
+          return { ...prev, sessionId: event.sessionId };
+
+        case 'theme_update':
+          return { ...prev, currentTheme: event.theme };
+
+        case 'ab_variants':
+          return { ...prev, abVariants: event.variants };
+
+        case 'panel_mode':
+          return { ...prev, panelMode: event.mode };
+
+        case 'progress':
+          if ('stage' in event) {
+            return { ...prev, stage: event.stage };
+          }
+          return prev;
+
+        case 'crm_instruction':
+          if (lastMsg?.role === 'assistant') {
+            const updated = { ...lastMsg, crmInstruction: { provider: event.provider, steps: event.steps } };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
+          }
+          return prev;
+
+        case 'error':
+          return { ...prev, error: event.message };
+
+        case 'knowledge_progress':
+          return { ...prev, knowledgeProgress: { uploaded: event.uploaded, total: event.total } };
+
+        case 'suggestions':
+          return { ...prev, suggestions: event.suggestions };
+
+        case 'agent_switch':
+          return {
+            ...prev,
+            activeAgent: event.agent,
+            agentActivities: [...prev.agentActivities, { agent: event.agent, task: event.task, timestamp: Date.now() }],
+          };
+
+        case 'widget_ready':
+          return { ...prev, widgetClientId: event.clientId, widgetVersion: Date.now() };
+
+        case 'done':
+          return { ...prev, isStreaming: false, knowledgeProgress: null };
+
+        default:
+          return prev;
+      }
+    });
+  }, []);
+
   // Shared SSE stream reader
   const streamChat = useCallback(
     async (displayMessage: string, requestBody: Record<string, unknown>) => {
@@ -162,95 +250,6 @@ export function useBuilderStream() {
     },
     [state.sessionId, streamChat]
   );
-
-  const handleEvent = useCallback((event: SSEEvent) => {
-    setState((prev) => {
-      const msgs = [...prev.messages];
-      const lastMsg = msgs[msgs.length - 1];
-
-      switch (event.type) {
-        case 'text':
-          if (lastMsg?.role === 'assistant') {
-            const updated = { ...lastMsg, content: lastMsg.content + event.content };
-            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
-          }
-          return prev;
-
-        case 'tool_start':
-          if (lastMsg?.role === 'assistant') {
-            const updated = {
-              ...lastMsg,
-              toolCards: [...(lastMsg.toolCards || []), { tool: event.tool, status: 'running' as const }],
-            };
-            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
-          }
-          return prev;
-
-        case 'tool_result':
-          if (lastMsg?.role === 'assistant') {
-            const cards = (lastMsg.toolCards || []).map((c) =>
-              c.tool === event.tool && c.status === 'running'
-                ? { ...c, status: 'done' as const, result: event.result }
-                : c
-            );
-            const updated = { ...lastMsg, toolCards: cards };
-            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
-          }
-          return prev;
-
-        case 'session':
-          return { ...prev, sessionId: event.sessionId };
-
-        case 'theme_update':
-          return { ...prev, currentTheme: event.theme };
-
-        case 'ab_variants':
-          return { ...prev, abVariants: event.variants };
-
-        case 'panel_mode':
-          return { ...prev, panelMode: event.mode };
-
-        case 'progress':
-          if ('stage' in event) {
-            return { ...prev, stage: event.stage };
-          }
-          return prev;
-
-        case 'crm_instruction':
-          if (lastMsg?.role === 'assistant') {
-            const updated = { ...lastMsg, crmInstruction: { provider: event.provider, steps: event.steps } };
-            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
-          }
-          return prev;
-
-        case 'error':
-          return { ...prev, error: event.message };
-
-        case 'knowledge_progress':
-          return { ...prev, knowledgeProgress: { uploaded: event.uploaded, total: event.total } };
-
-        case 'suggestions':
-          return { ...prev, suggestions: event.suggestions };
-
-        case 'agent_switch':
-          return {
-            ...prev,
-            activeAgent: event.agent,
-            agentActivities: [...prev.agentActivities, { agent: event.agent, task: event.task, timestamp: Date.now() }],
-          };
-
-        case 'widget_ready':
-          // Store clientId + version — version forces re-injection even for same clientId
-          return { ...prev, widgetClientId: event.clientId, widgetVersion: Date.now() };
-
-        case 'done':
-          return { ...prev, isStreaming: false, knowledgeProgress: null };
-
-        default:
-          return prev;
-      }
-    });
-  }, []);
 
   const stopStreaming = useCallback(() => {
     abortRef.current?.abort();
