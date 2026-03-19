@@ -381,13 +381,23 @@ export const integrationTools: ToolDefinition[] = [
         return { error: 'Invalid JSON in config parameter' };
       }
 
-      // 1. Validate
-      const { validateIntegrationConfig } = require(
-        path.join(process.cwd(), '.claude/widget-builder/scripts/integration-config-schema')
-      );
-      const validation = validateIntegrationConfig(config);
-      if (!validation.valid) {
-        return { error: `Invalid config: ${validation.errors.join('; ')}` };
+      // 1. Validate config inline (no external require — avoids Turbopack resolution)
+      if (!config.provider || !/^[a-z][a-z0-9-]*$/.test(config.provider)) {
+        return { error: 'Invalid config: provider slug must be lowercase alphanumeric with hyphens' };
+      }
+      if (!config.baseUrl || !config.baseUrl.startsWith('https://')) {
+        return { error: 'Invalid config: baseUrl must start with https://' };
+      }
+      if (!config.auth?.type || !config.auth?.fields?.length) {
+        return { error: 'Invalid config: auth must have type and fields' };
+      }
+      if (!config.actions?.length) {
+        return { error: 'Invalid config: at least one action is required' };
+      }
+      for (const action of config.actions) {
+        if (!action.id || !action.method || !action.path) {
+          return { error: `Invalid config: action missing id, method, or path` };
+        }
       }
       ctx.write({ type: 'progress', message: `Config validated for "${config.provider}"` });
 
@@ -404,10 +414,23 @@ export const integrationTools: ToolDefinition[] = [
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
       ctx.write({ type: 'progress', message: 'Config saved' });
 
-      // 3. Run generator
+      // 3. Run generator via child_process (avoids Turbopack module resolution)
       try {
-        const { generate } = require(path.join(process.cwd(), '.claude/widget-builder/scripts/generate-integration'));
-        const result = generate(configPath);
+        const { execFileSync } = await import('child_process');
+        const scriptPath = path.join(process.cwd(), '.claude/widget-builder/scripts/generate-integration.js');
+        const output = execFileSync(
+          'node',
+          [
+            '-e',
+            `
+          const { generate } = require('${scriptPath.replace(/'/g, "\\'")}');
+          const result = generate('${configPath.replace(/'/g, "\\'")}');
+          process.stdout.write(JSON.stringify(result));
+        `,
+          ],
+          { encoding: 'utf-8', timeout: 30000 }
+        );
+        const result = JSON.parse(output);
         ctx.write({ type: 'progress', message: `Plugin generated: ${result.provider}` });
       } catch (err) {
         return { error: `Generator failed: ${(err as Error).message}` };
