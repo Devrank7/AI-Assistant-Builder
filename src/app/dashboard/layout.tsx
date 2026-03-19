@@ -17,6 +17,7 @@ import {
   Users,
   CreditCard,
   Settings,
+  Download,
   Menu,
   LogOut,
 } from 'lucide-react';
@@ -35,6 +36,7 @@ const navGroups = [
     items: [
       { label: 'AI Builder', href: '/dashboard/builder', icon: Sparkles },
       { label: 'Integrations', href: '/dashboard/integrations', icon: Plug },
+      { label: 'Installation', href: '/dashboard/installation', icon: Download },
     ],
   },
   {
