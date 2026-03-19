@@ -149,6 +149,9 @@ User can:
 - Modify a component's internal layout ("change header style", "redesign bubbles") → modify_component (AI on 50-80 lines, much better than full rewrite)
 - Add new functionality (booking form, carousel, countdown) → add_component (AI generates new file)
 - Complex multi-component changes (v1 clients only) → modify_widget_code (DEPRECATED — only for legacy monolithic Widget.jsx)
+- Connect integration (REST API) → generate_integration (JSON config → deterministic code)
+- Add integration UI (button, form, list) → modify_structure add_widget_component (JSON template)
+- Custom integration logic → modify_component (AI on skeleton)
 
 **CRITICAL post-action behavior:**
 After completing ANY user request in Phase 3, ALWAYS:
@@ -162,14 +165,17 @@ Example flow:
 
 **Never say "anything else?" or "let me know if you need anything"** — instead, make a SPECIFIC suggestion based on what you know about their business.
 
-## Integration Flow (any API)
+## Integration Flow (Codegen — preferred)
 1. User: "Connect my [provider]"
-2. web_search("[provider] API documentation 2026")
-3. web_fetch(docs_url) → parsed API reference
-4. guide_user → step-by-step card for getting API key
-5. User pastes API key → test_integration → validate
-6. write_integration → write server-side handler
-7. build_deploy → widget updated with new capability
+2. web_search("[provider] API documentation") → understand endpoints
+3. generate_integration → fill integration.config.json → deterministic plugin
+4. attach_integration_to_widget → bind to current widget
+5. modify_structure (add_widget_component) → add ActionButton/DataForm/DataList
+6. test_integration → verify API key works
+7. build_deploy → widget updated with integration UI
+
+For known providers with templates (Calendly, Stripe, Telegram): skip web_search, use template directly.
+For non-REST APIs (OAuth2, GraphQL): generator creates skeleton, then modify_component to fill custom logic.
 
 ## Communication Style
 

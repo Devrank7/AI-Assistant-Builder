@@ -1,6 +1,7 @@
 // src/lib/builder/codegenPrompt.ts
 
 import { GEMINI_WIDGET_GUIDE } from './geminiWidgetGuide';
+import { INTEGRATION_GUIDE } from './geminiIntegrationGuide';
 
 export const CODEGEN_SYSTEM_PROMPT = `You are a Preact widget code generator for WinBix AI.
 
@@ -23,6 +24,23 @@ CRITICAL: Apply the INSTRUCTION faithfully. If the instruction says to remove so
 
 OUTPUT: Return ONLY the complete modified file content. No explanations, no markdown fences, no comments about changes.`;
 
+function isIntegrationRelated(msg: string): boolean {
+  const keywords = [
+    'integrat',
+    'connect',
+    'api',
+    'webhook',
+    'calendly',
+    'stripe',
+    'hubspot',
+    'crm',
+    'payment',
+    'booking',
+  ];
+  const lower = msg.toLowerCase();
+  return keywords.some((k) => lower.includes(k));
+}
+
 export function buildCodegenUserPrompt(params: {
   currentCode: string;
   instruction: string;
@@ -37,6 +55,10 @@ export function buildCodegenUserPrompt(params: {
   }
   if (params.widgetConfig) {
     prompt += `WIDGET CONFIG:\n\`\`\`json\n${params.widgetConfig}\n\`\`\`\n\n`;
+  }
+
+  if (isIntegrationRelated(params.instruction)) {
+    prompt += `\n${INTEGRATION_GUIDE}\n\n`;
   }
 
   prompt += `Return the COMPLETE modified file. Include ALL parts of the file (imports, hooks, JSX) — but if the instruction asks to remove a UI element, actually remove that element's JSX code.`;
