@@ -355,4 +355,71 @@ export const integrationTools: ToolDefinition[] = [
       };
     },
   },
+  {
+    name: 'generate_integration',
+    description:
+      'Generate a complete integration plugin from a JSON config. Creates manifest and plugin code deterministically — NO AI hallucination. For standard REST APIs, fill the integration.config.json and use this tool. DO NOT write plugin code manually.',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        config: {
+          type: 'string',
+          description:
+            'JSON string of integration.config.json. Must include: provider, name, baseUrl, auth (type, fields), actions (id, name, method, path), healthCheck (method, path, successField).',
+        },
+      },
+      required: ['clientId', 'config'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      const clientId = args.clientId as string;
+      let config: any;
+      try {
+        config = JSON.parse(args.config as string);
+      } catch {
+        return { error: 'Invalid JSON in config parameter' };
+      }
+
+      // 1. Validate
+      const { validateIntegrationConfig } = require(
+        path.join(process.cwd(), '.claude/widget-builder/scripts/integration-config-schema')
+      );
+      const validation = validateIntegrationConfig(config);
+      if (!validation.valid) {
+        return { error: `Invalid config: ${validation.errors.join('; ')}` };
+      }
+      ctx.write({ type: 'progress', message: `Config validated for "${config.provider}"` });
+
+      // 2. Save config to client directory
+      const configDir = path.join(
+        process.cwd(),
+        '.claude/widget-builder/clients',
+        clientId,
+        'integrations',
+        config.provider
+      );
+      fs.mkdirSync(configDir, { recursive: true });
+      const configPath = path.join(configDir, 'integration.config.json');
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+      ctx.write({ type: 'progress', message: 'Config saved' });
+
+      // 3. Run generator
+      try {
+        const { generate } = require(path.join(process.cwd(), '.claude/widget-builder/scripts/generate-integration'));
+        const result = generate(configPath);
+        ctx.write({ type: 'progress', message: `Plugin generated: ${result.provider}` });
+      } catch (err) {
+        return { error: `Generator failed: ${(err as Error).message}` };
+      }
+
+      // 4. Return success
+      return {
+        success: true,
+        provider: config.provider,
+        actions: config.actions.map((a: any) => a.id),
+        message: `Integration "${config.name}" generated. Plugin registered. Use attach_integration_to_widget to bind it to the widget, then add_widget_component to add UI.`,
+      };
+    },
+  },
 ];
