@@ -168,11 +168,11 @@ export function SkeletonCard({ lines = 3, className }: { lines?: number; classNa
   return (
     <div className={cn('card-premium animate-pulse space-y-4 p-6', className)}>
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-white/[0.06]" />
-        <div className="h-4 w-32 rounded-lg bg-white/[0.06]" />
+        <div className="h-10 w-10 rounded-xl bg-gray-200/60 dark:bg-white/[0.06]" />
+        <div className="h-4 w-32 rounded-lg bg-gray-200/60 dark:bg-white/[0.06]" />
       </div>
       {Array.from({ length: lines }).map((_, i) => (
-        <div key={i} className="h-3 rounded-lg bg-white/[0.04]" style={{ width: `${85 - i * 15}%` }} />
+        <div key={i} className="h-3 rounded-lg bg-gray-100 dark:bg-white/[0.04]" style={{ width: `${85 - i * 15}%` }} />
       ))}
     </div>
   );
@@ -207,7 +207,7 @@ export function AnimatedTabs({
           {activeTab === tab.id && (
             <motion.div
               layoutId="tab-indicator"
-              className="absolute inset-0 rounded-xl bg-white/[0.08]"
+              className="absolute inset-0 rounded-xl bg-gray-900/[0.06] dark:bg-white/[0.08]"
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             />
           )}

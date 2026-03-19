@@ -86,10 +86,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             >
               {icons[t.type]}
             </span>
-            <span className="text-sm font-medium text-white/90">{t.message}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white/90">{t.message}</span>
             <button
               onClick={() => removeToast(t.id)}
-              className="ml-2 flex-shrink-0 text-white/40 transition-colors hover:text-white/80"
+              className="ml-2 flex-shrink-0 text-gray-400 transition-colors hover:text-gray-600 dark:text-white/40 dark:hover:text-white/80"
               aria-label="Закрыть"
             >
               ✕

@@ -52,8 +52,8 @@ function cleanup() {
 
   // 4. Clean up global state the widget may have set
   if (typeof window !== 'undefined') {
-    delete (window as Record<string, unknown>).__WIDGET_CONFIG__;
-    delete (window as Record<string, unknown>).__WIDGET_CSS__;
+    delete (window as unknown as Record<string, unknown>).__WIDGET_CONFIG__;
+    delete (window as unknown as Record<string, unknown>).__WIDGET_CSS__;
   }
 
   // 5. Clear widget localStorage entries (old chat messages + session IDs)

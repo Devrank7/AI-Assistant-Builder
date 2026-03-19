@@ -1,5 +1,8 @@
 import { IntegrationPlugin, ConnectionResult, HealthResult, ExecutionResult } from '../../core/types';
-import manifest from './manifest.json';
+import manifestJson from './manifest.json';
+import type { PluginManifest } from '../../core/types';
+
+const manifest = manifestJson as unknown as PluginManifest;
 
 // Auto-generated from integration.config.json — DO NOT EDIT MANUALLY
 // To update: modify integration.config.json and re-run generate-integration.js
@@ -187,7 +190,9 @@ export const calendlyPlugin: IntegrationPlugin = {
   },
 
   describeCapabilities(): string {
-    return config.actions.map((a) => `${a.id}: ${a.description || a.name}`).join('; ');
+    return config.actions
+      .map((a: { id: string; name: string; description?: string }) => `${a.id}: ${a.description || a.name}`)
+      .join('; ');
   },
 };
 

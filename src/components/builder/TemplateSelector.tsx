@@ -5,6 +5,7 @@ import { Syne } from 'next/font/google';
 import { MessageSquare, HelpCircle, ClipboardList } from 'lucide-react';
 import { WIDGET_TYPES, type WidgetTypeId } from '@/lib/builder/widgetTypes';
 import { playClickSound } from '@/lib/sounds';
+import { useTheme } from '@/components/ThemeProvider';
 
 const WIDGET_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   'message-square': MessageSquare,
@@ -51,6 +52,8 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
   const [selectedType, setSelectedType] = useState<WidgetTypeId>('ai_chat');
   const [hoveredType, setHoveredType] = useState<WidgetTypeId | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   useEffect(() => {
     setMounted(true);
@@ -65,10 +68,10 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
   return (
     <div
       className="relative flex h-full flex-col items-center overflow-x-hidden overflow-y-auto"
-      style={{ background: '#06070b' }}
+      style={{ background: isDark ? '#06070b' : '#f8fafc' }}
     >
       {/* === Layered atmospheric background === */}
-      <div className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none absolute inset-0" style={{ opacity: isDark ? 1 : 0.4 }}>
         {/* Noise texture overlay */}
         <div
           className="absolute inset-0 opacity-[0.35]"
@@ -232,7 +235,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
               fontSize: 'clamp(34px, 5.5vw, 54px)',
               fontWeight: 800,
               lineHeight: 1.1,
-              color: '#f0f1f4',
+              color: isDark ? '#f0f1f4' : '#111827',
               letterSpacing: '-0.03em',
             }}
           >
@@ -268,7 +271,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                 }}
               />
             </span>
-            <span style={{ color: '#3a4058' }}>?</span>
+            <span style={{ color: isDark ? '#3a4058' : '#9CA3AF' }}>?</span>
           </h1>
         </div>
 
@@ -279,7 +282,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
             fontFamily: "'Outfit', sans-serif",
             fontSize: '15px',
             lineHeight: 1.7,
-            color: '#5a6178',
+            color: isDark ? '#5a6178' : '#6B7280',
             letterSpacing: '0.01em',
             opacity: mounted ? 1 : 0,
             transform: mounted ? 'translateY(0)' : 'translateY(16px)',
@@ -316,19 +319,31 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   className="relative overflow-hidden rounded-xl px-3 py-3.5 text-center transition-all duration-300"
                   style={{
                     background: isSelected
-                      ? 'linear-gradient(135deg, rgba(6,182,212,0.10), rgba(139,92,246,0.05))'
+                      ? isDark
+                        ? 'linear-gradient(135deg, rgba(6,182,212,0.10), rgba(139,92,246,0.05))'
+                        : 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(139,92,246,0.04))'
                       : isHovered
-                        ? 'rgba(255,255,255,0.035)'
-                        : 'rgba(255,255,255,0.02)',
+                        ? isDark
+                          ? 'rgba(255,255,255,0.035)'
+                          : 'rgba(0,0,0,0.03)'
+                        : isDark
+                          ? 'rgba(255,255,255,0.02)'
+                          : 'rgba(0,0,0,0.02)',
                     border: isSelected
                       ? '1px solid rgba(6,182,212,0.3)'
                       : isHovered
-                        ? '1px solid rgba(255,255,255,0.10)'
-                        : '1px solid rgba(255,255,255,0.05)',
+                        ? isDark
+                          ? '1px solid rgba(255,255,255,0.10)'
+                          : '1px solid rgba(0,0,0,0.10)'
+                        : isDark
+                          ? '1px solid rgba(255,255,255,0.05)'
+                          : '1px solid rgba(0,0,0,0.06)',
                     boxShadow: isSelected
-                      ? '0 0 24px rgba(6,182,212,0.08), 0 8px 32px rgba(6,182,212,0.04), inset 0 1px 0 rgba(255,255,255,0.04)'
+                      ? '0 0 24px rgba(6,182,212,0.08), 0 8px 32px rgba(6,182,212,0.04)'
                       : isHovered
-                        ? '0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.02)'
+                        ? isDark
+                          ? '0 4px 16px rgba(0,0,0,0.2)'
+                          : '0 4px 16px rgba(0,0,0,0.06)'
                         : 'none',
                     backdropFilter: 'blur(12px)',
                     transform:
@@ -361,7 +376,15 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                     className="block text-xs font-medium"
                     style={{
                       fontFamily: "'Outfit', sans-serif",
-                      color: isSelected ? '#22d3ee' : isHovered ? '#8a90a8' : '#5a6178',
+                      color: isSelected
+                        ? '#0891b2'
+                        : isHovered
+                          ? isDark
+                            ? '#8a90a8'
+                            : '#4B5563'
+                          : isDark
+                            ? '#5a6178'
+                            : '#6B7280',
                       letterSpacing: '0.02em',
                     }}
                   >
@@ -387,12 +410,24 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
               className="relative overflow-hidden rounded-2xl transition-all duration-500"
               style={{
                 background: isFocused
-                  ? 'linear-gradient(135deg, rgba(6,182,212,0.05), rgba(139,92,246,0.025), rgba(6,182,212,0.03))'
-                  : 'linear-gradient(135deg, rgba(255,255,255,0.025), rgba(255,255,255,0.015))',
-                border: isFocused ? '1px solid rgba(6,182,212,0.25)' : '1px solid rgba(255,255,255,0.06)',
+                  ? isDark
+                    ? 'linear-gradient(135deg, rgba(6,182,212,0.05), rgba(139,92,246,0.025), rgba(6,182,212,0.03))'
+                    : '#ffffff'
+                  : isDark
+                    ? 'linear-gradient(135deg, rgba(255,255,255,0.025), rgba(255,255,255,0.015))'
+                    : '#ffffff',
+                border: isFocused
+                  ? '1px solid rgba(6,182,212,0.25)'
+                  : isDark
+                    ? '1px solid rgba(255,255,255,0.06)'
+                    : '1px solid #E5E7EB',
                 boxShadow: isFocused
-                  ? '0 0 0 1px rgba(6,182,212,0.08), 0 8px 40px rgba(6,182,212,0.08), 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)'
-                  : '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.02)',
+                  ? isDark
+                    ? '0 0 0 1px rgba(6,182,212,0.08), 0 8px 40px rgba(6,182,212,0.08), 0 20px 60px rgba(0,0,0,0.3)'
+                    : '0 0 0 2px rgba(6,182,212,0.15), 0 8px 40px rgba(6,182,212,0.06)'
+                  : isDark
+                    ? '0 4px 24px rgba(0,0,0,0.2)'
+                    : '0 2px 12px rgba(0,0,0,0.06)',
                 backdropFilter: 'blur(24px)',
               }}
             >
@@ -420,7 +455,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   <svg
                     className="h-[18px] w-[18px] transition-all duration-400"
                     style={{
-                      color: isFocused ? '#22d3ee' : '#3a3f52',
+                      color: isFocused ? '#0891b2' : isDark ? '#3a3f52' : '#9CA3AF',
                       filter: isFocused ? 'drop-shadow(0 0 4px rgba(34,211,238,0.3))' : 'none',
                     }}
                     fill="none"
@@ -446,7 +481,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   placeholder="your-website.com or describe your business..."
                   className="min-w-0 flex-1 bg-transparent py-3.5 text-[14px] outline-none placeholder:transition-colors placeholder:duration-300"
                   style={{
-                    color: '#e8eaed',
+                    color: isDark ? '#e8eaed' : '#111827',
                     fontFamily: "'Outfit', sans-serif",
                     letterSpacing: '0.01em',
                   }}
@@ -462,8 +497,10 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                     letterSpacing: '0.02em',
                     background: url.trim()
                       ? 'linear-gradient(135deg, #0891b2, #06b6d4, #0e7490)'
-                      : 'rgba(255,255,255,0.03)',
-                    color: url.trim() ? '#fff' : '#2a2f42',
+                      : isDark
+                        ? 'rgba(255,255,255,0.03)'
+                        : 'rgba(0,0,0,0.04)',
+                    color: url.trim() ? '#fff' : isDark ? '#2a2f42' : '#9CA3AF',
                     boxShadow: url.trim()
                       ? '0 4px 20px rgba(6,182,212,0.3), 0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)'
                       : 'none',
@@ -508,7 +545,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
               style={{
                 fontFamily: "'Outfit', sans-serif",
                 fontSize: '11px',
-                color: '#2a2f42',
+                color: isDark ? '#2a2f42' : '#9CA3AF',
                 letterSpacing: '0.04em',
               }}
             >
@@ -518,12 +555,14 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   display: 'inline-block',
                   padding: '2px 7px',
                   borderRadius: '5px',
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.02))',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)',
+                  background: isDark
+                    ? 'linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.02))'
+                    : 'linear-gradient(to bottom, #f3f4f6, #e5e7eb)',
+                  border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #d1d5db',
+                  boxShadow: isDark ? '0 1px 2px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.05)',
                   fontSize: '10px',
                   fontFamily: "'Sora', monospace",
-                  color: '#4a5068',
+                  color: isDark ? '#4a5068' : '#6B7280',
                 }}
               >
                 Enter
@@ -554,8 +593,19 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   boxShadow: '0 0 12px rgba(6,182,212,0.06)',
                 }}
               >
-                <svg className="h-3 w-3" style={{ color: '#67e8f9' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="h-3 w-3"
+                  style={{ color: '#67e8f9' }}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
               <span
@@ -564,7 +614,7 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   fontSize: '13px',
                   fontWeight: 600,
                   letterSpacing: '0.04em',
-                  color: '#8b92a8',
+                  color: isDark ? '#8b92a8' : '#6B7280',
                 }}
               >
                 Recent Projects
@@ -575,9 +625,9 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   fontFamily: "'Outfit', sans-serif",
                   fontSize: '10px',
                   fontWeight: 500,
-                  color: '#4a5068',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.04)',
+                  color: isDark ? '#4a5068' : '#6B7280',
+                  background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)',
+                  border: isDark ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(0,0,0,0.08)',
                 }}
               >
                 {sessions.length}
@@ -585,7 +635,10 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
             </div>
             {onNewSession && (
               <button
-                onClick={() => { playClickSound(); onNewSession(); }}
+                onClick={() => {
+                  playClickSound();
+                  onNewSession();
+                }}
                 className="group/new flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium transition-all duration-400"
                 style={{
                   fontFamily: "'Outfit', sans-serif",
@@ -595,19 +648,28 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   backdropFilter: 'blur(12px)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(135deg, rgba(6,182,212,0.14), rgba(139,92,246,0.06))';
+                  e.currentTarget.style.background =
+                    'linear-gradient(135deg, rgba(6,182,212,0.14), rgba(139,92,246,0.06))';
                   e.currentTarget.style.borderColor = 'rgba(6,182,212,0.28)';
-                  e.currentTarget.style.boxShadow = '0 0 24px rgba(6,182,212,0.10), inset 0 1px 0 rgba(255,255,255,0.04)';
+                  e.currentTarget.style.boxShadow =
+                    '0 0 24px rgba(6,182,212,0.10), inset 0 1px 0 rgba(255,255,255,0.04)';
                   e.currentTarget.style.transform = 'translateY(-1px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.03))';
+                  e.currentTarget.style.background =
+                    'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(139,92,246,0.03))';
                   e.currentTarget.style.borderColor = 'rgba(6,182,212,0.10)';
                   e.currentTarget.style.boxShadow = 'none';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                <svg className="h-3.5 w-3.5 transition-transform duration-300 group-hover/new:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  className="h-3.5 w-3.5 transition-transform duration-300 group-hover/new:rotate-90"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
                 New Project
@@ -616,30 +678,42 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
           </div>
 
           {/* Cards grid */}
-          <div className="grid gap-3" style={{ gridTemplateColumns: sessions.length === 1 ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+          <div
+            className="grid gap-3"
+            style={{ gridTemplateColumns: sessions.length === 1 ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))' }}
+          >
             {sessions.slice(0, 6).map((session, i) => {
               const timeAgo = getTimeAgo(session.updatedAt);
               const isDeployed = session.status === 'deployed';
               const isBuilding = session.status === 'building';
               const statusColor = isDeployed ? '#34d399' : isBuilding ? '#fbbf24' : '#67e8f9';
-              const statusGlow = isDeployed ? 'rgba(52,211,153,0.15)' : isBuilding ? 'rgba(251,191,36,0.15)' : 'rgba(103,232,249,0.15)';
+              const statusGlow = isDeployed
+                ? 'rgba(52,211,153,0.15)'
+                : isBuilding
+                  ? 'rgba(251,191,36,0.15)'
+                  : 'rgba(103,232,249,0.15)';
               const statusLabel = isDeployed ? 'Live' : isBuilding ? 'Building' : 'Draft';
               const accentGradient = isDeployed
                 ? 'linear-gradient(135deg, rgba(52,211,153,0.08), rgba(6,182,212,0.04))'
                 : isBuilding
-                ? 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,146,60,0.04))'
-                : 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(139,92,246,0.04))';
+                  ? 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,146,60,0.04))'
+                  : 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(139,92,246,0.04))';
 
               return (
                 <button
                   key={session._id}
-                  onClick={() => { playClickSound(); onSelectSession?.(session._id); }}
+                  onClick={() => {
+                    playClickSound();
+                    onSelectSession?.(session._id);
+                  }}
                   className="group relative flex flex-col rounded-2xl p-[1px] text-left transition-all duration-500"
                   style={{
                     opacity: mounted ? 1 : 0,
                     transform: mounted ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.97)',
                     transitionDelay: `${450 + i * 80}ms`,
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01))',
+                    background: isDark
+                      ? 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01))'
+                      : 'linear-gradient(135deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02))',
                   }}
                   onMouseEnter={(e) => {
                     const card = e.currentTarget;
@@ -649,7 +723,9 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   }}
                   onMouseLeave={(e) => {
                     const card = e.currentTarget;
-                    card.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01))';
+                    card.style.background = isDark
+                      ? 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01))'
+                      : 'linear-gradient(135deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02))';
                     card.style.transform = 'translateY(0) scale(1)';
                     card.style.boxShadow = 'none';
                   }}
@@ -658,7 +734,9 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                   <div
                     className="relative flex flex-1 flex-col overflow-hidden rounded-[15px] px-5 py-4"
                     style={{
-                      background: 'linear-gradient(160deg, rgba(12,14,22,0.92), rgba(8,10,18,0.97))',
+                      background: isDark
+                        ? 'linear-gradient(160deg, rgba(12,14,22,0.92), rgba(8,10,18,0.97))'
+                        : 'linear-gradient(160deg, rgba(255,255,255,0.95), rgba(248,250,252,0.98))',
                       backdropFilter: 'blur(20px)',
                     }}
                   >
@@ -679,16 +757,49 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                         }}
                       >
                         {isDeployed ? (
-                          <svg className="h-4.5 w-4.5" style={{ color: statusColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <svg
+                            className="h-4.5 w-4.5"
+                            style={{ color: statusColor }}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                           </svg>
                         ) : isBuilding ? (
-                          <svg className="h-4.5 w-4.5 animate-spin" style={{ color: statusColor, animationDuration: '3s' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.183" />
+                          <svg
+                            className="h-4.5 w-4.5 animate-spin"
+                            style={{ color: statusColor, animationDuration: '3s' }}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.183"
+                            />
                           </svg>
                         ) : (
-                          <svg className="h-4.5 w-4.5" style={{ color: statusColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                          <svg
+                            className="h-4.5 w-4.5"
+                            style={{ color: statusColor }}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+                            />
                           </svg>
                         )}
                         {/* Pulse ring for deployed */}
@@ -736,8 +847,12 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
 
                     {/* Widget name */}
                     <h3
-                      className="mb-1 truncate text-[14px] font-semibold transition-colors duration-300 group-hover:text-white"
-                      style={{ color: '#d1d5e0', fontFamily: "'Sora', sans-serif", lineHeight: 1.3 }}
+                      className="mb-1 truncate text-[14px] font-semibold transition-colors duration-300"
+                      style={{
+                        color: isDark ? '#d1d5e0' : '#111827',
+                        fontFamily: "'Sora', sans-serif",
+                        lineHeight: 1.3,
+                      }}
                     >
                       {session.widgetName || session.preview || 'Untitled Project'}
                     </h3>
@@ -745,18 +860,43 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
                     {/* Meta row */}
                     <div className="mt-auto flex items-center gap-2 pt-3">
                       <div className="flex items-center gap-1.5">
-                        <svg className="h-3 w-3" style={{ color: '#3a4058' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                        <svg
+                          className="h-3 w-3"
+                          style={{ color: isDark ? '#3a4058' : '#9CA3AF' }}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={1.5}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+                          />
                         </svg>
-                        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '11px', color: '#3a4058', fontWeight: 500 }}>
+                        <span
+                          style={{
+                            fontFamily: "'Outfit', sans-serif",
+                            fontSize: '11px',
+                            color: isDark ? '#3a4058' : '#9CA3AF',
+                            fontWeight: 500,
+                          }}
+                        >
                           {session.messageCount}
                         </span>
                       </div>
                       <div
                         className="h-3"
-                        style={{ width: '1px', background: 'rgba(255,255,255,0.04)' }}
+                        style={{ width: '1px', background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.08)' }}
                       />
-                      <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '11px', color: '#2e3348', fontWeight: 500 }}>
+                      <span
+                        style={{
+                          fontFamily: "'Outfit', sans-serif",
+                          fontSize: '11px',
+                          color: isDark ? '#2e3348' : '#9CA3AF',
+                          fontWeight: 500,
+                        }}
+                      >
                         {timeAgo}
                       </span>
 
@@ -807,7 +947,9 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
       <div
         className="pointer-events-none absolute right-0 bottom-0 left-0 h-20"
         style={{
-          background: 'linear-gradient(to top, #06070b, transparent)',
+          background: isDark
+            ? 'linear-gradient(to top, #06070b, transparent)'
+            : 'linear-gradient(to top, #f8fafc, transparent)',
         }}
       />
 
@@ -835,10 +977,10 @@ export default function TemplateSelector({ onSubmitUrl, sessions, onSelectSessio
 
         /* Placeholder color */
         input::placeholder {
-          color: #2e3346 !important;
+          color: ${isDark ? '#2e3346' : '#9CA3AF'} !important;
         }
         input:focus::placeholder {
-          color: #3a4058 !important;
+          color: ${isDark ? '#3a4058' : '#6B7280'} !important;
         }
       `}</style>
     </div>

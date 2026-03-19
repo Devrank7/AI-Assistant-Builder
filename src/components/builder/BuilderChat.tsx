@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useTheme } from '@/components/ThemeProvider';
 import { useVoiceInput } from './useVoiceInput';
 import {
   playMessageSound,
@@ -80,6 +81,8 @@ export default function BuilderChat({
   suggestions,
   proactiveSuggestions,
 }: Props) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const [input, setInput] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -229,7 +232,10 @@ export default function BuilderChat({
   };
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden" style={{ background: '#08090d' }}>
+    <div
+      className="relative flex h-full flex-col overflow-hidden"
+      style={{ background: isDark ? '#08090d' : '#f8fafc' }}
+    >
       {/* Patterned background layer */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {/* SVG geometric pattern - subtle constellation/circuit style */}
@@ -237,7 +243,7 @@ export default function BuilderChat({
         <div
           className="absolute inset-0"
           style={{
-            opacity: 0.45,
+            opacity: isDark ? 0.45 : 0.25,
             backgroundImage: `
               radial-gradient(circle at 20px 20px, #0e7490 0.8px, transparent 0.8px),
               radial-gradient(circle at 60px 60px, #0e7490 0.8px, transparent 0.8px),
@@ -254,7 +260,9 @@ export default function BuilderChat({
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse at 50% 40%, transparent 40%, #08090d 90%)',
+            background: isDark
+              ? 'radial-gradient(ellipse at 50% 40%, transparent 40%, #08090d 90%)'
+              : 'radial-gradient(ellipse at 50% 40%, transparent 40%, #f8fafc 90%)',
           }}
         />
         {/* Ambient top glow */}
@@ -332,13 +340,15 @@ export default function BuilderChat({
                             '0 4px 28px rgba(6,182,212,0.15), 0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
                         }
                       : {
-                          background: 'rgba(255,255,255,0.028)',
-                          border: '1px solid rgba(255,255,255,0.07)',
+                          background: isDark ? 'rgba(255,255,255,0.028)' : 'rgba(255,255,255,0.95)',
+                          border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.08)',
                           borderRadius: '20px 20px 20px 6px',
                           padding: '15px 20px',
-                          color: '#c8cdd8',
+                          color: isDark ? '#c8cdd8' : '#111827',
                           backdropFilter: 'blur(16px)',
-                          boxShadow: '0 2px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.03)',
+                          boxShadow: isDark
+                            ? '0 2px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.03)'
+                            : '0 2px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)',
                         }
                   }
                 >
@@ -481,20 +491,20 @@ export default function BuilderChat({
                     <div
                       className="mt-4 rounded-xl p-4"
                       style={{
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                        border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
                         backdropFilter: 'blur(8px)',
                       }}
                     >
                       <p
                         className="mb-3 text-sm font-semibold capitalize"
-                        style={{ color: '#e8eaed', fontFamily: "'Outfit', sans-serif" }}
+                        style={{ color: isDark ? '#e8eaed' : '#111827', fontFamily: "'Outfit', sans-serif" }}
                       >
                         {msg.crmInstruction.provider} Setup
                       </p>
                       <ol
                         className="list-inside list-decimal space-y-2 text-xs leading-relaxed"
-                        style={{ color: '#8b92a5' }}
+                        style={{ color: isDark ? '#8b92a5' : '#6B7280' }}
                       >
                         {msg.crmInstruction.steps.map((step, k) => (
                           <li key={k}>{step}</li>
@@ -543,34 +553,46 @@ export default function BuilderChat({
                 <div
                   className="thinking-bubble max-w-[75%] overflow-hidden"
                   style={{
-                    background: 'rgba(255,255,255,0.028)',
-                    border: '1px solid rgba(255,255,255,0.07)',
+                    background: isDark ? 'rgba(255,255,255,0.028)' : 'rgba(255,255,255,0.95)',
+                    border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.08)',
                     borderRadius: '20px 20px 20px 6px',
                     padding: '18px 22px',
                     backdropFilter: 'blur(16px)',
-                    boxShadow: '0 2px 20px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.03)',
+                    boxShadow: isDark
+                      ? '0 2px 20px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.03)'
+                      : '0 2px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)',
                   }}
                 >
                   <div className="space-y-3">
                     {/* Shimmer lines */}
                     <div
                       className="shimmer-line h-[10px] w-52 rounded-full"
-                      style={{ background: 'rgba(255,255,255,0.04)' }}
+                      style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)' }}
                     />
                     <div
                       className="shimmer-line h-[10px] w-36 rounded-full"
-                      style={{ background: 'rgba(255,255,255,0.04)', animationDelay: '0.15s' }}
+                      style={{
+                        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)',
+                        animationDelay: '0.15s',
+                      }}
                     />
                     <div
                       className="shimmer-line h-[10px] w-44 rounded-full"
-                      style={{ background: 'rgba(255,255,255,0.04)', animationDelay: '0.3s' }}
+                      style={{
+                        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)',
+                        animationDelay: '0.3s',
+                      }}
                     />
                   </div>
                   {/* Typing indicator below skeleton */}
                   <div className="mt-5 flex items-center gap-2.5">
                     <span
                       className="thinking-label text-[11px] font-medium tracking-wider uppercase"
-                      style={{ color: '#3d4560', fontFamily: "'Outfit', sans-serif", letterSpacing: '0.08em' }}
+                      style={{
+                        color: isDark ? '#3d4560' : '#9CA3AF',
+                        fontFamily: "'Outfit', sans-serif",
+                        letterSpacing: '0.08em',
+                      }}
                     >
                       Thinking
                     </span>
@@ -633,14 +655,14 @@ export default function BuilderChat({
                   </span>
                   <span
                     className="text-xs tabular-nums"
-                    style={{ color: '#4a5068', fontFamily: "'Outfit', sans-serif" }}
+                    style={{ color: isDark ? '#4a5068' : '#9CA3AF', fontFamily: "'Outfit', sans-serif" }}
                   >
                     {knowledgeProgress.uploaded}/{knowledgeProgress.total}
                   </span>
                 </div>
                 <div
                   className="h-1.5 w-full overflow-hidden rounded-full"
-                  style={{ background: 'rgba(255,255,255,0.05)' }}
+                  style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.08)' }}
                 >
                   <div
                     className="h-full rounded-full transition-all duration-700 ease-out"
@@ -705,24 +727,24 @@ export default function BuilderChat({
                   className="chip-appear rounded-full px-4 py-2.5 text-xs font-medium transition-all duration-300"
                   style={{
                     animationDelay: `${i * 0.08}s`,
-                    background: 'rgba(255,255,255,0.025)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    color: '#8b92a5',
+                    background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.03)',
+                    border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+                    color: isDark ? '#8b92a5' : '#6B7280',
                     fontFamily: "'Outfit', sans-serif",
                     letterSpacing: '0.01em',
                     backdropFilter: 'blur(8px)',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = 'rgba(6,182,212,0.35)';
-                    e.currentTarget.style.color = '#67e8f9';
-                    e.currentTarget.style.background = 'rgba(6,182,212,0.07)';
+                    e.currentTarget.style.color = isDark ? '#67e8f9' : '#0891b2';
+                    e.currentTarget.style.background = isDark ? 'rgba(6,182,212,0.07)' : 'rgba(6,182,212,0.08)';
                     e.currentTarget.style.boxShadow = '0 0 24px rgba(6,182,212,0.10), 0 4px 16px rgba(0,0,0,0.1)';
                     e.currentTarget.style.transform = 'translateY(-1px) scale(1.02)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                    e.currentTarget.style.color = '#8b92a5';
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.025)';
+                    e.currentTarget.style.borderColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+                    e.currentTarget.style.color = isDark ? '#8b92a5' : '#6B7280';
+                    e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.03)';
                     e.currentTarget.style.boxShadow = 'none';
                     e.currentTarget.style.transform = 'translateY(0) scale(1)';
                   }}
@@ -742,8 +764,8 @@ export default function BuilderChat({
                   className="suggestion-appear rounded-2xl p-4"
                   style={{
                     animationDelay: `${idx * 0.12}s`,
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(139,92,246,0.12)',
+                    background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.95)',
+                    border: isDark ? '1px solid rgba(139,92,246,0.12)' : '1px solid rgba(139,92,246,0.18)',
                     backdropFilter: 'blur(8px)',
                   }}
                 >
@@ -771,7 +793,7 @@ export default function BuilderChat({
                     </span>
                     <span
                       className="text-sm font-medium"
-                      style={{ color: '#e0e4ec', fontFamily: "'Outfit', sans-serif" }}
+                      style={{ color: isDark ? '#e0e4ec' : '#111827', fontFamily: "'Outfit', sans-serif" }}
                     >
                       {s.title}
                     </span>
@@ -824,7 +846,11 @@ export default function BuilderChat({
         {/* Top fade gradient */}
         <div
           className="pointer-events-none absolute -top-16 right-0 left-0 h-16"
-          style={{ background: 'linear-gradient(to top, #08090d, transparent)' }}
+          style={{
+            background: isDark
+              ? 'linear-gradient(to top, #08090d, transparent)'
+              : 'linear-gradient(to top, #f8fafc, transparent)',
+          }}
         />
 
         {/* File preview badge */}
@@ -832,8 +858,8 @@ export default function BuilderChat({
           <div
             className="mx-auto mb-2 flex max-w-2xl items-center gap-2 rounded-xl px-3 py-2"
             style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+              border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
               backdropFilter: 'blur(12px)',
             }}
           >
@@ -853,7 +879,7 @@ export default function BuilderChat({
             </svg>
             <span
               className="min-w-0 flex-1 truncate text-xs"
-              style={{ color: '#e0e4ec', fontFamily: "'Outfit', sans-serif" }}
+              style={{ color: isDark ? '#e0e4ec' : '#111827', fontFamily: "'Outfit', sans-serif" }}
             >
               {attachedFile.name.length > 30 ? attachedFile.name.slice(0, 27) + '...' : attachedFile.name}
             </span>
@@ -883,11 +909,25 @@ export default function BuilderChat({
           onSubmit={handleSubmit}
           className="input-form mx-auto max-w-2xl overflow-hidden rounded-2xl transition-all duration-500"
           style={{
-            background: isFocused ? 'rgba(6,182,212,0.035)' : 'rgba(255,255,255,0.025)',
-            border: isFocused ? '1px solid rgba(6,182,212,0.25)' : '1px solid rgba(255,255,255,0.07)',
+            background: isFocused
+              ? isDark
+                ? 'rgba(6,182,212,0.035)'
+                : 'rgba(6,182,212,0.04)'
+              : isDark
+                ? 'rgba(255,255,255,0.025)'
+                : 'rgba(255,255,255,0.95)',
+            border: isFocused
+              ? '1px solid rgba(6,182,212,0.25)'
+              : isDark
+                ? '1px solid rgba(255,255,255,0.07)'
+                : '1px solid rgba(0,0,0,0.1)',
             boxShadow: isFocused
-              ? '0 0 48px rgba(6,182,212,0.08), 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(6,182,212,0.06)'
-              : '0 4px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.03)',
+              ? isDark
+                ? '0 0 48px rgba(6,182,212,0.08), 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(6,182,212,0.06)'
+                : '0 0 48px rgba(6,182,212,0.06), 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(6,182,212,0.06)'
+              : isDark
+                ? '0 4px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.03)'
+                : '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)',
             backdropFilter: 'blur(20px)',
           }}
         >
@@ -908,7 +948,7 @@ export default function BuilderChat({
               className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300 disabled:opacity-30"
               style={{
                 background: attachedFile ? 'rgba(6,182,212,0.12)' : 'transparent',
-                color: attachedFile ? '#22d3ee' : '#4a5068',
+                color: attachedFile ? '#22d3ee' : isDark ? '#4a5068' : '#9CA3AF',
               }}
             >
               <svg
@@ -932,7 +972,7 @@ export default function BuilderChat({
                 className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300"
                 style={{
                   background: isListening ? 'rgba(239,68,68,0.12)' : 'transparent',
-                  color: isListening ? '#f87171' : '#4a5068',
+                  color: isListening ? '#f87171' : isDark ? '#4a5068' : '#9CA3AF',
                 }}
               >
                 <svg
@@ -966,7 +1006,7 @@ export default function BuilderChat({
               disabled={isStreaming}
               className="min-w-0 flex-1 bg-transparent py-2.5 text-[13.5px] outline-none disabled:opacity-40"
               style={{
-                color: '#e0e4ec',
+                color: isDark ? '#e0e4ec' : '#111827',
                 fontFamily: "'Outfit', sans-serif",
                 letterSpacing: '0.01em',
                 caretColor: '#22d3ee',
@@ -978,7 +1018,7 @@ export default function BuilderChat({
               className="send-btn flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-500 disabled:cursor-not-allowed disabled:opacity-20"
               style={{
                 background: input.trim() ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'transparent',
-                color: input.trim() ? '#fff' : '#4a5068',
+                color: input.trim() ? '#fff' : isDark ? '#4a5068' : '#9CA3AF',
                 boxShadow: input.trim() ? '0 2px 20px rgba(6,182,212,0.30), 0 0 0 1px rgba(6,182,212,0.1)' : 'none',
                 transform: input.trim() ? 'scale(1)' : 'scale(0.92)',
               }}
@@ -1050,7 +1090,7 @@ export default function BuilderChat({
           50% { background-position: 100% 50%; }
         }
         .shimmer-line {
-          background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(6,182,212,0.10) 40%, rgba(255,255,255,0.03) 80%) !important;
+          background-image: linear-gradient(90deg, ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)'} 0%, rgba(6,182,212,0.10) 40%, ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)'} 80%) !important;
           background-size: 200px 100%;
           animation: shimmer 2s ease-in-out infinite;
         }
@@ -1121,7 +1161,7 @@ export default function BuilderChat({
           left: 0;
           right: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+          background: linear-gradient(90deg, transparent, ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}, transparent);
           border-radius: inherit;
           pointer-events: none;
         }
@@ -1139,35 +1179,35 @@ export default function BuilderChat({
 
         /* Placeholder styling */
         .input-form input::placeholder {
-          color: #3d4560;
+          color: ${isDark ? '#3d4560' : '#9CA3AF'};
           transition: color 0.3s ease;
         }
         .input-form input:focus::placeholder {
-          color: #4a5068;
+          color: ${isDark ? '#4a5068' : '#6B7280'};
         }
 
         .scrollbar-thin::-webkit-scrollbar { width: 4px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 4px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.1)'}; border-radius: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.2)'}; }
 
         /* Markdown styles for assistant messages */
         .builder-markdown p { margin: 0 0 0.5em 0; }
         .builder-markdown p:last-child { margin-bottom: 0; }
-        .builder-markdown strong { color: #e0e4ec; font-weight: 600; }
-        .builder-markdown em { color: #a5b4c8; font-style: italic; }
+        .builder-markdown strong { color: ${isDark ? '#e0e4ec' : '#111827'}; font-weight: 600; }
+        .builder-markdown em { color: ${isDark ? '#a5b4c8' : '#6B7280'}; font-style: italic; }
         .builder-markdown code {
-          background: rgba(6,182,212,0.08);
-          border: 1px solid rgba(6,182,212,0.15);
+          background: ${isDark ? 'rgba(6,182,212,0.08)' : 'rgba(6,182,212,0.08)'};
+          border: 1px solid ${isDark ? 'rgba(6,182,212,0.15)' : 'rgba(6,182,212,0.2)'};
           border-radius: 4px;
           padding: 1px 5px;
           font-size: 0.88em;
-          color: #67e8f9;
+          color: ${isDark ? '#67e8f9' : '#0e7490'};
           font-family: 'SF Mono', 'Fira Code', monospace;
         }
         .builder-markdown pre {
-          background: rgba(0,0,0,0.3);
-          border: 1px solid rgba(255,255,255,0.06);
+          background: ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.04)'};
+          border: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'};
           border-radius: 8px;
           padding: 12px 14px;
           margin: 8px 0;
@@ -1177,23 +1217,23 @@ export default function BuilderChat({
           background: none;
           border: none;
           padding: 0;
-          color: #c8cdd8;
+          color: ${isDark ? '#c8cdd8' : '#374151'};
         }
         .builder-markdown ul, .builder-markdown ol {
           margin: 0.4em 0;
           padding-left: 1.4em;
         }
         .builder-markdown li { margin: 0.25em 0; }
-        .builder-markdown li::marker { color: #22d3ee; }
+        .builder-markdown li::marker { color: ${isDark ? '#22d3ee' : '#0891b2'}; }
         .builder-markdown a {
-          color: #22d3ee;
+          color: ${isDark ? '#22d3ee' : '#0891b2'};
           text-decoration: underline;
-          text-decoration-color: rgba(34,211,238,0.3);
+          text-decoration-color: ${isDark ? 'rgba(34,211,238,0.3)' : 'rgba(8,145,178,0.3)'};
           text-underline-offset: 2px;
         }
-        .builder-markdown a:hover { text-decoration-color: #22d3ee; }
+        .builder-markdown a:hover { text-decoration-color: ${isDark ? '#22d3ee' : '#0891b2'}; }
         .builder-markdown h1, .builder-markdown h2, .builder-markdown h3 {
-          color: #e8eaed;
+          color: ${isDark ? '#e8eaed' : '#111827'};
           font-weight: 600;
           margin: 0.6em 0 0.3em;
         }
@@ -1201,14 +1241,14 @@ export default function BuilderChat({
         .builder-markdown h2 { font-size: 1.08em; }
         .builder-markdown h3 { font-size: 1em; }
         .builder-markdown blockquote {
-          border-left: 2px solid rgba(6,182,212,0.3);
+          border-left: 2px solid ${isDark ? 'rgba(6,182,212,0.3)' : 'rgba(6,182,212,0.4)'};
           margin: 0.5em 0;
           padding: 0.3em 0 0.3em 12px;
-          color: #8b92a5;
+          color: ${isDark ? '#8b92a5' : '#6B7280'};
         }
         .builder-markdown hr {
           border: none;
-          border-top: 1px solid rgba(255,255,255,0.06);
+          border-top: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'};
           margin: 0.8em 0;
         }
       `}</style>
