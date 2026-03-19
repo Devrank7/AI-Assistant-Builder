@@ -1,0 +1,69 @@
+{
+  "provider": "calendly",
+  "name": "Calendly",
+  "category": "calendar",
+  "color": "#006BFF",
+  "baseUrl": "https://api.calendly.com",
+  "auth": {
+    "type": "bearer",
+    "header": "Authorization",
+    "prefix": "Bearer",
+    "fields": [
+      {
+        "key": "apiKey",
+        "label": "Personal Access Token",
+        "type": "password",
+        "required": true,
+        "placeholder": "eyJhbG..."
+      }
+    ]
+  },
+  "actions": [
+    {
+      "id": "getEventTypes",
+      "name": "Get Event Types",
+      "description": "List available appointment types",
+      "method": "GET",
+      "path": "/event_types",
+      "queryParams": {
+        "user": "{{auth.userUri}}"
+      },
+      "responseMapping": {
+        "root": "collection",
+        "fields": {
+          "id": "uri",
+          "name": "name",
+          "duration": "duration",
+          "url": "scheduling_url"
+        }
+      }
+    },
+    {
+      "id": "createBooking",
+      "name": "Book Appointment",
+      "description": "Schedule an appointment for a customer",
+      "method": "POST",
+      "path": "/scheduled_events",
+      "body": {
+        "event_type": "{{params.eventTypeId}}",
+        "invitee": {
+          "email": "{{params.email}}",
+          "name": "{{params.name}}"
+        }
+      },
+      "responseMapping": {
+        "root": "resource",
+        "fields": {
+          "id": "uri",
+          "status": "status",
+          "startTime": "start_time"
+        }
+      }
+    }
+  ],
+  "healthCheck": {
+    "method": "GET",
+    "path": "/users/me",
+    "successField": "resource.uri"
+  }
+}

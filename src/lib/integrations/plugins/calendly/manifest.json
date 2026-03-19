@@ -2,7 +2,7 @@
   "slug": "calendly",
   "name": "Calendly",
   "category": "calendar",
-  "description": "Calendly Scheduling. Manage event types, availability, and invitees.",
+  "description": "Calendly integration",
   "icon": "/integrations/calendly.svg",
   "color": "#006BFF",
   "authFields": [
@@ -11,28 +11,28 @@
       "label": "Personal Access Token",
       "type": "password",
       "required": true,
-      "placeholder": "eyJra..."
+      "placeholder": "eyJhbG..."
     }
   ],
   "actions": [
     {
       "id": "getEventTypes",
       "name": "Get Event Types",
-      "description": "List all available event types for the account",
+      "description": "List available appointment types",
       "inputSchema": {}
     },
     {
-      "id": "getAvailability",
-      "name": "Get Availability",
-      "description": "Get available time slots for a given event type and date range",
-      "inputSchema": { "eventTypeUri": "string", "startDate": "string", "endDate": "string" }
-    },
-    {
-      "id": "createInvitee",
-      "name": "Create Invitee",
-      "description": "Book a Calendly event for an invitee",
-      "inputSchema": { "eventUri": "string", "email": "string", "name": "string?" }
+      "id": "createBooking",
+      "name": "Book Appointment",
+      "description": "Schedule an appointment for a customer",
+      "inputSchema": {
+        "eventTypeId": "string",
+        "email": "string",
+        "name": "string"
+      }
     }
   ],
+  "healthEndpoint": "/users/me",
+  "docsUrl": "",
   "status": "active"
 }
