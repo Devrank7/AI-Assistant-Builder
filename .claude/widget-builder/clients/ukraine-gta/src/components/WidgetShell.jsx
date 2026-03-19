@@ -33,8 +33,8 @@ const DEFAULT_STRUCTURE = {
         { id: 'imagePreview', slot: 'panel-footer', enabled: true },
         { id: 'inputArea', slot: 'panel-footer', enabled: true },
         { id: 'poweredBy', slot: 'panel-footer', enabled: true },
-        { id: 'toggleButton', slot: 'external', enabled: true },
         { id: 'nudgeBubble', slot: 'external', enabled: true },
+        { id: 'toggleButton', slot: 'external', enabled: true },
     ],
 };
 
