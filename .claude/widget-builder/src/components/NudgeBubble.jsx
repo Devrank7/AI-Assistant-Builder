@@ -12,7 +12,7 @@ export default function NudgeBubble({ ctx }) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.9 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className="max-w-[200px] sm:max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl shadow-black/10 border cursor-pointer relative bg-aw-surface-card border-aw-surface-border text-aw-text-primary"
+                    className="max-w-[200px] sm:max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl shadow-black/30 border cursor-pointer relative bg-aw-surface-card border-aw-surface-border text-aw-text-primary"
                     onClick={() => { dismissNudge(); setIsOpen(true); }}
                 >
                     <button onClick={(e) => { e.stopPropagation(); dismissNudge(); }}

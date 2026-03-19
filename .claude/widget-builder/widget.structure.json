@@ -58,15 +58,15 @@
       "props": {}
     },
     {
-      "id": "toggleButton",
-      "file": "ToggleButton.jsx",
+      "id": "nudgeBubble",
+      "file": "NudgeBubble.jsx",
       "slot": "external",
       "enabled": true,
       "props": {}
     },
     {
-      "id": "nudgeBubble",
-      "file": "NudgeBubble.jsx",
+      "id": "toggleButton",
+      "file": "ToggleButton.jsx",
       "slot": "external",
       "enabled": true,
       "props": {}

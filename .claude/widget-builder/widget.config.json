@@ -1,16 +1,33 @@
 {
-  "clientId": "ua-online-gta",
-  "botName": "UA ONLINE | GTA про Україну",
-  "welcomeMessage": "Вітаємо у **UA ONLINE | GTA про Україну**! Готові поринути у світ пригод? Запитуйте, якщо у вас виникли питання.",
-  "inputPlaceholder": "Напишіть ваше запитання...",
-  "quickReplies": ["Як почати грати?", "Правила сервера", "Донат та магазин"],
+  "clientId": "winbix-ai",
+  "botName": "WinBix AI",
+  "welcomeMessage": "Welcome to **WinBix AI**! I can help you learn about our AI chat widgets, pricing, and features.",
+  "inputPlaceholder": "Ask about our platform...",
+  "quickReplies": ["How does it work?", "View pricing", "What channels are supported?", "Get a free demo"],
   "avatar": {
     "type": "initials",
-    "initials": "UA"
+    "initials": "WB"
+  },
+  "design": {
+    "position": "bottom-right"
   },
   "features": {
     "sound": true,
     "voiceInput": true,
-    "streaming": true
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need an AI assistant for your business? Try a free demo!"
+    }
+  },
+  "contacts": {
+    "email": "support@winbixai.com",
+    "website": "https://winbixai.com"
   }
 }
