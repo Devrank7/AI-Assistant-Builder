@@ -17,6 +17,12 @@ import InputArea from './InputArea';
 import PoweredBy from './PoweredBy';
 import ToggleButton from './ToggleButton';
 import NudgeBubble from './NudgeBubble';
+import ActionButton from './templates/ActionButton';
+import DataForm from './templates/DataForm';
+import DataList from './templates/DataList';
+import StatusCard from './templates/StatusCard';
+import ExternalLink from './templates/ExternalLink';
+import useIntegration from '../hooks/useIntegration';
 
 const POSITION_MAP = {
     'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 items-end',
@@ -48,6 +54,12 @@ const COMPONENT_MAP = {
     poweredBy: PoweredBy,
     toggleButton: ToggleButton,
     nudgeBubble: NudgeBubble,
+    // Integration templates
+    actionButton: ActionButton,
+    dataForm: DataForm,
+    dataList: DataList,
+    statusCard: StatusCard,
+    externalLink: ExternalLink,
 };
 
 export function Widget({ config }) {
@@ -107,6 +119,7 @@ export function Widget({ config }) {
     const positionClasses = POSITION_MAP[position] || POSITION_MAP['bottom-right'];
     const { offset, isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle } = useDrag(config.clientId);
     const { isListening, isSupported: voiceSupported, transcript, startListening, stopListening } = useVoice(voiceLocale);
+    const { execute: executeIntegration } = useIntegration(config);
 
     const handleVoiceToggle = useCallback(() => {
         if (isListening) {
@@ -331,6 +344,7 @@ export function Widget({ config }) {
         handleSwipeEnd, scrollToBottom, handleChatScroll, toggleMute, cycleFontSize, exportChat,
         handleImageSelect, removeSelectedImage, handleSubmit, handleRichAction, handleKeyDown,
         showQuickReplies, getDayLabel, getTimeLabel, shouldShowSeparator,
+        executeIntegration,
     };
 
     // Read widget structure (allows runtime customization)
@@ -339,7 +353,7 @@ export function Widget({ config }) {
 
     const renderSlot = (slotName) =>
         enabled.filter(comp => comp.slot === slotName).map(comp => {
-            const Comp = COMPONENT_MAP[comp.id];
+            const Comp = COMPONENT_MAP[comp.id] || COMPONENT_MAP[comp.template];
             if (!Comp) return null;
             return <Comp key={comp.id} ctx={{ ...ctx, ...comp.props }} />;
         });
@@ -381,7 +395,7 @@ export function Widget({ config }) {
                 )}
             </AnimatePresence>
 
-            <div data-widget-root className={`fixed z-[9999] flex flex-col gap-3 antialiased ${positionClasses}`} style={{ fontFamily: "Nunito Sans", ...(isMobile && isOpen ? {} : dragStyle) }}>
+            <div data-widget-root className={`fixed z-[9999] flex flex-col gap-3 antialiased ${positionClasses}`} style={{ fontFamily: "\'Inter\', -apple-system, BlinkMacSystemFont, sans-serif", ...(isMobile && isOpen ? {} : dragStyle) }}>
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
@@ -391,8 +405,8 @@ export function Widget({ config }) {
                             exit={isMobile ? { y: '100%' } : { opacity: 0, y: 20, scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 300, damping: isMobile ? 30 : 25 }}
                             className={isMobile
-                                ? 'fixed inset-x-0 bottom-0 flex flex-col bg-aw-surface-bg shadow-2xl shadow-black/15 rounded-t-3xl overflow-hidden'
-                                : 'relative w-[85vw] max-w-[370px] h-[60vh] max-h-[540px] sm:w-[370px] sm:h-[540px] rounded-3xl overflow-hidden flex flex-col bg-aw-surface-bg shadow-2xl shadow-black/15 border border-aw-surface-border'}
+                                ? 'fixed inset-x-0 bottom-0 flex flex-col bg-aw-surface-bg shadow-2xl shadow-black/40 rounded-t-3xl overflow-hidden'
+                                : 'relative w-[85vw] max-w-[370px] h-[60vh] max-h-[540px] sm:w-[370px] sm:h-[540px] rounded-3xl overflow-hidden flex flex-col bg-aw-surface-bg shadow-2xl shadow-black/40 border border-aw-surface-border'}
                             ref={isMobile ? panelRef : undefined}
                             style={isMobile ? { height: '90dvh', maxHeight: '90dvh' } : {}}
                             role="dialog"

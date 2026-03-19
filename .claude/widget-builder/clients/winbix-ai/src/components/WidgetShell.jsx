@@ -17,6 +17,12 @@ import InputArea from './InputArea';
 import PoweredBy from './PoweredBy';
 import ToggleButton from './ToggleButton';
 import NudgeBubble from './NudgeBubble';
+import ActionButton from './templates/ActionButton';
+import DataForm from './templates/DataForm';
+import DataList from './templates/DataList';
+import StatusCard from './templates/StatusCard';
+import ExternalLink from './templates/ExternalLink';
+import useIntegration from '../hooks/useIntegration';
 
 const POSITION_MAP = {
     'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 items-end',
@@ -48,6 +54,12 @@ const COMPONENT_MAP = {
     poweredBy: PoweredBy,
     toggleButton: ToggleButton,
     nudgeBubble: NudgeBubble,
+    // Integration templates
+    actionButton: ActionButton,
+    dataForm: DataForm,
+    dataList: DataList,
+    statusCard: StatusCard,
+    externalLink: ExternalLink,
 };
 
 export function Widget({ config }) {
@@ -107,6 +119,7 @@ export function Widget({ config }) {
     const positionClasses = POSITION_MAP[position] || POSITION_MAP['bottom-right'];
     const { offset, isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle } = useDrag(config.clientId);
     const { isListening, isSupported: voiceSupported, transcript, startListening, stopListening } = useVoice(voiceLocale);
+    const { execute: executeIntegration } = useIntegration(config);
 
     const handleVoiceToggle = useCallback(() => {
         if (isListening) {
@@ -331,6 +344,7 @@ export function Widget({ config }) {
         handleSwipeEnd, scrollToBottom, handleChatScroll, toggleMute, cycleFontSize, exportChat,
         handleImageSelect, removeSelectedImage, handleSubmit, handleRichAction, handleKeyDown,
         showQuickReplies, getDayLabel, getTimeLabel, shouldShowSeparator,
+        executeIntegration,
     };
 
     // Read widget structure (allows runtime customization)
@@ -339,7 +353,7 @@ export function Widget({ config }) {
 
     const renderSlot = (slotName) =>
         enabled.filter(comp => comp.slot === slotName).map(comp => {
-            const Comp = COMPONENT_MAP[comp.id];
+            const Comp = COMPONENT_MAP[comp.id] || COMPONENT_MAP[comp.template];
             if (!Comp) return null;
             return <Comp key={comp.id} ctx={{ ...ctx, ...comp.props }} />;
         });
