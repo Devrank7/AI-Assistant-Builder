@@ -38,6 +38,7 @@ describe('Builder Types', () => {
     expect(AGENT_TOOL_NAMES).toContain('select_theme');
     expect(AGENT_TOOL_NAMES).toContain('rollback');
     expect(AGENT_TOOL_NAMES).toContain('write_integration');
-    expect(AGENT_TOOL_NAMES.length).toBe(19);
+    expect(AGENT_TOOL_NAMES).toContain('generate_integration');
+    expect(AGENT_TOOL_NAMES.length).toBe(31);
   });
 });

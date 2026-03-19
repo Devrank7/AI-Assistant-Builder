@@ -46,12 +46,13 @@ export const AGENT_TOOL_NAMES = [
   'write_integration',
   'test_integration',
   'guide_user',
-  // Marketplace (6)
+  // Marketplace + Codegen (6)
   'list_user_integrations',
   'open_connection_wizard',
   'attach_integration_to_widget',
   'execute_integration_action',
   'check_integration_health',
+  'generate_integration',
   // No-URL builder
   'create_theme_from_scratch',
   'upload_knowledge_text',
