@@ -68,6 +68,9 @@ export default defineConfig({
         emptyOutDir: true,
         cssCodeSplit: false,
     },
+    esbuild: {
+        charset: 'ascii',
+    },
     define: {
         'process.env': {},
         '__WIDGET_CONFIG__': JSON.stringify(widgetConfig),

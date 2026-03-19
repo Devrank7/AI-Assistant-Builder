@@ -934,13 +934,17 @@ export function Widget({ config }) {
             <div className="px-4 pt-2 pb-3 border-t ${inputAreaBorder} ${inputAreaBg} space-y-1.5 safe-area-bottom">
                 {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-                    <button type="button" onClick={() => fileInputRef.current?.click()}
-                        className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
-                        aria-label="Upload photo">
-                        <ImagePlus size={16} />
-                    </button>
-                    {voiceSupported && config.features?.voiceInput !== false && (
+                    {ctx.imageUpload !== false && (
+                        <>
+                            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                            <button type="button" onClick={() => fileInputRef.current?.click()}
+                                className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
+                                aria-label="Upload photo">
+                                <ImagePlus size={16} />
+                            </button>
+                        </>
+                    )}
+                    {voiceSupported && config.features?.voiceInput !== false && ctx.voiceInput !== false && (
                         <button type="button" onClick={handleVoiceToggle}
                             className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${isListening ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm animate-pulse' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
                             aria-label={isListening ? 'Stop recording' : 'Voice input'}>
@@ -2253,13 +2257,17 @@ export default function InputArea({ ctx }) {
         <div className="px-4 pt-2 pb-3 border-t ${inputAreaBorder} ${inputAreaBg} space-y-1.5 safe-area-bottom">
             {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
             <form onSubmit={handleSubmit} className="flex items-end gap-2">
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-                <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
-                    aria-label="Upload photo">
-                    <ImagePlus size={16} />
-                </button>
-                {voiceSupported && config.features?.voiceInput !== false && (
+                {ctx.imageUpload !== false && (
+                    <>
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                        <button type="button" onClick={() => fileInputRef.current?.click()}
+                            className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
+                            aria-label="Upload photo">
+                            <ImagePlus size={16} />
+                        </button>
+                    </>
+                )}
+                {voiceSupported && config.features?.voiceInput !== false && ctx.voiceInput !== false && (
                     <button type="button" onClick={handleVoiceToggle}
                         className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${isListening ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm animate-pulse' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
                         aria-label={isListening ? 'Stop recording' : 'Voice input'}>
@@ -2421,8 +2429,8 @@ const DEFAULT_STRUCTURE = {
         { id: 'imagePreview', slot: 'panel-footer', enabled: true },
         { id: 'inputArea', slot: 'panel-footer', enabled: true },
         { id: 'poweredBy', slot: 'panel-footer', enabled: true },
-        { id: 'toggleButton', slot: 'external', enabled: true },
         { id: 'nudgeBubble', slot: 'external', enabled: true },
+        { id: 'toggleButton', slot: 'external', enabled: true },
     ],
 };
 
@@ -2810,8 +2818,8 @@ function genV2WidgetStructure(c) {
             { id: 'imagePreview', file: 'ImagePreview.jsx', slot: 'panel-footer', enabled: true, props: {} },
             { id: 'inputArea', file: 'InputArea.jsx', slot: 'panel-footer', enabled: true, props: { voiceInput: true, imageUpload: true } },
             { id: 'poweredBy', file: 'PoweredBy.jsx', slot: 'panel-footer', enabled: true, props: {} },
-            { id: 'toggleButton', file: 'ToggleButton.jsx', slot: 'external', enabled: true, props: {} },
             { id: 'nudgeBubble', file: 'NudgeBubble.jsx', slot: 'external', enabled: true, props: {} },
+            { id: 'toggleButton', file: 'ToggleButton.jsx', slot: 'external', enabled: true, props: {} },
         ],
         customComponents: [],
     }, null, 2);

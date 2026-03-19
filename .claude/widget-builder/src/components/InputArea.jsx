@@ -10,13 +10,17 @@ export default function InputArea({ ctx }) {
         <div className="px-4 pt-2 pb-3 border-t border-aw-surface-border bg-aw-surface-bg space-y-1.5 safe-area-bottom">
             {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
             <form onSubmit={handleSubmit} className="flex items-end gap-2">
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-                <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}`}
-                    aria-label="Upload photo">
-                    <ImagePlus size={16} />
-                </button>
-                {voiceSupported && config.features?.voiceInput !== false && (
+                {ctx.imageUpload !== false && (
+                    <>
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                        <button type="button" onClick={() => fileInputRef.current?.click()}
+                            className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${selectedImage ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}`}
+                            aria-label="Upload photo">
+                            <ImagePlus size={16} />
+                        </button>
+                    </>
+                )}
+                {voiceSupported && config.features?.voiceInput !== false && ctx.voiceInput !== false && (
                     <button type="button" onClick={handleVoiceToggle}
                         className={`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 ${isListening ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm animate-pulse' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}`}
                         aria-label={isListening ? 'Stop recording' : 'Voice input'}>

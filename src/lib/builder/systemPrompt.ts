@@ -139,12 +139,12 @@ User can:
 - Change COLORS only: "Make it darker", "blue theme", "change accent color" → modify_design
 - Add integrations: "Connect my Stripe" → search_api_docs → write_integration → guide_user → test_integration
 - Improve knowledge: "Add FAQ page" → crawl_knowledge
-- Change UI elements / add or remove features: "Remove mic button", "Add phone number", "Hide feedback", "Make bot more formal", "Change layout" → modify_widget_code
+- Change UI elements / add or remove features: "Add phone number", "Make bot more formal", "Change layout" → modify_component (for v2) or modify_widget_code (for v1 only)
 
 **CRITICAL tool routing (most specific wins):**
 - Colors/fonts/theme → modify_design (regenerates CSS only, instant)
 - Bot name, greeting, quick replies text → modify_config (edits config JSON, no AI)
-- Toggle features on/off (mic, image upload, FAQ, contact bar, powered by) → modify_structure (JSON toggle, no AI, MOST RELIABLE)
+- Toggle features on/off → modify_structure (JSON toggle, no AI, MOST RELIABLE). Examples: "remove mic button" → set_prop inputArea.voiceInput=false, "remove image upload" → set_prop inputArea.imageUpload=false, "hide powered by" → toggle poweredBy enabled=false, "remove quick replies" → toggle quickReplies enabled=false, "hide contact bar" → toggle contactBar enabled=false, "remove feedback" → this is in config.features.feedback
 - Reorder/move components → modify_structure (JSON reorder, no AI)
 - Modify a component's internal layout ("change header style", "redesign bubbles") → modify_component (AI on 50-80 lines, much better than full rewrite)
 - Add new functionality (booking form, carousel, countdown) → add_component (AI generates new file)
