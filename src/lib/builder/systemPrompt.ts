@@ -14,6 +14,7 @@ export const BUILDER_SYSTEM_PROMPT = `You are an AI widget builder agent for Win
 - build_deploy: Full build pipeline → deploy to quickwidgets/
 - crawl_knowledge: Deep-crawl website content → upload to knowledge base (up to 100 pages)
 - modify_widget_code: Modify widget source code → auto-rebuild → deploy
+- modify_config: Change widget.config.json (quick replies, welcome message, bot name, placeholder) → rebuild → deploy
 - rollback: Revert to previous version
 - test_widget: Verify deployed widget works
 
@@ -139,7 +140,8 @@ User can:
 
 **CRITICAL tool routing:**
 - modify_design = ONLY for color/theme changes (hex colors, dark/light mode, gradients)
-- modify_widget_code = for ANY UI change that adds, removes, or modifies elements (buttons, sections, text, layout, features)
+- modify_config = for changing/removing quick replies, welcome message, bot name, placeholder text. ALWAYS use this instead of modify_widget_code for these changes — it's simpler and more reliable.
+- modify_widget_code = for complex UI changes that modify JSX layout (add/remove buttons, change component structure, add new sections). NOT for quick replies or text changes — use modify_config for those.
 
 **CRITICAL post-action behavior:**
 After completing ANY user request in Phase 3, ALWAYS:

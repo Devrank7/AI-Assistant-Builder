@@ -820,6 +820,107 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
     },
   },
   {
+    name: 'modify_config',
+    description:
+      'Modify widget.config.json fields and rebuild. Use for: removing/changing quick replies, changing welcome message, changing bot name, changing placeholder text, toggling features. This is simpler and more reliable than modify_widget_code for config-level changes. Examples: "remove quick replies", "change greeting to Hello!", "rename bot to Support".',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        quickReplies: {
+          type: 'string',
+          description:
+            'New quick replies as comma-separated list, or "REMOVE" to remove them entirely. E.g. "Pricing,Book a demo" or "REMOVE"',
+        },
+        welcomeMessage: { type: 'string', description: 'New welcome/greeting message' },
+        botName: { type: 'string', description: 'New bot display name' },
+        inputPlaceholder: { type: 'string', description: 'New input field placeholder text' },
+      },
+      required: ['clientId'],
+    },
+    category: 'core',
+    async executor(args, ctx) {
+      const clientId = args.clientId as string;
+
+      // Read current config
+      const configPath = path.join(process.cwd(), '.claude/widget-builder/clients', clientId, 'widget.config.json');
+      if (!fs.existsSync(configPath)) {
+        return { error: `widget.config.json not found for client "${clientId}"` };
+      }
+
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      const changes: string[] = [];
+
+      // Apply changes
+      if (args.quickReplies !== undefined) {
+        const qr = args.quickReplies as string;
+        if (qr === 'REMOVE' || qr === '' || qr.toLowerCase() === 'remove') {
+          config.quickReplies = [];
+          changes.push('removed quick replies');
+        } else {
+          config.quickReplies = qr
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean);
+          changes.push(`set quick replies to: ${config.quickReplies.join(', ')}`);
+        }
+      }
+
+      if (args.welcomeMessage !== undefined) {
+        config.welcomeMessage = args.welcomeMessage as string;
+        changes.push('updated welcome message');
+      }
+
+      if (args.botName !== undefined) {
+        config.botName = args.botName as string;
+        changes.push('updated bot name');
+      }
+
+      if (args.inputPlaceholder !== undefined) {
+        config.inputPlaceholder = args.inputPlaceholder as string;
+        changes.push('updated input placeholder');
+      }
+
+      if (changes.length === 0) {
+        return { error: 'No changes specified. Provide at least one field to modify.' };
+      }
+
+      // Write updated config
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+      ctx.write({ type: 'progress', message: `Config updated: ${changes.join(', ')}` });
+
+      // Rebuild widget
+      ctx.write({ type: 'progress', message: 'Rebuilding widget...' });
+      const buildScript = path.join(process.cwd(), '.claude/widget-builder/scripts/build.js');
+
+      try {
+        await execAsync(`node "${buildScript}" "${clientId}"`, { cwd: process.cwd(), timeout: 60000 });
+      } catch (err) {
+        return { error: `Build failed: ${(err as Error).message}` };
+      }
+
+      // Deploy
+      const distScript = path.join(process.cwd(), '.claude/widget-builder/dist/script.js');
+      if (!fs.existsSync(distScript)) {
+        return { error: 'Build produced no output — dist/script.js not found' };
+      }
+
+      const quickDir = path.join(process.cwd(), 'quickwidgets', clientId);
+      const fullDir = path.join(process.cwd(), 'widgets', clientId);
+      const deployDir = fs.existsSync(fullDir) ? fullDir : fs.existsSync(quickDir) ? quickDir : null;
+
+      if (!deployDir) {
+        return { error: `No deploy directory found for client "${clientId}"` };
+      }
+
+      saveVersion(clientId, `modify_config: ${changes.join(', ')}`.slice(0, 100), 'modify_config');
+      fs.copyFileSync(distScript, path.join(deployDir, 'script.js'));
+
+      ctx.write({ type: 'widget_ready', clientId });
+      return { success: true, message: `Widget config updated and deployed. Changes: ${changes.join(', ')}` };
+    },
+  },
+  {
     name: 'test_widget',
     description:
       'Test a deployed widget by loading it and checking for JavaScript errors. Use after build_deploy or modify_widget_code.',

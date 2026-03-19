@@ -25,7 +25,7 @@ export const PANEL_MODES = [
 export type PanelMode = (typeof PANEL_MODES)[number];
 
 export const AGENT_TOOL_NAMES = [
-  // Core (9)
+  // Core (10)
   'analyze_site',
   'generate_design',
   'modify_design',
@@ -33,6 +33,7 @@ export const AGENT_TOOL_NAMES = [
   'build_deploy',
   'crawl_knowledge',
   'modify_widget_code',
+  'modify_config',
   'rollback',
   'test_widget',
   // Integration (6)
@@ -42,6 +43,15 @@ export const AGENT_TOOL_NAMES = [
   'write_integration',
   'test_integration',
   'guide_user',
+  // Marketplace (6)
+  'list_user_integrations',
+  'open_connection_wizard',
+  'attach_integration_to_widget',
+  'execute_integration_action',
+  'check_integration_health',
+  // No-URL builder
+  'create_theme_from_scratch',
+  'upload_knowledge_text',
   // Proactive (4)
   'analyze_opportunities',
   'suggest_improvements',

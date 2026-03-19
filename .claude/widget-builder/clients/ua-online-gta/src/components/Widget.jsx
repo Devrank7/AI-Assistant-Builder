@@ -275,6 +275,8 @@ export function Widget({ config }) {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e); }
     };
 
+    const showQuickReplies = messages.filter((m) => m.role === 'user').length === 0;
+
     // Day separator helper
     const getDayLabel = useCallback((ts) => {
         if (!ts) return '';
@@ -432,6 +434,18 @@ export function Widget({ config }) {
                         {msg.role === 'assistant' && msg.richBlocks?.length > 0 && (
                             <RichBlocks blocks={msg.richBlocks} onAction={handleRichAction} />
                         )}
+                        {/* Follow-up suggestions */}
+                        {msg.role === 'assistant' && !msg.isError && msg.suggestions?.length > 0 && idx === messages.length - 1 && (
+                            <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                                className="flex flex-wrap gap-1.5 ml-7 sm:ml-9 mt-2 mb-1">
+                                {msg.suggestions.map((s, si) => (
+                                    <button key={si} onClick={() => { detectLang(s); sendMessage(s); }}
+                                        className="px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-200 cursor-pointer border-[#2a2d35] bg-[#1a1d23] text-[#ffffff] hover:bg-[#1e212b] hover:border-[#4ade80]">
+                                        {s}
+                                    </button>
+                                ))}
+                            </motion.div>
+                        )}
                     </div>
                 ))}
                 {isTyping && (
@@ -477,6 +491,7 @@ export function Widget({ config }) {
 
             {/* INPUT */}
             <div className="px-4 pt-2 pb-3 border-t border-[#2a2d35] bg-[#0f1117] space-y-1.5 safe-area-bottom">
+                {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                     <button type="button" onClick={() => fileInputRef.current?.click()}
@@ -623,5 +638,3 @@ export function Widget({ config }) {
         </>
     );
 }
-
-export default Widget;
