@@ -20,6 +20,8 @@ import {
   Download,
   Menu,
   LogOut,
+  Mail,
+  Workflow,
 } from 'lucide-react';
 
 const navGroups = [
@@ -27,6 +29,8 @@ const navGroups = [
     label: 'MAIN',
     items: [
       { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+      { label: 'Inbox', href: '/dashboard/inbox', icon: Mail },
+      { label: 'Contacts', href: '/dashboard/contacts', icon: Users },
       { label: 'My Widgets', href: '/dashboard/widgets', icon: MessageSquare },
       { label: 'My Chats', href: '/dashboard/chats', icon: Bot },
     ],
@@ -35,6 +39,7 @@ const navGroups = [
     label: 'BUILD',
     items: [
       { label: 'AI Builder', href: '/dashboard/builder', icon: Sparkles },
+      { label: 'Flows', href: '/dashboard/flows', icon: Workflow },
       { label: 'Integrations', href: '/dashboard/integrations', icon: Plug },
       { label: 'Installation', href: '/dashboard/installation', icon: Download },
     ],
