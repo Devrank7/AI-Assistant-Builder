@@ -1,0 +1,16 @@
+{
+  "clientId": "online-ua-mdash",
+  "botName": "Online.UA — українське незалежне медіа",
+  "welcomeMessage": "Вітаємо в **Online.UA** — вашому джерелі незалежних новин України та світу. Чим ми можемо допомогти?",
+  "inputPlaceholder": "Задайте питання...",
+  "quickReplies": ["Останні новини", "Блоги", "Прес-релізи"],
+  "avatar": {
+    "type": "initials",
+    "initials": "ON"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "streaming": true
+  }
+}

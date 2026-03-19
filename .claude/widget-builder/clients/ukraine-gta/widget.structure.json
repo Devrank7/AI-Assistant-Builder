@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "layout": {
+    "position": "bottom-right",
+    "mobileMode": "bottom-sheet"
+  },
+  "components": [
+    {
+      "id": "header",
+      "file": "Header.jsx",
+      "slot": "panel-top",
+      "enabled": true,
+      "props": {}
+    },
+    {
+      "id": "contactBar",
+      "file": "ContactBar.jsx",
+      "slot": "panel-top",
+      "enabled": true,
+      "props": {}
+    },
+    {
+      "id": "contextBanner",
+      "file": "ContextBanner.jsx",
+      "slot": "panel-top",
+      "enabled": true,
+      "props": {}
+    },
+    {
+      "id": "messageList",
+      "file": "MessageList.jsx",
+      "slot": "panel-body",
+      "enabled": true,
+      "props": {}
+    },
+    {
+      "id": "imagePreview",
+      "file": "ImagePreview.jsx",
+      "slot": "panel-footer",
+      "enabled": true,
+      "props": {}
+    },
+    {
+      "id": "inputArea",
+      "file": "InputArea.jsx",
+      "slot": "panel-footer",
+      "enabled": true,
+      "props": {
+        "voiceInput": false,
+        "imageUpload": true
+      }
+    },
+    {
+      "id": "poweredBy",
+      "file": "PoweredBy.jsx",
+      "slot": "panel-footer",
+      "enabled": true,
+      "props": {}
+    },
+    {
+      "id": "nudgeBubble",
+      "file": "NudgeBubble.jsx",
+      "slot": "external",
+      "enabled": true,
+      "props": {}
+    },
+    {
+      "id": "toggleButton",
+      "file": "ToggleButton.jsx",
+      "slot": "external",
+      "enabled": true,
+      "props": {}
+    }
+  ],
+  "customComponents": []
+}

@@ -1,0 +1,16 @@
+{
+  "clientId": "ukraine-gta",
+  "botName": "Онлайн гра про Україну - UKRAINE GTA",
+  "welcomeMessage": "Вітаємо у **UKRAINE GTA**! Готові поринути у світ реалістичної України та відчути атмосферу рідних міст? Чим ми можемо вам допомогти?",
+  "inputPlaceholder": "Напишіть ваше питання...",
+  "quickReplies": ["Скачати UKRAINE GTA", "Про проект", "Як почати грати?"],
+  "avatar": {
+    "type": "initials",
+    "initials": "ОН"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "streaming": true
+  }
+}
