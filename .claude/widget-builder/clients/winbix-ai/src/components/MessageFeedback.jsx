@@ -25,12 +25,12 @@ export default function MessageFeedback({ messageIndex, sessionId, clientId }) {
     return (
         <div className="flex items-center gap-1 mt-0.5 ml-8">
             <button onClick={() => handleRate('up')}
-                className={`p-0.5 rounded transition-colors ${rating === 'up' ? 'text-[#3B82F6]' : 'text-[#64748B] hover:text-[#60A5FA]'}`}
+                className={`p-0.5 rounded transition-colors ${rating === 'up' ? 'text-aw-feedback-active' : 'text-aw-text-muted hover:text-aw-feedback-hover'}`}
                 aria-label="Helpful">
                 <ThumbsUp size={11} />
             </button>
             <button onClick={() => handleRate('down')}
-                className={`p-0.5 rounded transition-colors ${rating === 'down' ? 'text-red-400' : 'text-[#64748B] hover:text-red-300'}`}
+                className={`p-0.5 rounded transition-colors ${rating === 'down' ? 'text-red-400' : 'text-aw-text-muted hover:text-red-300'}`}
                 aria-label="Not helpful">
                 <ThumbsDown size={11} />
             </button>

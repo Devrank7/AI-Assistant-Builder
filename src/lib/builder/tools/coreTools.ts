@@ -551,12 +551,12 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
 
         ctx.write({ type: 'theme_update', theme: mergedTheme });
 
-        // Auto-rebuild with forceRegen to regenerate JSX with new theme colors
+        // Auto-rebuild with cssOnly — colors are now CSS variables, so only index.css needs regeneration
         ctx.write({ type: 'progress', message: 'Rebuilding widget with new colors...' });
         const buildRes = await fetch(`${ctx.baseUrl}/api/builder/build`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Cookie: ctx.cookie },
-          body: JSON.stringify({ sessionId: ctx.sessionId, forceRegen: true }),
+          body: JSON.stringify({ sessionId: ctx.sessionId, cssOnly: true }),
         });
 
         if (!buildRes.ok) {
@@ -918,6 +918,371 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
 
       ctx.write({ type: 'widget_ready', clientId });
       return { success: true, message: `Widget config updated and deployed. Changes: ${changes.join(', ')}` };
+    },
+  },
+  {
+    name: 'modify_structure',
+    description:
+      'Deterministic widget structure changes — NO AI needed. Use for: toggling components on/off ("remove quick replies", "hide powered by", "remove mic button"), setting component props ("disable voice input", "disable image upload"), reordering components. This is the FASTEST and most RELIABLE tool for enabling/disabling features.',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        operations: {
+          type: 'string',
+          description:
+            'JSON array of operations. Each op: { "op": "toggle", "componentId": "<id>", "enabled": true/false } or { "op": "set_prop", "componentId": "<id>", "prop": "<name>", "value": <any> } or { "op": "reorder", "componentId": "<id>", "position": "before:<otherId>" | "after:<otherId>" }. Component IDs: header, contactBar, contextBanner, messageList, imagePreview, inputArea, poweredBy, toggleButton, nudgeBubble. InputArea props: voiceInput (bool), imageUpload (bool).',
+        },
+      },
+      required: ['clientId', 'operations'],
+    },
+    category: 'core',
+    async executor(args, ctx) {
+      const clientId = args.clientId as string;
+      const structurePath = path.join(
+        process.cwd(),
+        '.claude/widget-builder/clients',
+        clientId,
+        'widget.structure.json'
+      );
+
+      if (!fs.existsSync(structurePath)) {
+        return {
+          error: `widget.structure.json not found for client "${clientId}". This client may use v1 monolithic Widget.jsx — use modify_widget_code instead.`,
+        };
+      }
+
+      const structure = JSON.parse(fs.readFileSync(structurePath, 'utf-8'));
+      let operations: Array<{
+        op: string;
+        componentId: string;
+        enabled?: boolean;
+        prop?: string;
+        value?: unknown;
+        position?: string;
+      }>;
+
+      try {
+        operations = JSON.parse(args.operations as string);
+      } catch {
+        return { error: 'Invalid operations JSON. Must be a JSON array of operation objects.' };
+      }
+
+      const changes: string[] = [];
+
+      for (const op of operations) {
+        const comp = structure.components.find((c: { id: string }) => c.id === op.componentId);
+        if (!comp) {
+          changes.push(`⚠️ Component "${op.componentId}" not found`);
+          continue;
+        }
+
+        if (op.op === 'toggle') {
+          comp.enabled = op.enabled ?? !comp.enabled;
+          changes.push(`${comp.enabled ? 'enabled' : 'disabled'} ${op.componentId}`);
+        } else if (op.op === 'set_prop') {
+          if (!comp.props) comp.props = {};
+          comp.props[op.prop!] = op.value;
+          changes.push(`set ${op.componentId}.${op.prop} = ${JSON.stringify(op.value)}`);
+        } else if (op.op === 'reorder') {
+          const idx = structure.components.indexOf(comp);
+          structure.components.splice(idx, 1);
+          const [dir, targetId] = (op.position || '').split(':');
+          const targetIdx = structure.components.findIndex((c: { id: string }) => c.id === targetId);
+          if (targetIdx === -1) {
+            structure.components.push(comp);
+            changes.push(`moved ${op.componentId} to end (target "${targetId}" not found)`);
+          } else {
+            structure.components.splice(dir === 'before' ? targetIdx : targetIdx + 1, 0, comp);
+            changes.push(`moved ${op.componentId} ${dir} ${targetId}`);
+          }
+        }
+      }
+
+      if (changes.length === 0) {
+        return { error: 'No valid operations applied.' };
+      }
+
+      // Write updated structure
+      fs.writeFileSync(structurePath, JSON.stringify(structure, null, 2));
+      ctx.write({ type: 'progress', message: `Structure updated: ${changes.join(', ')}` });
+
+      // Rebuild and deploy
+      ctx.write({ type: 'progress', message: 'Rebuilding widget...' });
+      const buildScript = path.join(process.cwd(), '.claude/widget-builder/scripts/build.js');
+
+      try {
+        await execAsync(`node "${buildScript}" "${clientId}"`, { cwd: process.cwd(), timeout: 60000 });
+      } catch (err) {
+        return { error: `Build failed: ${(err as Error).message}` };
+      }
+
+      const distScript = path.join(process.cwd(), '.claude/widget-builder/dist/script.js');
+      if (!fs.existsSync(distScript)) {
+        return { error: 'Build produced no output' };
+      }
+
+      const quickDir = path.join(process.cwd(), 'quickwidgets', clientId);
+      const fullDir = path.join(process.cwd(), 'widgets', clientId);
+      const deployDir = fs.existsSync(fullDir) ? fullDir : fs.existsSync(quickDir) ? quickDir : null;
+
+      if (!deployDir) {
+        return { error: `No deploy directory found for client "${clientId}"` };
+      }
+
+      saveVersion(clientId, `modify_structure: ${changes.join(', ')}`.slice(0, 100), 'modify_structure');
+      fs.copyFileSync(distScript, path.join(deployDir, 'script.js'));
+
+      ctx.write({ type: 'widget_ready', clientId });
+      return { success: true, message: `Widget structure updated and deployed. Changes: ${changes.join(', ')}` };
+    },
+  },
+  {
+    name: 'modify_component',
+    description:
+      'Modify a SINGLE component file using AI. Use for changes to a specific component\'s internal layout that can\'t be done with modify_structure or modify_config. The AI only sees the target component (50-80 lines), not the entire widget. Examples: "change header layout", "add subtitle to header", "redesign message bubble shape". Specify which component to modify.',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        componentId: {
+          type: 'string',
+          description:
+            'Which component to modify. One of: Header, ContactBar, ContextBanner, MessageList, ImagePreview, InputArea, PoweredBy, ToggleButton, NudgeBubble, ChatMessage, QuickReplies, MessageFeedback, RichBlocks',
+        },
+        instruction: {
+          type: 'string',
+          description: "The user's EXACT request for the change, copied verbatim.",
+        },
+      },
+      required: ['clientId', 'componentId', 'instruction'],
+    },
+    category: 'core',
+    async executor(args, ctx) {
+      const clientId = args.clientId as string;
+      const componentId = args.componentId as string;
+      const instruction = args.instruction as string;
+      const fileName = componentId.endsWith('.jsx') ? componentId : `${componentId}.jsx`;
+      const filePath = path.join(process.cwd(), '.claude/widget-builder/clients', clientId, 'src/components', fileName);
+
+      if (!fs.existsSync(filePath)) {
+        return { error: `Component file not found: ${fileName}. Check component name.` };
+      }
+
+      const currentCode = fs.readFileSync(filePath, 'utf-8');
+      ctx.write({ type: 'progress', message: `Modifying ${fileName} (${currentCode.split('\n').length} lines)...` });
+
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+
+      try {
+        const result = await ai.models.generateContent({
+          model: 'gemini-3-flash-preview',
+          contents: `${CODEGEN_SYSTEM_PROMPT}
+
+IMPORTANT RULES FOR THIS COMPONENT:
+- All colors use CSS variable Tailwind classes (bg-aw-surface-bg, text-aw-text-primary, etc.)
+- NEVER use hardcoded hex colors like bg-[#2a2d3f] — always use aw-* classes
+- This component receives a single \`ctx\` prop with all state and handlers
+- Keep the same export pattern (default export)
+- Available CSS variable classes: bg-aw-surface-bg, bg-aw-surface-card, bg-aw-surface-border, bg-aw-surface-input, text-aw-text-primary, text-aw-text-secondary, text-aw-text-muted, from-aw-header-from, via-aw-header-via, to-aw-header-to, bg-aw-send, hover:bg-aw-send-hover, text-aw-link, and many more.
+
+CURRENT CODE:
+\`\`\`jsx
+${currentCode}
+\`\`\`
+
+INSTRUCTION: ${instruction}
+
+Return ONLY the complete modified component file. No markdown fences, no explanation.`,
+          config: { temperature: 0.1 },
+        });
+
+        let newCode = (result.text || '')
+          .trim()
+          .replace(/^```(?:jsx|javascript)?[\s\n]*/m, '')
+          .replace(/[\s\n]*```$/m, '')
+          .trim();
+
+        if (!newCode || newCode.length < 20) {
+          return { error: 'AI returned empty or invalid code' };
+        }
+
+        // Write modified component
+        fs.writeFileSync(filePath, newCode);
+
+        // Rebuild and deploy
+        ctx.write({ type: 'progress', message: 'Rebuilding widget...' });
+        const buildScript = path.join(process.cwd(), '.claude/widget-builder/scripts/build.js');
+
+        try {
+          await execAsync(`node "${buildScript}" "${clientId}"`, { cwd: process.cwd(), timeout: 60000 });
+        } catch (err) {
+          return { error: `Component modified but build failed: ${(err as Error).message}` };
+        }
+
+        const distScript = path.join(process.cwd(), '.claude/widget-builder/dist/script.js');
+        if (!fs.existsSync(distScript)) {
+          return { error: 'Build produced no output' };
+        }
+
+        const quickDir = path.join(process.cwd(), 'quickwidgets', clientId);
+        const fullDir = path.join(process.cwd(), 'widgets', clientId);
+        const deployDir = fs.existsSync(fullDir) ? fullDir : fs.existsSync(quickDir) ? quickDir : null;
+
+        if (!deployDir) {
+          return { error: `No deploy directory found for client "${clientId}"` };
+        }
+
+        saveVersion(clientId, `modify_component(${componentId}): ${instruction}`.slice(0, 100), 'modify_component');
+        fs.copyFileSync(distScript, path.join(deployDir, 'script.js'));
+
+        ctx.write({ type: 'widget_ready', clientId });
+        return {
+          success: true,
+          message: `Component ${componentId} modified and deployed. Lines: ${newCode.split('\n').length}`,
+        };
+      } catch (err) {
+        return { error: `Failed to modify component: ${(err as Error).message}` };
+      }
+    },
+  },
+  {
+    name: 'add_component',
+    description:
+      'Generate a NEW custom component and add it to the widget. Use for adding entirely new functionality: booking form, product carousel, countdown timer, custom footer, etc. AI generates a small component file (50-100 lines), adds it to widget.structure.json, and rebuilds.',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+        componentName: {
+          type: 'string',
+          description: 'PascalCase name for the new component, e.g. "BookingForm", "ProductCarousel", "CountdownTimer"',
+        },
+        slot: {
+          type: 'string',
+          description: 'Where to place the component. One of: panel-top, panel-body, panel-footer, external',
+        },
+        instruction: {
+          type: 'string',
+          description: 'Detailed description of what the component should do and look like.',
+        },
+      },
+      required: ['clientId', 'componentName', 'slot', 'instruction'],
+    },
+    category: 'core',
+    async executor(args, ctx) {
+      const clientId = args.clientId as string;
+      const componentName = args.componentName as string;
+      const slot = args.slot as string;
+      const instruction = args.instruction as string;
+      const fileName = `${componentName}.jsx`;
+      const filePath = path.join(process.cwd(), '.claude/widget-builder/clients', clientId, 'src/components', fileName);
+
+      const structurePath = path.join(
+        process.cwd(),
+        '.claude/widget-builder/clients',
+        clientId,
+        'widget.structure.json'
+      );
+
+      if (!fs.existsSync(structurePath)) {
+        return { error: 'widget.structure.json not found. This client may use v1 — migrate first.' };
+      }
+
+      ctx.write({ type: 'progress', message: `Generating ${componentName} component...` });
+
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+
+      try {
+        const result = await ai.models.generateContent({
+          model: 'gemini-3-flash-preview',
+          contents: `${CODEGEN_SYSTEM_PROMPT}
+
+Generate a Preact component file for: ${componentName}
+
+RULES:
+- Default export a function component that receives a single \`ctx\` prop
+- ctx contains: config, messages, sendMessage, uiStrings, lang, and all widget state/handlers
+- All colors use CSS variable Tailwind classes (bg-aw-surface-card, text-aw-text-primary, border-aw-surface-border, etc.)
+- NEVER use hardcoded hex colors — always use aw-* classes
+- Import from 'react' (aliased to preact/compat), 'framer-motion', 'lucide-preact'
+- Keep it under 100 lines
+- Make it visually consistent with the rest of the widget (rounded corners, subtle shadows, clean typography)
+
+DESCRIPTION: ${instruction}
+
+Return ONLY the complete component file. No markdown fences, no explanation.`,
+          config: { temperature: 0.2 },
+        });
+
+        let code = (result.text || '')
+          .trim()
+          .replace(/^```(?:jsx|javascript)?[\s\n]*/m, '')
+          .replace(/[\s\n]*```$/m, '')
+          .trim();
+
+        if (!code || code.length < 20) {
+          return { error: 'AI returned empty or invalid code' };
+        }
+
+        // Write new component file
+        fs.writeFileSync(filePath, code);
+
+        // Update widget.structure.json
+        const structure = JSON.parse(fs.readFileSync(structurePath, 'utf-8'));
+        const componentId = componentName.charAt(0).toLowerCase() + componentName.slice(1);
+
+        // Add to customComponents
+        if (!structure.customComponents) structure.customComponents = [];
+        structure.customComponents.push({
+          id: componentId,
+          file: fileName,
+          slot,
+          enabled: true,
+          props: {},
+        });
+
+        fs.writeFileSync(structurePath, JSON.stringify(structure, null, 2));
+
+        // Note: WidgetShell uses dynamic imports for custom components via __WIDGET_STRUCTURE__
+        // So we don't need to modify WidgetShell.jsx
+
+        // Rebuild and deploy
+        ctx.write({ type: 'progress', message: 'Rebuilding widget with new component...' });
+        const buildScript = path.join(process.cwd(), '.claude/widget-builder/scripts/build.js');
+
+        try {
+          await execAsync(`node "${buildScript}" "${clientId}"`, { cwd: process.cwd(), timeout: 60000 });
+        } catch (err) {
+          return { error: `Component generated but build failed: ${(err as Error).message}` };
+        }
+
+        const distScript = path.join(process.cwd(), '.claude/widget-builder/dist/script.js');
+        if (!fs.existsSync(distScript)) {
+          return { error: 'Build produced no output' };
+        }
+
+        const quickDir = path.join(process.cwd(), 'quickwidgets', clientId);
+        const fullDir = path.join(process.cwd(), 'widgets', clientId);
+        const deployDir = fs.existsSync(fullDir) ? fullDir : fs.existsSync(quickDir) ? quickDir : null;
+
+        if (!deployDir) {
+          return { error: `No deploy directory found for client "${clientId}"` };
+        }
+
+        saveVersion(clientId, `add_component(${componentName}): ${instruction}`.slice(0, 100), 'add_component');
+        fs.copyFileSync(distScript, path.join(deployDir, 'script.js'));
+
+        ctx.write({ type: 'widget_ready', clientId });
+        return {
+          success: true,
+          message: `New component ${componentName} created (${code.split('\n').length} lines), added to slot "${slot}", and deployed.`,
+        };
+      } catch (err) {
+        return { error: `Failed to generate component: ${(err as Error).message}` };
+      }
     },
   },
   {

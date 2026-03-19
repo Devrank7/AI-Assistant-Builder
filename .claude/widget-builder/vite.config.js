@@ -15,6 +15,17 @@ try {
     console.warn("No widget.config.json found, using defaults");
 }
 
+// Try to load widget structure (v2 component layout)
+let widgetStructure = null;
+try {
+    const structurePath = path.resolve(__dirname, 'widget.structure.json');
+    if (fs.existsSync(structurePath)) {
+        widgetStructure = JSON.parse(fs.readFileSync(structurePath, 'utf-8'));
+    }
+} catch (e) {
+    // No structure file — v1 monolithic mode
+}
+
 export default defineConfig({
     plugins: [
         preact(),
@@ -60,5 +71,6 @@ export default defineConfig({
     define: {
         'process.env': {},
         '__WIDGET_CONFIG__': JSON.stringify(widgetConfig),
+        '__WIDGET_STRUCTURE__': JSON.stringify(widgetStructure),
     },
 });

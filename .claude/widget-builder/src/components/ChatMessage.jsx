@@ -31,15 +31,15 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         >
             {/* Bot Avatar */}
             {isBot && (
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#1e293b] to-[#0f172a] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#2a2d35]/50">
-                    <Sparkles size={13} className="text-[#4ade80]" />
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-aw-avatar-from to-aw-avatar-to flex items-center justify-center flex-shrink-0 shadow-sm border border-aw-avatar-border/50">
+                    <Sparkles size={13} className="text-aw-avatar-icon" />
                 </div>
             )}
 
             <div className="flex flex-col max-w-[85%] sm:max-w-[78%]">
                 {imageUrl && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={`mb-1.5 ${isBot ? '' : 'flex justify-end'}`}>
-                        <div className="relative group/img cursor-pointer overflow-hidden rounded-2xl border border-[#2a2d35] shadow-sm" onClick={() => onImageClick?.(imageUrl)}>
+                        <div className="relative group/img cursor-pointer overflow-hidden rounded-2xl border border-aw-surface-border shadow-sm" onClick={() => onImageClick?.(imageUrl)}>
                             <img src={imageUrl} alt="" className="max-w-[200px] max-h-[140px] object-cover rounded-2xl" />
                             <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/15 transition-all duration-200 flex items-center justify-center">
                                 <ZoomIn size={18} className="text-white opacity-0 group-hover/img:opacity-90 transition-opacity drop-shadow-lg" />
@@ -53,17 +53,17 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                         isError
                             ? 'bg-red-50 text-red-600 border border-red-200 rounded-bl-md'
                             : isBot
-                              ? 'bg-[#1a1d23] text-[#ffffff] border border-[#2a2d35] shadow-sm rounded-bl-md'
-                              : 'bg-gradient-to-r from-[#22c55e] to-[#15803d] text-white rounded-br-md shadow-sm'
+                              ? 'bg-aw-surface-card text-aw-text-primary border border-aw-surface-border shadow-sm rounded-bl-md'
+                              : 'bg-gradient-to-r from-aw-user-msg-from to-aw-user-msg-to text-white rounded-br-md shadow-sm'
                     }`}>
                         <div className="max-w-none msg-text [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
-                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[#4ade80] hover:text-[#86efac]">{children}</a>
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-aw-link hover:text-aw-link-hover">{children}</a>
                                     ),
                                     strong: ({ children }) => (
-                                        <strong className="font-semibold text-white">{children}</strong>
+                                        <strong className="font-semibold text-aw-text-primary font-semibold">{children}</strong>
                                     ),
                                     li: ({ children }) => (
                                         <li className="text-[12.5px] leading-relaxed">{children}</li>
@@ -77,15 +77,15 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 )}
 
                 <div className={`flex items-center gap-2 mt-1 px-1 ${isBot ? '' : 'justify-end'}`}>
-                    {timestamp && <span className="text-[10px] text-[#9ca3af] font-medium">{formatTime(timestamp)}</span>}
+                    {timestamp && <span className="text-[10px] text-aw-text-secondary font-medium">{formatTime(timestamp)}</span>}
                     {isBot && !isError && content && (
-                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-[#6b7280] hover:text-[#1e212b] transition-all duration-200" aria-label="Copy">
-                            {copied ? <Check size={11} className="text-[#2a2d35]" /> : <Copy size={11} />}
+                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 text-aw-text-muted hover:text-aw-copy-hover transition-all duration-200" aria-label="Copy">
+                            {copied ? <Check size={11} className="text-aw-copy-active" /> : <Copy size={11} />}
                         </button>
                     )}
                     {isBot && !isError && content && onSpeak && (
                         <button onClick={() => onSpeak(content)}
-                            className={`p-0.5 transition-all duration-200 ${isSpeaking ? 'text-[#4ade80] opacity-100' : 'opacity-0 group-hover:opacity-100 text-[#6b7280] hover:text-[#1e212b]'}`}
+                            className={`p-0.5 transition-all duration-200 ${isSpeaking ? 'text-aw-feedback-active opacity-100' : 'opacity-0 group-hover:opacity-100 text-aw-text-muted hover:text-aw-copy-hover'}`}
                             aria-label={isSpeaking ? 'Stop reading' : 'Read aloud'}>
                             {isSpeaking ? <VolumeX size={11} /> : <Volume2 size={11} />}
                         </button>
@@ -99,7 +99,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
             </div>
 
             {!isBot && (
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-[#2a2d35]/50 text-[#4ade80] flex-shrink-0 shadow-sm">
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-gradient-to-br from-aw-avatar-from to-aw-avatar-to border border-aw-avatar-border/50 text-aw-avatar-icon flex-shrink-0 shadow-sm">
                     <User size={13} />
                 </div>
             )}

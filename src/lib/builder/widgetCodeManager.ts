@@ -9,6 +9,16 @@ const SHARED_SRC = path.join(BUILDER_ROOT, 'src');
 // Files that can be read
 const READABLE_FILES = [
   'components/Widget.jsx',
+  'components/WidgetShell.jsx',
+  'components/Header.jsx',
+  'components/ContactBar.jsx',
+  'components/ContextBanner.jsx',
+  'components/MessageList.jsx',
+  'components/ImagePreview.jsx',
+  'components/InputArea.jsx',
+  'components/PoweredBy.jsx',
+  'components/ToggleButton.jsx',
+  'components/NudgeBubble.jsx',
   'components/ChatMessage.jsx',
   'components/QuickReplies.jsx',
   'components/MessageFeedback.jsx',

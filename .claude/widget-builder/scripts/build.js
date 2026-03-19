@@ -31,6 +31,16 @@ if (fs.existsSync(configPath)) {
     fs.copyFileSync(configPath, path.join(BUILDER_ROOT, 'widget.config.json'));
 }
 
+// 1b. Copy widget.structure.json (v2) if it exists
+const structurePath = path.join(clientDir, 'widget.structure.json');
+const rootStructurePath = path.join(BUILDER_ROOT, 'widget.structure.json');
+if (fs.existsSync(structurePath)) {
+    fs.copyFileSync(structurePath, rootStructurePath);
+} else if (fs.existsSync(rootStructurePath)) {
+    // Clean up stale structure from previous build
+    fs.unlinkSync(rootStructurePath);
+}
+
 // 2. Overwrite src/components with client's custom components
 // We only copy components that exist in client folder, falling back to default otherwise?
 // NO, for consistency, if client folder exists, we assume it has the full source for components.

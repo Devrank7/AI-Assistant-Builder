@@ -25,7 +25,7 @@ export const PANEL_MODES = [
 export type PanelMode = (typeof PANEL_MODES)[number];
 
 export const AGENT_TOOL_NAMES = [
-  // Core (10)
+  // Core (13)
   'analyze_site',
   'generate_design',
   'modify_design',
@@ -34,6 +34,9 @@ export const AGENT_TOOL_NAMES = [
   'crawl_knowledge',
   'modify_widget_code',
   'modify_config',
+  'modify_structure',
+  'modify_component',
+  'add_component',
   'rollback',
   'test_widget',
   // Integration (6)

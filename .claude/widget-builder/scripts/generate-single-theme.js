@@ -27,10 +27,14 @@ const CLIENTS_DIR = path.join(__dirname, '..', 'clients');
 // ── CLI ─────────────────────────────────────────────────────────────────
 const clientId = process.argv[2];
 const forceRegen = process.argv.includes('--force-regen');
+const cssOnly = process.argv.includes('--css-only');
+const useV2 = process.argv.includes('--v2');
 if (!clientId) {
-    console.error('Usage: node generate-single-theme.js <clientId> [--force-regen]');
+    console.error('Usage: node generate-single-theme.js <clientId> [--force-regen] [--css-only] [--v2]');
     console.error('Expects theme config at: clients/<clientId>/theme.json');
-    console.error('  --force-regen: Regenerate all JSX files even if they exist (used by modify_design)');
+    console.error('  --force-regen: Regenerate all JSX files even if they exist');
+    console.error('  --css-only: Only regenerate index.css (for color/theme changes via modify_design)');
+    console.error('  --v2: Generate decomposed v2 component files instead of monolithic Widget.jsx');
     process.exit(1);
 }
 
@@ -86,6 +90,18 @@ if (missing.length > 0) {
 if (c.hasShine === undefined) c.hasShine = true;
 if (!c.headerAccent) c.headerAccent = '';
 if (!c.label) c.label = `${clientId} theme`;
+
+// Light mode defaults for surface/text colors (dark themes define these in theme.json)
+if (!c.isDark) {
+    if (!c.surfaceBg) c.surfaceBg = '#ffffff';
+    if (!c.surfaceCard) c.surfaceCard = '#ffffff';
+    if (!c.surfaceBorder) c.surfaceBorder = '#e5e7eb';
+    if (!c.surfaceInput) c.surfaceInput = '#f9fafb';
+    if (!c.surfaceInputFocus) c.surfaceInputFocus = '#ffffff';
+    if (!c.textPrimary) c.textPrimary = '#374151';
+    if (!c.textSecondary) c.textSecondary = '#9ca3af';
+    if (!c.textMuted) c.textMuted = '#d1d5db';
+}
 
 // ── Widget type detection ────────────────────────────────────────────────
 const widgetType = c.widgetType || 'ai_chat';
@@ -157,10 +173,8 @@ function genCSS(c) {
         + `</g>`
         + `</svg>`;
     const encodedSvg = encodeURIComponent(svgRaw);
-    // Combine SVG pattern + gradient background so Tailwind classes don't override
-    const chatGradient = c.isDark
-        ? `linear-gradient(to bottom, ${c.surfaceBg}, ${c.surfaceCard})`
-        : 'linear-gradient(to bottom, rgba(249,250,251,0.8), #ffffff)';
+    // Combine SVG pattern + gradient background — uses CSS variables so color changes don't need JSX regen
+    const chatGradient = 'linear-gradient(to bottom, var(--aw-surface-bg), var(--aw-surface-card))';
 
     return `@tailwind base;
 @tailwind components;
@@ -168,10 +182,73 @@ function genCSS(c) {
 
 /* ${c.label} */
 :host {
+    /* Brand */
     --aw-primary: ${c.cssPrimary};
     --aw-accent: ${c.cssAccent};
-    --aw-bg: ${c.isDark ? c.surfaceBg : '#ffffff'};
-    --aw-text: ${c.isDark ? c.textPrimary : '#374151'};
+    /* Surfaces */
+    --aw-surface-bg: ${c.surfaceBg};
+    --aw-surface-card: ${c.surfaceCard};
+    --aw-surface-border: ${c.surfaceBorder};
+    --aw-surface-input: ${c.surfaceInput};
+    --aw-surface-input-focus: ${c.surfaceInputFocus};
+    /* Text */
+    --aw-text-primary: ${c.textPrimary};
+    --aw-text-secondary: ${c.textSecondary};
+    --aw-text-muted: ${c.textMuted};
+    /* Header gradient */
+    --aw-header-from: ${c.headerFrom};
+    --aw-header-via: ${c.headerVia};
+    --aw-header-to: ${c.headerTo};
+    /* Toggle button */
+    --aw-toggle-from: ${c.toggleFrom};
+    --aw-toggle-via: ${c.toggleVia};
+    --aw-toggle-to: ${c.toggleTo};
+    --aw-toggle-shadow: ${c.toggleShadow};
+    --aw-toggle-hover-rgb: ${c.toggleHoverRgb};
+    /* Send button */
+    --aw-send-from: ${c.sendFrom};
+    --aw-send-hover: ${c.sendHoverFrom};
+    /* Online dot */
+    --aw-online-dot: ${c.onlineDotBg};
+    --aw-online-dot-border: ${c.onlineDotBorder};
+    /* User messages */
+    --aw-user-msg-from: ${c.userMsgFrom};
+    --aw-user-msg-to: ${c.userMsgTo};
+    --aw-user-msg-shadow: ${c.userMsgShadow};
+    /* Avatar */
+    --aw-avatar-from: ${c.avatarFrom};
+    --aw-avatar-to: ${c.avatarTo};
+    --aw-avatar-border: ${c.avatarBorder};
+    --aw-avatar-icon: ${c.avatarIcon};
+    /* Chips / quick replies */
+    --aw-chip-border: ${c.chipBorder};
+    --aw-chip-from: ${c.chipFrom};
+    --aw-chip-to: ${c.chipTo};
+    --aw-chip-text: ${c.chipText};
+    --aw-chip-hover-from: ${c.chipHoverFrom};
+    --aw-chip-hover-to: ${c.chipHoverTo};
+    --aw-chip-hover-border: ${c.chipHoverBorder};
+    /* Links */
+    --aw-link: ${c.linkColor};
+    --aw-link-hover: ${c.linkHover};
+    /* Copy button */
+    --aw-copy-hover: ${c.copyHover};
+    --aw-copy-active: ${c.copyActive};
+    /* Focus */
+    --aw-focus-border: ${c.focusBorder};
+    --aw-focus-ring: ${c.focusRing};
+    --aw-focus-rgb: ${c.focusRgb};
+    /* Image button states */
+    --aw-img-active-border: ${c.imgActiveBorder};
+    --aw-img-active-bg: ${c.imgActiveBg};
+    --aw-img-active-text: ${c.imgActiveText};
+    --aw-img-hover-text: ${c.imgHoverText};
+    --aw-img-hover-border: ${c.imgHoverBorder};
+    --aw-img-hover-bg: ${c.imgHoverBg};
+    /* Feedback */
+    --aw-feedback-active: ${c.feedbackActive};
+    --aw-feedback-hover: ${c.feedbackHover};
+    /* Typography */
     font-family: ${c.font};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -187,11 +264,11 @@ function genCSS(c) {
 }
 
 *:focus-visible {
-    outline: 2px solid rgba(${c.focusRgb}, 0.35);
+    outline: 2px solid rgba(var(--aw-focus-rgb), 0.35);
     outline-offset: 2px;
 }
 button:focus-visible {
-    outline: 2px solid rgba(${c.focusRgb}, 0.35);
+    outline: 2px solid rgba(var(--aw-focus-rgb), 0.35);
     outline-offset: 2px;
     border-radius: 12px;
 }
@@ -221,7 +298,7 @@ button, a, input, textarea, [role="button"] { touch-action: manipulation; -webki
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: ${c.isDark ? c.cssPrimary : c.cssPrimary};
+    background: var(--aw-primary);
     animation: typing-bounce 1.4s ease-in-out infinite;
 }
 .typing-dot:nth-child(2) { animation-delay: 0.15s; }
@@ -340,40 +417,28 @@ if (document.readyState === 'loading') {
 }
 
 function genWidget(c) {
-    const containerBg = c.isDark ? `bg-[${c.surfaceBg}]` : 'bg-white';
-    const containerBorder = c.isDark ? `border-[${c.surfaceBorder}]` : 'border-gray-100';
+    // All colors now come from CSS variables (--aw-*) — no dark/light conditionals needed
+    const containerBg = 'bg-aw-surface-bg';
+    const containerBorder = 'border-aw-surface-border';
     const containerShadow = c.isDark ? 'shadow-black/40' : 'shadow-black/15';
-    const chatBg = c.isDark
-        ? `bg-gradient-to-b from-[${c.surfaceBg}] to-[${c.surfaceCard}]`
-        : 'bg-gradient-to-b from-gray-50/80 to-white';
-    const inputAreaBg = c.isDark ? `bg-[${c.surfaceBg}]` : 'bg-white';
-    const inputAreaBorder = c.isDark ? `border-[${c.surfaceBorder}]` : 'border-gray-100';
-    const inputBg = c.isDark ? `bg-[${c.surfaceInput}]` : 'bg-gray-50/80';
-    const inputText = c.isDark ? `text-[${c.textPrimary}]` : 'text-gray-800';
-    const inputPlaceholder = c.isDark ? `placeholder-[${c.textSecondary}]` : 'placeholder-gray-400';
-    const inputBorderColor = c.isDark ? `border-[${c.surfaceBorder}]` : 'border-gray-200';
-    const inputFocusBg = c.isDark ? `focus:bg-[${c.surfaceInputFocus}]` : 'focus:bg-white';
-    const imgPreviewBg = c.isDark ? `bg-[${c.surfaceBg}] border-[${c.surfaceBorder}]` : 'bg-white border-t border-gray-50';
-    const imgPreviewBorder = c.isDark ? `border-[${c.surfaceBorder}]` : 'border-gray-200';
+    const inputAreaBg = 'bg-aw-surface-bg';
+    const inputAreaBorder = 'border-aw-surface-border';
+    const inputBg = 'bg-aw-surface-input';
+    const inputText = 'text-aw-text-primary';
+    const inputPlaceholder = 'placeholder-aw-text-secondary';
+    const inputBorderColor = 'border-aw-surface-border';
+    const inputFocusBg = 'focus:bg-aw-surface-input-focus';
+    const imgPreviewBg = 'bg-aw-surface-bg border-aw-surface-border';
+    const imgPreviewBorder = 'border-aw-surface-border';
     const shine = c.hasShine ? `\n                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />` : '';
-    const nudgeBg = c.isDark ? `bg-[${c.surfaceCard}] border-[${c.surfaceBorder}] text-[${c.textPrimary}]` : 'bg-white border-gray-100 text-gray-700';
+    const nudgeBg = 'bg-aw-surface-card border-aw-surface-border text-aw-text-primary';
     const nudgeShadow = c.isDark ? 'shadow-black/30' : 'shadow-black/10';
-    const suggestionClasses = c.isDark
-        ? `border-[${c.surfaceBorder}] bg-[${c.surfaceCard}] text-[${c.textPrimary}] hover:bg-[${c.surfaceInput}] hover:border-[${c.chipHoverBorder}]`
-        : `border-[${c.chipBorder}] bg-[${c.chipFrom}] text-[${c.chipText}] hover:bg-[${c.chipHoverFrom}] hover:border-[${c.chipHoverBorder}]`;
-    const menuBg = c.isDark ? `bg-[${c.surfaceCard}]/95 border-[${c.surfaceBorder}]` : 'bg-white/95 border-gray-200/80';
-    const menuItemClasses = c.isDark
-        ? `text-[${c.textPrimary}] hover:bg-[${c.surfaceInput}]`
-        : 'text-gray-700 hover:bg-gray-50';
-    const contactBarClasses = c.isDark
-        ? `bg-[${c.surfaceCard}]/80 border-[${c.surfaceBorder}]`
-        : 'bg-gray-50/60 border-gray-100';
-    const contactBtnClasses = c.isDark
-        ? `text-[${c.textSecondary}] hover:text-[${c.textPrimary}] hover:bg-[${c.surfaceInput}]`
-        : `text-gray-500 hover:text-[${c.cssPrimary}] hover:bg-white`;
-    const pillClasses = c.isDark
-        ? `bg-[${c.surfaceCard}] text-[${c.textPrimary}] border border-[${c.surfaceBorder}] shadow-black/30`
-        : 'bg-white text-gray-700 border border-gray-200 shadow-black/10';
+    const suggestionClasses = 'border-aw-surface-border bg-aw-surface-card text-aw-text-primary hover:bg-aw-surface-input hover:border-aw-chip-hover-border';
+    const menuBg = 'bg-aw-surface-card/95 border-aw-surface-border';
+    const menuItemClasses = 'text-aw-text-primary hover:bg-aw-surface-input';
+    const contactBarClasses = 'bg-aw-surface-card/80 border-aw-surface-border';
+    const contactBtnClasses = 'text-aw-text-secondary hover:text-aw-text-primary hover:bg-aw-surface-input';
+    const pillClasses = 'bg-aw-surface-card text-aw-text-primary border border-aw-surface-border shadow-black/20';
 
     return `import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -689,13 +754,13 @@ export function Widget({ config }) {
             {isMobile && (
                 <div className="flex justify-center pt-2 pb-0.5 cursor-grab active:cursor-grabbing ${containerBg}"
                     onTouchStart={handleSwipeStart} onTouchMove={handleSwipeMove} onTouchEnd={handleSwipeEnd}>
-                    <div className="w-10 h-1 rounded-full ${c.isDark ? `bg-[${c.surfaceBorder}]` : 'bg-gray-300'}" />
+                    <div className="w-10 h-1 rounded-full bg-aw-surface-border" />
                 </div>
             )}
 
             {/* HEADER */}
             <div className="relative ${c.headerPad} flex items-center justify-between ${c.headerAccent}">
-                <div className="absolute inset-0 bg-gradient-to-br from-[${c.headerFrom}] via-[${c.headerVia}] to-[${c.headerTo}]" />${shine}
+                <div className="absolute inset-0 bg-gradient-to-br from-aw-header-from via-aw-header-via to-aw-header-to" />${shine}
 
                 <div className="relative flex items-center gap-3">
                     <div className="relative">
@@ -703,7 +768,7 @@ export function Widget({ config }) {
                             <Sparkles size={18} className="text-white" />
                         </div>
                         {!isOffline && (
-                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[${c.onlineDotBg}] border-[2.5px] border-[${c.onlineDotBorder}] shadow-sm" />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-aw-online-dot border-[2.5px] border-aw-online-dot-border shadow-sm" />
                         )}
                     </div>
                     <div>
@@ -772,11 +837,11 @@ export function Widget({ config }) {
 
             {/* CONTEXT BANNER */}
             {pageTitle && !contextDismissed && messages.length === 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 border-b ${c.isDark ? `bg-[${c.cssPrimary}]/10 border-[${c.surfaceBorder}] text-[${c.textPrimary}]` : `bg-[${c.cssPrimary}]/5 border-[${c.cssPrimary}]/10 text-gray-700`}">
-                    <Globe size={13} className="${c.isDark ? `text-[${c.cssPrimary}]` : `text-[${c.cssPrimary}]`}" />
+                <div className="flex items-center gap-2 px-4 py-2 border-b border-aw-surface-border text-aw-text-primary" style={{ backgroundColor: 'color-mix(in srgb, var(--aw-primary) 10%, transparent)' }}>
+                    <Globe size={13} className="text-primary" />
                     <span className="flex-1 text-[11.5px] font-medium truncate">{uiStrings.contextBanner}: <strong>{pageTitle}</strong></span>
                     <button onClick={() => { setContextDismissed(true); try { sessionStorage.setItem('aw-ctx-' + config.clientId, '1'); } catch {} }}
-                        className="p-0.5 ${c.isDark ? `text-[${c.textMuted}] hover:text-[${c.textSecondary}]` : 'text-gray-400 hover:text-gray-600'} transition-colors">
+                        className="p-0.5 text-aw-text-muted hover:text-aw-text-secondary transition-colors">
                         <X size={12} />
                     </button>
                 </div>
@@ -791,9 +856,9 @@ export function Widget({ config }) {
                     <div key={idx}>
                         {shouldShowSeparator(idx) && msg.timestamp && (
                             <div className="flex items-center gap-3 my-3">
-                                <div className="flex-1 h-px ${c.isDark ? `bg-[${c.surfaceBorder}]/50` : 'bg-gray-200/70'}" />
-                                <span className="text-[10px] font-medium ${c.isDark ? `text-[${c.textMuted}]` : 'text-gray-400'} whitespace-nowrap">{getDayLabel(msg.timestamp)}</span>
-                                <div className="flex-1 h-px ${c.isDark ? `bg-[${c.surfaceBorder}]/50` : 'bg-gray-200/70'}" />
+                                <div className="flex-1 h-px bg-aw-surface-border/50" />
+                                <span className="text-[10px] font-medium text-aw-text-muted whitespace-nowrap">{getDayLabel(msg.timestamp)}</span>
+                                <div className="flex-1 h-px bg-aw-surface-border/50" />
                             </div>
                         )}
                         <ChatMessage
@@ -826,12 +891,12 @@ export function Widget({ config }) {
                 ))}
                 {isTyping && (
                     <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
-                        <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50">
-                            <Sparkles size={13} className="text-[${c.avatarIcon}]" />
+                        <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-aw-avatar-from to-aw-avatar-to flex items-center justify-center flex-shrink-0 shadow-sm border border-aw-avatar-border/50">
+                            <Sparkles size={13} className="text-aw-avatar-icon" />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-[11px] font-medium ${c.isDark ? `text-[${c.textSecondary}]` : 'text-gray-400'} ml-1">{config.botName || 'AI'} {uiStrings.isTyping}</span>
-                            <div className="${c.isDark ? `bg-[${c.surfaceCard}] border border-[${c.surfaceBorder}]` : 'bg-white border border-gray-100 shadow-sm'} rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
+                            <span className="text-[11px] font-medium text-aw-text-secondary ml-1">{config.botName || 'AI'} {uiStrings.isTyping}</span>
+                            <div className="bg-aw-surface-card border border-aw-surface-border rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
                                 <span className="typing-dot" />
                                 <span className="typing-dot" />
                                 <span className="typing-dot" />
@@ -871,13 +936,13 @@ export function Widget({ config }) {
                 <form onSubmit={handleSubmit} className="flex items-end gap-2">
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                     <button type="button" onClick={() => fileInputRef.current?.click()}
-                        className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-[${c.imgActiveBorder}] bg-[${c.imgActiveBg}] text-[${c.imgActiveText}] shadow-sm' : '${c.isDark ? `border-[${c.surfaceBorder}] text-[${c.textSecondary}]` : 'border-gray-200 text-gray-400'} hover:text-[${c.imgHoverText}] hover:border-[${c.imgHoverBorder}] hover:bg-[${c.imgHoverBg}]'}\`}
+                        className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
                         aria-label="Upload photo">
                         <ImagePlus size={16} />
                     </button>
                     {voiceSupported && config.features?.voiceInput !== false && (
                         <button type="button" onClick={handleVoiceToggle}
-                            className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${isListening ? 'border-[${c.imgActiveBorder}] bg-[${c.imgActiveBg}] text-[${c.imgActiveText}] shadow-sm animate-pulse' : '${c.isDark ? `border-[${c.surfaceBorder}] text-[${c.textSecondary}]` : 'border-gray-200 text-gray-400'} hover:text-[${c.imgHoverText}] hover:border-[${c.imgHoverBorder}] hover:bg-[${c.imgHoverBg}]'}\`}
+                            className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${isListening ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm animate-pulse' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
                             aria-label={isListening ? 'Stop recording' : 'Voice input'}>
                             {isListening ? <MicOff size={16} /> : <Mic size={16} />}
                         </button>
@@ -885,20 +950,20 @@ export function Widget({ config }) {
                     <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
                         placeholder={uiStrings.placeholder}
                         rows={1}
-                        className="flex-1 min-w-0 ${inputBg} ${inputText} ${inputPlaceholder} rounded-xl py-2.5 pl-3.5 pr-3.5 border ${inputBorderColor} focus:outline-none focus:border-[${c.focusBorder}] focus:ring-2 focus:ring-[${c.focusRing}] ${inputFocusBg} transition-all resize-none text-[13.5px] leading-relaxed"
+                        className="flex-1 min-w-0 ${inputBg} ${inputText} ${inputPlaceholder} rounded-xl py-2.5 pl-3.5 pr-3.5 border ${inputBorderColor} focus:outline-none focus:border-aw-focus-border focus:ring-2 focus:ring-aw-focus-ring ${inputFocusBg} transition-all resize-none text-[13.5px] leading-relaxed"
                         style={{ maxHeight: '100px' }}
                     />
                     <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
-                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-[${c.sendFrom}] text-white flex items-center justify-center hover:bg-[${c.sendHoverFrom}] active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-[${c.sendFrom}]/25">
+                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-aw-send text-white flex items-center justify-center hover:bg-aw-send-hover active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-aw-send/25">
                         <Send size={16} />
                     </button>
                 </form>
             </div>
 
             {/* POWERED BY */}
-            <div className="flex justify-center py-1.5 ${c.isDark ? `bg-[${c.surfaceBg}]` : 'bg-gray-50/50'}">
+            <div className="flex justify-center py-1.5 bg-aw-surface-bg">
                 <a href="https://winbixai.com" target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[10px] font-medium ${c.isDark ? `text-[${c.textMuted}] hover:text-[${c.textSecondary}]` : 'text-gray-400 hover:text-gray-500'} transition-colors opacity-70 hover:opacity-100">
+                    className="flex items-center gap-1 text-[10px] font-medium text-aw-text-muted hover:text-aw-text-secondary transition-colors opacity-70 hover:opacity-100">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                     Powered by WinBix AI
                 </a>
@@ -966,7 +1031,7 @@ export function Widget({ config }) {
                             onClick={() => { dismissNudge(); setIsOpen(true); }}
                         >
                             <button onClick={(e) => { e.stopPropagation(); dismissNudge(); }}
-                                className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-colors ${c.isDark ? `bg-[${c.surfaceBorder}] text-[${c.textSecondary}] hover:bg-[${c.surfaceInput}]` : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'}">
+                                className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-colors bg-aw-surface-border text-aw-text-secondary hover:bg-aw-surface-input">
                                 <X size={11} />
                             </button>
                             <p className="text-[12.5px] leading-relaxed pr-2">{nudgeMessage}</p>
@@ -978,17 +1043,17 @@ export function Widget({ config }) {
                 {(!isMobile || !isOpen) && (
                     <div className="relative self-end">
                         {!isOpen && unreadCount > 0 && (
-                            <span className="absolute inset-0 ${c.toggleRadius} bg-gradient-to-br from-[${c.toggleFrom}] to-[${c.toggleTo}] animate-pulse-ring" />
+                            <span className="absolute inset-0 ${c.toggleRadius} bg-gradient-to-br from-aw-toggle-from to-aw-toggle-to animate-pulse-ring" />
                         )}
                         <motion.button
-                            whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(${c.toggleHoverRgb}, 0.35)' }}
+                            whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(var(--aw-toggle-hover-rgb), 0.35)' }}
                             whileTap={isDragging ? {} : { scale: 0.92 }}
                             onClick={() => { if (!isDragging) setIsOpen(!isOpen); }}
                             onDoubleClick={resetPosition}
                             onPointerDown={onPointerDown}
                             onPointerMove={onPointerMove}
                             onPointerUp={onPointerUp}
-                            className={\`${c.toggleSize} ${c.toggleRadius} flex items-center justify-center text-white shadow-lg shadow-[${c.toggleShadow}]/30 bg-gradient-to-br from-[${c.toggleFrom}] via-[${c.toggleVia}] to-[${c.toggleTo}] border border-white/10 \${!isOpen ? 'animate-breathe' : ''}\`}
+                            className={\`${c.toggleSize} ${c.toggleRadius} flex items-center justify-center text-white shadow-lg shadow-aw-toggle-shadow/30 bg-gradient-to-br from-aw-toggle-from via-aw-toggle-via to-aw-toggle-to border border-white/10 \${!isOpen ? 'animate-breathe' : ''}\`}
                             aria-label={isOpen ? 'Close chat' : 'Open chat'}
                         >
                             <AnimatePresence mode="wait">
@@ -1004,7 +1069,7 @@ export function Widget({ config }) {
                             </AnimatePresence>
                         </motion.button>
                         {!isOpen && unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 ${c.isDark ? `border-[${c.surfaceBg}]` : 'border-white'} shadow-sm pointer-events-none">
+                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-aw-surface-bg shadow-sm pointer-events-none">
                                 {unreadCount}
                             </span>
                         )}
@@ -1018,16 +1083,12 @@ export function Widget({ config }) {
 }
 
 function genChatMessage(c) {
-    const botMsgClasses = c.isDark
-        ? `bg-[${c.surfaceCard}] text-[${c.textPrimary}] border border-[${c.surfaceBorder}] shadow-sm rounded-bl-md`
-        : 'bg-white text-gray-700 border border-gray-100 shadow-sm rounded-bl-md';
-    const strongClasses = c.isDark ? 'text-white' : 'text-gray-900';
-    const timestampColor = c.isDark ? `text-[${c.textSecondary}]` : 'text-gray-400';
-    const copyDefault = c.isDark ? `text-[${c.textMuted}]` : 'text-gray-300';
-    const imgBorder = c.isDark ? `border-[${c.surfaceBorder}]` : 'border-gray-200';
-    const userMsgClasses = c.isDark
-        ? `bg-gradient-to-r from-[${c.userMsgFrom}] to-[${c.userMsgTo}] text-white rounded-br-md shadow-sm`
-        : `bg-gradient-to-r from-[${c.chipFrom}] to-[${c.chipTo}] text-gray-700 border border-[${c.chipBorder}]/50 rounded-br-md shadow-sm`;
+    const botMsgClasses = 'bg-aw-surface-card text-aw-text-primary border border-aw-surface-border shadow-sm rounded-bl-md';
+    const strongClasses = 'text-aw-text-primary font-semibold';
+    const timestampColor = 'text-aw-text-secondary';
+    const copyDefault = 'text-aw-text-muted';
+    const imgBorder = 'border-aw-surface-border';
+    const userMsgClasses = 'bg-gradient-to-r from-aw-user-msg-from to-aw-user-msg-to text-white rounded-br-md shadow-sm';
 
     return `import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
@@ -1062,8 +1123,8 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
         >
             {/* Bot Avatar */}
             {isBot && (
-                <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] flex items-center justify-center flex-shrink-0 shadow-sm border border-[${c.avatarBorder}]/50">
-                    <Sparkles size={13} className="text-[${c.avatarIcon}]" />
+                <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-aw-avatar-from to-aw-avatar-to flex items-center justify-center flex-shrink-0 shadow-sm border border-aw-avatar-border/50">
+                    <Sparkles size={13} className="text-aw-avatar-icon" />
                 </div>
             )}
 
@@ -1091,7 +1152,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
-                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-[${c.linkColor}] hover:text-[${c.linkHover}]">{children}</a>
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-aw-link hover:text-aw-link-hover">{children}</a>
                                     ),
                                     strong: ({ children }) => (
                                         <strong className="font-semibold ${strongClasses}">{children}</strong>
@@ -1110,13 +1171,13 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                 <div className={\`flex items-center gap-2 mt-1 px-1 \${isBot ? '' : 'justify-end'}\`}>
                     {timestamp && <span className="text-[10px] ${timestampColor} font-medium">{formatTime(timestamp)}</span>}
                     {isBot && !isError && content && (
-                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 ${copyDefault} hover:text-[${c.copyHover}] transition-all duration-200" aria-label="Copy">
-                            {copied ? <Check size={11} className="text-[${c.copyActive}]" /> : <Copy size={11} />}
+                        <button onClick={handleCopy} className="opacity-0 group-hover:opacity-100 p-0.5 ${copyDefault} hover:text-aw-copy-hover transition-all duration-200" aria-label="Copy">
+                            {copied ? <Check size={11} className="text-aw-copy-active" /> : <Copy size={11} />}
                         </button>
                     )}
                     {isBot && !isError && content && onSpeak && (
                         <button onClick={() => onSpeak(content)}
-                            className={\`p-0.5 transition-all duration-200 \${isSpeaking ? 'text-[${c.feedbackActive}] opacity-100' : 'opacity-0 group-hover:opacity-100 ${copyDefault} hover:text-[${c.copyHover}]'}\`}
+                            className={\`p-0.5 transition-all duration-200 \${isSpeaking ? 'text-aw-feedback-active opacity-100' : 'opacity-0 group-hover:opacity-100 ${copyDefault} hover:text-aw-copy-hover'}\`}
                             aria-label={isSpeaking ? 'Stop reading' : 'Read aloud'}>
                             {isSpeaking ? <VolumeX size={11} /> : <Volume2 size={11} />}
                         </button>
@@ -1130,7 +1191,7 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
             </div>
 
             {!isBot && (
-                <div className="w-7 h-7 ${c.chatAvatarRound} flex items-center justify-center bg-gradient-to-br from-[${c.avatarFrom}] to-[${c.avatarTo}] border border-[${c.avatarBorder}]/50 text-[${c.avatarIcon}] flex-shrink-0 shadow-sm">
+                <div className="w-7 h-7 ${c.chatAvatarRound} flex items-center justify-center bg-gradient-to-br from-aw-avatar-from to-aw-avatar-to border border-aw-avatar-border/50 text-aw-avatar-icon flex-shrink-0 shadow-sm">
                     <User size={13} />
                 </div>
             )}
@@ -1143,17 +1204,11 @@ export default memo(ChatMessage);
 }
 
 function genQuickReplies(c) {
-    const cardBg = c.isDark
-        ? `bg-[${c.surfaceCard}]/80 border-[${c.surfaceBorder}]/80 hover:border-[${c.chipHoverBorder}] hover:bg-[${c.surfaceInput}]`
-        : `bg-white/80 border-[${c.chipBorder}] hover:border-[${c.chipHoverBorder}] hover:bg-[${c.chipHoverFrom}]/40`;
-    const cardText = c.isDark ? `text-[${c.textPrimary}]` : `text-[${c.chipText}]`;
-    const iconBg = c.isDark
-        ? `bg-gradient-to-br from-[${c.cssPrimary}]/20 to-[${c.cssPrimary}]/10`
-        : `bg-gradient-to-br from-[${c.cssPrimary}]/[0.12] to-[${c.cssPrimary}]/[0.05]`;
-    const iconColor = `text-[${c.cssPrimary}]`;
-    const glowHover = c.isDark
-        ? `group-hover:shadow-[0_0_20px_rgba(${c.focusRgb.replace(/ /g, '')},0.08)]`
-        : `group-hover:shadow-[0_2px_16px_rgba(${c.focusRgb.replace(/ /g, '')},0.10)]`;
+    const cardBg = 'bg-aw-surface-card/80 border-aw-surface-border/80 hover:border-aw-chip-hover-border hover:bg-aw-surface-input';
+    const cardText = 'text-aw-text-primary';
+    const iconBg = 'bg-gradient-to-br from-primary/15 to-primary/5';
+    const iconColor = 'text-primary';
+    const glowHover = 'group-hover:shadow-md';
 
     return `import { motion } from 'framer-motion';
 import { MessageCircle } from 'lucide-preact';
@@ -1181,7 +1236,7 @@ export default function QuickReplies({ options, onSelect }) {
                         </span>
                         <span className="text-[12px] font-medium leading-snug ${cardText}">{option}</span>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[${c.cssPrimary}]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 </motion.button>
             ))}
         </div>
@@ -1218,12 +1273,12 @@ export default function MessageFeedback({ messageIndex, sessionId, clientId }) {
     return (
         <div className="flex items-center gap-1 mt-0.5 ml-8">
             <button onClick={() => handleRate('up')}
-                className={\`p-0.5 rounded transition-colors \${rating === 'up' ? 'text-[${c.feedbackActive}]' : '${c.isDark ? `text-[${c.textMuted}]` : 'text-gray-300'} hover:text-[${c.feedbackHover}]'}\`}
+                className={\`p-0.5 rounded transition-colors \${rating === 'up' ? 'text-aw-feedback-active' : 'text-aw-text-muted hover:text-aw-feedback-hover'}\`}
                 aria-label="Helpful">
                 <ThumbsUp size={11} />
             </button>
             <button onClick={() => handleRate('down')}
-                className={\`p-0.5 rounded transition-colors \${rating === 'down' ? 'text-red-400' : '${c.isDark ? `text-[${c.textMuted}]` : 'text-gray-300'} hover:text-red-300'}\`}
+                className={\`p-0.5 rounded transition-colors \${rating === 'down' ? 'text-red-400' : 'text-aw-text-muted hover:text-red-300'}\`}
                 aria-label="Not helpful">
                 <ThumbsDown size={11} />
             </button>
@@ -1234,18 +1289,16 @@ export default function MessageFeedback({ messageIndex, sessionId, clientId }) {
 }
 
 function genRichBlocks(c) {
-    const cardBg = c.isDark ? `bg-[${c.surfaceCard}] border-[${c.surfaceBorder}]` : 'bg-white border-gray-100';
-    const cardTitle = c.isDark ? `text-[${c.textPrimary}]` : 'text-gray-800';
-    const cardDesc = c.isDark ? `text-[${c.textSecondary}]` : 'text-gray-500';
-    const cardBtnBg = c.isDark ? `bg-[${c.surfaceInput}] text-[${c.textPrimary}] hover:bg-[${c.surfaceInputFocus}]` : `bg-[${c.chipFrom}] text-[${c.chipText}] hover:bg-[${c.chipHoverFrom}]`;
-    const btnGroupBg = c.isDark
-        ? `border-[${c.surfaceBorder}] bg-[${c.surfaceCard}] text-[${c.textPrimary}] hover:bg-[${c.surfaceInput}]`
-        : `border-[${c.chipBorder}] bg-[${c.chipFrom}] text-[${c.chipText}] hover:bg-[${c.chipHoverFrom}] hover:border-[${c.chipHoverBorder}]`;
-    const formBg = c.isDark ? `bg-[${c.surfaceCard}] border-[${c.surfaceBorder}]` : 'bg-gray-50 border-gray-100';
-    const formInputBg = c.isDark ? `bg-[${c.surfaceInput}] border-[${c.surfaceBorder}] text-[${c.textPrimary}] placeholder-[${c.textMuted}] focus:border-[${c.focusBorder}]` : `bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-[${c.focusBorder}]`;
+    const cardBg = 'bg-aw-surface-card border-aw-surface-border';
+    const cardTitle = 'text-aw-text-primary';
+    const cardDesc = 'text-aw-text-secondary';
+    const cardBtnBg = 'bg-aw-surface-input text-aw-text-primary hover:bg-aw-surface-input-focus';
+    const btnGroupBg = 'border-aw-surface-border bg-aw-surface-card text-aw-text-primary hover:bg-aw-surface-input hover:border-aw-chip-hover-border';
+    const formBg = 'bg-aw-surface-card border-aw-surface-border';
+    const formInputBg = 'bg-aw-surface-input border-aw-surface-border text-aw-text-primary placeholder-aw-text-muted focus:border-aw-focus-border';
 
-    const arrowBg = c.isDark ? `bg-[${c.surfaceCard}]/90 border-[${c.surfaceBorder}] hover:bg-[${c.surfaceCard}]` : 'bg-white/90 border-gray-200 hover:bg-white';
-    const arrowIcon = c.isDark ? `text-[${c.textSecondary}]` : 'text-gray-600';
+    const arrowBg = 'bg-aw-surface-card/90 border-aw-surface-border hover:bg-aw-surface-card';
+    const arrowIcon = 'text-aw-text-secondary';
 
     return `import { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
@@ -1343,7 +1396,7 @@ function LeadForm({ fields, submitLabel, onSubmit }) {
         return (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 className="rounded-2xl border p-3 text-center ${formBg}">
-                <p className="text-[12px] font-medium ${c.isDark ? `text-[${c.textPrimary}]` : 'text-gray-700'}">✓ Submitted</p>
+                <p className="text-[12px] font-medium text-aw-text-primary">✓ Submitted</p>
             </motion.div>
         );
     }
@@ -1356,11 +1409,11 @@ function LeadForm({ fields, submitLabel, onSubmit }) {
                     placeholder={f.label}
                     value={values[f.key] || ''}
                     onChange={(e) => setValues(prev => ({ ...prev, [f.key]: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border text-[12px] focus:outline-none focus:ring-1 focus:ring-[${c.focusRing}] transition-all ${formInputBg}"
+                    className="w-full px-3 py-2 rounded-xl border text-[12px] focus:outline-none focus:ring-1 focus:ring-aw-focus-ring transition-all ${formInputBg}"
                 />
             ))}
             <button type="submit"
-                className="w-full py-2 rounded-xl text-[12px] font-semibold text-white bg-[${c.sendFrom}] hover:bg-[${c.sendHoverFrom}] transition-all shadow-sm">
+                className="w-full py-2 rounded-xl text-[12px] font-semibold text-white bg-aw-send hover:bg-aw-send-hover transition-all shadow-sm">
                 {submitLabel}
             </button>
         </motion.form>
@@ -1933,6 +1986,837 @@ render(h(LeadForm, null), app);
 `;
 }
 
+// ── v2 Component Generators ─────────────────────────────────────────────
+
+function genV2Header(c) {
+    const shine = c.hasShine ? `\n                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />` : '';
+    const menuBg = 'bg-aw-surface-card/95 border-aw-surface-border';
+    const menuItemClasses = 'text-aw-text-primary hover:bg-aw-surface-input';
+
+    return `import { useState } from 'react';
+import { Sparkles, X, MoreVertical, Trash2, Volume2, VolumeX, Type, Download, ChevronDown } from 'lucide-preact';
+
+export default function Header({ ctx }) {
+    const { isOffline, config, uiStrings, setIsOpen, isMobile, showMenu, setShowMenu,
+            menuRef, clearMessages, toggleMute, isMuted, cycleFontSize, chatFontSize,
+            exportChat, messages } = ctx;
+
+    return (
+        <div className="relative ${c.headerPad} flex items-center justify-between ${c.headerAccent}">
+            <div className="absolute inset-0 bg-gradient-to-br from-aw-header-from via-aw-header-via to-aw-header-to" />${shine}
+
+            <div className="relative flex items-center gap-3">
+                <div className="relative">
+                    <div className="w-10 h-10 ${c.avatarHeaderRound} bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10">
+                        <Sparkles size={18} className="text-white" />
+                    </div>
+                    {!isOffline && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-aw-online-dot border-[2.5px] border-aw-online-dot-border shadow-sm" />
+                    )}
+                </div>
+                <div>
+                    <h3 className="font-semibold ${c.nameSize} text-white tracking-tight leading-tight truncate max-w-[140px] sm:max-w-[180px]">{config.botName || config.bot?.name}</h3>
+                    <p className="text-[11px] text-white/65 font-medium flex items-center gap-1">
+                        {isOffline ? uiStrings.offline : (<><span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />{uiStrings.respondsInstantly}</>)}
+                    </p>
+                </div>
+            </div>
+            <div className="relative flex items-center gap-1">
+                <div className="relative" ref={menuRef}>
+                    <button onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                        className="p-2 hover:bg-white/15 rounded-xl text-white/50 hover:text-white transition-all duration-200" aria-label="Menu">
+                        <MoreVertical size={15} />
+                    </button>
+                    {showMenu && (
+                        <div className="absolute right-0 top-full mt-1.5 w-[168px] rounded-2xl shadow-xl border overflow-hidden z-50 ${menuBg}" style={{ backdropFilter: 'blur(16px)' }}>
+                            <button onClick={() => { clearMessages(); setShowMenu(false); }}
+                                className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors ${menuItemClasses}">
+                                <Trash2 size={13} /> {uiStrings.newChat}
+                            </button>
+                            <button onClick={() => { toggleMute(); setShowMenu(false); }}
+                                className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors ${menuItemClasses}">
+                                {isMuted ? <Volume2 size={13} /> : <VolumeX size={13} />} {isMuted ? uiStrings.unmute : uiStrings.mute}
+                            </button>
+                            <button onClick={() => { cycleFontSize(); }}
+                                className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center justify-between transition-colors ${menuItemClasses}">
+                                <span className="flex items-center gap-2.5"><Type size={13} /> {uiStrings.fontSize}</span>
+                                <span className="text-[10px] opacity-60 font-bold tracking-wider">{chatFontSize.toUpperCase()}</span>
+                            </button>
+                            {messages.length > 0 && (
+                                <button onClick={exportChat}
+                                    className="w-full px-3.5 py-2.5 text-left text-[12px] font-medium flex items-center gap-2.5 transition-colors ${menuItemClasses}">
+                                    <Download size={13} /> {uiStrings.exportChat}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/15 rounded-xl text-white/50 hover:text-white transition-all duration-200" aria-label="Close">
+                    {isMobile ? <ChevronDown size={18} /> : <X size={16} />}
+                </button>
+            </div>
+        </div>
+    );
+}
+`;
+}
+
+function genV2ContactBar(c) {
+    const contactBarClasses = 'bg-aw-surface-card/80 border-aw-surface-border';
+    const contactBtnClasses = 'text-aw-text-secondary hover:text-aw-text-primary hover:bg-aw-surface-input';
+
+    return `import { Phone, Mail, Globe } from 'lucide-preact';
+
+export default function ContactBar({ ctx }) {
+    const { contacts, uiStrings } = ctx;
+
+    if (!contacts || Object.keys(contacts).length === 0) return null;
+
+    return (
+        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b overflow-x-auto scrollbar-hide ${contactBarClasses}">
+            {contacts.phone && (
+                <a href={'tel:' + contacts.phone} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap ${contactBtnClasses}" target="_blank" rel="noopener">
+                    <Phone size={12} /> {uiStrings.call}
+                </a>
+            )}
+            {contacts.email && (
+                <a href={'mailto:' + contacts.email} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap ${contactBtnClasses}">
+                    <Mail size={12} /> Email
+                </a>
+            )}
+            {contacts.website && (
+                <a href={contacts.website} target="_blank" rel="noopener" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap ${contactBtnClasses}">
+                    <Globe size={12} /> {uiStrings.website}
+                </a>
+            )}
+        </div>
+    );
+}
+`;
+}
+
+function genV2ContextBanner(c) {
+    return `import { Globe, X } from 'lucide-preact';
+
+export default function ContextBanner({ ctx }) {
+    const { pageTitle, contextDismissed, setContextDismissed, messages, config, uiStrings } = ctx;
+
+    if (!pageTitle || contextDismissed || messages.length > 0) return null;
+
+    return (
+        <div className="flex items-center gap-2 px-4 py-2 border-b border-aw-surface-border text-aw-text-primary" style={{ backgroundColor: 'color-mix(in srgb, var(--aw-primary) 10%, transparent)' }}>
+            <Globe size={13} className="text-primary" />
+            <span className="flex-1 text-[11.5px] font-medium truncate">{uiStrings.contextBanner}: <strong>{pageTitle}</strong></span>
+            <button onClick={() => { setContextDismissed(true); try { sessionStorage.setItem('aw-ctx-' + config.clientId, '1'); } catch {} }}
+                className="p-0.5 text-aw-text-muted hover:text-aw-text-secondary transition-colors">
+                <X size={12} />
+            </button>
+        </div>
+    );
+}
+`;
+}
+
+function genV2MessageList(c) {
+    const suggestionClasses = 'border-aw-surface-border bg-aw-surface-card text-aw-text-primary hover:bg-aw-surface-input hover:border-aw-chip-hover-border';
+    const pillClasses = 'bg-aw-surface-card text-aw-text-primary border border-aw-surface-border shadow-black/20';
+
+    return `import { motion } from 'framer-motion';
+import { Sparkles, ArrowDown } from 'lucide-preact';
+import ChatMessage from './ChatMessage';
+import MessageFeedback from './MessageFeedback';
+import RichBlocks from './RichBlocks';
+
+export default function MessageList({ ctx }) {
+    const { chatContainerRef, handleChatScroll, chatFontSize, typewriterDone, welcomeMsg,
+            typewriterText, messages, shouldShowSeparator, getDayLabel, setExpandedImage,
+            ttsSupported, speak, lang, speakingIdx, retryLastMessage, sessionId, config,
+            isTyping, hasNewMessages, isAtBottom, scrollToBottom, messagesEndRef,
+            handleRichAction, detectLang, sendMessage, uiStrings } = ctx;
+
+    return (
+        <div ref={chatContainerRef} onScroll={handleChatScroll}
+            className={\`flex-1 overflow-y-auto px-4 py-4 space-y-1 scrollbar-hide chat-pattern font-\${chatFontSize}\`} aria-live="polite">
+            <ChatMessage role="assistant" content={typewriterDone ? welcomeMsg : typewriterText} onImageClick={setExpandedImage}
+                onSpeak={ttsSupported && typewriterDone ? () => speak(welcomeMsg, lang, -1) : null} isSpeaking={speakingIdx === -1} />
+            {messages.map((msg, idx) => (
+                <div key={idx}>
+                    {shouldShowSeparator(idx) && msg.timestamp && (
+                        <div className="flex items-center gap-3 my-3">
+                            <div className="flex-1 h-px bg-aw-surface-border/50" />
+                            <span className="text-[10px] font-medium text-aw-text-muted whitespace-nowrap">{getDayLabel(msg.timestamp)}</span>
+                            <div className="flex-1 h-px bg-aw-surface-border/50" />
+                        </div>
+                    )}
+                    <ChatMessage
+                        role={msg.role} content={msg.content} timestamp={msg.timestamp}
+                        isError={msg.isError} onRetry={msg.isError ? retryLastMessage : undefined}
+                        imageUrl={msg.imageUrl} onImageClick={setExpandedImage}
+                        onSpeak={msg.role === 'assistant' && ttsSupported ? () => speak(msg.content, lang, idx) : null}
+                        isSpeaking={speakingIdx === idx}
+                    />
+                    {msg.role === 'assistant' && !msg.isError && msg.content && config.features?.feedback !== false && (
+                        <MessageFeedback messageIndex={idx} sessionId={sessionId} clientId={config.clientId} />
+                    )}
+                    {msg.role === 'assistant' && msg.richBlocks?.length > 0 && (
+                        <RichBlocks blocks={msg.richBlocks} onAction={handleRichAction} />
+                    )}
+                    {msg.role === 'assistant' && !msg.isError && msg.suggestions?.length > 0 && idx === messages.length - 1 && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                            className="flex flex-wrap gap-1.5 ml-7 sm:ml-9 mt-2 mb-1">
+                            {msg.suggestions.map((s, si) => (
+                                <button key={si} onClick={() => { detectLang(s); sendMessage(s); }}
+                                    className="px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-200 cursor-pointer ${suggestionClasses}">
+                                    {s}
+                                </button>
+                            ))}
+                        </motion.div>
+                    )}
+                </div>
+            ))}
+            {isTyping && (
+                <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-2 py-2">
+                    <div className="w-7 h-7 ${c.chatAvatarRound} bg-gradient-to-br from-aw-avatar-from to-aw-avatar-to flex items-center justify-center flex-shrink-0 shadow-sm border border-aw-avatar-border/50">
+                        <Sparkles size={13} className="text-aw-avatar-icon" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[11px] font-medium text-aw-text-secondary ml-1">{config.botName || 'AI'} {uiStrings.isTyping}</span>
+                        <div className="bg-aw-surface-card border border-aw-surface-border rounded-2xl rounded-tl-md px-4 py-3 flex items-center gap-1.5">
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+            {hasNewMessages && !isAtBottom && (
+                <div className="sticky bottom-2 left-0 right-0 flex justify-center z-10">
+                    <button onClick={scrollToBottom}
+                        className="new-msg-pill px-3.5 py-1.5 rounded-full text-[12px] font-semibold shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:shadow-xl ${pillClasses}">
+                        <ArrowDown size={12} /> {uiStrings.newMessages}
+                    </button>
+                </div>
+            )}
+            <div ref={messagesEndRef} />
+        </div>
+    );
+}
+`;
+}
+
+function genV2ImagePreview(c) {
+    const imgPreviewBg = 'bg-aw-surface-bg border-aw-surface-border';
+    const imgPreviewBorder = 'border-aw-surface-border';
+
+    return `import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-preact';
+
+export default function ImagePreview({ ctx }) {
+    const { selectedImage, removeSelectedImage } = ctx;
+
+    return (
+        <AnimatePresence>
+            {selectedImage && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-4 overflow-hidden ${imgPreviewBg}">
+                    <div className="relative inline-block my-2.5">
+                        <img src={selectedImage.previewUrl} alt="" className="h-16 w-auto rounded-xl border ${imgPreviewBorder} object-cover shadow-sm" />
+                        <button onClick={removeSelectedImage} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-md transition-colors">
+                            <X size={11} />
+                        </button>
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+}
+`;
+}
+
+function genV2InputArea(c) {
+    const inputBg = 'bg-aw-surface-input';
+    const inputText = 'text-aw-text-primary';
+    const inputPlaceholder = 'placeholder-aw-text-secondary';
+    const inputBorderColor = 'border-aw-surface-border';
+    const inputFocusBg = 'focus:bg-aw-surface-input-focus';
+    const inputAreaBg = 'bg-aw-surface-bg';
+    const inputAreaBorder = 'border-aw-surface-border';
+
+    return `import { ImagePlus, Mic, MicOff, Send } from 'lucide-preact';
+import QuickReplies from './QuickReplies';
+
+export default function InputArea({ ctx }) {
+    const { inputRef, fileInputRef, inputValue, setInputValue, handleKeyDown, handleSubmit,
+            handleImageSelect, selectedImage, voiceSupported, config, isListening,
+            handleVoiceToggle, uiStrings, isLoading, showQuickReplies, sendMessage } = ctx;
+
+    return (
+        <div className="px-4 pt-2 pb-3 border-t ${inputAreaBorder} ${inputAreaBg} space-y-1.5 safe-area-bottom">
+            {showQuickReplies && <QuickReplies options={config.quickReplies || config.features?.quickReplies?.starters} onSelect={(t) => sendMessage(t)} />}
+            <form onSubmit={handleSubmit} className="flex items-end gap-2">
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                <button type="button" onClick={() => fileInputRef.current?.click()}
+                    className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${selectedImage ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
+                    aria-label="Upload photo">
+                    <ImagePlus size={16} />
+                </button>
+                {voiceSupported && config.features?.voiceInput !== false && (
+                    <button type="button" onClick={handleVoiceToggle}
+                        className={\`flex-shrink-0 p-2.5 rounded-xl border transition-all duration-200 \${isListening ? 'border-aw-img-active-border bg-aw-img-active-bg text-aw-img-active-text shadow-sm animate-pulse' : 'border-aw-surface-border text-aw-text-secondary hover:text-aw-img-hover-text hover:border-aw-img-hover-border hover:bg-aw-img-hover-bg'}\`}
+                        aria-label={isListening ? 'Stop recording' : 'Voice input'}>
+                        {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                    </button>
+                )}
+                <textarea ref={inputRef} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
+                    placeholder={uiStrings.placeholder}
+                    rows={1}
+                    className="flex-1 min-w-0 ${inputBg} ${inputText} ${inputPlaceholder} rounded-xl py-2.5 pl-3.5 pr-3.5 border ${inputBorderColor} focus:outline-none focus:border-aw-focus-border focus:ring-2 focus:ring-aw-focus-ring ${inputFocusBg} transition-all resize-none text-[13.5px] leading-relaxed"
+                    style={{ maxHeight: '100px' }}
+                />
+                <button type="submit" disabled={(!inputValue.trim() && !selectedImage) || isLoading}
+                    className="flex-shrink-0 w-9 h-9 rounded-xl bg-aw-send text-white flex items-center justify-center hover:bg-aw-send-hover active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-aw-send/25">
+                    <Send size={16} />
+                </button>
+            </form>
+        </div>
+    );
+}
+`;
+}
+
+function genV2PoweredBy(c) {
+    return `export default function PoweredBy({ ctx }) {
+    return (
+        <div className="flex justify-center py-1.5 bg-aw-surface-bg">
+            <a href="https://winbixai.com" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[10px] font-medium text-aw-text-muted hover:text-aw-text-secondary transition-colors opacity-70 hover:opacity-100">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                Powered by WinBix AI
+            </a>
+        </div>
+    );
+}
+`;
+}
+
+function genV2NudgeBubble(c) {
+    const nudgeBg = 'bg-aw-surface-card border-aw-surface-border text-aw-text-primary';
+    const nudgeShadow = c.isDark ? 'shadow-black/30' : 'shadow-black/10';
+
+    return `import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-preact';
+
+export default function NudgeBubble({ ctx }) {
+    const { showNudge, isOpen, nudgeMessage, dismissNudge, setIsOpen } = ctx;
+
+    return (
+        <AnimatePresence>
+            {showNudge && !isOpen && nudgeMessage && (
+                <motion.div key="nudge"
+                    initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    className="max-w-[200px] sm:max-w-[220px] px-3.5 py-2.5 rounded-2xl shadow-xl ${nudgeShadow} border cursor-pointer relative ${nudgeBg}"
+                    onClick={() => { dismissNudge(); setIsOpen(true); }}
+                >
+                    <button onClick={(e) => { e.stopPropagation(); dismissNudge(); }}
+                        className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-colors bg-aw-surface-border text-aw-text-secondary hover:bg-aw-surface-input">
+                        <X size={11} />
+                    </button>
+                    <p className="text-[12.5px] leading-relaxed pr-2">{nudgeMessage}</p>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+}
+`;
+}
+
+function genV2ToggleButton(c) {
+    return `import { AnimatePresence, motion } from 'framer-motion';
+import { MessageCircle, X } from 'lucide-preact';
+
+export default function ToggleButton({ ctx }) {
+    const { isOpen, setIsOpen, isMobile, isDragging, resetPosition,
+            onPointerDown, onPointerMove, onPointerUp, unreadCount } = ctx;
+
+    if (isMobile && isOpen) return null;
+
+    return (
+        <div className="relative self-end">
+            {!isOpen && unreadCount > 0 && (
+                <span className="absolute inset-0 ${c.toggleRadius} bg-gradient-to-br from-aw-toggle-from to-aw-toggle-to animate-pulse-ring" />
+            )}
+            <motion.button
+                whileHover={isDragging ? {} : { scale: 1.08, boxShadow: '0 8px 30px rgba(var(--aw-toggle-hover-rgb), 0.35)' }}
+                whileTap={isDragging ? {} : { scale: 0.92 }}
+                onClick={() => { if (!isDragging) setIsOpen(!isOpen); }}
+                onDoubleClick={resetPosition}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                className={\`${c.toggleSize} ${c.toggleRadius} flex items-center justify-center text-white shadow-lg shadow-aw-toggle-shadow/30 bg-gradient-to-br from-aw-toggle-from via-aw-toggle-via to-aw-toggle-to border border-white/10 \${!isOpen ? 'animate-breathe' : ''}\`}
+                aria-label={isOpen ? 'Close chat' : 'Open chat'}
+            >
+                <AnimatePresence mode="wait">
+                    {isOpen ? (
+                        <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                            <X size={22} strokeWidth={2.5} />
+                        </motion.div>
+                    ) : (
+                        <motion.div key="chat" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ duration: 0.2 }}>
+                            <MessageCircle size={22} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.button>
+            {!isOpen && unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-aw-surface-bg shadow-sm pointer-events-none">
+                    {unreadCount}
+                </span>
+            )}
+        </div>
+    );
+}
+`;
+}
+
+function genV2WidgetShell(c) {
+    const containerBg = 'bg-aw-surface-bg';
+    const containerBorder = 'border-aw-surface-border';
+    const containerShadow = c.isDark ? 'shadow-black/40' : 'shadow-black/15';
+
+    return `import { useState, useRef, useEffect, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-preact';
+import useChat from '../hooks/useChat';
+import useDrag from '../hooks/useDrag';
+import useVoice from '../hooks/useVoice';
+import useProactive from '../hooks/useProactive';
+import useLanguage from '../hooks/useLanguage';
+import useTTS from '../hooks/useTTS';
+
+import Header from './Header';
+import ContactBar from './ContactBar';
+import ContextBanner from './ContextBanner';
+import MessageList from './MessageList';
+import ImagePreview from './ImagePreview';
+import InputArea from './InputArea';
+import PoweredBy from './PoweredBy';
+import ToggleButton from './ToggleButton';
+import NudgeBubble from './NudgeBubble';
+
+const POSITION_MAP = {
+    'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 items-end',
+    'bottom-left': 'bottom-4 left-4 sm:bottom-6 sm:left-6 items-start',
+};
+
+const DEFAULT_STRUCTURE = {
+    version: 1,
+    components: [
+        { id: 'header', slot: 'panel-top', enabled: true },
+        { id: 'contactBar', slot: 'panel-top', enabled: true },
+        { id: 'contextBanner', slot: 'panel-top', enabled: true },
+        { id: 'messageList', slot: 'panel-body', enabled: true },
+        { id: 'imagePreview', slot: 'panel-footer', enabled: true },
+        { id: 'inputArea', slot: 'panel-footer', enabled: true },
+        { id: 'poweredBy', slot: 'panel-footer', enabled: true },
+        { id: 'toggleButton', slot: 'external', enabled: true },
+        { id: 'nudgeBubble', slot: 'external', enabled: true },
+    ],
+};
+
+const COMPONENT_MAP = {
+    header: Header,
+    contactBar: ContactBar,
+    contextBanner: ContextBanner,
+    messageList: MessageList,
+    imagePreview: ImagePreview,
+    inputArea: InputArea,
+    poweredBy: PoweredBy,
+    toggleButton: ToggleButton,
+    nudgeBubble: NudgeBubble,
+};
+
+export function Widget({ config }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const { messages, sendMessage, isLoading, isTyping, isOffline, retryLastMessage, clearMessages, sessionId, isReturningUser } =
+        useChat(config);
+    const [inputValue, setInputValue] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [expandedImage, setExpandedImage] = useState(null);
+    const messagesEndRef = useRef(null);
+    const inputRef = useRef(null);
+    const fileInputRef = useRef(null);
+
+    // Typewriter welcome
+    const rawWelcome = config.welcomeMessage || config.bot?.greeting || '';
+    const welcomeMsg = rawWelcome.length > 180 ? rawWelcome.slice(0, 177) + '...' : rawWelcome;
+    const [typewriterText, setTypewriterText] = useState('');
+    const [typewriterDone, setTypewriterDone] = useState(false);
+
+    // New messages pill
+    const chatContainerRef = useRef(null);
+    const isAtBottomRef = useRef(true);
+    const [isAtBottom, setIsAtBottom] = useState(true);
+    const [hasNewMessages, setHasNewMessages] = useState(false);
+
+    // Context banner
+    const [contextDismissed, setContextDismissed] = useState(() => {
+        try { return sessionStorage.getItem('aw-ctx-' + config.clientId) === '1'; } catch { return false; }
+    });
+    const pageTitle = typeof document !== 'undefined' ? (document.title || '').replace(/\\s*[-|–].*$/, '').trim() : '';
+
+    const [showMenu, setShowMenu] = useState(false);
+    const [isMuted, setIsMuted] = useState(() => {
+        try { const v = localStorage.getItem('aw-muted-' + config.clientId) === 'true'; window.__WIDGET_MUTED__ = v; return v; } catch { return false; }
+    });
+    const [chatFontSize, setChatFontSize] = useState(() => {
+        try { return localStorage.getItem('aw-fontsize-' + config.clientId) || 'md'; } catch { return 'md'; }
+    });
+    const menuRef = useRef(null);
+    const contacts = config.contacts;
+
+    const { lang, detect: detectLang, ui: uiStrings, voiceLocale } = useLanguage(config.clientId);
+    const { speak, speakingIdx, isSupported: ttsSupported } = useTTS();
+    const { showNudge, nudgeMessage, unreadCount, dismissNudge } = useProactive(config, isOpen);
+
+    const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false);
+    const swipeStartRef = useRef(0);
+    const [swipeY, setSwipeY] = useState(0);
+
+    useEffect(() => {
+        const onResize = () => setIsMobile(window.innerWidth < 640);
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    const position = config.design?.position || 'bottom-right';
+    const positionClasses = POSITION_MAP[position] || POSITION_MAP['bottom-right'];
+    const { offset, isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle } = useDrag(config.clientId);
+    const { isListening, isSupported: voiceSupported, transcript, startListening, stopListening } = useVoice(voiceLocale);
+
+    const handleVoiceToggle = useCallback(() => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening((finalText) => {
+                setInputValue(prev => prev ? prev + ' ' + finalText : finalText);
+                if (inputRef.current) inputRef.current.focus();
+            });
+        }
+    }, [isListening, startListening, stopListening]);
+
+    const swipeStartTime = useRef(0);
+    const handleSwipeStart = useCallback((e) => {
+        swipeStartRef.current = e.touches[0].clientY;
+        swipeStartTime.current = Date.now();
+    }, []);
+    const handleSwipeMove = useCallback((e) => {
+        const diff = e.touches[0].clientY - swipeStartRef.current;
+        if (diff > 0) { setSwipeY(diff); e.preventDefault(); }
+    }, []);
+    const handleSwipeEnd = useCallback(() => {
+        const elapsed = Date.now() - swipeStartTime.current;
+        const velocity = swipeY / Math.max(elapsed, 1);
+        if (swipeY > 80 || velocity > 0.5) setIsOpen(false);
+        setSwipeY(0);
+        swipeStartRef.current = 0;
+    }, [swipeY]);
+
+    const panelRef = useRef(null);
+    useEffect(() => {
+        if (!isMobile || !isOpen) return;
+        const vv = window.visualViewport;
+        if (!vv) return;
+        const onResize = () => {
+            if (panelRef.current) panelRef.current.style.height = vv.height + 'px';
+        };
+        vv.addEventListener('resize', onResize);
+        return () => vv.removeEventListener('resize', onResize);
+    }, [isMobile, isOpen]);
+
+    const scrollToBottom = useCallback(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        setHasNewMessages(false);
+    }, []);
+
+    useEffect(() => {
+        if (isAtBottomRef.current) scrollToBottom();
+        else if (messages.length > 0) setHasNewMessages(true);
+    }, [messages, isTyping, scrollToBottom]);
+
+    const handleChatScroll = useCallback(() => {
+        const el = chatContainerRef.current;
+        if (!el) return;
+        const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+        isAtBottomRef.current = atBottom;
+        setIsAtBottom(atBottom);
+        if (atBottom) setHasNewMessages(false);
+    }, []);
+
+    useEffect(() => {
+        if (!isOpen || typewriterDone) return;
+        let i = 0;
+        const timer = setInterval(() => {
+            i++;
+            setTypewriterText(welcomeMsg.slice(0, i));
+            if (i >= welcomeMsg.length) {
+                clearInterval(timer);
+                setTypewriterDone(true);
+            }
+        }, 18);
+        return () => clearInterval(timer);
+    }, [isOpen, typewriterDone, welcomeMsg]);
+
+    useEffect(() => {
+        if (!showMenu) return;
+        const handler = (e) => { if (menuRef.current && !e.composedPath().includes(menuRef.current)) setShowMenu(false); };
+        document.addEventListener('pointerdown', handler);
+        return () => document.removeEventListener('pointerdown', handler);
+    }, [showMenu]);
+
+    const toggleMute = useCallback(() => {
+        setIsMuted(v => {
+            const next = !v;
+            try { localStorage.setItem('aw-muted-' + config.clientId, String(next)); } catch {}
+            window.__WIDGET_MUTED__ = next;
+            return next;
+        });
+    }, [config.clientId]);
+
+    const cycleFontSize = useCallback(() => {
+        setChatFontSize(f => {
+            const next = f === 'sm' ? 'md' : f === 'md' ? 'lg' : 'sm';
+            try { localStorage.setItem('aw-fontsize-' + config.clientId, next); } catch {}
+            return next;
+        });
+    }, [config.clientId]);
+
+    const exportChat = useCallback(() => {
+        const lines = messages.map(m => (m.role === 'user' ? 'You' : (config.botName || 'AI')) + ': ' + m.content);
+        const blob = new Blob([lines.join('\\n\\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'chat.txt'; a.click();
+        URL.revokeObjectURL(url);
+        setShowMenu(false);
+    }, [messages, config.botName]);
+
+    useEffect(() => {
+        if (isOpen && inputRef.current) setTimeout(() => inputRef.current?.focus(), 150);
+    }, [isOpen]);
+    useEffect(() => {
+        if (!isOpen) return;
+        const h = (e) => { if (e.key === 'Escape') expandedImage ? setExpandedImage(null) : showMenu ? setShowMenu(false) : setIsOpen(false); };
+        document.addEventListener('keydown', h);
+        return () => document.removeEventListener('keydown', h);
+    }, [isOpen, expandedImage, showMenu]);
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.style.height = 'auto';
+            inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 100) + 'px';
+        }
+    }, [inputValue]);
+
+    useEffect(() => {
+      const handler = (event) => {
+        if (event.data?.type === 'theme_update' && event.data.theme) {
+          const theme = event.data.theme;
+          const root = document.querySelector('[data-widget-root]');
+          if (root) {
+            if (theme.cssPrimary) root.style.setProperty('--aw-primary', theme.cssPrimary);
+            if (theme.cssAccent) root.style.setProperty('--aw-accent', theme.cssAccent);
+          }
+        }
+      };
+      window.addEventListener('message', handler);
+      return () => window.removeEventListener('message', handler);
+    }, []);
+
+    const handleImageSelect = useCallback((e) => {
+        const file = e.target.files?.[0];
+        if (!file || !file.type.startsWith('image/') || file.size > 10 * 1024 * 1024) return;
+        setSelectedImage({ file, previewUrl: URL.createObjectURL(file) });
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    }, []);
+
+    const removeSelectedImage = useCallback(() => {
+        if (selectedImage?.previewUrl) URL.revokeObjectURL(selectedImage.previewUrl);
+        setSelectedImage(null);
+    }, [selectedImage]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!inputValue.trim() && !selectedImage) return;
+        const text = inputValue.trim() || (selectedImage ? 'Analyze this image' : '');
+        detectLang(text);
+        if (selectedImage) {
+            sendMessage(text, undefined, selectedImage.file);
+            URL.revokeObjectURL(selectedImage.previewUrl);
+            setSelectedImage(null);
+        } else {
+            sendMessage(text);
+        }
+        setInputValue('');
+        if (inputRef.current) inputRef.current.style.height = 'auto';
+    };
+
+    const handleRichAction = useCallback((urlOrType, label) => {
+        if (urlOrType === 'form_submit') {
+            sendMessage(label);
+        } else if (urlOrType?.startsWith('http')) {
+            window.open(urlOrType, '_blank', 'noopener');
+        } else {
+            sendMessage(label);
+        }
+    }, [sendMessage]);
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e); }
+    };
+
+    const showQuickReplies = messages.filter((m) => m.role === 'user').length === 0;
+
+    const getDayLabel = useCallback((ts) => {
+        if (!ts) return '';
+        const d = new Date(ts);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const yesterday = today - 86400000;
+        const msgDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        if (msgDay === today) return uiStrings.today;
+        if (msgDay === yesterday) return uiStrings.yesterday;
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }, [uiStrings]);
+
+    const getTimeLabel = useCallback((ts) => {
+        if (!ts) return '';
+        return new Date(ts).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }, []);
+
+    const shouldShowSeparator = useCallback((idx) => {
+        if (idx === 0) return true;
+        const curr = messages[idx]?.timestamp;
+        const prev = messages[idx - 1]?.timestamp;
+        if (!curr || !prev) return false;
+        const currDay = new Date(curr).toDateString();
+        const prevDay = new Date(prev).toDateString();
+        return currDay !== prevDay;
+    }, [messages]);
+
+    // Build ctx object for all child components
+    const ctx = {
+        config, isOpen, setIsOpen, isMobile, isOffline, messages, sendMessage, isLoading, isTyping,
+        retryLastMessage, clearMessages, sessionId, isReturningUser, inputValue, setInputValue,
+        selectedImage, setSelectedImage, expandedImage, setExpandedImage, messagesEndRef, inputRef,
+        fileInputRef, typewriterText, typewriterDone, welcomeMsg, chatContainerRef, isAtBottom,
+        hasNewMessages, contextDismissed, setContextDismissed, pageTitle, showMenu, setShowMenu,
+        isMuted, chatFontSize, menuRef, contacts, uiStrings, lang, detectLang, voiceLocale,
+        speak, speakingIdx, ttsSupported, showNudge, nudgeMessage, unreadCount, dismissNudge,
+        isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle,
+        isListening, voiceSupported, handleVoiceToggle, handleSwipeStart, handleSwipeMove,
+        handleSwipeEnd, scrollToBottom, handleChatScroll, toggleMute, cycleFontSize, exportChat,
+        handleImageSelect, removeSelectedImage, handleSubmit, handleRichAction, handleKeyDown,
+        showQuickReplies, getDayLabel, getTimeLabel, shouldShowSeparator,
+    };
+
+    // Read widget structure (allows runtime customization)
+    const structure = (typeof window !== 'undefined' && window.__WIDGET_STRUCTURE__) || DEFAULT_STRUCTURE;
+    const enabled = structure.components.filter(comp => comp.enabled !== false);
+
+    const renderSlot = (slotName) =>
+        enabled.filter(comp => comp.slot === slotName).map(comp => {
+            const Comp = COMPONENT_MAP[comp.id];
+            if (!Comp) return null;
+            return <Comp key={comp.id} ctx={{ ...ctx, ...comp.props }} />;
+        });
+
+    const chatContent = (
+        <>
+            {isMobile && (
+                <div className="flex justify-center pt-2 pb-0.5 cursor-grab active:cursor-grabbing ${containerBg}"
+                    onTouchStart={handleSwipeStart} onTouchMove={handleSwipeMove} onTouchEnd={handleSwipeEnd}>
+                    <div className="w-10 h-1 rounded-full bg-aw-surface-border" />
+                </div>
+            )}
+            {renderSlot('panel-top')}
+            {renderSlot('panel-body')}
+            {renderSlot('panel-footer')}
+            {/* EXPANDED IMAGE */}
+            <AnimatePresence>
+                {expandedImage && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 rounded-3xl"
+                        onClick={() => setExpandedImage(null)}>
+                        <motion.img initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}
+                            src={expandedImage} alt="" className="max-w-full max-h-full rounded-2xl shadow-2xl" onClick={(e) => e.stopPropagation()} />
+                        <button onClick={() => setExpandedImage(null)} className="absolute top-4 right-4 p-2 bg-white/15 hover:bg-white/25 rounded-xl text-white transition-all">
+                            <X size={16} />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </>
+    );
+
+    return (
+        <>
+            <AnimatePresence>
+                {isMobile && isOpen && (
+                    <motion.div key="backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[9998] bg-black/50" onClick={() => setIsOpen(false)} />
+                )}
+            </AnimatePresence>
+
+            <div data-widget-root className={\`fixed z-[9999] flex flex-col gap-3 antialiased \${positionClasses}\`} style={{ fontFamily: "${c.font.replace(/'/g, "\\'")}", ...(isMobile && isOpen ? {} : dragStyle) }}>
+                <AnimatePresence>
+                    {isOpen && (
+                        <motion.div
+                            key="chat-panel"
+                            initial={isMobile ? { y: '100%' } : { opacity: 0, y: 20, scale: 0.95 }}
+                            animate={isMobile ? { y: swipeY > 0 ? swipeY : 0 } : { opacity: 1, y: 0, scale: 1 }}
+                            exit={isMobile ? { y: '100%' } : { opacity: 0, y: 20, scale: 0.95 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: isMobile ? 30 : 25 }}
+                            className={isMobile
+                                ? 'fixed inset-x-0 bottom-0 flex flex-col ${containerBg} shadow-2xl ${containerShadow} rounded-t-3xl overflow-hidden'
+                                : 'relative w-[85vw] ${c.widgetMaxW ? `max-w-[${c.widgetMaxW}]` : 'max-w-[360px]'} h-[60vh] ${c.widgetMaxH ? `max-h-[${c.widgetMaxH}]` : 'max-h-[520px]'} ${c.widgetW ? `sm:w-[${c.widgetW}]` : 'sm:w-[360px]'} ${c.widgetH ? `sm:h-[${c.widgetH}]` : 'sm:h-[520px]'} rounded-3xl overflow-hidden flex flex-col ${containerBg} shadow-2xl ${containerShadow} border ${containerBorder}'}
+                            ref={isMobile ? panelRef : undefined}
+                            style={isMobile ? { height: '90dvh', maxHeight: '90dvh' } : {}}
+                            role="dialog"
+                            aria-label="Chat widget"
+                        >
+                            {chatContent}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                {renderSlot('external')}
+            </div>
+        </>
+    );
+}
+`;
+}
+
+function genV2WidgetStructure(c) {
+    return JSON.stringify({
+        version: 1,
+        layout: { position: 'bottom-right', mobileMode: 'bottom-sheet' },
+        components: [
+            { id: 'header', file: 'Header.jsx', slot: 'panel-top', enabled: true, props: {} },
+            { id: 'contactBar', file: 'ContactBar.jsx', slot: 'panel-top', enabled: true, props: {} },
+            { id: 'contextBanner', file: 'ContextBanner.jsx', slot: 'panel-top', enabled: true, props: {} },
+            { id: 'messageList', file: 'MessageList.jsx', slot: 'panel-body', enabled: true, props: {} },
+            { id: 'imagePreview', file: 'ImagePreview.jsx', slot: 'panel-footer', enabled: true, props: {} },
+            { id: 'inputArea', file: 'InputArea.jsx', slot: 'panel-footer', enabled: true, props: { voiceInput: true, imageUpload: true } },
+            { id: 'poweredBy', file: 'PoweredBy.jsx', slot: 'panel-footer', enabled: true, props: {} },
+            { id: 'toggleButton', file: 'ToggleButton.jsx', slot: 'external', enabled: true, props: {} },
+            { id: 'nudgeBubble', file: 'NudgeBubble.jsx', slot: 'external', enabled: true, props: {} },
+        ],
+        customComponents: [],
+    }, null, 2);
+}
+
 // ── Write Files ─────────────────────────────────────────────────────────
 const srcDir = path.join(CLIENTS_DIR, clientId, 'src');
 const compDir = path.join(srcDir, 'components');
@@ -1943,36 +2827,91 @@ fs.mkdirSync(compDir, { recursive: true });
 // localStorage cleanup) that must not be overwritten. build.js protects it during client src copy.
 
 if (widgetType === 'ai_chat') {
-    // Always regenerate CSS (contains theme colors that change with modify_design)
+    // Always regenerate CSS (contains theme colors as CSS custom properties)
     fs.writeFileSync(path.join(srcDir, 'index.css'), genCSS(c));
 
-    // Only generate JSX files if they DON'T already exist.
-    // If they exist, they may have been customized by modify_widget_code (e.g. mic button removed).
-    // Overwriting them would lose those customizations.
-    const jsxFiles = [
-        [path.join(compDir, 'Widget.jsx'), () => genWidget(c)],
-        [path.join(compDir, 'ChatMessage.jsx'), () => genChatMessage(c)],
-        [path.join(compDir, 'QuickReplies.jsx'), () => genQuickReplies(c)],
-        [path.join(compDir, 'MessageFeedback.jsx'), () => genFeedback(c)],
-        [path.join(compDir, 'RichBlocks.jsx'), () => genRichBlocks(c)],
-    ];
+    if (cssOnly) {
+        // --css-only: Only CSS was regenerated. JSX components use CSS variables,
+        // so color/theme changes don't require JSX regeneration.
+        console.log(`✅ ${clientId}: CSS-only regeneration (index.css updated, JSX untouched)`);
+        console.log(`   → ${srcDir}/index.css`);
+    } else if (useV2 || !fs.existsSync(path.join(compDir, 'Widget.jsx'))) {
+        // ── v2 decomposed components ──
+        // Generate individual component files + WidgetShell compositor + structure manifest.
+        // Used when --v2 flag is passed OR when generating a brand-new client (no Widget.jsx yet).
+        const v2Files = [
+            [path.join(compDir, 'WidgetShell.jsx'), () => genV2WidgetShell(c)],
+            [path.join(compDir, 'Header.jsx'), () => genV2Header(c)],
+            [path.join(compDir, 'ContactBar.jsx'), () => genV2ContactBar(c)],
+            [path.join(compDir, 'ContextBanner.jsx'), () => genV2ContextBanner(c)],
+            [path.join(compDir, 'MessageList.jsx'), () => genV2MessageList(c)],
+            [path.join(compDir, 'ImagePreview.jsx'), () => genV2ImagePreview(c)],
+            [path.join(compDir, 'InputArea.jsx'), () => genV2InputArea(c)],
+            [path.join(compDir, 'PoweredBy.jsx'), () => genV2PoweredBy(c)],
+            [path.join(compDir, 'ToggleButton.jsx'), () => genV2ToggleButton(c)],
+            [path.join(compDir, 'NudgeBubble.jsx'), () => genV2NudgeBubble(c)],
+            // Widget.jsx re-export so main.jsx import path doesn't change
+            [path.join(compDir, 'Widget.jsx'), () => `// v2: Re-export from WidgetShell (the compositor)\nexport { Widget } from './WidgetShell';\n`],
+            // Shared sub-components still needed by MessageList
+            [path.join(compDir, 'ChatMessage.jsx'), () => genChatMessage(c)],
+            [path.join(compDir, 'QuickReplies.jsx'), () => genQuickReplies(c)],
+            [path.join(compDir, 'MessageFeedback.jsx'), () => genFeedback(c)],
+            [path.join(compDir, 'RichBlocks.jsx'), () => genRichBlocks(c)],
+        ];
 
-    let generated = 0;
-    let skipped = 0;
-    for (const [filePath, generator] of jsxFiles) {
-        if (fs.existsSync(filePath) && !forceRegen) {
-            skipped++;
-            console.log(`   ⏭ ${path.basename(filePath)} (exists — preserving custom code)`);
-        } else {
-            fs.writeFileSync(filePath, generator());
-            generated++;
-            console.log(`   → ${filePath}`);
+        // Widget structure manifest
+        const structurePath = path.join(CLIENTS_DIR, clientId, 'widget.structure.json');
+
+        let generated = 0;
+        let skipped = 0;
+        for (const [filePath, generator] of v2Files) {
+            if (fs.existsSync(filePath) && !forceRegen) {
+                skipped++;
+                console.log(`   ⏭ ${path.basename(filePath)} (exists — preserving custom code)`);
+            } else {
+                fs.writeFileSync(filePath, generator());
+                generated++;
+                console.log(`   → ${filePath}`);
+            }
         }
-    }
 
-    console.log(`✅ ${clientId}: ${generated + 1} files generated, ${skipped} preserved`);
-    console.log(`   → ${srcDir}/index.css`);
-    console.log(`   (main.jsx is shared — not generated per client)`);
+        // Always write structure manifest (it's declarative config, not code)
+        fs.writeFileSync(structurePath, genV2WidgetStructure(c));
+        console.log(`   → ${structurePath}`);
+
+        console.log(`✅ ${clientId} [v2]: ${generated + 1} files generated, ${skipped} preserved`);
+        console.log(`   → ${srcDir}/index.css`);
+        console.log(`   (main.jsx is shared — not generated per client)`);
+    } else {
+        // ── v1 monolithic Widget.jsx (backward compat) ──
+        // Only generate JSX files if they DON'T already exist.
+        // If they exist, they may have been customized by modify_widget_code (e.g. mic button removed).
+        // Overwriting them would lose those customizations.
+        const jsxFiles = [
+            [path.join(compDir, 'Widget.jsx'), () => genWidget(c)],
+            [path.join(compDir, 'ChatMessage.jsx'), () => genChatMessage(c)],
+            [path.join(compDir, 'QuickReplies.jsx'), () => genQuickReplies(c)],
+            [path.join(compDir, 'MessageFeedback.jsx'), () => genFeedback(c)],
+            [path.join(compDir, 'RichBlocks.jsx'), () => genRichBlocks(c)],
+        ];
+
+        let generated = 0;
+        let skipped = 0;
+        for (const [filePath, generator] of jsxFiles) {
+            if (fs.existsSync(filePath) && !forceRegen) {
+                skipped++;
+                console.log(`   ⏭ ${path.basename(filePath)} (exists — preserving custom code)`);
+            } else {
+                fs.writeFileSync(filePath, generator());
+                generated++;
+                console.log(`   → ${filePath}`);
+            }
+        }
+
+        console.log(`✅ ${clientId} [v1]: ${generated + 1} files generated, ${skipped} preserved`);
+        console.log(`   → ${srcDir}/index.css`);
+        console.log(`   (main.jsx is shared — not generated per client)`);
+    }
 } else if (widgetType === 'smart_faq') {
     fs.writeFileSync(path.join(srcDir, 'index.css'), genFaqCSS(c));
 

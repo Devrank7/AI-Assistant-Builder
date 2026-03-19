@@ -15,16 +15,16 @@ export default function QuickReplies({ options, onSelect }) {
                     whileHover={{ scale: 1.015, y: -1 }}
                     whileTap={{ scale: 0.985 }}
                     onClick={() => onSelect(option)}
-                    className="group relative w-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer text-left shadow-sm hover:shadow-md bg-[#0F1629]/80 border-[#1E2D4A]/80 hover:border-[#3B82F6] hover:bg-[#0A1020] group-hover:shadow-[0_0_20px_rgba(59,130,246,0.08)]"
+                    className="group relative w-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer text-left shadow-sm hover:shadow-md bg-aw-surface-card/80 border-aw-surface-border/80 hover:border-aw-chip-hover-border hover:bg-aw-surface-input group-hover:shadow-md"
                     style={{ backdropFilter: 'blur(8px)' }}
                 >
                     <div className="relative flex items-center gap-3 px-3.5 py-2.5">
-                        <span className="flex-shrink-0 w-7 h-7 rounded-xl bg-gradient-to-br from-[#3B82F6]/20 to-[#3B82F6]/10 flex items-center justify-center shadow-sm">
-                            <MessageCircle size={13} className="text-[#3B82F6]" />
+                        <span className="flex-shrink-0 w-7 h-7 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shadow-sm">
+                            <MessageCircle size={13} className="text-primary" />
                         </span>
-                        <span className="text-[12px] font-medium leading-snug text-[#E8EAED]">{option}</span>
+                        <span className="text-[12px] font-medium leading-snug text-aw-text-primary">{option}</span>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F6]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 </motion.button>
             ))}
         </div>
