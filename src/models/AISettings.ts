@@ -12,6 +12,12 @@ export interface IAISettings extends Document {
   actionsEnabled: boolean; // Enable AI actions (tool use) in widget chat
   actionsSystemPrompt: string; // Custom instructions for action behavior
   maxActionsPerSession: number; // Rate limit: max tool calls per chat session
+  emotionAIEnabled: boolean; // Enable real-time sentiment analysis & tone adaptation
+  personasEnabled: boolean; // Enable AI persona switching
+  commerceEnabled: boolean; // Enable in-chat commerce (product catalog, cart, payments)
+  customerMemoryEnabled: boolean; // Enable persistent customer memory (Mem0-like)
+  autoLearningEnabled: boolean; // Enable auto-learning from negative feedback
+  industryTemplate?: string; // Industry template slug (e.g. 'dental', 'beauty_salon')
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,6 +85,29 @@ const AISettingsSchema = new Schema<IAISettings>(
       default: 10,
       min: 1,
       max: 50,
+    },
+    emotionAIEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    personasEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    commerceEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    customerMemoryEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    autoLearningEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    industryTemplate: {
+      type: String,
     },
   },
   {

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Feedback from '@/models/Feedback';
+import AISettings from '@/models/AISettings';
 import { verifyAdminOrClient } from '@/lib/auth';
+import { processNegativeFeedback } from '@/lib/autoLearning';
 
 /**
  * POST /api/feedback — Save message feedback (from widget, public)
@@ -28,6 +30,18 @@ export async function POST(request: NextRequest) {
       { rating, comment },
       { upsert: true, new: true }
     );
+
+    // Auto-learning: process negative feedback to generate corrections
+    if (rating === 'down') {
+      const settings = (await AISettings.findOne({ clientId }).select('autoLearningEnabled').lean()) as {
+        autoLearningEnabled?: boolean;
+      } | null;
+      if (settings?.autoLearningEnabled) {
+        processNegativeFeedback(clientId, sessionId, messageIndex, comment).catch((err) =>
+          console.error('[AutoLearning] Background processing error:', err)
+        );
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

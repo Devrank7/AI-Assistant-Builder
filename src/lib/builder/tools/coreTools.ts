@@ -295,7 +295,7 @@ CRITICAL COLOR RULES:
       let inputPlaceholder = 'Type your message...';
       try {
         const qrResult = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
+          model: 'gemini-3-flash-preview',
           contents: `You are analyzing a ${businessType} business website: "${businessName}".
 Here is content from the site:
 ${pagesSummary.slice(0, 2000)}
@@ -500,7 +500,7 @@ Return ONLY valid JSON, no markdown.`,
 
       try {
         const result = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
+          model: 'gemini-3-flash-preview',
           contents: `Here are the COLOR fields of a chat widget theme:
 ${JSON.stringify(mutableSnapshot, null, 2)}
 

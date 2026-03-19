@@ -7,7 +7,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
  * Generate embedding vector for text using Gemini
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-embedding-2-preview' });
 
   const result = await model.embedContent(text);
   if (!result?.embedding?.values) {

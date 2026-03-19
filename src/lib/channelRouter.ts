@@ -24,6 +24,13 @@ import { calculateCost, getModel, getDefaultModel } from '@/lib/models';
 import { parseRichBlocks, type RichBlock } from '@/lib/richMessages';
 import { detectHandoffRequest, getActiveHandoff, createHandoff } from '@/lib/handoff';
 import { agenticChatStream } from '@/lib/agenticRouter';
+import { getOrCreateProfile, buildCustomerContext, processConversation } from '@/lib/customerMemory';
+import { analyzeConversationSentiment, buildEmotionContext, updateProfileSentiment } from '@/lib/emotionAI';
+import { processConversationIntelligence } from '@/lib/conversationIntelligence';
+import { selectPersona, buildPersonaContext } from '@/lib/personaRouter';
+import { upsertInboxThread } from '@/lib/inboxManager';
+import { trackFunnelEvent } from '@/lib/revenueTracker';
+import { processNegativeFeedback } from '@/lib/autoLearning';
 
 export type ChannelType = 'website' | 'telegram' | 'whatsapp' | 'instagram';
 
@@ -56,6 +63,10 @@ interface AIConfig {
   maxTokens: number;
   topK: number;
   handoffEnabled: boolean;
+  emotionAIEnabled: boolean;
+  personasEnabled: boolean;
+  customerMemoryEnabled: boolean;
+  autoLearningEnabled: boolean;
 }
 
 /**
@@ -113,6 +124,10 @@ async function getAIConfig(clientId: string): Promise<AIConfig> {
     maxTokens: settingsDoc?.maxTokens || 8196,
     topK: settingsDoc?.topK || 3,
     handoffEnabled: settingsDoc?.handoffEnabled ?? false,
+    emotionAIEnabled: settingsDoc?.emotionAIEnabled ?? false,
+    personasEnabled: settingsDoc?.personasEnabled ?? false,
+    customerMemoryEnabled: settingsDoc?.customerMemoryEnabled ?? false,
+    autoLearningEnabled: settingsDoc?.autoLearningEnabled ?? false,
   };
 }
 
@@ -215,8 +230,42 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
   // 5. Build RAG context
   const context = await buildContext(input.clientId, input.message, config.topK);
 
-  // 6. Build prompt
-  const fullSystemPrompt = buildFullPrompt(config, context, input.conversationHistory);
+  // 6. Build prompt with new AI features
+  let fullSystemPrompt = buildFullPrompt(config, context, input.conversationHistory);
+
+  // 6a. Customer Memory — inject profile context
+  const visitorId = (input.metadata?.visitorId as string) || input.sessionId || 'anonymous';
+  if (config.customerMemoryEnabled) {
+    try {
+      await getOrCreateProfile(input.clientId, visitorId, input.channel);
+      const customerContext = await buildCustomerContext(input.clientId, visitorId);
+      if (customerContext) fullSystemPrompt += customerContext;
+    } catch (e) {
+      console.error('[ChannelRouter] Customer memory error:', e);
+    }
+  }
+
+  // 6b. Emotion AI — analyze sentiment and inject tone adjustment
+  if (config.emotionAIEnabled && input.conversationHistory) {
+    const sentiment = analyzeConversationSentiment([
+      ...input.conversationHistory,
+      { role: 'user', content: input.message },
+    ]);
+    const emotionContext = buildEmotionContext(sentiment);
+    if (emotionContext) fullSystemPrompt += emotionContext;
+    // Update profile sentiment async
+    updateProfileSentiment(input.clientId, visitorId, sentiment).catch(() => {});
+  }
+
+  // 6c. Persona routing — select and inject persona
+  if (config.personasEnabled) {
+    try {
+      const { overlay } = await selectPersona(input.clientId, input.message);
+      if (overlay) fullSystemPrompt += overlay;
+    } catch (e) {
+      console.error('[ChannelRouter] Persona error:', e);
+    }
+  }
 
   // 7. Generate response
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -252,7 +301,7 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
   const rawText = response.text();
   const { cleanText, richBlocks } = parseRichBlocks(rawText);
 
-  // 10. Log conversation (async)
+  // 10. Log conversation + post-processing (async)
   if (input.sessionId) {
     ChatLog.findOneAndUpdate(
       { clientId: input.clientId, sessionId: input.sessionId },
@@ -273,6 +322,35 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
       },
       { upsert: true, new: true }
     ).catch((err) => console.error('Failed to log chat:', err));
+
+    // Track funnel event
+    trackFunnelEvent(input.clientId, visitorId, input.sessionId, 'chat_started').catch(() => {});
+
+    // Update inbox thread
+    upsertInboxThread(input.clientId, input.sessionId, input.channel, input.message, 'user', { visitorId }).catch(
+      () => {}
+    );
+    upsertInboxThread(input.clientId, input.sessionId, input.channel, cleanText, 'assistant', { visitorId }).catch(
+      () => {}
+    );
+  }
+
+  // 11. Post-conversation processing (async, non-blocking)
+  if (config.customerMemoryEnabled && input.conversationHistory) {
+    processConversation(input.clientId, visitorId, input.sessionId || 'anonymous', [
+      ...input.conversationHistory,
+      { role: 'user', content: input.message },
+      { role: 'assistant', content: cleanText },
+    ]).catch(() => {});
+  }
+
+  // Conversation intelligence (async)
+  if (input.conversationHistory && input.conversationHistory.length >= 4) {
+    processConversationIntelligence(input.clientId, input.sessionId || 'anonymous', visitorId, [
+      ...input.conversationHistory,
+      { role: 'user', content: input.message },
+      { role: 'assistant', content: cleanText },
+    ]).catch(() => {});
   }
 
   return {
@@ -358,8 +436,42 @@ export async function routeMessageStream(input: RouteMessageInput): Promise<{
   // 5. Build RAG context
   const context = await buildContext(input.clientId, input.message, config.topK);
 
-  // 6. Build prompt
-  const fullSystemPrompt = buildFullPrompt(config, context, input.conversationHistory);
+  // 6. Build prompt with new AI features
+  let fullSystemPrompt = buildFullPrompt(config, context, input.conversationHistory);
+
+  const streamVisitorId = (input.metadata?.visitorId as string) || input.sessionId || 'anonymous';
+
+  // 6a. Customer Memory
+  if (config.customerMemoryEnabled) {
+    try {
+      await getOrCreateProfile(input.clientId, streamVisitorId, input.channel);
+      const customerContext = await buildCustomerContext(input.clientId, streamVisitorId);
+      if (customerContext) fullSystemPrompt += customerContext;
+    } catch (e) {
+      console.error('[Stream] Customer memory error:', e);
+    }
+  }
+
+  // 6b. Emotion AI
+  if (config.emotionAIEnabled && input.conversationHistory) {
+    const sentiment = analyzeConversationSentiment([
+      ...input.conversationHistory,
+      { role: 'user', content: input.message },
+    ]);
+    const emotionContext = buildEmotionContext(sentiment);
+    if (emotionContext) fullSystemPrompt += emotionContext;
+    updateProfileSentiment(input.clientId, streamVisitorId, sentiment).catch(() => {});
+  }
+
+  // 6c. Persona routing
+  if (config.personasEnabled) {
+    try {
+      const { overlay } = await selectPersona(input.clientId, input.message);
+      if (overlay) fullSystemPrompt += overlay;
+    } catch (e) {
+      console.error('[Stream] Persona error:', e);
+    }
+  }
 
   // 7. Start streaming
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -456,7 +568,7 @@ Only use :::form ONCE per conversation. Use plain text for normal responses.`;
       } finally {
         controller.close();
 
-        // After stream ends, log chat
+        // After stream ends, log chat + post-processing
         try {
           if (input.sessionId) {
             await ChatLog.findOneAndUpdate(
@@ -478,6 +590,32 @@ Only use :::form ONCE per conversation. Use plain text for normal responses.`;
               },
               { upsert: true, new: true }
             );
+
+            // Track funnel + inbox (async, non-blocking)
+            trackFunnelEvent(input.clientId, streamVisitorId, input.sessionId, 'chat_started').catch(() => {});
+            upsertInboxThread(input.clientId, input.sessionId, input.channel, input.message, 'user', {
+              visitorId: streamVisitorId,
+            }).catch(() => {});
+            upsertInboxThread(input.clientId, input.sessionId, input.channel, fullResponse, 'assistant', {
+              visitorId: streamVisitorId,
+            }).catch(() => {});
+
+            // Customer memory + intelligence (async)
+            if (config.customerMemoryEnabled && input.conversationHistory) {
+              processConversation(input.clientId, streamVisitorId, input.sessionId, [
+                ...input.conversationHistory,
+                { role: 'user', content: input.message },
+                { role: 'assistant', content: fullResponse },
+              ]).catch(() => {});
+            }
+
+            if (input.conversationHistory && input.conversationHistory.length >= 4) {
+              processConversationIntelligence(input.clientId, input.sessionId, streamVisitorId, [
+                ...input.conversationHistory,
+                { role: 'user', content: input.message },
+                { role: 'assistant', content: fullResponse },
+              ]).catch(() => {});
+            }
           }
         } catch (logError) {
           console.error('[Stream] Logging error:', logError);

@@ -49,9 +49,9 @@ describe('Gemini Model Registry', () => {
       expect(model.isDefault).toBe(true);
     });
 
-    it('should return gemini-3-pro-preview correctly', () => {
-      const model = getModel('gemini-3-pro-preview');
-      expect(model.tier).toBe('pro');
+    it('should return gemini-3.1-flash-lite-preview correctly', () => {
+      const model = getModel('gemini-3.1-flash-lite-preview');
+      expect(model.tier).toBe('lite');
     });
   });
 
@@ -78,9 +78,9 @@ describe('Gemini Model Registry', () => {
     });
 
     it('should calculate cost correctly for pro models', () => {
-      // gemini-3-pro-preview: $2.00/1M input, $12.00/1M output
+      // gemini-3.1-pro-preview: $2.00/1M input, $12.00/1M output
       // 10000 input + 5000 output
-      const cost = calculateCost('gemini-3-pro-preview', 10000, 5000);
+      const cost = calculateCost('gemini-3.1-pro-preview', 10000, 5000);
       // (10000/1M) * 2.00 + (5000/1M) * 12.00 = 0.02 + 0.06 = 0.08
       expect(cost).toBeCloseTo(0.08, 6);
     });
@@ -101,7 +101,7 @@ describe('Gemini Model Registry', () => {
     it('should return array of all model IDs', () => {
       const ids = getModelIds();
       expect(ids).toContain('gemini-3-flash-preview');
-      expect(ids).toContain('gemini-3-pro-preview');
+      expect(ids).toContain('gemini-3.1-flash-lite-preview');
       expect(ids).toContain('gemini-3.1-pro-preview');
       expect(ids.length).toBe(GEMINI_MODELS.length);
     });

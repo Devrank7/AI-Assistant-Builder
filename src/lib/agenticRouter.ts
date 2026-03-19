@@ -29,6 +29,12 @@ import { parseRichBlocks } from '@/lib/richMessages';
 import { detectHandoffRequest, getActiveHandoff, createHandoff } from '@/lib/handoff';
 import { loadWidgetTools, type WidgetToolContext, type LoadedWidgetTools } from '@/lib/widgetTools';
 import type { RouteMessageInput } from '@/lib/channelRouter';
+import { getOrCreateProfile, buildCustomerContext, processConversation } from '@/lib/customerMemory';
+import { analyzeConversationSentiment, buildEmotionContext, updateProfileSentiment } from '@/lib/emotionAI';
+import { processConversationIntelligence } from '@/lib/conversationIntelligence';
+import { selectPersona } from '@/lib/personaRouter';
+import { upsertInboxThread } from '@/lib/inboxManager';
+import { trackFunnelEvent } from '@/lib/revenueTracker';
 
 const MAX_ACTION_LOOPS = 5;
 
@@ -44,6 +50,9 @@ interface AgenticConfig {
   actionsEnabled: boolean;
   actionsSystemPrompt: string;
   maxActionsPerSession: number;
+  emotionAIEnabled: boolean;
+  personasEnabled: boolean;
+  customerMemoryEnabled: boolean;
 }
 
 async function getAgenticConfig(clientId: string): Promise<AgenticConfig> {
@@ -61,6 +70,9 @@ async function getAgenticConfig(clientId: string): Promise<AgenticConfig> {
     actionsEnabled: settingsDoc?.actionsEnabled ?? false,
     actionsSystemPrompt: settingsDoc?.actionsSystemPrompt || '',
     maxActionsPerSession: settingsDoc?.maxActionsPerSession || 10,
+    emotionAIEnabled: settingsDoc?.emotionAIEnabled ?? false,
+    personasEnabled: settingsDoc?.personasEnabled ?? false,
+    customerMemoryEnabled: settingsDoc?.customerMemoryEnabled ?? false,
   };
 }
 
@@ -244,7 +256,40 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
   const ragContext = await buildContext(input.clientId, input.message, config.topK);
 
   // 6. Build system prompt
-  const systemPrompt = buildAgenticSystemPrompt(config, ragContext, tools, input.conversationHistory, input.metadata);
+  let systemPrompt = buildAgenticSystemPrompt(config, ragContext, tools, input.conversationHistory, input.metadata);
+
+  // 6a. Customer Memory
+  const agentVisitorId = (input.metadata?.visitorId as string) || input.sessionId || 'anonymous';
+  if (config.customerMemoryEnabled) {
+    try {
+      await getOrCreateProfile(input.clientId, agentVisitorId, input.channel);
+      const customerContext = await buildCustomerContext(input.clientId, agentVisitorId);
+      if (customerContext) systemPrompt += customerContext;
+    } catch (e) {
+      console.error('[AgenticRouter] Customer memory error:', e);
+    }
+  }
+
+  // 6b. Emotion AI
+  if (config.emotionAIEnabled && input.conversationHistory) {
+    const sentiment = analyzeConversationSentiment([
+      ...input.conversationHistory,
+      { role: 'user', content: input.message },
+    ]);
+    const emotionContext = buildEmotionContext(sentiment);
+    if (emotionContext) systemPrompt += emotionContext;
+    updateProfileSentiment(input.clientId, agentVisitorId, sentiment).catch(() => {});
+  }
+
+  // 6c. Persona routing
+  if (config.personasEnabled) {
+    try {
+      const { overlay } = await selectPersona(input.clientId, input.message);
+      if (overlay) systemPrompt += overlay;
+    } catch (e) {
+      console.error('[AgenticRouter] Persona error:', e);
+    }
+  }
 
   // 7. Create Gemini chat with function calling
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
@@ -427,6 +472,33 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
                 },
               }
             );
+          }
+
+          // Post-processing: inbox, funnel, memory, intelligence
+          if (input.sessionId) {
+            trackFunnelEvent(input.clientId, agentVisitorId, input.sessionId, 'chat_started').catch(() => {});
+            upsertInboxThread(input.clientId, input.sessionId, input.channel, input.message, 'user', {
+              visitorId: agentVisitorId,
+            }).catch(() => {});
+            upsertInboxThread(input.clientId, input.sessionId, input.channel, fullResponse, 'assistant', {
+              visitorId: agentVisitorId,
+            }).catch(() => {});
+
+            if (config.customerMemoryEnabled && input.conversationHistory) {
+              processConversation(input.clientId, agentVisitorId, input.sessionId, [
+                ...input.conversationHistory,
+                { role: 'user', content: input.message },
+                { role: 'assistant', content: fullResponse },
+              ]).catch(() => {});
+            }
+
+            if (input.conversationHistory && input.conversationHistory.length >= 4) {
+              processConversationIntelligence(input.clientId, input.sessionId, agentVisitorId, [
+                ...input.conversationHistory,
+                { role: 'user', content: input.message },
+                { role: 'assistant', content: fullResponse },
+              ]).catch(() => {});
+            }
           }
         } catch (logError) {
           console.error('[AgenticRouter] Post-stream error:', logError);

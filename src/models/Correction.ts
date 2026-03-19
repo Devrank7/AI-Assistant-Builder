@@ -2,6 +2,8 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export type CorrectionStatus = 'pending' | 'applied' | 'rejected';
 
+export type CorrectionSource = 'manual' | 'auto_learning';
+
 export interface ICorrection extends Document {
   clientId: string;
   sessionId: string;
@@ -10,7 +12,9 @@ export interface ICorrection extends Document {
   originalAnswer: string;
   correctedAnswer: string;
   status: CorrectionStatus;
+  source: CorrectionSource;
   appliedAt?: Date;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,7 +32,13 @@ const CorrectionSchema = new Schema<ICorrection>(
       enum: ['pending', 'applied', 'rejected'],
       default: 'pending',
     },
+    source: {
+      type: String,
+      enum: ['manual', 'auto_learning'],
+      default: 'manual',
+    },
     appliedAt: { type: Date },
+    metadata: { type: Schema.Types.Mixed },
   },
   { timestamps: true }
 );

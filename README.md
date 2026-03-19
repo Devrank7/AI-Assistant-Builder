@@ -1,337 +1,450 @@
-# AI Widget Platform
+# WinBix AI
 
-SaaS-платформа для создания AI чат-виджетов с RAG, мультитенантностью, омниканальными интеграциями и AI-агентными скиллами для автоматизации.
+**AI that sells while you sleep.**
 
-**Stack**: Next.js 14, TypeScript, MongoDB, Preact (виджет), Vite, Tailwind CSS v3, Google Gemini API
+WinBix AI — multi-tenant SaaS-платформа, которая разворачивает AI чат-ассистентов для бизнеса за 30 секунд. Пользователь вставляет URL сайта → AI анализирует бизнес → создаёт кастомный виджет с базой знаний → виджет отвечает клиентам 24/7 на 4 языках, бронирует встречи, собирает лиды и интегрируется с CRM.
+
+**Продакшн:** [https://winbixai.com](https://winbixai.com)
+
+---
+
+## Что это за продукт
+
+WinBix AI — это конструктор AI-ассистентов, который конкурирует с Intercom, Tidio, Crisp и Drift. Ключевое отличие: **AI Builder Agent** — пользователь общается с AI в чате, а тот создаёт, настраивает и деплоит виджет через инструменты (function calling). Нет UI-форм — всё через разговор.
+
+### Для кого
+
+- **Малый и средний бизнес** — установить AI-ассистента на сайт за 30 секунд
+- **Агентства** — массово создавать виджеты для клиентов (mass-build из Google Sheets)
+- **Enterprise** — white-label, кастомный домен, SLA 99.9%
+
+### Ценностное предложение
+
+```
+Пользователь вставляет URL → AI краулит 30+ страниц → извлекает цвета, шрифты, контент →
+генерирует 3 варианта дизайна → загружает знания в RAG → деплоит виджет →
+виджет работает 24/7 на сайте клиента
+```
+
+---
+
+## Техстек
+
+| Слой           | Технологии                                                               |
+| -------------- | ------------------------------------------------------------------------ |
+| **Frontend**   | Next.js 15 (App Router), TypeScript, Tailwind CSS v4                     |
+| **Widget**     | Preact + Vite + Tailwind CSS v3, Shadow DOM изоляция                     |
+| **Database**   | MongoDB (Mongoose), vector embeddings для RAG                            |
+| **AI**         | Google Gemini API (`@google/genai`), function calling, streaming         |
+| **Payments**   | Stripe, WayForPay, NowPayments, Cryptomus, LiqPay                        |
+| **Channels**   | Web chat, Telegram Bot API, WhatsApp (WHAPI), Instagram (Meta Graph API) |
+| **Deployment** | Docker, production на winbixai.com                                       |
 
 ---
 
 ## Архитектура
 
 ```
-Клиентские сайты (embed <script>)
-        │
-        ▼
-┌──────────────────────────────────────────────────┐
-│              AI Widget Platform                   │
-│                                                   │
-│  Pages:                                           │
-│  /admin          — Админ-панель (dashboard)       │
-│  /admin/client/X — Детали клиента (табы)          │
-│  /client/X       — Клиентский кабинет             │
-│  /cabinet        — Биллинг, настройки             │
-│  /demo/template  — Превью шаблонов                │
-│                                                   │
-│  Widget (Preact, Shadow DOM):                     │
-│  widgets/X/script.js      — полные виджеты        │
-│  quickwidgets/X/script.js — демо-виджеты          │
-│                                                   │
-│  AI Agent Skills (.agent/skills/):                │
-│  6 скиллов для автоматизации (см. ниже)           │
-│                                                   │
-│  External:                                        │
-│  Gemini AI · Cryptomus · SMTP · Telegram Bot      │
-│  Google Sheets · Instagram · WhatsApp · ManyChat  │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        WinBix AI Platform                        │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐ │
+│  │  Dashboard    │  │  Admin Panel │  │  AI Builder (Chat UI)  │ │
+│  │  /dashboard/* │  │  /admin/*    │  │  /dashboard/builder    │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬─────────────┘ │
+│         │                 │                      │               │
+│  ┌──────▼─────────────────▼──────────────────────▼─────────────┐ │
+│  │                    API Layer (120+ routes)                   │ │
+│  │  /api/chat/stream  /api/builder/chat  /api/integrations/*   │ │
+│  └──────┬─────────────────┬──────────────────────┬─────────────┘ │
+│         │                 │                      │               │
+│  ┌──────▼───────┐  ┌─────▼──────────┐  ┌───────▼────────────┐  │
+│  │ Channel      │  │ Agentic Router │  │ Plugin Registry    │  │
+│  │ Router       │  │ (function      │  │ (HubSpot, Calendar │  │
+│  │ (RAG + AI)   │  │  calling loop) │  │  Stripe, Sheets)   │  │
+│  └──────┬───────┘  └────────────────┘  └────────────────────┘  │
+│         │                                                       │
+│  ┌──────▼───────────────────────────────────────────────────┐   │
+│  │              MongoDB (25 models)                          │   │
+│  │  Users, Clients, KnowledgeChunks, ChatLogs, Integrations │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+
+         │                    │                    │
+    ┌────▼────┐         ┌────▼────┐         ┌────▼────┐
+    │ Website │         │Telegram │         │WhatsApp │
+    │ Widget  │         │  Bot    │         │ (WHAPI) │
+    │(Preact) │         │         │         │         │
+    └─────────┘         └─────────┘         └─────────┘
 ```
+
+### 3-Layer Architecture
+
+| Слой                        | Назначение                                     | Где                               |
+| --------------------------- | ---------------------------------------------- | --------------------------------- |
+| **Skills** (инструкции)     | SOP-документы для AI-агента                    | `.claude/skills/*/SKILL.md`       |
+| **Orchestration** (решения) | AI Builder Agent — роутинг, вызов инструментов | `src/lib/builder/`                |
+| **Execution** (исполнение)  | Детерминистические Node.js скрипты             | `.claude/widget-builder/scripts/` |
+
+---
+
+## Возможности платформы
+
+### Core — Что работает сейчас
+
+| Фича                         | Статус      | Описание                                                                             |
+| ---------------------------- | ----------- | ------------------------------------------------------------------------------------ |
+| **AI Builder Agent**         | ✅ Работает | Пользователь общается в чате → агент вызывает tools → виджет создаётся автоматически |
+| **30-секундный деплой**      | ✅ Работает | URL → анализ сайта → генерация дизайна → RAG knowledge → деплой                      |
+| **3 типа виджетов**          | ✅ Работает | AI Chat (RAG чатбот), Smart FAQ (аккордеон), Lead Form (мульти-шаговая форма)        |
+| **RAG Knowledge Base**       | ✅ Работает | Deep crawl (30+ страниц), embeddings, semantic search, corrections                   |
+| **Streaming Responses**      | ✅ Работает | SSE streaming с rich blocks (карусели, формы, кнопки)                                |
+| **4 языка**                  | ✅ Работает | EN, UK, RU, AR — автоматическое определение                                          |
+| **Voice Input**              | ✅ Работает | Web Speech API (speech-to-text)                                                      |
+| **Text-to-Speech**           | ✅ Работает | Google Cloud TTS + browser fallback                                                  |
+| **Proactive Nudges**         | ✅ Работает | Всплывающее сообщение через N секунд                                                 |
+| **Omnichannel**              | ✅ Работает | Web, Telegram, WhatsApp, Instagram — один AI на всех каналах                         |
+| **Human Handoff**            | ✅ Работает | Автоопределение "хочу оператора" → пауза бота → передача человеку                    |
+| **A/B Testing**              | ✅ Работает | Несколько вариантов виджета, трекинг конверсий                                       |
+| **Analytics Dashboard**      | ✅ Работает | Чаты/день, top вопросы, каналы, satisfaction, response time                          |
+| **Integrations Marketplace** | ✅ Работает | HubSpot, Salesforce, Pipedrive, Calendly, Stripe, Google Sheets и др.                |
+| **Team Management**          | ✅ Работает | Организации, роли (owner/admin/editor/viewer), инвайты                               |
+| **Billing**                  | ✅ Работает | Stripe + 5 альтернативных провайдеров, trial, plans                                  |
+| **Webhooks**                 | ✅ Работает | 6 event types, HMAC-SHA256 подпись, auto-disable после 10 ошибок                     |
+| **Audit Log**                | ✅ Работает | 19+ типов действий, 90-дневное хранение                                              |
+| **Widget Versioning**        | ✅ Работает | Rollback к предыдущим версиям                                                        |
+| **Proactive Consultant**     | ✅ Работает | Builder-агент активно предлагает улучшения после деплоя                              |
+
+### AI Actions — Autonomous Agent (новое)
+
+| Фича                     | Статус                         | Описание                                                    |
+| ------------------------ | ------------------------------ | ----------------------------------------------------------- |
+| **Agentic Router**       | ✅ Код готов, ⚠️ не тестирован | Gemini function calling loop в widget chat (max 5 итераций) |
+| **Built-in Tools**       | ✅ Код готов, ⚠️ не тестирован | `collect_lead`, `search_knowledge`, `send_notification`     |
+| **Integration Tools**    | ✅ Код готов, ⚠️ не тестирован | Динамическая загрузка tools из WidgetIntegration bindings   |
+| **Action UI Indicators** | ✅ Код готов, ⚠️ не тестирован | Спиннер/галочка/крестик в чате при выполнении действий      |
+| **Rate Limiting**        | ✅ Код готов                   | Max N actions per session (настраивается)                   |
+
+### Plugins — Реализация интеграций
+
+| Plugin              | Статус           | Actions                                   |
+| ------------------- | ---------------- | ----------------------------------------- |
+| **HubSpot**         | ✅ Полностью     | createContact, createDeal, searchContacts |
+| **Pipedrive**       | 📋 Manifest only | createContact, createDeal                 |
+| **Salesforce**      | 📋 Manifest only | createContact, createOpportunity          |
+| **Google Calendar** | 📋 Manifest only | checkAvailability, createEvent            |
+| **Calendly**        | 📋 Manifest only | getAvailableSlots, createBooking          |
+| **Stripe**          | 📋 Manifest only | createPaymentLink, checkPayment           |
+| **Telegram**        | 📋 Manifest only | sendMessage                               |
+| **WhatsApp**        | 📋 Manifest only | sendMessage                               |
+| **Google Sheets**   | 📋 Manifest only | appendRow, readRange                      |
+| **Email (SMTP)**    | 📋 Manifest only | sendEmail                                 |
+
+> **📋 Manifest only** = определены actions + auth schema, но execute() возвращает stub. Нужно реализовать HTTP вызовы к API.
+
+---
+
+## Тарифные планы
+
+|                  | Free    | Starter        | Pro          | Enterprise        |
+| ---------------- | ------- | -------------- | ------------ | ----------------- |
+| **Цена**         | $0      | $29/мес        | $79/мес      | $299/мес          |
+| **Виджеты**      | 1       | 3              | ∞            | ∞                 |
+| **Сообщения**    | 100/мес | 1,000/мес      | ∞            | ∞                 |
+| **Каналы**       | Web     | Web + Telegram | Все          | Все + Custom      |
+| **AI Builder**   | —       | —              | ✅           | ✅                |
+| **Integrations** | —       | 3 preset       | Все          | Все + Agent-built |
+| **A/B Tests**    | —       | —              | 2 concurrent | ∞                 |
+| **Team**         | 1       | 2              | 5            | ∞                 |
+| **White-label**  | —       | —              | —            | ✅                |
+| **SLA**          | —       | —              | —            | 99.9%             |
 
 ---
 
 ## Структура проекта
 
 ```
-AIWidget/
-├── .agent/
-│   ├── skills/                          # AI-агентные скиллы (инструкции)
-│   │   ├── create-widget/SKILL.md       # Создание полного виджета (discovery → build)
-│   │   ├── create-quick-widget/SKILL.md # Быстрое создание демо-виджета
+├── .claude/
+│   ├── skills/                          # AI-агентные скиллы (SOPs)
+│   │   ├── create-widget/SKILL.md       # Полное создание виджета
+│   │   ├── create-quick-widget/SKILL.md # Быстрый демо-виджет из URL
 │   │   ├── mass-quick-widgets/SKILL.md  # Массовое создание из Google Sheets
-│   │   ├── create-telegram-bot-assistant/SKILL.md
-│   │   ├── create-whatsapp-assistant/SKILL.md
-│   │   └── create-instagram-assistant/SKILL.md
+│   │   ├── upload-widget-knowledge/     # Краулинг + загрузка знаний
+│   │   ├── create-telegram-bot-assistant/
+│   │   ├── create-whatsapp-assistant/
+│   │   ├── create-instagram-assistant/
+│   │   └── check-demo-quality/          # Проверка iframe-совместимости
 │   │
-│   └── widget-builder/                  # Сборщик виджетов (Preact + Vite)
+│   └── widget-builder/                  # Preact Widget Builder
 │       ├── src/
-│       │   ├── main.jsx                 # Entry point (Custom Element, Shadow DOM)
-│       │   ├── index.css                # Tailwind CSS (processed by PostCSS)
+│       │   ├── main.jsx                 # Custom Element + Shadow DOM entry
 │       │   ├── components/
-│       │   │   ├── Widget.jsx           # Главный компонент
-│       │   │   ├── ChatMessage.jsx      # Рендер сообщений (markdown, code blocks)
+│       │   │   ├── Widget.jsx           # Главный UI (chat, toggle, header)
+│       │   │   ├── ChatMessage.jsx      # Markdown рендер, code blocks
 │       │   │   ├── QuickReplies.jsx     # Кнопки быстрых ответов
-│       │   │   └── MessageFeedback.jsx  # Лайк/дизлайк
+│       │   │   ├── MessageFeedback.jsx  # Thumbs up/down
+│       │   │   └── RichBlocks.jsx       # Карусели, формы, карточки
 │       │   └── hooks/
-│       │       └── useChat.js           # API логика, стриминг, localStorage
-│       ├── clients/<clientId>/          # Кастомный код клиента (переопределяет src/)
-│       ├── scripts/build.js             # Сборка: node scripts/build.js <client_id>
-│       ├── vite.config.js               # IIFE bundle, CSS injection в Shadow DOM
-│       ├── postcss.config.cjs
-│       └── tailwind.config.js
-│
-├── widgets/<clientId>/                  # Полные виджеты (embed-скрипты)
-│   ├── script.js
-│   └── info.json
-│
-├── quickwidgets/<clientId>/             # Демо-виджеты (без биллинга)
-│   ├── script.js
-│   └── info.json                        # clientType: "quick"
+│       │       ├── useChat.js           # Streaming, SSE, actions, history
+│       │       ├── useVoice.js          # Speech-to-text
+│       │       ├── useTTS.js            # Text-to-speech
+│       │       ├── useDrag.js           # Draggable toggle
+│       │       ├── useProactive.js      # Nudge bubble
+│       │       └── useLanguage.js       # Auto language detection
+│       ├── clients/<clientId>/          # Per-client customizations
+│       └── scripts/
+│           ├── generate-single-theme.js # theme.json → 7 source files
+│           └── build.js                 # Vite build → script.js
 │
 ├── src/
-│   ├── app/                             # Next.js App Router
-│   │   ├── admin/
-│   │   │   ├── page.tsx                 # Dashboard: список клиентов + quick widgets
-│   │   │   └── client/[id]/page.tsx     # Детали клиента (табы)
-│   │   ├── client/[id]/page.tsx         # Клиентский кабинет
-│   │   ├── cabinet/
-│   │   │   ├── page.tsx                 # Кабинет клиента
-│   │   │   └── billing/page.tsx         # Биллинг, тарифы
-│   │   ├── demo/[template]/page.tsx     # Превью шаблонов
-│   │   │
-│   │   └── api/                         # API Routes (см. ниже)
+│   ├── app/                             # Next.js 15 App Router
+│   │   ├── page.tsx                     # Landing page
+│   │   ├── pricing/                     # Pricing page
+│   │   ├── dashboard/                   # User dashboard
+│   │   │   ├── builder/                 # AI Builder (chat UI)
+│   │   │   ├── widgets/                 # Widget management
+│   │   │   ├── chats/                   # Chat history viewer
+│   │   │   ├── analytics/               # Analytics dashboard
+│   │   │   ├── ab-tests/                # A/B testing
+│   │   │   ├── integrations/            # Integration marketplace
+│   │   │   ├── team/                    # Team management
+│   │   │   ├── billing/                 # Subscription & payments
+│   │   │   └── settings/                # User preferences
+│   │   ├── admin/                       # Admin panel
+│   │   │   ├── users/                   # User management
+│   │   │   ├── clients/                 # Client management (tabs)
+│   │   │   ├── subscriptions/           # Subscription tracking
+│   │   │   └── analytics/               # Platform analytics
+│   │   └── api/                         # 120+ API routes
+│   │       ├── auth/                    # JWT + Google OAuth
+│   │       ├── chat/stream/             # SSE streaming endpoint
+│   │       ├── builder/chat/            # Builder agent endpoint
+│   │       ├── knowledge/               # RAG CRUD + deep crawl
+│   │       ├── integrations/            # Plugin marketplace
+│   │       ├── webhooks/                # Telegram, WhatsApp, Instagram
+│   │       ├── stripe/                  # Payments
+│   │       ├── ab-tests/                # A/B testing
+│   │       ├── analytics/               # Analytics API
+│   │       └── admin/                   # Admin operations
 │   │
-│   ├── components/
-│   │   ├── ClientCard.tsx               # Карточка клиента (regular + quick)
-│   │   ├── ClientList.tsx               # Список клиентов (split view)
-│   │   ├── admin/tabs/                  # Табы админ-панели
-│   │   │   ├── AISettingsTab.tsx
-│   │   │   ├── AnalyticsTab.tsx         # Recharts графики
-│   │   │   ├── BillingTab.tsx
-│   │   │   ├── ChannelDetailTab.tsx     # Instagram/WhatsApp/Telegram
-│   │   │   ├── ChatHistoryTab.tsx
-│   │   │   ├── ClientInfoTab.tsx
-│   │   │   ├── DemoTab.tsx
-│   │   │   ├── FilesTab.tsx
-│   │   │   ├── KnowledgeTab.tsx
-│   │   │   ├── ProactiveTab.tsx
-│   │   │   ├── TrainingTab.tsx
-│   │   │   └── UsageTab.tsx
-│   │   ├── templates/                   # Шаблоны демо-страниц
-│   │   │   ├── DentalTemplate.tsx
-│   │   │   ├── ConstructionTemplate.tsx
-│   │   │   ├── HotelTemplate.tsx
-│   │   │   └── ClientWebsiteTemplate.tsx
-│   │   └── ui/                          # UI kit (Toast, Pagination, etc.)
+│   ├── lib/                             # Business logic
+│   │   ├── channelRouter.ts             # Unified AI message handler (all channels)
+│   │   ├── agenticRouter.ts             # AI Actions — function calling loop
+│   │   ├── widgetTools.ts               # Dynamic tool loader per widget
+│   │   ├── gemini.ts                    # Embeddings, RAG search
+│   │   ├── models.ts                    # Gemini model registry + pricing
+│   │   ├── richMessages.ts              # Parse :::carousel, :::form blocks
+│   │   ├── handoff.ts                   # Human handoff workflow
+│   │   ├── analytics.ts                 # Chat analytics aggregation
+│   │   ├── pricing.ts                   # Plan definitions & feature matrix
+│   │   ├── builder/
+│   │   │   ├── systemPrompt.ts          # AI Builder agent prompt
+│   │   │   ├── geminiAgent.ts           # Gemini function calling (builder)
+│   │   │   ├── anthropicAgent.ts        # Claude fallback agent
+│   │   │   ├── toolRegistry.ts          # Tool registration system
+│   │   │   └── tools/
+│   │   │       ├── coreTools.ts         # analyze_site, build_deploy, etc.
+│   │   │       ├── integrationTools.ts  # web_search, write_integration
+│   │   │       └── proactiveTools.ts    # analyze_opportunities
+│   │   └── integrations/
+│   │       ├── core/
+│   │       │   ├── PluginRegistry.ts    # Plugin discovery + execution
+│   │       │   ├── types.ts             # Plugin interfaces
+│   │       │   └── HealthMonitor.ts     # Connection health checks
+│   │       └── plugins/                 # 13+ integration plugins
 │   │
-│   ├── lib/                             # Бизнес-логика
-│   │   ├── gemini.ts                    # AI: RAG поиск, стриминг, embeddings
-│   │   ├── analytics.ts                # Агрегация аналитики
-│   │   ├── mongodb.ts                   # Подключение к MongoDB
-│   │   ├── widgetScanner.ts             # Сканирование widgets/ и quickwidgets/
-│   │   ├── googleSheets.ts              # Google Sheets + Drive API (JWT auth)
-│   │   ├── notifications.ts             # Email + Telegram уведомления
-│   │   ├── PaymentService.ts            # Единый сервис платежей
-│   │   ├── documentParser.ts            # Парсинг PDF/DOCX/TXT
-│   │   ├── channelRouter.ts             # Роутинг сообщений по каналам
-│   │   ├── telegramBot.ts               # Telegram Bot API
-│   │   ├── whatsappService.ts           # WhatsApp (WHAPI)
-│   │   ├── instagramService.ts          # Instagram DM
-│   │   ├── costGuard.ts                 # Контроль расходов AI
-│   │   ├── handoff.ts                   # Передача оператору
-│   │   ├── rateLimit.ts                 # Rate limiting
-│   │   ├── richMessages.ts              # Markdown, code blocks
-│   │   ├── invoiceGenerator.ts          # PDF-инвойсы
-│   │   ├── promptTemplates.ts           # Готовые промпты (dental, hotel, etc.)
-│   │   ├── paymentProviders/
-│   │   │   ├── types.ts                 # PaymentProvider interface
-│   │   │   └── cryptomus.ts             # Cryptomus (BTC, ETH, USDT)
-│   │   └── ...                          # auth, validation, utils, etc.
+│   ├── models/                          # 25 MongoDB schemas
+│   │   ├── User.ts                      # Auth, plans, organizations
+│   │   ├── Client.ts                    # Widget clients, billing, costs
+│   │   ├── AISettings.ts                # Per-client AI config + actions
+│   │   ├── KnowledgeChunk.ts            # RAG text + vector embeddings
+│   │   ├── ChatLog.ts                   # Conversation history (365d TTL)
+│   │   ├── Integration.ts               # Connected service credentials
+│   │   ├── WidgetIntegration.ts         # Widget ↔ Integration bindings
+│   │   ├── ABTest.ts                    # A/B test variants & results
+│   │   ├── ProactiveTrigger.ts          # Nudge trigger rules
+│   │   ├── Handoff.ts                   # Human handoff requests
+│   │   ├── Webhook.ts                   # Custom webhooks (HMAC signed)
+│   │   └── ...
 │   │
-│   └── models/                          # Mongoose модели
-│       ├── Client.ts                    # clientType: 'full' | 'quick'
-│       ├── AISettings.ts
-│       ├── KnowledgeChunk.ts            # text + embedding[768]
-│       ├── ChatLog.ts
-│       ├── ChannelConfig.ts             # Каналы (telegram, whatsapp, instagram)
-│       ├── Feedback.ts
-│       ├── ProactiveTrigger.ts
-│       ├── Invoice.ts
-│       ├── Handoff.ts
-│       ├── Webhook.ts
-│       ├── AuditLog.ts
-│       ├── Correction.ts
-│       └── Notification.ts
+│   └── components/                      # React UI (100+ components)
+│       ├── builder/                     # AI Builder chat, preview, pipeline
+│       ├── dashboard/                   # Command palette, navigation
+│       ├── admin/                       # Admin tabs, data tables, charts
+│       ├── analytics/                   # Analytics charts
+│       ├── playground/                  # Widget sandbox
+│       ├── templates/                   # Industry demo pages
+│       └── ui/                          # Design system (buttons, modals, etc.)
 │
-├── scripts/
-│   ├── checkPayments.ts                 # CRON: проверка оплат
-│   └── setupTelegramBot.ts              # Настройка Telegram webhook
-│
-└── service_account.json                 # Google API credentials
+├── widgets/<clientId>/                  # Production widgets (script.js)
+├── quickwidgets/<clientId>/             # Demo widgets (script.js)
+├── knowledge-seeds/<clientId>.json      # Portable knowledge snapshots
+└── scripts/                             # Standalone utilities
 ```
 
 ---
 
-## API Routes
+## Widget Build Pipeline
 
-### Auth
+```
+1. User provides URL
+   ↓
+2. analyze_site → Deep crawl (sitemap + BFS, 30+ pages)
+   → Extract: colors, fonts, business type, content, links
+   ↓
+3. generate_design → Gemini generates 3 theme.json variants
+   ↓
+4. generate-single-theme.js → 7 source files from theme.json
+   (Widget.jsx, ChatMessage.jsx, QuickReplies.jsx, etc.)
+   ↓
+5. build.js → Vite IIFE build → script.js (single file, CSS injected)
+   ↓
+6. Deploy → quickwidgets/<clientId>/script.js
+   ↓
+7. crawl_knowledge → Extract text from 30+ pages → embeddings → MongoDB
+   ↓
+8. Widget is live: <script src="https://winbixai.com/quickwidgets/<id>/script.js"></script>
+```
 
-| Method | Endpoint           | Description   |
-| ------ | ------------------ | ------------- |
-| POST   | `/api/auth/admin`  | Логин админа  |
-| POST   | `/api/auth/client` | Логин клиента |
+---
 
-### Clients
+## AI Actions (Autonomous Agent)
 
-| Method  | Endpoint                     | Description                                   |
-| ------- | ---------------------------- | --------------------------------------------- |
-| GET     | `/api/clients`               | Список всех клиентов (widgets + quickwidgets) |
-| GET/PUT | `/api/clients/[id]`          | Чтение/обновление клиента                     |
-| DELETE  | `/api/clients/[id]/delete`   | Удаление quick widget                         |
-| GET     | `/api/clients/[id]/channels` | Обнаруженные каналы клиента                   |
-| GET     | `/api/clients/me`            | Текущий клиент (по токену)                    |
+Виджет может не только отвечать на вопросы, но и **выполнять действия**:
 
-### AI & Chat
+```
+Посетитель: "Хочу записаться на массаж на пятницу"
+AI: [вызывает check_availability] → "Есть 14:00 и 16:30. Какое время?"
+Посетитель: "14:00"
+AI: [вызывает book_appointment] → "Готово! Запись на пятницу 14:00. ✅"
+```
 
-| Method   | Endpoint                      | Description                        |
-| -------- | ----------------------------- | ---------------------------------- |
-| POST     | `/api/chat`                   | Основной endpoint (RAG + Gemini)   |
-| POST     | `/api/chat/stream`            | SSE стриминг ответов               |
-| GET/PUT  | `/api/ai-settings/[clientId]` | Настройки AI (промпт, температура) |
-| GET/POST | `/api/templates`              | Шаблоны промптов                   |
+### Как работает
+
+1. `channelRouter.ts` проверяет `actionsEnabled` в AI Settings
+2. Если включено → делегирует в `agenticRouter.ts`
+3. `widgetTools.ts` загружает tools: built-in + из WidgetIntegration bindings
+4. Gemini получает `functionDeclarations` → может вызывать tools
+5. Agentic loop (max 5 итераций): Gemini → tool call → execute → result → Gemini → text
+6. SSE events: `action_start` (спиннер), `action_result` (галочка/крестик)
+
+### Built-in Tools (всегда доступны)
+
+| Tool                | Описание                                                    |
+| ------------------- | ----------------------------------------------------------- |
+| `collect_lead`      | Сохраняет лид (имя, email, телефон) из разговора            |
+| `search_knowledge`  | Расширенный поиск по knowledge base (top-5, threshold 0.25) |
+| `send_notification` | Уведомление владельцу в Telegram                            |
+
+### Integration Tools (из подключённых интеграций)
+
+Динамически загружаются из WidgetIntegration. Если подключён HubSpot с action `createContact` → виджет может создавать контакты прямо в чате.
+
+### Статус
+
+⚠️ **Код написан и компилируется, но не тестирован с реальным Gemini API.** Нужен ручной тест: включить `actionsEnabled: true` для виджета → отправить сообщение → проверить agentic loop.
+
+---
+
+## Channels
+
+| Канал          | Endpoint                       | Особенности                                                     |
+| -------------- | ------------------------------ | --------------------------------------------------------------- |
+| **Web Widget** | `POST /api/chat/stream`        | SSE streaming, rich blocks, page context, follow-up suggestions |
+| **Telegram**   | `POST /api/webhooks/telegram`  | Bot API, /start linking, user metadata                          |
+| **WhatsApp**   | `POST /api/webhooks/whatsapp`  | WHAPI + Meta Cloud API, human takeover (30 min timeout)         |
+| **Instagram**  | `POST /api/webhooks/instagram` | Meta Graph API v21+, DM routing, attachment support             |
+
+Все каналы используют единый `channelRouter.ts` → одна и та же RAG + AI логика.
+
+---
+
+## API Overview
+
+### Auth & Users
+
+- `POST /api/auth/register` — Регистрация
+- `POST /api/auth/login` — JWT login
+- `GET /api/auth/google` — Google OAuth
+- `POST /api/auth/refresh` — Refresh token
+- `GET /api/auth/me` — Current user
+
+### Chat & AI
+
+- `POST /api/chat/stream` — SSE streaming (website widget)
+- `POST /api/chat` — Non-streaming (channels)
+- `PUT /api/ai-settings/:clientId` — AI config (prompt, model, temperature, actions)
+
+### Builder Agent
+
+- `POST /api/builder/chat` — Builder conversation (function calling)
+- `POST /api/builder/build` — Build widget
 
 ### Knowledge Base
 
-| Method   | Endpoint                | Description                        |
-| -------- | ----------------------- | ---------------------------------- |
-| GET/POST | `/api/knowledge`        | CRUD chunks                        |
-| POST     | `/api/knowledge/upload` | Загрузка документов (PDF/DOCX/TXT) |
-
-### Chat History & Feedback
-
-| Method     | Endpoint           | Description          |
-| ---------- | ------------------ | -------------------- |
-| GET/DELETE | `/api/chat-logs`   | История чатов        |
-| POST       | `/api/feedback`    | Лайк/дизлайк ответов |
-| POST       | `/api/corrections` | Коррекция ответов AI |
-
-### Payments & Credits
-
-| Method | Endpoint                          | Description           |
-| ------ | --------------------------------- | --------------------- |
-| POST   | `/api/payments/setup`             | Создание подписки     |
-| POST   | `/api/payments/cancel`            | Отмена подписки       |
-| GET    | `/api/payments/tiers`             | Тарифы (1/3/6/12 мес) |
-| POST   | `/api/payments/webhook/cryptomus` | Webhook Cryptomus     |
-| GET    | `/api/credits/status`             | Статус AI-кредитов    |
-| POST   | `/api/credits/topup`              | Докупить кредиты      |
+- `GET/POST /api/knowledge` — CRUD knowledge chunks
+- `POST /api/knowledge/upload` — File upload (PDF/DOCX)
+- `POST /api/knowledge/deep-crawl` — Website crawl
 
 ### Integrations
 
-| Method | Endpoint                          | Description                             |
-| ------ | --------------------------------- | --------------------------------------- |
-| POST   | `/api/integrations/sheets/export` | Экспорт в Google Sheets                 |
-| GET    | `/api/integrations/sheets/read`   | Чтение данных из таблицы                |
-| POST   | `/api/integrations/sheets/update` | Обновление ячеек таблицы                |
-| GET    | `/api/integrations/sheets/search` | Поиск таблиц по имени (Drive API)       |
-| POST   | `/api/telegram/notify`            | Отправка отчёта в Telegram (multi-chat) |
-| POST   | `/api/telegram/webhook`           | Webhook Telegram бота                   |
+- `GET /api/integrations` — Available plugins
+- `POST /api/integrations/connect` — Connect (encrypt credentials)
+- `POST /api/integrations/execute` — Execute action
+- `POST /api/integrations/widget-attach` — Bind to widget
 
-### Channels (Webhooks)
+### Payments
 
-| Method   | Endpoint                  | Description                                 |
-| -------- | ------------------------- | ------------------------------------------- |
-| GET/POST | `/api/webhooks/instagram` | Instagram webhook (verification + messages) |
-| POST     | `/api/webhooks/whatsapp`  | WhatsApp webhook                            |
-| POST     | `/api/webhooks/whapi`     | WHAPI webhook                               |
-| POST     | `/api/webhooks/manychat`  | ManyChat webhook                            |
+- `POST /api/stripe/checkout` — Create checkout session
+- `GET /api/stripe/portal` — Billing portal
+- `POST /api/stripe/webhook` — Stripe events
 
-### Other
+### Admin
 
-| Method | Endpoint                  | Description          |
-| ------ | ------------------------- | -------------------- |
-| GET    | `/api/analytics`          | Статистика чатов     |
-| GET    | `/api/health`             | Healthcheck          |
-| POST   | `/api/handoff`            | Передача оператору   |
-| GET    | `/api/proactive-triggers` | Проактивные триггеры |
-| GET    | `/api/invoices`           | Инвойсы              |
-| GET    | `/api/audit-log`          | Аудит-лог            |
-| POST   | `/api/cron/trial-check`   | Проверка триалов     |
+- `GET /api/admin/users` — User management
+- `GET /api/admin/clients` — Client management
+- `GET /api/admin/analytics` — Platform analytics
+- `POST /api/admin/users/:id/impersonate` — Support login
 
----
-
-## Виджет
-
-Виджеты — Preact-приложения, работающие в Shadow DOM. CSS обрабатывается Tailwind v3 + PostCSS и инжектируется через `window.__WIDGET_CSS__`.
-
-**Два типа:**
-
-- **Full** (`widgets/`) — для платящих клиентов, с биллингом и клиентским кабинетом
-- **Quick** (`quickwidgets/`) — демо-виджеты для проспектинга, без биллинга
-
-**Embed:**
-
-```html
-<script src="https://domain.com/widgets/client-id/script.js"></script>
-<!-- или для quick: -->
-<script src="https://domain.com/quickwidgets/client-id/script.js"></script>
-```
-
-**Build:**
-
-```bash
-node .agent/widget-builder/scripts/build.js <client_id>
-# Output: .agent/widget-builder/dist/script.js
-# Deploy: copy to widgets/<client_id>/ or quickwidgets/<client_id>/
-```
-
----
-
-## AI Agent Skills
-
-Скиллы — SKILL.md файлы с инструкциями для AI-агента. Расположены в `.agent/skills/`.
-
-### create-widget
-
-Полное создание виджета: 20 вопросов discovery → генерация кода → сборка → деплой в `widgets/`. Создаёт кастомные компоненты в `clients/<clientId>/src/`.
-
-### create-quick-widget
-
-Быстрое создание демо-виджета: только URL сайта → автоанализ (цвета, шрифты, контент) → генерация → сборка → деплой в `quickwidgets/`. Без вопросов к клиенту.
-
-### mass-quick-widgets
-
-Массовое создание демо-виджетов из Google Sheets:
-
-1. Ищет таблицу по дате `DD.MM.YYYY Проверенные лиды` (или `Квалифицированные лиды`)
-2. Читает leads (email, website, username)
-3. Для каждого lead → create-quick-widget процесс
-4. Обновляет `hasWidget=TRUE` в таблице
-5. Отправляет Telegram-отчёт (поддержка multi-chat)
-
-### create-telegram-bot-assistant
-
-Создание кастомного Telegram-бота: генерирует `script.js` с интеграциями (CRM, календарь, оплата) → деплой в `widgets/<clientId>/channels/telegram-bot/`.
-
-### create-whatsapp-assistant
-
-Создание WhatsApp-ассистента: аналогично Telegram, но для WhatsApp (WHAPI) → деплой в `widgets/<clientId>/channels/whatsapp/`.
-
-### create-instagram-assistant
-
-Создание Instagram DM ассистента: генерирует обработчик сообщений → деплой в `widgets/<clientId>/channels/instagram/`.
+Полный список: 120+ endpoints в `src/app/api/`.
 
 ---
 
 ## Env Variables
 
 ```env
+# Core
 MONGODB_URI=mongodb://...
 GEMINI_API_KEY=...
 ADMIN_SECRET_TOKEN=...
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_BASE_URL=https://winbixai.com
+
+# Auth
+JWT_SECRET=...
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
 
 # Payments
-CRYPTOMUS_MERCHANT_ID=...
-CRYPTOMUS_API_KEY=...
+STRIPE_SECRET_KEY=...
+STRIPE_WEBHOOK_SECRET=...
+NOWPAYMENTS_API_KEY=...
+
+# Channels
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_REPORT_CHAT_ID=123456
+WHAPI_API_KEY=...
+INSTAGRAM_ACCESS_TOKEN=...
+
+# Integrations
+INTEGRATION_ENCRYPTION_KEY=...   # AES-256 for API key storage
+BRAVE_SEARCH_API_KEY=...         # For web_search tool
 
 # Notifications
 SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
 SMTP_USER=...
 SMTP_PASS=...
-SMTP_FROM=...
-TELEGRAM_BOT_TOKEN=...
-TELEGRAM_REPORT_CHAT_ID=123456,789012  # comma-separated for multi-chat
 
-# Google Sheets (service account)
+# Google Sheets
 GOOGLE_SERVICE_ACCOUNT_PATH=./service_account.json
 ```
 
@@ -340,15 +453,53 @@ GOOGLE_SERVICE_ACCOUNT_PATH=./service_account.json
 ## Quick Start
 
 ```bash
+# 1. Install
 npm install
-cp .env.example .env.local  # fill in values
-npm run dev                  # http://localhost:3000
+
+# 2. Configure
+cp .env.example .env.local   # Fill in values
+
+# 3. Run
+npm run dev                   # http://localhost:3000
+
+# 4. Access
+# Dashboard: http://localhost:3000/dashboard
+# Admin:     http://localhost:3000/admin
+# Builder:   http://localhost:3000/dashboard/builder
 ```
 
-Admin panel: `http://localhost:3000/admin`
+### Build a widget manually
+
+```bash
+# Generate source files from theme.json
+node .claude/widget-builder/scripts/generate-single-theme.js <clientId>
+
+# Build widget
+node .claude/widget-builder/scripts/build.js <clientId>
+
+# Output: .claude/widget-builder/dist/script.js
+# Deploy: copy to quickwidgets/<clientId>/script.js
+```
+
+---
+
+## Что планируется (Roadmap)
+
+| #   | Фича                          | Описание                                                           | Статус        |
+| --- | ----------------------------- | ------------------------------------------------------------------ | ------------- |
+| 1   | **AI Actions Testing**        | Протестировать agentic router с реальным Gemini API                | Следующий шаг |
+| 2   | **Plugin Implementations**    | Реализовать Google Calendar, Calendly, Stripe plugins (HTTP calls) | Planned       |
+| 3   | **Real-Time Voice Agent**     | WebRTC голосовой разговор с AI в виджете                           | Concept       |
+| 4   | **Multi-Agent Orchestration** | Sales Agent, Support Agent, Onboarding Agent — автопереключение    | Concept       |
+| 5   | **Workflow Builder**          | Визуальный drag-and-drop конструктор автоматизаций                 | Concept       |
+| 6   | **Auto-Evolving Knowledge**   | Периодический re-crawl сайта + автообновление knowledge base       | Concept       |
+| 7   | **Conversation Intelligence** | NLP-анализ: buying signals, churn risk, competitor mentions        | Concept       |
+| 8   | **Unified Omnichannel Inbox** | Единый inbox для всех каналов с AI-suggested replies               | Concept       |
+| 9   | **Agent Marketplace**         | Готовые отраслевые агенты (dental, restaurant, beauty)             | Concept       |
+| 10  | **White-Label Reseller**      | Агентства продают под своим брендом                                | Concept       |
 
 ---
 
 ## License
 
-MIT © 2026 ChatBot Fusion
+Proprietary © 2026 WinBix AI
