@@ -1,0 +1,57 @@
+{
+  "provider": "google-sheets",
+  "name": "Google Sheets",
+  "category": "data",
+  "color": "#34A853",
+  "baseUrl": "https://sheets.googleapis.com/v4",
+  "docsUrl": "https://developers.google.com/sheets/api",
+  "auth": {
+    "type": "bearer",
+    "header": "Authorization",
+    "prefix": "Bearer",
+    "fields": [
+      { "key": "apiKey", "label": "API Key", "type": "password", "required": true, "placeholder": "AIza..." },
+      {
+        "key": "spreadsheetId",
+        "label": "Spreadsheet ID",
+        "type": "text",
+        "required": true,
+        "placeholder": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
+      }
+    ]
+  },
+  "actions": [
+    {
+      "id": "getValues",
+      "name": "Read Range",
+      "description": "Read values from a spreadsheet range",
+      "method": "GET",
+      "path": "/spreadsheets/{{auth.spreadsheetId}}/values/{{params.range}}",
+      "queryParams": { "key": "{{auth.apiKey}}" },
+      "responseMapping": {
+        "root": "values",
+        "fields": {}
+      }
+    },
+    {
+      "id": "appendRow",
+      "name": "Append Row",
+      "description": "Append a row to the spreadsheet",
+      "method": "POST",
+      "path": "/spreadsheets/{{auth.spreadsheetId}}/values/{{params.range}}:append",
+      "queryParams": { "valueInputOption": "USER_ENTERED", "key": "{{auth.apiKey}}" },
+      "body": {
+        "values": [["{{params.col1}}", "{{params.col2}}", "{{params.col3}}"]]
+      },
+      "responseMapping": {
+        "root": "updates",
+        "fields": { "updatedRows": "updatedRows", "updatedRange": "updatedRange" }
+      }
+    }
+  ],
+  "healthCheck": {
+    "method": "GET",
+    "path": "/spreadsheets/{{auth.spreadsheetId}}",
+    "successField": "spreadsheetId"
+  }
+}

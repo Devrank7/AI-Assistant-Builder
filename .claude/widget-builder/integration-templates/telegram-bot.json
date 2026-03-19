@@ -1,0 +1,43 @@
+{
+  "provider": "telegram-bot",
+  "name": "Telegram Bot",
+  "category": "notification",
+  "color": "#26A5E4",
+  "baseUrl": "https://api.telegram.org",
+  "auth": {
+    "type": "custom",
+    "fields": [
+      {
+        "key": "botToken",
+        "label": "Bot Token",
+        "type": "password",
+        "required": true,
+        "placeholder": "123456:ABC-DEF..."
+      },
+      { "key": "chatId", "label": "Chat ID", "type": "text", "required": true, "placeholder": "-1001234567890" }
+    ]
+  },
+  "actions": [
+    {
+      "id": "sendMessage",
+      "name": "Send Message",
+      "description": "Send a text message to a Telegram chat",
+      "method": "POST",
+      "path": "/bot{{auth.botToken}}/sendMessage",
+      "body": {
+        "chat_id": "{{auth.chatId}}",
+        "text": "{{params.text}}",
+        "parse_mode": "HTML"
+      },
+      "responseMapping": {
+        "root": "result",
+        "fields": { "messageId": "message_id", "date": "date" }
+      }
+    }
+  ],
+  "healthCheck": {
+    "method": "GET",
+    "path": "/bot{{auth.botToken}}/getMe",
+    "successField": "result.id"
+  }
+}
