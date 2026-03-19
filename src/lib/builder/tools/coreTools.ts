@@ -507,10 +507,18 @@ ${JSON.stringify(mutableSnapshot, null, 2)}
 USER REQUEST: "${instruction}"
 
 Return a JSON with ONLY these same fields, with colors changed per the request.
-- If dark theme requested: isDark=true, surfaceBg="#0f1117", surfaceCard="#1a1d23", surfaceBorder="#2a2d35", surfaceInput="#1e212b", textPrimary="#ffffff", textSecondary="#9ca3af", textMuted="#6b7280"
-- If light theme requested: isDark=false, surfaceBg="#ffffff", surfaceCard="#ffffff", surfaceBorder="#e5e7eb", surfaceInput="#f1f5f9", textPrimary="#111827", textSecondary="#4b5563", textMuted="#9ca3af"
+
+CRITICAL RULES FOR DARK/LIGHT SWITCHING:
+- When switching to dark mode: ONLY change surface/background/text colors. Keep ALL accent/brand colors (header gradient, toggle, send button, user message, avatar, chips hover, links, cssPrimary, cssAccent) EXACTLY the same — these are the brand identity.
+  - Set: isDark=true, surfaceBg="#0f1117", surfaceCard="#1a1d23", surfaceBorder="#2a2d35", surfaceInput="#1e212b", surfaceInputFocus="#1a1d23", textPrimary="#ffffff", textSecondary="#9ca3af", textMuted="#6b7280", onlineDotBorder="#0f1117"
+  - Do NOT change: headerFrom/Via/To, toggleFrom/Via/To, sendFrom/To, userMsgFrom/To, avatarFrom/To, cssPrimary, cssAccent, linkColor, chipHoverBorder, focusBorder, imgActiveBorder
+  - Adjust chip colors for dark bg: chipBorder="#2a2d35", chipFrom="#1a1d23", chipTo="#0f1117", chipText="#e2e8f0"
+- When switching to light mode: ONLY change surface/background/text. Keep ALL accent/brand colors the same.
+  - Set: isDark=false, surfaceBg="#ffffff", surfaceCard="#ffffff", surfaceBorder="#e5e7eb", surfaceInput="#f1f5f9", surfaceInputFocus="#ffffff", textPrimary="#111827", textSecondary="#4b5563", textMuted="#9ca3af"
+  - Adjust chip colors for light bg: chipBorder="#e5e7eb", chipFrom="#ffffff", chipTo="#f8fafc", chipText="#374151"
+- When changing color (e.g. "make it green"): Change ALL accent colors to the new hue, but keep surface/text unchanged.
 - All hex colors must be valid 6-digit hex (e.g. #3b82f6).
-- focusRgb and toggleHoverRgb must be "r, g, b" format matching the primary color.
+- focusRgb and toggleHoverRgb must be "r, g, b" format matching the primary accent color.
 Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fields. No markdown.`,
           config: { temperature: 0.1 },
         });
