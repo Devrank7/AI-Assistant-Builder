@@ -22,6 +22,7 @@ import {
   Globe,
   Clock,
   Box,
+  Code2,
 } from 'lucide-react';
 
 /* ── Display font ── */
@@ -216,6 +217,16 @@ function WidgetCard({
             <Button variant="secondary" size="sm" className="w-full gap-1.5 text-[11px]">
               <MessageSquare className="h-3 w-3" />
               Edit
+            </Button>
+          </Link>
+          <Link
+            href={`/dashboard/widgets/${widget.clientId}/install`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex-1"
+          >
+            <Button variant="primary" size="sm" className="w-full gap-1.5 text-[11px]">
+              <Code2 className="h-3 w-3" />
+              Install
             </Button>
           </Link>
           <a

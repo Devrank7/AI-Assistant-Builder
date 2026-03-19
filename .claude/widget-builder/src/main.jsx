@@ -66,10 +66,27 @@ if (!customElements.get(_aw_tag)) {
     customElements.define(_aw_tag, AIChatWidget);
 }
 
-function mountWidget() {
+async function mountWidget() {
     document.querySelectorAll('[data-aw]').forEach(el => el.remove());
 
     const clientId = window.__WIDGET_CONFIG__?.clientId;
+    const apiBase = window.__WIDGET_CONFIG__?.apiBase || '';
+
+    // Check widget status (message limits) before mounting
+    if (clientId && apiBase) {
+        try {
+            const statusRes = await fetch(apiBase + '/api/widget-status?clientId=' + encodeURIComponent(clientId));
+            const status = await statusRes.json();
+            if (!status.active) {
+                console.warn('[WinBix AI] Widget disabled: ' + (status.message || status.reason || 'Plan limit reached. Upgrade at winbixai.com/plans'));
+                return; // Don't mount widget
+            }
+        } catch (err) {
+            // Fail-open: if status check fails, still show widget
+            console.warn('[WinBix AI] Status check failed, showing widget anyway:', err.message);
+        }
+    }
+
     if (clientId) {
         try {
             localStorage.removeItem('aiwidget_' + clientId + '_messages');

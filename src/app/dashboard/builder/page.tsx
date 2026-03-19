@@ -107,7 +107,7 @@ export default function BuilderPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
-  const hasPaidPlan = user && user.plan !== 'none';
+  const hasPaidPlan = user && user.plan !== 'none'; // 'free' plan also has access
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [showSessions, setShowSessions] = useState(false);
   const restoredRef = useRef(false);
@@ -222,6 +222,34 @@ export default function BuilderPage() {
                 <div className="border-border bg-bg-secondary/30 flex items-center gap-3 border-b px-5 py-3">
                   {/* Preview on Site button */}
                   <PreviewOnSiteButton clientId={stream.widgetClientId} currentTheme={stream.currentTheme} />
+
+                  {/* Install on Site button */}
+                  <Link
+                    href={`/dashboard/widgets/${stream.widgetClientId}/install`}
+                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300"
+                    style={{
+                      background: 'rgba(16,185,129,0.07)',
+                      border: '1px solid rgba(16,185,129,0.18)',
+                      color: '#34d399',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(16,185,129,0.12)';
+                      e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(16,185,129,0.07)';
+                      e.currentTarget.style.borderColor = 'rgba(16,185,129,0.18)';
+                    }}
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"
+                      />
+                    </svg>
+                    Install on Site
+                  </Link>
 
                   {stream.stage === 'deploy' && stream.sessionId && (
                     <Link
