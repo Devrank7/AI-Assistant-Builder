@@ -1506,9 +1506,14 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
     category: 'core',
     async executor(args, ctx) {
       const clientId = args.clientId as string;
-      const text = args.text as string;
+      let text = args.text as string;
       const businessType = (args.businessType as string) || 'business';
       const businessName = (args.businessName as string) || clientId;
+
+      // If Gemini sends the marker, substitute with the full file text
+      if (text === '__FILE_CONTENT__' && ctx.pendingFileText) {
+        text = ctx.pendingFileText;
+      }
 
       ctx.write({ type: 'progress', stage: 'knowledge', status: 'active' });
       ctx.write({ type: 'progress', message: 'Uploading knowledge...' });

@@ -49,12 +49,12 @@ export function useBuilderStream() {
 
   const abortRef = useRef<AbortController | null>(null);
 
-  const sendMessage = useCallback(
-    async (message: string, sessionId?: string | null) => {
-      // Add user message
+  // Shared SSE stream reader
+  const streamChat = useCallback(
+    async (displayMessage: string, requestBody: Record<string, unknown>) => {
       const userMsg: BuilderMessage = {
         role: 'user',
-        content: message,
+        content: displayMessage,
         timestamp: new Date().toISOString(),
       };
 
@@ -65,7 +65,6 @@ export function useBuilderStream() {
         error: null,
       }));
 
-      // Create assistant message placeholder
       const assistantMsg: BuilderMessage = {
         role: 'assistant',
         content: '',
@@ -84,7 +83,7 @@ export function useBuilderStream() {
         const res = await fetch('/api/builder/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: sessionId || state.sessionId, message }),
+          body: JSON.stringify(requestBody),
           signal: abortRef.current.signal,
         });
 
@@ -128,7 +127,40 @@ export function useBuilderStream() {
         setState((prev) => ({ ...prev, isStreaming: false }));
       }
     },
-    [state.sessionId]
+    [handleEvent]
+  );
+
+  const sendMessage = useCallback(
+    async (message: string, sessionId?: string | null) => {
+      await streamChat(message, {
+        sessionId: sessionId || state.sessionId,
+        message,
+      });
+    },
+    [state.sessionId, streamChat]
+  );
+
+  const sendMessageWithFile = useCallback(
+    async (
+      message: string,
+      fileContext: {
+        filename: string;
+        type: string;
+        size: number;
+        pages?: number;
+        wordCount: number;
+        preview: string;
+        fullText: string;
+      }
+    ) => {
+      const displayMessage = message || `📎 ${fileContext.filename}`;
+      await streamChat(displayMessage, {
+        sessionId: state.sessionId,
+        message: message || 'User uploaded a file',
+        fileContext,
+      });
+    },
+    [state.sessionId, streamChat]
   );
 
   const handleEvent = useCallback((event: SSEEvent) => {
@@ -285,6 +317,7 @@ export function useBuilderStream() {
   return {
     ...state,
     sendMessage,
+    sendMessageWithFile,
     stopStreaming,
     resetSession,
     restoreSession,

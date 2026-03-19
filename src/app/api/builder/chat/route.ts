@@ -12,6 +12,14 @@ import { BUILDER_SYSTEM_PROMPT } from '@/lib/builder/systemPrompt';
 import type { ToolContext } from '@/lib/builder/toolRegistry';
 
 const activeStreams = new Map<string, boolean>();
+const pendingFileTexts = new Map<string, { text: string; timestamp: number }>();
+
+function cleanupPendingFiles() {
+  const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+  for (const [key, val] of pendingFileTexts) {
+    if (val.timestamp < fiveMinAgo) pendingFileTexts.delete(key);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!auth.authenticated) return auth.response;
 
     const body = await request.json();
-    const { sessionId, message } = body;
+    const { sessionId, message, fileContext } = body;
 
     if (!message || typeof message !== 'string') {
       return Errors.badRequest('message is required');
@@ -48,8 +56,29 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Augment message with file context if present
+    let augmentedMessage = message;
+    if (fileContext && fileContext.preview) {
+      const fileMeta = [
+        `Attached file: ${fileContext.filename}`,
+        `(${fileContext.type}, ${fileContext.wordCount} words, ${Math.round(fileContext.size / 1024)} KB)`,
+        fileContext.pages ? `${fileContext.pages} pages` : null,
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      augmentedMessage = `${message || 'User uploaded a file'}\n\n---\n[${fileMeta}]\nContent preview:\n${fileContext.preview}\n\nIMPORTANT: The full text of this file is available. To add it to the widget's knowledge base, call upload_knowledge_text with text set to "__FILE_CONTENT__". To answer questions about the file, use the preview above.\n---`;
+    }
+
+    // Store fullText in memory map
+    if (fileContext && fileContext.fullText) {
+      cleanupPendingFiles();
+      const sid = session._id.toString();
+      pendingFileTexts.set(sid, { text: fileContext.fullText, timestamp: Date.now() });
+    }
+
     // Add user message
-    session.messages.push({ role: 'user', content: message, timestamp: new Date() });
+    session.messages.push({ role: 'user', content: augmentedMessage, timestamp: new Date() });
     session.status = 'streaming';
     await session.save();
 
@@ -78,6 +107,7 @@ export async function POST(request: NextRequest) {
           cookie,
           write,
           userPlan,
+          pendingFileText: pendingFileTexts.get(currentSessionId)?.text,
         };
 
         const { assistantText, toolCallsMade } = await runAgentLoop({
@@ -87,6 +117,9 @@ export async function POST(request: NextRequest) {
           toolContext,
           write,
         });
+
+        // Clean up pending file text
+        pendingFileTexts.delete(currentSessionId);
 
         // Save assistant response
         if (assistantText) {

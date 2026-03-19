@@ -28,12 +28,23 @@ interface Message {
   crmInstruction?: { provider: string; steps: string[] };
 }
 
+interface FileContext {
+  filename: string;
+  type: string;
+  size: number;
+  pages?: number;
+  wordCount: number;
+  preview: string;
+  fullText: string;
+}
+
 interface Props {
   messages: Message[];
   isStreaming: boolean;
   error: string | null;
   knowledgeProgress: { uploaded: number; total: number } | null;
   onSendMessage: (message: string) => void;
+  onSendMessageWithFile?: (message: string, fileContext: FileContext) => void;
   suggestions?: string[];
   proactiveSuggestions?: Suggestion[] | null;
 }
@@ -65,11 +76,15 @@ export default function BuilderChat({
   error,
   knowledgeProgress,
   onSendMessage,
+  onSendMessageWithFile,
   suggestions,
   proactiveSuggestions,
 }: Props) {
   const [input, setInput] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { isListening, isSupported, startListening, stopListening } = useVoiceInput((text) =>
     setInput((prev) => prev + ' ' + text)
@@ -147,12 +162,70 @@ export default function BuilderChat({
     prevErrorRef.current = error;
   }, [error]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File too large. Maximum size is 25 MB.');
+      return;
+    }
+    setAttachedFile(file);
+    e.target.value = '';
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isStreaming) return;
-    playSendSound();
-    onSendMessage(input.trim());
-    setInput('');
+    if (isStreaming || isUploading) return;
+    if (!attachedFile && !input.trim()) return;
+
+    if (attachedFile && onSendMessageWithFile) {
+      setIsUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', attachedFile);
+
+        const res = await fetch('/api/builder/upload-file', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+          alert(data.error || 'Failed to process file');
+          setIsUploading(false);
+          return;
+        }
+
+        playSendSound();
+        onSendMessageWithFile(input.trim(), {
+          filename: data.metadata.filename,
+          type: data.metadata.type,
+          size: data.metadata.size,
+          pages: data.metadata.pages,
+          wordCount: data.metadata.wordCount,
+          preview: data.preview,
+          fullText: data.text,
+        });
+
+        setInput('');
+        setAttachedFile(null);
+      } catch (err) {
+        alert('Failed to upload file. Please try again.');
+        console.error('File upload error:', err);
+      } finally {
+        setIsUploading(false);
+      }
+    } else if (input.trim()) {
+      playSendSound();
+      onSendMessage(input.trim());
+      setInput('');
+    }
   };
 
   return (
@@ -754,6 +827,58 @@ export default function BuilderChat({
           style={{ background: 'linear-gradient(to top, #08090d, transparent)' }}
         />
 
+        {/* File preview badge */}
+        {attachedFile && (
+          <div
+            className="mx-auto mb-2 flex max-w-2xl items-center gap-2 rounded-xl px-3 py-2"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(12px)',
+            }}
+          >
+            <svg
+              className="h-4 w-4 flex-shrink-0"
+              style={{ color: '#22d3ee' }}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+              />
+            </svg>
+            <span
+              className="min-w-0 flex-1 truncate text-xs"
+              style={{ color: '#e0e4ec', fontFamily: "'Outfit', sans-serif" }}
+            >
+              {attachedFile.name.length > 30 ? attachedFile.name.slice(0, 27) + '...' : attachedFile.name}
+            </span>
+            <span className="flex-shrink-0 text-xs" style={{ color: '#6b7280' }}>
+              {formatFileSize(attachedFile.size)}
+            </span>
+            <button
+              type="button"
+              onClick={() => setAttachedFile(null)}
+              className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full transition-colors"
+              style={{ color: '#6b7280' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#ef4444';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#6b7280';
+              }}
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit}
           className="input-form mx-auto max-w-2xl overflow-hidden rounded-2xl transition-all duration-500"
@@ -767,6 +892,39 @@ export default function BuilderChat({
           }}
         >
           <div className="flex items-center gap-2 px-3 py-2.5">
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.png,.jpg,.jpeg,.webp"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            {/* Attachment button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isStreaming || isUploading}
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300 disabled:opacity-30"
+              style={{
+                background: attachedFile ? 'rgba(6,182,212,0.12)' : 'transparent',
+                color: attachedFile ? '#22d3ee' : '#4a5068',
+              }}
+            >
+              <svg
+                className="h-[18px] w-[18px]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                />
+              </svg>
+            </button>
             {isSupported && (
               <button
                 type="button"
@@ -798,7 +956,13 @@ export default function BuilderChat({
               onChange={(e) => setInput(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder={isStreaming ? 'Agent is working...' : 'Describe what you want to build...'}
+              placeholder={
+                isUploading
+                  ? 'Uploading file...'
+                  : isStreaming
+                    ? 'Agent is working...'
+                    : 'Describe what you want to build...'
+              }
               disabled={isStreaming}
               className="min-w-0 flex-1 bg-transparent py-2.5 text-[13.5px] outline-none disabled:opacity-40"
               style={{
@@ -810,7 +974,7 @@ export default function BuilderChat({
             />
             <button
               type="submit"
-              disabled={!input.trim() || isStreaming}
+              disabled={(!input.trim() && !attachedFile) || isStreaming || isUploading}
               className="send-btn flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-500 disabled:cursor-not-allowed disabled:opacity-20"
               style={{
                 background: input.trim() ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : 'transparent',

@@ -39,6 +39,14 @@ export const BUILDER_SYSTEM_PROMPT = `You are an AI widget builder agent for Win
 - suggest_improvements: Show interactive suggestion cards
 - check_knowledge_gaps: Compare crawled pages vs knowledge base
 
+### File Attachments
+Users can attach files (PDF, DOCX, TXT, MD, CSV, XLSX, images) via the paperclip button.
+When a user attaches a file, you see the filename, metadata, and a content preview.
+- To add file content to the widget's knowledge base: call upload_knowledge_text with text set to "__FILE_CONTENT__" — the system will substitute the full file text automatically
+- To answer questions about the file: use the preview content provided in the message
+- Default behavior: if the user just uploads a file without specific instructions, add it to the knowledge base and confirm what was added
+- IMPORTANT: Do NOT call upload_knowledge_text before a widget is built (no clientId yet). Acknowledge the file, and upload it after the widget is created.
+
 ### AI Actions (Widget Tool-Use)
 The widget supports **Autonomous Actions** — the AI can execute real actions during conversations with visitors:
 - Book appointments (Google Calendar, Calendly)

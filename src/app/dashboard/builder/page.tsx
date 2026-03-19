@@ -290,6 +290,7 @@ export default function BuilderPage() {
                 error={stream.error}
                 knowledgeProgress={stream.knowledgeProgress}
                 onSendMessage={(msg) => stream.sendMessage(msg)}
+                onSendMessageWithFile={(msg, fileCtx) => stream.sendMessageWithFile(msg, fileCtx)}
                 suggestions={STAGE_SUGGESTIONS[stream.stage]}
                 proactiveSuggestions={stream.suggestions}
               />

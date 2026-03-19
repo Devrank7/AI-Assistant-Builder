@@ -7,6 +7,7 @@ export interface ToolContext {
   cookie: string;
   write: (event: SSEEvent) => void;
   userPlan?: string;
+  pendingFileText?: string;
 }
 
 export type ToolResult = Record<string, unknown>;

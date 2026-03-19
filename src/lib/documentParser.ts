@@ -1,18 +1,18 @@
 /**
- * Document parsing utilities for PDF and DOCX files
+ * Document parsing utilities for PDF, DOCX, CSV, XLSX, TXT, and images (OCR)
  *
  * Required packages (install via npm):
- * npm install pdf-parse mammoth
- *
- * If packages are not installed, the functions will throw helpful errors.
+ * npm install pdf-parse mammoth xlsx papaparse @types/papaparse
  */
 
 export interface ParsedDocument {
   text: string;
   metadata: {
     filename: string;
-    type: 'pdf' | 'docx' | 'txt';
+    type: 'pdf' | 'docx' | 'txt' | 'csv' | 'xlsx' | 'image';
     pages?: number;
+    sheets?: number;
+    rows?: number;
     wordCount: number;
   };
 }
@@ -22,7 +22,6 @@ export interface ParsedDocument {
  */
 export async function parsePDF(buffer: Buffer, filename: string): Promise<ParsedDocument> {
   try {
-    // Dynamic import to handle missing package gracefully
     // @ts-expect-error - pdf-parse types are not perfect
     const pdfParse = (await import('pdf-parse')).default;
     const data = await pdfParse(buffer);
@@ -50,7 +49,6 @@ export async function parsePDF(buffer: Buffer, filename: string): Promise<Parsed
  */
 export async function parseDOCX(buffer: Buffer, filename: string): Promise<ParsedDocument> {
   try {
-    // Dynamic import to handle missing package gracefully
     const mammoth = await import('mammoth');
     const result = await mammoth.extractRawText({ buffer });
     const text = result.value.trim();
@@ -88,6 +86,115 @@ export function parseTXT(buffer: Buffer, filename: string): ParsedDocument {
 }
 
 /**
+ * Parse CSV file using papaparse
+ */
+export async function parseCSV(buffer: Buffer, filename: string): Promise<ParsedDocument> {
+  const Papa = (await import('papaparse')).default;
+  const raw = buffer.toString('utf-8');
+  const result = Papa.parse(raw, { header: true, skipEmptyLines: true });
+  const headers = result.meta.fields || [];
+  const rows = (result.data as Record<string, string>[]).slice(0, 500);
+
+  const lines = rows.map((row, i) => {
+    const fields = headers.map((h) => `${h}=${row[h] || ''}`).join(', ');
+    return `Row ${i + 1}: ${fields}`;
+  });
+
+  const text = lines.join('\n');
+
+  return {
+    text,
+    metadata: {
+      filename,
+      type: 'csv',
+      rows: rows.length,
+      wordCount: text.split(/\s+/).length,
+    },
+  };
+}
+
+/**
+ * Parse XLSX file using SheetJS
+ */
+export async function parseXLSX(buffer: Buffer, filename: string): Promise<ParsedDocument> {
+  const XLSX = await import('xlsx');
+  const workbook = XLSX.read(buffer, { type: 'buffer' });
+  const parts: string[] = [];
+  let totalRows = 0;
+
+  for (const sheetName of workbook.SheetNames) {
+    const sheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
+    const rows = data.slice(0, 500);
+    totalRows += rows.length;
+
+    parts.push(`## Sheet: ${sheetName}`);
+    for (let i = 0; i < rows.length; i++) {
+      parts.push(`Row ${i + 1}: ${rows[i].join(', ')}`);
+    }
+  }
+
+  const text = parts.join('\n');
+
+  return {
+    text,
+    metadata: {
+      filename,
+      type: 'xlsx',
+      sheets: workbook.SheetNames.length,
+      rows: totalRows,
+      wordCount: text.split(/\s+/).length,
+    },
+  };
+}
+
+/**
+ * Parse image via Gemini Vision OCR
+ */
+export async function parseImage(buffer: Buffer, filename: string): Promise<ParsedDocument> {
+  const ext = filename.toLowerCase().split('.').pop() || 'png';
+  const mimeMap: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+  };
+  const mimeType = mimeMap[ext] || 'image/png';
+
+  const { GoogleGenerativeAI } = await import('@google/generative-ai');
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+  const result = await model.generateContent([
+    'Extract all text from this image. Return only the extracted text, nothing else. If there is no text, return "NO_TEXT_FOUND".',
+    {
+      inlineData: {
+        mimeType,
+        data: buffer.toString('base64'),
+      },
+    },
+  ]);
+
+  const text = result.response.text().trim();
+
+  if (!text || text === 'NO_TEXT_FOUND') {
+    return {
+      text: '',
+      metadata: { filename, type: 'image', wordCount: 0 },
+    };
+  }
+
+  return {
+    text,
+    metadata: {
+      filename,
+      type: 'image',
+      wordCount: text.split(/\s+/).length,
+    },
+  };
+}
+
+/**
  * Auto-detect file type and parse accordingly
  */
 export async function parseDocument(buffer: Buffer, filename: string): Promise<ParsedDocument> {
@@ -101,7 +208,16 @@ export async function parseDocument(buffer: Buffer, filename: string): Promise<P
     case 'txt':
     case 'md':
       return parseTXT(buffer, filename);
+    case 'csv':
+      return parseCSV(buffer, filename);
+    case 'xlsx':
+      return parseXLSX(buffer, filename);
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'webp':
+      return parseImage(buffer, filename);
     default:
-      throw new Error(`Unsupported file type: .${ext}. Supported: pdf, docx, txt, md`);
+      throw new Error(`Unsupported file type: .${ext}. Supported: pdf, docx, txt, md, csv, xlsx, png, jpg, jpeg, webp`);
   }
 }
