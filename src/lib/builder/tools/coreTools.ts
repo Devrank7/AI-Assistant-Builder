@@ -931,7 +931,7 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
         operations: {
           type: 'string',
           description:
-            'JSON array of operations. Each op: { "op": "toggle", "componentId": "<id>", "enabled": true/false } or { "op": "set_prop", "componentId": "<id>", "prop": "<name>", "value": <any> } or { "op": "reorder", "componentId": "<id>", "position": "before:<otherId>" | "after:<otherId>" }. Component IDs: header, contactBar, contextBanner, messageList, imagePreview, inputArea, poweredBy, toggleButton, nudgeBubble. InputArea props: voiceInput (bool), imageUpload (bool).',
+            'JSON array of operations. Each op: { "op": "toggle", "componentId": "<id>", "enabled": true/false } or { "op": "set_prop", "componentId": "<id>", "prop": "<name>", "value": <any> } or { "op": "reorder", "componentId": "<id>", "position": "before:<otherId>" | "after:<otherId>" }. Component IDs: header, contactBar, contextBanner, messageList, imagePreview, inputArea, poweredBy, toggleButton, nudgeBubble. InputArea props: voiceInput (bool), imageUpload (bool). or { "op": "add_widget_component", "componentId": "<unique-id>", "template": "<templateName>", "slot": "<slot>", "props": {...} }. Template names: actionButton, dataForm, dataList, statusCard, externalLink.',
         },
       },
       required: ['clientId', 'operations'],
@@ -960,6 +960,9 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
         prop?: string;
         value?: unknown;
         position?: string;
+        template?: string;
+        slot?: string;
+        props?: Record<string, unknown>;
       }>;
 
       try {
@@ -971,6 +974,33 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
       const changes: string[] = [];
 
       for (const op of operations) {
+        // add_widget_component creates a NEW component — must handle BEFORE comp lookup
+        if (op.op === 'add_widget_component') {
+          const existing = structure.components.find((c: { id: string }) => c.id === op.componentId);
+          if (existing) {
+            changes.push(`⚠️ Component "${op.componentId}" already exists`);
+            continue;
+          }
+          const validTemplates = ['actionButton', 'dataForm', 'dataList', 'statusCard', 'externalLink'];
+          const template = op.template; // camelCase — must match COMPONENT_MAP keys exactly
+          if (!template || !validTemplates.includes(template)) {
+            changes.push(`⚠️ Unknown template "${op.template}". Valid: ${validTemplates.join(', ')}`);
+            continue;
+          }
+          const slot = op.slot || 'panel-footer';
+          structure.components.push({
+            id: op.componentId,
+            template,
+            file: template.charAt(0).toUpperCase() + template.slice(1) + '.jsx',
+            slot,
+            enabled: true,
+            props: op.props || {},
+          });
+          changes.push(`added ${op.componentId} (${template}) to ${slot}`);
+          continue;
+        }
+
+        // All other ops require an existing component
         const comp = structure.components.find((c: { id: string }) => c.id === op.componentId);
         if (!comp) {
           changes.push(`⚠️ Component "${op.componentId}" not found`);
