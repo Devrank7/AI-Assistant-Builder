@@ -47,6 +47,9 @@ export function middleware(request: NextRequest) {
     '/api/invoices',
     '/api/export',
     '/api/payments',
+    '/api/contacts',
+    '/api/inbox',
+    '/api/flows',
   ];
   if (adminApiPaths.some((p) => pathname.startsWith(p))) {
     const authHeader = request.headers.get('authorization');
