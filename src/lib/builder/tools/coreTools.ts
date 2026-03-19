@@ -551,12 +551,12 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
 
         ctx.write({ type: 'theme_update', theme: mergedTheme });
 
-        // Auto-rebuild
-        ctx.write({ type: 'progress', message: 'Rebuilding widget...' });
+        // Auto-rebuild with forceRegen to regenerate JSX with new theme colors
+        ctx.write({ type: 'progress', message: 'Rebuilding widget with new colors...' });
         const buildRes = await fetch(`${ctx.baseUrl}/api/builder/build`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Cookie: ctx.cookie },
-          body: JSON.stringify({ sessionId: ctx.sessionId }),
+          body: JSON.stringify({ sessionId: ctx.sessionId, forceRegen: true }),
         });
 
         if (!buildRes.ok) {

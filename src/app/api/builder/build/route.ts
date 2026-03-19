@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (!auth.authenticated) return auth.response;
 
     const body = await request.json();
-    const { sessionId } = body;
+    const { sessionId, forceRegen } = body;
 
     if (!sessionId) {
       return Errors.badRequest('sessionId is required');
@@ -98,7 +98,8 @@ export async function POST(request: NextRequest) {
 
       // 4. Run generate-single-theme.js
       const generateScript = path.join(builderRoot, 'scripts', 'generate-single-theme.js');
-      await execAsync(`node "${generateScript}" "${clientId}"`, {
+      const regenFlag = forceRegen ? ' --force-regen' : '';
+      await execAsync(`node "${generateScript}" "${clientId}"${regenFlag}`, {
         cwd: builderRoot,
         timeout: 30000,
       });

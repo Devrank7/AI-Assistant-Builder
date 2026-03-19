@@ -26,9 +26,11 @@ const CLIENTS_DIR = path.join(__dirname, '..', 'clients');
 
 // ── CLI ─────────────────────────────────────────────────────────────────
 const clientId = process.argv[2];
+const forceRegen = process.argv.includes('--force-regen');
 if (!clientId) {
-    console.error('Usage: node generate-single-theme.js <clientId>');
+    console.error('Usage: node generate-single-theme.js <clientId> [--force-regen]');
     console.error('Expects theme config at: clients/<clientId>/theme.json');
+    console.error('  --force-regen: Regenerate all JSX files even if they exist (used by modify_design)');
     process.exit(1);
 }
 
@@ -1958,7 +1960,7 @@ if (widgetType === 'ai_chat') {
     let generated = 0;
     let skipped = 0;
     for (const [filePath, generator] of jsxFiles) {
-        if (fs.existsSync(filePath)) {
+        if (fs.existsSync(filePath) && !forceRegen) {
             skipped++;
             console.log(`   ⏭ ${path.basename(filePath)} (exists — preserving custom code)`);
         } else {
