@@ -52,7 +52,8 @@ export function middleware(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
     const adminToken = request.cookies.get('admin_token')?.value;
     const clientToken = request.cookies.get('client_token')?.value;
-    if (!authHeader && !adminToken && !clientToken) {
+    const accessToken = request.cookies.get('access_token')?.value;
+    if (!authHeader && !adminToken && !clientToken && !accessToken) {
       return NextResponse.json({ success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
     }
   }

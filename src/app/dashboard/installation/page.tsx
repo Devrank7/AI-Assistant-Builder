@@ -233,12 +233,12 @@ export default function InstallationPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    fetch('/api/clients')
+    fetch('/api/user/widgets')
       .then((r) => r.json())
       .then((data) => {
-        const list: WidgetInfo[] = (data.clients || []).map((c: Record<string, string>) => ({
+        const list: WidgetInfo[] = (data.data || []).map((c: Record<string, string>) => ({
           clientId: c.clientId,
-          name: c.name || c.clientId,
+          name: c.widgetName || c.clientId,
           clientType: c.clientType || 'quick',
           website: c.website,
         }));
