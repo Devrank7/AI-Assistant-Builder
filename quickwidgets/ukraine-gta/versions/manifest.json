@@ -1,11 +1,17 @@
 {
-  "current": 1,
+  "current": 2,
   "versions": [
     {
       "v": 1,
       "date": "2026-03-19T13:56:45.408Z",
       "description": "modify_structure: set inputArea.voiceInput = false",
       "tool": "modify_structure"
+    },
+    {
+      "v": 2,
+      "date": "2026-03-19T16:51:27.360Z",
+      "description": "Initial build",
+      "tool": "build_widget"
     }
   ]
 }

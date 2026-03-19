@@ -8,7 +8,7 @@
     --aw-primary: #15151d;
     --aw-accent: #7dc452;
     /* Surfaces */
-    --aw-surface-bg: #ffffff;
+    --aw-surface-bg: #f8f9fa;
     --aw-surface-card: #ffffff;
     --aw-surface-border: #e2e8f0;
     --aw-surface-input: #f1f5f9;
@@ -18,24 +18,24 @@
     --aw-text-secondary: #475569;
     --aw-text-muted: #a1a1a1;
     /* Header gradient */
-    --aw-header-from: #15151d;
-    --aw-header-via: #140842;
-    --aw-header-to: #121463;
+    --aw-header-from: #7dc452;
+    --aw-header-via: #6bb342;
+    --aw-header-to: #5a9e33;
     /* Toggle button */
     --aw-toggle-from: #7dc452;
-    --aw-toggle-via: #6eb048;
-    --aw-toggle-to: #115927;
+    --aw-toggle-via: #6bb342;
+    --aw-toggle-to: #5a9e33;
     --aw-toggle-shadow: #7dc452;
     --aw-toggle-hover-rgb: 125, 196, 82;
     /* Send button */
     --aw-send-from: #7dc452;
-    --aw-send-hover: #8ed066;
+    --aw-send-hover: #6bb342;
     /* Online dot */
     --aw-online-dot: #7dc452;
     --aw-online-dot-border: #ffffff;
     /* User messages */
     --aw-user-msg-from: #7dc452;
-    --aw-user-msg-to: #6eb048;
+    --aw-user-msg-to: #6bb342;
     --aw-user-msg-shadow: #7dc452;
     /* Avatar */
     --aw-avatar-from: #15151d;
@@ -62,14 +62,14 @@
     --aw-focus-rgb: 125, 196, 82;
     /* Image button states */
     --aw-img-active-border: #7dc452;
-    --aw-img-active-bg: #f4fbf1;
+    --aw-img-active-bg: #eef8e8;
     --aw-img-active-text: #115927;
-    --aw-img-hover-text: #115927;
-    --aw-img-hover-border: #7dc452;
-    --aw-img-hover-bg: #f4fbf1;
+    --aw-img-hover-text: #15151d;
+    --aw-img-hover-border: #a1a1a1;
+    --aw-img-hover-bg: #f1f5f9;
     /* Feedback */
     --aw-feedback-active: #7dc452;
-    --aw-feedback-hover: #6eb048;
+    --aw-feedback-hover: #6bb342;
     /* Typography */
     font-family: Nunito Sans;
     -webkit-font-smoothing: antialiased;

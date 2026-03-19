@@ -46,7 +46,7 @@
       "slot": "panel-footer",
       "enabled": true,
       "props": {
-        "voiceInput": true,
+        "voiceInput": false,
         "imageUpload": true
       }
     },

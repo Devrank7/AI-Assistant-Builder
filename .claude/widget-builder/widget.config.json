@@ -1,33 +1,16 @@
 {
-  "clientId": "winbix-ai",
-  "botName": "WinBix AI",
-  "welcomeMessage": "Welcome to **WinBix AI**! I can help you learn about our AI chat widgets, pricing, and features.",
-  "inputPlaceholder": "Ask about our platform...",
-  "quickReplies": ["How does it work?", "View pricing", "What channels are supported?", "Get a free demo"],
+  "clientId": "ukraine-gta",
+  "botName": "Онлайн гра про Україну - UKRAINE GTA",
+  "welcomeMessage": "Вітаємо у **UKRAINE GTA**! Готовий поринути у світ реалістичної України? Запитуй, що тебе цікавить!",
+  "inputPlaceholder": "Напишіть ваше питання...",
+  "quickReplies": ["Як почати грати?", "Список серверів", "Донат та бонуси"],
   "avatar": {
     "type": "initials",
-    "initials": "WB"
-  },
-  "design": {
-    "position": "bottom-right"
+    "initials": "ОН"
   },
   "features": {
     "sound": true,
     "voiceInput": true,
-    "feedback": true,
-    "streaming": true,
-    "tts": true,
-    "autoLang": true,
-    "richCards": true,
-    "leadForm": true,
-    "memory": true,
-    "proactive": {
-      "delay": 8,
-      "message": "Need an AI assistant for your business? Try a free demo!"
-    }
-  },
-  "contacts": {
-    "email": "support@winbixai.com",
-    "website": "https://winbixai.com"
+    "streaming": true
   }
 }
