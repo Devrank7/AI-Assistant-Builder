@@ -26,6 +26,9 @@ import {
   Book,
   Key,
   Store,
+  GraduationCap,
+  Globe,
+  TrendingUp,
 } from 'lucide-react';
 
 const navGroups = [
@@ -49,12 +52,14 @@ const navGroups = [
       { label: 'Installation', href: '/dashboard/installation', icon: Download },
       { label: 'API Docs', href: '/dashboard/developer/docs', icon: Book },
       { label: 'API', href: '/dashboard/settings/api-keys', icon: Key },
+      { label: 'Training Studio', href: '/dashboard/training', icon: GraduationCap },
     ],
   },
   {
     label: 'INSIGHTS',
     items: [
       { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+      { label: 'Advanced Analytics', href: '/dashboard/analytics/advanced', icon: TrendingUp },
       { label: 'A/B Tests', href: '/dashboard/ab-tests', icon: FlaskConical },
     ],
   },
@@ -64,6 +69,7 @@ const navGroups = [
       { label: 'Team', href: '/dashboard/team', icon: Users },
       { label: 'Billing', href: '/dashboard/billing', icon: CreditCard },
       { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+      { label: 'Domains', href: '/dashboard/settings/domains', icon: Globe },
       { label: 'Referrals', href: '/dashboard/referrals', icon: Gift },
     ],
   },
