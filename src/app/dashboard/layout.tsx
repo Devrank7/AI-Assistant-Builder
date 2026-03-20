@@ -29,6 +29,7 @@ import {
   GraduationCap,
   Globe,
   TrendingUp,
+  RefreshCw,
 } from 'lucide-react';
 
 const navGroups = [
@@ -61,6 +62,7 @@ const navGroups = [
       { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
       { label: 'Advanced Analytics', href: '/dashboard/analytics/advanced', icon: TrendingUp },
       { label: 'A/B Tests', href: '/dashboard/ab-tests', icon: FlaskConical },
+      { label: 'Knowledge Evolution', href: '/dashboard/knowledge-evolution', icon: RefreshCw },
     ],
   },
   {
