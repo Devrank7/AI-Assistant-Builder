@@ -25,6 +25,7 @@ import {
   Gift,
   Book,
   Key,
+  Store,
 } from 'lucide-react';
 
 const navGroups = [
@@ -43,6 +44,7 @@ const navGroups = [
     items: [
       { label: 'AI Builder', href: '/dashboard/builder', icon: Sparkles },
       { label: 'Flows', href: '/dashboard/flows', icon: Workflow },
+      { label: 'Marketplace', href: '/dashboard/marketplace', icon: Store },
       { label: 'Integrations', href: '/dashboard/integrations', icon: Plug },
       { label: 'Installation', href: '/dashboard/installation', icon: Download },
       { label: 'API Docs', href: '/dashboard/developer/docs', icon: Book },
