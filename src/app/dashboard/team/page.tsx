@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { motion } from 'framer-motion';
 import { Card, Button, Badge, Avatar, Modal, Input } from '@/components/ui';
 import { Users, UserPlus, Mail, Shield, Trash2, Crown, Eye, Pencil } from 'lucide-react';
 
@@ -171,16 +172,27 @@ export default function TeamPage() {
             ))}
           </div>
         ) : members.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-12 text-center">
-            <Users className="text-text-tertiary h-8 w-8" />
-            <p className="text-text-secondary text-sm">No team members yet</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-24 text-center"
+          >
+            <div className="bg-bg-tertiary mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+              <Users className="text-text-tertiary h-8 w-8" />
+            </div>
+            <h3 className="text-text-primary mb-1.5 text-base font-semibold">Just you for now</h3>
+            <p className="text-text-secondary mb-6 max-w-sm text-sm">
+              Invite team members to collaborate on your widgets
+            </p>
             {canManage && (
-              <Button size="sm" className="mt-2" onClick={() => setInviteModalOpen(true)}>
-                <UserPlus className="h-3.5 w-3.5" />
-                Invite your first member
-              </Button>
+              <button
+                onClick={() => setInviteModalOpen(true)}
+                className="bg-accent hover:bg-accent/90 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
+              >
+                Invite Team Member
+              </button>
             )}
-          </div>
+          </motion.div>
         ) : (
           <div className="divide-border divide-y">
             {members.map((m) => {

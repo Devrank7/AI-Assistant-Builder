@@ -552,15 +552,19 @@ export default function InboxPage() {
                 ))}
               </div>
             ) : conversations.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5">
-                  <MessageSquare className="text-text-secondary/40 h-7 w-7" />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex h-full flex-col items-center justify-center px-6 py-16 text-center"
+              >
+                <div className="bg-bg-tertiary mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+                  <Mail className="text-text-tertiary h-8 w-8" />
                 </div>
-                <p className="text-text-secondary text-sm font-medium">No conversations</p>
-                <p className="text-text-secondary/60 mt-1 text-xs">
-                  Conversations will appear here when visitors start chatting
+                <h3 className="text-text-primary mb-1.5 text-base font-semibold">No conversations yet</h3>
+                <p className="text-text-secondary max-w-xs text-sm">
+                  Your inbox populates when visitors chat with your widgets
                 </p>
-              </div>
+              </motion.div>
             ) : (
               <motion.div variants={staggerContainer} initial="hidden" animate="show">
                 {conversations.map((conv) => {

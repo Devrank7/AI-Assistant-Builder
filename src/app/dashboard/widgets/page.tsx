@@ -391,73 +391,24 @@ function WidgetRow({
    ═══════════════════════════════════════════════════ */
 function EmptyWidgets({ href }: { href: string }) {
   return (
-    <motion.div {...fadeUp} className="flex flex-col items-center justify-center px-4 py-20 text-center">
-      {/* Animated icon */}
-      <div className="relative mb-6">
-        <div
-          className="absolute -inset-4 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(59,130,246,0.08), transparent 70%)',
-            animation: 'emptyPulse 3s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="relative flex h-16 w-16 items-center justify-center rounded-2xl"
-          style={{
-            background: 'rgba(59,130,246,0.06)',
-            border: '1px solid rgba(59,130,246,0.12)',
-            boxShadow: '0 0 24px rgba(59,130,246,0.08)',
-          }}
-        >
-          <span style={{ color: '#3B82F6' }}>
-            <Box className="h-7 w-7" />
-          </span>
-        </div>
-
-        {/* Floating particles */}
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="absolute h-1 w-1 rounded-full bg-blue-400/40"
-            style={{
-              top: `${20 + i * 25}%`,
-              left: i === 1 ? '85%' : `${10 + i * 30}%`,
-              animation: `emptyFloat ${2 + i * 0.5}s ease-in-out infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center justify-center py-24 text-center"
+    >
+      <div className="bg-bg-tertiary mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+        <MessageSquare className="text-text-tertiary h-8 w-8" />
       </div>
-
-      <h3 className={`${syne.className} mb-2 text-xl font-bold text-gray-900 dark:text-white`}>
-        No widgets yet
-      </h3>
-      <p className="mb-8 max-w-sm text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
-        Create your first AI-powered chat widget and embed it on any website in minutes.
-        Our builder handles everything automatically.
+      <h3 className="text-text-primary mb-1.5 text-base font-semibold">No widgets yet</h3>
+      <p className="text-text-secondary mb-6 max-w-sm text-sm">
+        Create your first AI-powered widget to start engaging visitors
       </p>
-
-      <Link href={href}>
-        <motion.button
-          whileHover={{ scale: 1.03, y: -1 }}
-          whileTap={{ scale: 0.97 }}
-          className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-[13px] font-semibold text-white shadow-lg shadow-blue-500/20 transition-shadow hover:shadow-xl hover:shadow-blue-500/30"
-        >
-          <Sparkles className="h-4 w-4" />
-          Create Your First Widget
-        </motion.button>
+      <Link
+        href={href}
+        className="bg-accent hover:bg-accent/90 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
+      >
+        Create Widget
       </Link>
-
-      <style jsx>{`
-        @keyframes emptyPulse {
-          0%, 100% { transform: scale(1); opacity: 0.5; }
-          50% { transform: scale(1.15); opacity: 0.8; }
-        }
-        @keyframes emptyFloat {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
-          50% { transform: translateY(-8px) scale(1.3); opacity: 0.8; }
-        }
-      `}</style>
     </motion.div>
   );
 }

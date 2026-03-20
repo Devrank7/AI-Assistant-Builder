@@ -141,6 +141,27 @@ export default function BillingPage() {
         </p>
       </motion.div>
 
+      {/* Empty state — no active paid subscription */}
+      {!hasSubscription && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center py-24 text-center"
+        >
+          <div className="bg-bg-tertiary mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+            <CreditCard className="text-text-tertiary h-8 w-8" />
+          </div>
+          <h3 className="text-text-primary mb-1.5 text-base font-semibold">No active subscription</h3>
+          <p className="text-text-secondary mb-6 max-w-sm text-sm">Choose a plan to unlock more features and widgets</p>
+          <Link
+            href="/pricing"
+            className="bg-accent hover:bg-accent/90 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
+          >
+            View Plans
+          </Link>
+        </motion.div>
+      )}
+
       {/* Current plan hero card */}
       <motion.div
         {...fadeUp}

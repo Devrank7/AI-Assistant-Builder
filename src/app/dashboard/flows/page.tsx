@@ -608,23 +608,22 @@ export default function FlowsPage() {
         ) : flows.length === 0 ? (
           /* ── Empty state ── */
           <motion.div
-            {...fadeUp}
-            className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300/80 bg-white/50 px-8 py-16 text-center backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.01]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300/80 bg-white/50 px-8 py-24 text-center backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.01]"
           >
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10">
-              <Workflow className="h-8 w-8 text-emerald-500" />
+            <div className="bg-bg-tertiary mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+              <Workflow className="text-text-tertiary h-8 w-8" />
             </div>
-            <h3 className={`${syne.className} mb-2 text-xl font-bold text-gray-900 dark:text-white`}>No flows yet</h3>
-            <p className="mb-6 max-w-sm text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-              Start with a template above or create from scratch. Flows automate repetitive tasks so you can focus on
-              what matters.
+            <h3 className="text-text-primary mb-1.5 text-base font-semibold">No automation flows yet</h3>
+            <p className="text-text-secondary mb-6 max-w-sm text-sm">
+              Create flows to automate actions based on events
             </p>
             <Link
               href="/dashboard/flows/new"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:shadow-emerald-500/30 hover:brightness-110"
+              className="bg-accent hover:bg-accent/90 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
             >
-              <Plus className="h-4 w-4" />
-              Create Your First Flow
+              Create Flow
             </Link>
           </motion.div>
         ) : (

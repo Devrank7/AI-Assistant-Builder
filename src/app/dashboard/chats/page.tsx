@@ -414,87 +414,22 @@ function ChatRow({ session, onOpen }: { session: ChatSession; onOpen: (id: strin
    ═══════════════════════════════════════════════════ */
 function EmptyChats({ filterActive }: { filterActive: boolean }) {
   return (
-    <motion.div {...fadeUp} className="flex flex-col items-center justify-center px-4 py-20 text-center">
-      <div className="relative mb-6">
-        <div
-          className="absolute -inset-4 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.08), transparent 70%)',
-            animation: 'chatEmptyPulse 3s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="relative flex h-16 w-16 items-center justify-center rounded-2xl"
-          style={{
-            background: 'rgba(139,92,246,0.06)',
-            border: '1px solid rgba(139,92,246,0.12)',
-            boxShadow: '0 0 24px rgba(139,92,246,0.08)',
-          }}
-        >
-          <span style={{ color: '#8B5CF6' }}>
-            <Bot className="h-7 w-7" />
-          </span>
-        </div>
-
-        {/* Floating particles */}
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="absolute h-1 w-1 rounded-full bg-violet-400/40"
-            style={{
-              top: `${15 + i * 30}%`,
-              left: i === 1 ? '88%' : `${8 + i * 35}%`,
-              animation: `chatEmptyFloat ${2 + i * 0.5}s ease-in-out infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center justify-center py-24 text-center"
+    >
+      <div className="bg-bg-tertiary mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+        <Bot className="text-text-tertiary h-8 w-8" />
       </div>
-
-      <h3 className={`${syne.className} mb-2 text-xl font-bold text-gray-900 dark:text-white`}>
-        {filterActive ? 'No chats in this category' : 'No conversations yet'}
+      <h3 className="text-text-primary mb-1.5 text-base font-semibold">
+        {filterActive ? 'No chats in this category' : 'No active chat sessions'}
       </h3>
-      <p className="mb-8 max-w-sm text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
+      <p className="text-text-secondary max-w-sm text-sm">
         {filterActive
-          ? 'Try a different filter or start a new conversation with the AI Builder.'
-          : 'Start a conversation with our AI Builder to create your first widget. It guides you through every step automatically.'}
+          ? 'Try a different filter to find your conversations.'
+          : 'Chat sessions appear when visitors interact with your widgets'}
       </p>
-
-      <Link href="/dashboard/builder">
-        <motion.button
-          whileHover={{ scale: 1.03, y: -1 }}
-          whileTap={{ scale: 0.97 }}
-          className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-3 text-[13px] font-semibold text-white shadow-lg shadow-violet-500/20 transition-shadow hover:shadow-xl hover:shadow-violet-500/30"
-        >
-          <Sparkles className="h-4 w-4" />
-          Start Building
-        </motion.button>
-      </Link>
-
-      <style jsx>{`
-        @keyframes chatEmptyPulse {
-          0%,
-          100% {
-            transform: scale(1);
-            opacity: 0.5;
-          }
-          50% {
-            transform: scale(1.15);
-            opacity: 0.8;
-          }
-        }
-        @keyframes chatEmptyFloat {
-          0%,
-          100% {
-            transform: translateY(0) scale(1);
-            opacity: 0.4;
-          }
-          50% {
-            transform: translateY(-8px) scale(1.3);
-            opacity: 0.8;
-          }
-        }
-      `}</style>
     </motion.div>
   );
 }

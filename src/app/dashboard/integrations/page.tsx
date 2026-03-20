@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { MotionList, MotionItem, AnimatedNumber, SkeletonCard } from '@/components/ui/motion';
 import { cn } from '@/lib/utils';
-import { Search, ShieldCheck, ExternalLink, Plug, AlertTriangle, Zap } from 'lucide-react';
+import { Search, ShieldCheck, ExternalLink, Plug, AlertTriangle, Zap, Link2Off } from 'lucide-react';
+import Link from 'next/link';
 import type { PluginManifest } from '@/lib/integrations/core/types';
 import { IntegrationCard } from './components/IntegrationCard';
 import { ConnectionWizard } from './components/ConnectionWizard';
@@ -329,6 +330,23 @@ export default function IntegrationsPage() {
             );
           })}
         </MotionList>
+      )}
+
+      {/* Empty connections state — Pro user, catalog loaded, no connections yet */}
+      {!loading && isPro && manifests.length > 0 && connections.length === 0 && filteredManifests.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center py-12 text-center"
+        >
+          <div className="bg-bg-tertiary mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+            <Plug className="text-text-tertiary h-8 w-8" />
+          </div>
+          <h3 className="text-text-primary mb-1.5 text-base font-semibold">No integrations connected</h3>
+          <p className="text-text-secondary mb-6 max-w-sm text-sm">
+            Connect your favorite tools to automate workflows and sync data from your AI widget conversations.
+          </p>
+        </motion.div>
       )}
 
       {/* Empty search state */}
