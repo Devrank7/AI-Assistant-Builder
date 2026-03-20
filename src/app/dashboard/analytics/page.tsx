@@ -192,6 +192,23 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
+      {/* Advanced Analytics Link */}
+      <Link
+        href="/dashboard/analytics/advanced"
+        className="border-border-primary bg-bg-secondary hover:border-border-secondary flex items-center justify-between rounded-xl border p-4 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <TrendingUp className="h-5 w-5 text-purple-400" />
+          <div>
+            <p className="text-text-primary font-medium">Advanced Analytics</p>
+            <p className="text-text-secondary text-sm">
+              Funnels, cohort retention, churn predictions, revenue attribution
+            </p>
+          </div>
+        </div>
+        <ArrowRight className="text-text-tertiary h-5 w-5" />
+      </Link>
+
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
