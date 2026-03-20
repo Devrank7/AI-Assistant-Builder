@@ -1,0 +1,33 @@
+import { NextRequest } from 'next/server';
+import { verifyUser } from '@/lib/auth';
+import { successResponse, Errors } from '@/lib/apiResponse';
+import { checkPermission } from '@/lib/orgAuth';
+import { deleteDomain } from '@/lib/customDomainService';
+import type { OrgRole } from '@/models/OrgMember';
+import connectDB from '@/lib/mongodb';
+import Organization from '@/models/Organization';
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyUser(request);
+  if (!auth.authenticated) return auth.response;
+  if (!auth.organizationId) return Errors.forbidden('Organization required');
+  if (!auth.orgRole || !checkPermission(auth.orgRole as OrgRole, 'manage_whitelabel')) {
+    return Errors.forbidden('Insufficient permissions');
+  }
+
+  await connectDB();
+  const org = await Organization.findById(auth.organizationId);
+  if (!org || org.plan !== 'enterprise') {
+    return Errors.forbidden('Custom domains require Enterprise plan');
+  }
+
+  const { id } = await params;
+
+  try {
+    await deleteDomain(id, auth.organizationId);
+    return successResponse(null, 'Domain deleted');
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to delete domain';
+    return Errors.badRequest(message);
+  }
+}
