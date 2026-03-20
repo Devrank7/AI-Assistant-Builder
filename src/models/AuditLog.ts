@@ -26,6 +26,7 @@ export interface IAuditLog extends Document {
   details: Record<string, unknown>;
   ip?: string;
   userAgent?: string;
+  organizationId?: string;
   createdAt: Date;
 }
 
@@ -56,6 +57,7 @@ const AuditLogSchema = new Schema<IAuditLog>(
     },
     ip: String,
     userAgent: String,
+    organizationId: { type: String, index: true },
   },
   {
     timestamps: true,
