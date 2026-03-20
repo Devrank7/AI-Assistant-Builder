@@ -21,6 +21,10 @@ export interface IAgentPersona extends Document {
   triggerIntents: string[]; // Intent labels that activate this persona
   isDefault: boolean;
   isActive: boolean;
+  nicheTemplate?: string; // Template ID this persona was created from
+  modelPreference?: 'gemini' | 'claude' | 'openai' | 'auto'; // Preferred AI provider
+  memoryEnabled: boolean; // Whether to use agent memory for this persona
+  maxMemoryFacts: number; // Max facts to store per visitor
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +42,10 @@ const AgentPersonaSchema = new Schema<IAgentPersona>(
     triggerIntents: [String],
     isDefault: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    nicheTemplate: { type: String },
+    modelPreference: { type: String, enum: ['gemini', 'claude', 'openai', 'auto'], default: 'auto' },
+    memoryEnabled: { type: Boolean, default: false },
+    maxMemoryFacts: { type: Number, default: 20, min: 1, max: 100 },
   },
   { timestamps: true }
 );
