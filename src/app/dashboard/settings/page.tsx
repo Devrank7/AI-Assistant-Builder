@@ -619,6 +619,59 @@ export default function SettingsPage() {
           </div>
         </SettingsSection>
 
+        {/* ── SSO ── */}
+        <SettingsSection
+          icon={Shield}
+          iconColor="#8B5CF6"
+          title="Single Sign-On (SSO)"
+          subtitle="Enterprise SAML/OIDC authentication"
+        >
+          <div
+            className="flex flex-col gap-4 rounded-xl p-4 sm:flex-row sm:items-center sm:justify-between"
+            style={{ background: 'rgba(139,92,246,0.04)', border: '1px solid rgba(139,92,246,0.1)' }}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(139,92,246,0.25))',
+                  color: '#8B5CF6',
+                }}
+              >
+                <Shield className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-gray-900 dark:text-white">
+                  Enterprise SSO
+                  <span
+                    className="ml-2 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase"
+                    style={{
+                      background: 'rgba(139,92,246,0.1)',
+                      color: '#8B5CF6',
+                      border: '1px solid rgba(139,92,246,0.2)',
+                    }}
+                  >
+                    Enterprise
+                  </span>
+                </p>
+                <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">
+                  SAML 2.0 &amp; OIDC single sign-on for your team
+                </p>
+              </div>
+            </div>
+            <Link href="/dashboard/settings/sso" className="shrink-0">
+              <motion.button
+                whileHover={{ scale: 1.03, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200/60 bg-white px-4 py-2 text-[12px] font-semibold text-gray-700 shadow-sm transition-all hover:border-violet-300/50 hover:bg-violet-50/40 hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-gray-300 dark:hover:border-violet-500/20 dark:hover:bg-violet-500/[0.06]"
+              >
+                Configure
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </motion.button>
+            </Link>
+          </div>
+        </SettingsSection>
+
         {/* ── API KEYS ── */}
         <SettingsSection
           icon={Key}
