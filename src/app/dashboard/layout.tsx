@@ -22,6 +22,7 @@ import {
   LogOut,
   Mail,
   Workflow,
+  Gift,
 } from 'lucide-react';
 
 const navGroups = [
@@ -57,6 +58,7 @@ const navGroups = [
       { label: 'Team', href: '/dashboard/team', icon: Users },
       { label: 'Billing', href: '/dashboard/billing', icon: CreditCard },
       { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+      { label: 'Referrals', href: '/dashboard/referrals', icon: Gift },
     ],
   },
 ];
