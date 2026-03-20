@@ -28,6 +28,7 @@ export interface IUser extends Document {
   niche: string | null;
   referralCode: string | null;
   referredBy: string | null; // userId of referrer
+  emailSequencesSent: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +56,7 @@ const UserSchema = new Schema<IUser>(
     niche: { type: String, default: null },
     referralCode: { type: String, default: null, unique: true, sparse: true },
     referredBy: { type: String, default: null, index: true },
+    emailSequencesSent: { type: [String], default: [] },
   },
   { timestamps: true }
 );
