@@ -105,15 +105,30 @@ WinBix AI — это конструктор AI-ассистентов, кото�
 | **Proactive Nudges**         | ✅ Работает | Всплывающее сообщение через N секунд                                                 |
 | **Omnichannel**              | ✅ Работает | Web, Telegram, WhatsApp, Instagram — один AI на всех каналах                         |
 | **Human Handoff**            | ✅ Работает | Автоопределение "хочу оператора" → пауза бота → передача человеку                    |
-| **A/B Testing**              | ✅ Работает | Несколько вариантов виджета, трекинг конверсий                                       |
-| **Analytics Dashboard**      | ✅ Работает | Чаты/день, top вопросы, каналы, satisfaction, response time                          |
+| **A/B Testing**              | ✅ Работает | Несколько вариантов виджета, трекинг конверсий, статистика                           |
+| **Analytics Dashboard**      | ✅ Работает | Чаты/день, top вопросы, каналы, satisfaction, response time, AI quality metrics      |
 | **Integrations Marketplace** | ✅ Работает | HubSpot, Salesforce, Pipedrive, Calendly, Stripe, Google Sheets и др.                |
-| **Team Management**          | ✅ Работает | Организации, роли (owner/admin/editor/viewer), инвайты                               |
+| **Team Management**          | ✅ Работает | Организации, роли (owner/admin/editor/viewer), инвайты, activity log                 |
 | **Billing**                  | ✅ Работает | Stripe + 5 альтернативных провайдеров, trial, plans                                  |
-| **Webhooks**                 | ✅ Работает | 6 event types, HMAC-SHA256 подпись, auto-disable после 10 ошибок                     |
-| **Audit Log**                | ✅ Работает | 19+ типов действий, 90-дневное хранение                                              |
+| **Webhooks**                 | ✅ Работает | 12 event types, HMAC-SHA256 подпись, retry с backoff, auto-disable после 10 ошибок   |
+| **Audit Log**                | ✅ Работает | 19+ типов действий, 90-дневное хранение, org-scoped                                  |
 | **Widget Versioning**        | ✅ Работает | Rollback к предыдущим версиям                                                        |
 | **Proactive Consultant**     | ✅ Работает | Builder-агент активно предлагает улучшения после деплоя                              |
+
+### Enterprise Features — Новое
+
+| Фича                       | Статус      | Описание                                                                                                         |
+| -------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Contacts CRM**           | ✅ Работает | Контакты с lead scoring, теги, фильтры, multi-channel tracking, timeline                                         |
+| **Unified Inbox**          | ✅ Работает | Единый inbox для всех каналов, conversation threads, real-time updates, AI-suggested replies                     |
+| **Flow Builder**           | ✅ Работает | Визуальный flow editor, trigger-action автоматизации, 10+ типов trigger/action                                   |
+| **Enterprise Dashboard**   | ✅ Работает | A/B test статистика, AI quality metrics (resolution rate, knowledge gaps), white-label настройки                 |
+| **White-Label**            | ✅ Работает | Custom domain, скрытый брендинг, custom logo/colors, только для Enterprise плана                                 |
+| **Integration Hub v2**     | ✅ Работает | Webhook management, 12 event types, widget-integration bindings, retry logic с exponential backoff               |
+| **Developer API Platform** | ✅ Работает | REST API v1, API key management (SHA-256 hashed), per-key rate limits, интерактивная документация                |
+| **Onboarding & Growth**    | ✅ Работает | Referral program, email sequences, smart notifications, empty states, onboarding wizard                          |
+| **Widget Marketplace**     | ✅ Работает | 10 official templates по нишам, browse/search/filter, one-click install, community publishing, ratings & reviews |
+| **Marketing Pages**        | ✅ Работает | Features, Customers, Enterprise, Agency, Changelog — glassmorphism + framer-motion                               |
 
 ### AI Actions — Autonomous Agent (новое)
 
@@ -198,30 +213,45 @@ WinBix AI — это конструктор AI-ассистентов, кото�
 │
 ├── src/
 │   ├── app/                             # Next.js 15 App Router
-│   │   ├── page.tsx                     # Landing page
-│   │   ├── pricing/                     # Pricing page
+│   │   ├── page.tsx                     # Landing page (animated, glassmorphism)
+│   │   ├── pricing/                     # Pricing page (4-tier with Stripe)
+│   │   ├── features/                    # Features showcase page
+│   │   ├── customers/                   # Customer testimonials page
+│   │   ├── enterprise/                  # Enterprise landing page
+│   │   ├── agency/                      # Agency program page
+│   │   ├── changelog/                   # Release timeline page
 │   │   ├── dashboard/                   # User dashboard
 │   │   │   ├── builder/                 # AI Builder (chat UI)
 │   │   │   ├── widgets/                 # Widget management
 │   │   │   ├── chats/                   # Chat history viewer
-│   │   │   ├── analytics/               # Analytics dashboard
-│   │   │   ├── ab-tests/                # A/B testing
-│   │   │   ├── integrations/            # Integration marketplace
-│   │   │   ├── team/                    # Team management
+│   │   │   ├── inbox/                   # Unified inbox (all channels)
+│   │   │   ├── contacts/                # Contact CRM with lead scoring
+│   │   │   ├── flows/                   # Visual flow builder
+│   │   │   ├── marketplace/             # Widget template marketplace
+│   │   │   ├── analytics/               # Analytics + AI quality metrics
+│   │   │   ├── ab-tests/                # A/B testing with statistics
+│   │   │   ├── integrations/            # Integration hub + webhooks
+│   │   │   ├── team/                    # Team management + activity log
 │   │   │   ├── billing/                 # Subscription & payments
-│   │   │   └── settings/                # User preferences
+│   │   │   ├── referrals/               # Referral program
+│   │   │   ├── onboarding/              # Onboarding wizard
+│   │   │   ├── developer/docs/          # Interactive API documentation
+│   │   │   └── settings/                # Settings, API keys, white-label
 │   │   ├── admin/                       # Admin panel
 │   │   │   ├── users/                   # User management
 │   │   │   ├── clients/                 # Client management (tabs)
 │   │   │   ├── subscriptions/           # Subscription tracking
 │   │   │   └── analytics/               # Platform analytics
-│   │   └── api/                         # 120+ API routes
+│   │   └── api/                         # 150+ API routes
 │   │       ├── auth/                    # JWT + Google OAuth
 │   │       ├── chat/stream/             # SSE streaming endpoint
 │   │       ├── builder/chat/            # Builder agent endpoint
 │   │       ├── knowledge/               # RAG CRUD + deep crawl
 │   │       ├── integrations/            # Plugin marketplace
+│   │       ├── marketplace/             # Widget template marketplace API
 │   │       ├── webhooks/                # Telegram, WhatsApp, Instagram
+│   │       ├── v1/                      # Developer REST API v1
+│   │       ├── developer/               # API key management
 │   │       ├── stripe/                  # Payments
 │   │       ├── ab-tests/                # A/B testing
 │   │       ├── analytics/               # Analytics API
@@ -253,23 +283,31 @@ WinBix AI — это конструктор AI-ассистентов, кото�
 │   │       │   └── HealthMonitor.ts     # Connection health checks
 │   │       └── plugins/                 # 13+ integration plugins
 │   │
-│   ├── models/                          # 25 MongoDB schemas
+│   ├── models/                          # 30+ MongoDB schemas
 │   │   ├── User.ts                      # Auth, plans, organizations
 │   │   ├── Client.ts                    # Widget clients, billing, costs
 │   │   ├── AISettings.ts                # Per-client AI config + actions
 │   │   ├── KnowledgeChunk.ts            # RAG text + vector embeddings
 │   │   ├── ChatLog.ts                   # Conversation history (365d TTL)
+│   │   ├── Contact.ts                   # CRM contacts with lead scoring
 │   │   ├── Integration.ts               # Connected service credentials
 │   │   ├── WidgetIntegration.ts         # Widget ↔ Integration bindings
 │   │   ├── ABTest.ts                    # A/B test variants & results
 │   │   ├── ProactiveTrigger.ts          # Nudge trigger rules
 │   │   ├── Handoff.ts                   # Human handoff requests
-│   │   ├── Webhook.ts                   # Custom webhooks (HMAC signed)
+│   │   ├── Webhook.ts                   # Webhooks (HMAC, retry, 12 events)
+│   │   ├── ApiKey.ts                    # Developer API keys (SHA-256)
+│   │   ├── AuditLog.ts                  # Audit log (org-scoped)
+│   │   ├── Organization.ts              # Orgs + white-label settings
+│   │   ├── Flow.ts                      # Flow builder automations
+│   │   ├── MarketplaceTemplate.ts       # Widget marketplace templates
+│   │   ├── MarketplaceReview.ts         # Template ratings & reviews
 │   │   └── ...
 │   │
-│   └── components/                      # React UI (100+ components)
+│   └── components/                      # React UI (120+ components)
 │       ├── builder/                     # AI Builder chat, preview, pipeline
 │       ├── dashboard/                   # Command palette, navigation
+│       ├── marketing/                   # MarketingNav, MarketingFooter
 │       ├── admin/                       # Admin tabs, data tables, charts
 │       ├── analytics/                   # Analytics charts
 │       ├── playground/                  # Widget sandbox
@@ -386,12 +424,33 @@ AI: [вызывает book_appointment] → "Готово! Запись на п�
 - `POST /api/knowledge/upload` — File upload (PDF/DOCX)
 - `POST /api/knowledge/deep-crawl` — Website crawl
 
-### Integrations
+### Integrations & Webhooks
 
 - `GET /api/integrations` — Available plugins
 - `POST /api/integrations/connect` — Connect (encrypt credentials)
 - `POST /api/integrations/execute` — Execute action
-- `POST /api/integrations/widget-attach` — Bind to widget
+- `GET/POST /api/integrations/widget-bindings` — Widget ↔ integration bindings
+- `GET/POST /api/webhooks/manage` — Webhook CRUD (12 event types)
+- `PATCH/DELETE /api/webhooks/manage/:id` — Update/delete webhook
+
+### Developer API (v1)
+
+- `GET/POST /api/developer/keys` — API key management
+- `PATCH/DELETE /api/developer/keys/:id` — Update/revoke key
+- `GET /api/v1/widgets` — List widgets (API key auth)
+- `GET/PATCH/DELETE /api/v1/widgets/:id` — Widget CRUD
+- `GET /api/v1/analytics` — Analytics data
+- `GET /api/v1/chatlogs` — Chat logs with pagination
+- `GET/POST /api/v1/knowledge` — Knowledge chunks CRUD
+
+### Marketplace
+
+- `GET /api/marketplace` — Browse/search/filter templates
+- `POST /api/marketplace` — Publish community template
+- `GET /api/marketplace/:id` — Template details
+- `POST /api/marketplace/:id/install` — One-click fork to account
+- `GET/POST /api/marketplace/:id/review` — Ratings & reviews
+- `POST /api/marketplace/seed` — Seed 10 official templates
 
 ### Payments
 
@@ -406,7 +465,7 @@ AI: [вызывает book_appointment] → "Готово! Запись на п�
 - `GET /api/admin/analytics` — Platform analytics
 - `POST /api/admin/users/:id/impersonate` — Support login
 
-Полный список: 120+ endpoints в `src/app/api/`.
+Полный список: 150+ endpoints в `src/app/api/`.
 
 ---
 
@@ -483,6 +542,20 @@ node .claude/widget-builder/scripts/build.js <clientId>
 
 ---
 
+## Что реализовано (Enterprise Features)
+
+| #   | Фича                       | Описание                                                                       | Статус    |
+| --- | -------------------------- | ------------------------------------------------------------------------------ | --------- |
+| 1   | **Contacts CRM**           | Lead scoring, теги, timeline, multi-channel tracking                           | ✅ Готово |
+| 2   | **Unified Inbox**          | Единый inbox для всех каналов, AI-suggested replies, real-time                 | ✅ Готово |
+| 3   | **Flow Builder**           | Визуальный trigger-action конструктор автоматизаций                            | ✅ Готово |
+| 4   | **Enterprise Dashboard**   | A/B stats, AI quality metrics, white-label, audit log                          | ✅ Готово |
+| 5   | **Integration Hub v2**     | Webhooks (12 events, HMAC, retry), widget bindings, event bus                  | ✅ Готово |
+| 6   | **Landing & Marketing**    | Features, Customers, Enterprise, Agency, Changelog pages                       | ✅ Готово |
+| 7   | **Developer API Platform** | REST API v1, API key management, interactive docs, per-key rate limits         | ✅ Готово |
+| 8   | **Onboarding & Growth**    | Referral program, email sequences, smart notifications, onboarding wizard      | ✅ Готово |
+| 9   | **Widget Marketplace**     | 10 official templates, browse/search/filter, install, publish, ratings/reviews | ✅ Готово |
+
 ## Что планируется (Roadmap)
 
 | #   | Фича                          | Описание                                                           | Статус        |
@@ -491,12 +564,12 @@ node .claude/widget-builder/scripts/build.js <clientId>
 | 2   | **Plugin Implementations**    | Реализовать Google Calendar, Calendly, Stripe plugins (HTTP calls) | Planned       |
 | 3   | **Real-Time Voice Agent**     | WebRTC голосовой разговор с AI в виджете                           | Concept       |
 | 4   | **Multi-Agent Orchestration** | Sales Agent, Support Agent, Onboarding Agent — автопереключение    | Concept       |
-| 5   | **Workflow Builder**          | Визуальный drag-and-drop конструктор автоматизаций                 | Concept       |
+| 5   | **Advanced AI Agents**        | Per-niche agents, personality tuning, multi-model fallback         | Concept       |
 | 6   | **Auto-Evolving Knowledge**   | Периодический re-crawl сайта + автообновление knowledge base       | Concept       |
 | 7   | **Conversation Intelligence** | NLP-анализ: buying signals, churn risk, competitor mentions        | Concept       |
-| 8   | **Unified Omnichannel Inbox** | Единый inbox для всех каналов с AI-suggested replies               | Concept       |
-| 9   | **Agent Marketplace**         | Готовые отраслевые агенты (dental, restaurant, beauty)             | Concept       |
-| 10  | **White-Label Reseller**      | Агентства продают под своим брендом                                | Concept       |
+| 8   | **Premium Marketplace**       | Платные шаблоны, revenue sharing 70/30 с авторами                  | Concept       |
+| 9   | **Widget Builder v2**         | Component-based architecture, CSS variables, deterministic edits   | Planned       |
+| 10  | **Public API v2**             | GraphQL API, webhook subscriptions, SDK packages                   | Concept       |
 
 ---
 
