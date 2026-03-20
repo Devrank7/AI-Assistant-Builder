@@ -29,6 +29,7 @@
     "lucide-react": "^0.577.0",
     "mammoth": "^1.11.0",
     "mongoose": "^9.1.6",
+    "nanoid": "^5.1.7",
     "next": "16.1.6",
     "nodemailer": "^8.0.0",
     "p-limit": "^7.3.0",

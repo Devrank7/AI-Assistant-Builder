@@ -18,30 +18,30 @@
     --aw-text-secondary: #475569;
     --aw-text-muted: #a1a1a1;
     /* Header gradient */
-    --aw-header-from: #7dc452;
-    --aw-header-via: #6bb342;
-    --aw-header-to: #5a9e33;
+    --aw-header-from: #15151d;
+    --aw-header-via: #140842;
+    --aw-header-to: #121463;
     /* Toggle button */
     --aw-toggle-from: #7dc452;
-    --aw-toggle-via: #6bb342;
-    --aw-toggle-to: #5a9e33;
+    --aw-toggle-via: #6ab045;
+    --aw-toggle-to: #115927;
     --aw-toggle-shadow: #7dc452;
     --aw-toggle-hover-rgb: 125, 196, 82;
     /* Send button */
     --aw-send-from: #7dc452;
-    --aw-send-hover: #6bb342;
+    --aw-send-hover: #8ed563;
     /* Online dot */
     --aw-online-dot: #7dc452;
     --aw-online-dot-border: #ffffff;
     /* User messages */
     --aw-user-msg-from: #7dc452;
-    --aw-user-msg-to: #6bb342;
+    --aw-user-msg-to: #6ab045;
     --aw-user-msg-shadow: #7dc452;
     /* Avatar */
     --aw-avatar-from: #15151d;
     --aw-avatar-to: #140842;
-    --aw-avatar-border: #ffffff;
-    --aw-avatar-icon: #7dc452;
+    --aw-avatar-border: #7dc452;
+    --aw-avatar-icon: #ffffff;
     /* Chips / quick replies */
     --aw-chip-border: #e2e8f0;
     --aw-chip-from: #ffffff;
@@ -52,7 +52,7 @@
     --aw-chip-hover-border: #7dc452;
     /* Links */
     --aw-link: #107295;
-    --aw-link-hover: #121463;
+    --aw-link-hover: #120386;
     /* Copy button */
     --aw-copy-hover: #7dc452;
     --aw-copy-active: #115927;
@@ -64,12 +64,12 @@
     --aw-img-active-border: #7dc452;
     --aw-img-active-bg: #eef8e8;
     --aw-img-active-text: #115927;
-    --aw-img-hover-text: #15151d;
-    --aw-img-hover-border: #a1a1a1;
-    --aw-img-hover-bg: #f1f5f9;
+    --aw-img-hover-text: #115927;
+    --aw-img-hover-border: #7dc452;
+    --aw-img-hover-bg: #f6fbf3;
     /* Feedback */
     --aw-feedback-active: #7dc452;
-    --aw-feedback-hover: #6bb342;
+    --aw-feedback-hover: #115927;
     /* Typography */
     font-family: Nunito Sans;
     -webkit-font-smoothing: antialiased;
