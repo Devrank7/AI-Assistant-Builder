@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { MotionList, MotionItem, AnimatedNumber, SkeletonCard } from '@/components/ui/motion';
 import { cn } from '@/lib/utils';
-import { Search, ShieldCheck, ExternalLink, Plug, AlertTriangle, Zap, Link2Off } from 'lucide-react';
+import { Search, ShieldCheck, ExternalLink, Plug, AlertTriangle, Zap, Link2Off, Webhook } from 'lucide-react';
 import Link from 'next/link';
 import type { PluginManifest } from '@/lib/integrations/core/types';
 import { IntegrationCard } from './components/IntegrationCard';
@@ -182,6 +182,37 @@ export default function IntegrationsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      {/* Webhooks quick-access card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 16 }}
+      >
+        <Card padding="md" className="relative overflow-hidden">
+          <div
+            className="absolute inset-x-0 top-0 h-[2px]"
+            style={{ background: 'linear-gradient(90deg, var(--color-accent), transparent)' }}
+          />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-accent/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                <Webhook className="text-accent h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-text-primary text-sm font-semibold">Webhooks</p>
+                <p className="text-text-secondary text-xs">Send real-time event notifications to your server</p>
+              </div>
+            </div>
+            <Link href="/dashboard/integrations/webhooks">
+              <Button variant="primary" size="sm" className="shrink-0">
+                Manage Webhooks
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </motion.div>
+
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
