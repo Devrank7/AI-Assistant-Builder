@@ -26,6 +26,8 @@ export interface IUser extends Document {
   organizationId: string | null;
   onboardingCompleted: boolean;
   niche: string | null;
+  referralCode: string | null;
+  referredBy: string | null; // userId of referrer
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,11 +53,14 @@ const UserSchema = new Schema<IUser>(
     organizationId: { type: String, default: null, index: true },
     onboardingCompleted: { type: Boolean, default: false },
     niche: { type: String, default: null },
+    referralCode: { type: String, default: null, unique: true, sparse: true },
+    referredBy: { type: String, default: null, index: true },
   },
   { timestamps: true }
 );
 
 UserSchema.index({ googleId: 1 }, { sparse: true });
+UserSchema.index({ referralCode: 1 }, { sparse: true });
 UserSchema.index({ stripeCustomerId: 1 });
 UserSchema.index({ passwordResetToken: 1 });
 UserSchema.index({ emailVerificationToken: 1 });
