@@ -31,6 +31,11 @@ import { selectPersona, buildPersonaContext } from '@/lib/personaRouter';
 import { upsertInboxThread } from '@/lib/inboxManager';
 import { trackFunnelEvent } from '@/lib/revenueTracker';
 import { processNegativeFeedback } from '@/lib/autoLearning';
+import { emitEvent } from '@/lib/events';
+import { handleContactForMessage } from '@/lib/contacts/autoCreate';
+import { upsertConversation, triggerHandoff } from '@/lib/inbox/conversationManager';
+import { detectHandoff } from '@/lib/inbox/handoff';
+import Contact from '@/models/Contact';
 
 export type ChannelType = 'website' | 'telegram' | 'whatsapp' | 'instagram';
 
@@ -333,6 +338,75 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
     upsertInboxThread(input.clientId, input.sessionId, input.channel, cleanText, 'assistant', { visitorId }).catch(
       () => {}
     );
+
+    // --- Event Bus Integration (Inbox + Contacts) ---
+    // Auto-create/update contact
+    const contactId = await handleContactForMessage({
+      clientId: input.clientId,
+      channel: input.channel as 'web' | 'telegram' | 'whatsapp' | 'instagram',
+      channelUserId: input.sessionId,
+      text: input.message,
+      senderName: undefined,
+      metadata: input.metadata as Record<string, string | undefined>,
+    }).catch(() => 'unknown');
+
+    // Upsert conversation
+    const conversationId = await upsertConversation({
+      clientId: input.clientId,
+      sessionId: input.sessionId || 'unknown',
+      contactId,
+      channel: input.channel as 'web' | 'telegram' | 'whatsapp' | 'instagram',
+      text: input.message,
+      sender: 'visitor',
+      metadata: input.metadata as Record<string, string | undefined>,
+    }).catch(() => 'unknown');
+
+    // Emit message:received
+    await emitEvent('message:received', input.clientId, {
+      conversationId,
+      contactId,
+      channel: input.channel,
+      text: input.message,
+      sender: 'visitor',
+    }).catch(() => {});
+
+    // Emit message:sent (bot response)
+    await emitEvent('message:sent', input.clientId, {
+      conversationId,
+      contactId,
+      channel: input.channel,
+      text: cleanText.substring(0, 200),
+      sender: 'bot',
+    }).catch(() => {});
+
+    // Update conversation with bot's last message
+    await upsertConversation({
+      clientId: input.clientId,
+      sessionId: input.sessionId || 'unknown',
+      contactId,
+      channel: input.channel as 'web' | 'telegram' | 'whatsapp' | 'instagram',
+      text: cleanText.substring(0, 200),
+      sender: 'bot',
+    }).catch(() => {});
+
+    // Handoff detection
+    const contact = await Contact.findOne({ contactId })
+      .lean()
+      .catch(() => null);
+    const handoffResult = detectHandoff({
+      message: input.message,
+      consecutiveLowConfidence: 0, // TODO: tracked separately if needed
+      contactLeadScore: contact?.leadScore ?? 0,
+      messageText: input.message,
+    });
+    if (handoffResult.shouldHandoff && handoffResult.reason) {
+      await triggerHandoff(conversationId, handoffResult.reason).catch(() => {});
+      await emitEvent('conversation:handoff', input.clientId, {
+        conversationId,
+        contactId,
+        reason: handoffResult.reason,
+      }).catch(() => {});
+    }
   }
 
   // 11. Post-conversation processing (async, non-blocking)
@@ -599,6 +673,70 @@ Only use :::form ONCE per conversation. Use plain text for normal responses.`;
             upsertInboxThread(input.clientId, input.sessionId, input.channel, fullResponse, 'assistant', {
               visitorId: streamVisitorId,
             }).catch(() => {});
+
+            // --- Event Bus Integration (Inbox + Contacts) ---
+            const streamContactId = await handleContactForMessage({
+              clientId: input.clientId,
+              channel: input.channel as 'web' | 'telegram' | 'whatsapp' | 'instagram',
+              channelUserId: input.sessionId,
+              text: input.message,
+              senderName: undefined,
+              metadata: input.metadata as Record<string, string | undefined>,
+            }).catch(() => 'unknown');
+
+            const streamConversationId = await upsertConversation({
+              clientId: input.clientId,
+              sessionId: input.sessionId || 'unknown',
+              contactId: streamContactId,
+              channel: input.channel as 'web' | 'telegram' | 'whatsapp' | 'instagram',
+              text: input.message,
+              sender: 'visitor',
+              metadata: input.metadata as Record<string, string | undefined>,
+            }).catch(() => 'unknown');
+
+            emitEvent('message:received', input.clientId, {
+              conversationId: streamConversationId,
+              contactId: streamContactId,
+              channel: input.channel,
+              text: input.message,
+              sender: 'visitor',
+            }).catch(() => {});
+
+            emitEvent('message:sent', input.clientId, {
+              conversationId: streamConversationId,
+              contactId: streamContactId,
+              channel: input.channel,
+              text: fullResponse.substring(0, 200),
+              sender: 'bot',
+            }).catch(() => {});
+
+            await upsertConversation({
+              clientId: input.clientId,
+              sessionId: input.sessionId || 'unknown',
+              contactId: streamContactId,
+              channel: input.channel as 'web' | 'telegram' | 'whatsapp' | 'instagram',
+              text: fullResponse.substring(0, 200),
+              sender: 'bot',
+            }).catch(() => {});
+
+            // Handoff detection
+            const streamContact = await Contact.findOne({ contactId: streamContactId })
+              .lean()
+              .catch(() => null);
+            const streamHandoff = detectHandoff({
+              message: input.message,
+              consecutiveLowConfidence: 0,
+              contactLeadScore: (streamContact as Record<string, number> | null)?.leadScore ?? 0,
+              messageText: input.message,
+            });
+            if (streamHandoff.shouldHandoff && streamHandoff.reason) {
+              await triggerHandoff(streamConversationId, streamHandoff.reason).catch(() => {});
+              emitEvent('conversation:handoff', input.clientId, {
+                conversationId: streamConversationId,
+                contactId: streamContactId,
+                reason: streamHandoff.reason,
+              }).catch(() => {});
+            }
 
             // Customer memory + intelligence (async)
             if (config.customerMemoryEnabled && input.conversationHistory) {

@@ -58,6 +58,13 @@ async function sendMessage(chatId: number | string, text: string, parseMode = 'H
 }
 
 /**
+ * Send a message to a Telegram chat (exported for inbox reply routing).
+ */
+export async function sendTelegramMessage(chatId: number | string, text: string): Promise<boolean> {
+  return sendMessage(chatId, text, 'Markdown');
+}
+
+/**
  * Handle /start command
  */
 async function handleStartCommand(chatId: number, args: string, firstName: string): Promise<void> {
