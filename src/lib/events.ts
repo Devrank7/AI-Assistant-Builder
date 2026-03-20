@@ -47,3 +47,16 @@ export function onEvent(type: string, handler: (event: EventPayload) => void): v
 export function offEvent(type: string, handler: (event: EventPayload) => void): void {
   emitter.off(type, handler);
 }
+
+// Auto-register flow engine listener (lazy, non-blocking)
+if (typeof globalThis !== 'undefined') {
+  import('./flows/engine')
+    .then(({ processEvent }) => {
+      emitter.on('*', (event: EventPayload) => {
+        processEvent(event).catch((err) => console.error('Flow engine error:', err));
+      });
+    })
+    .catch(() => {
+      // Flow engine not available yet (during build or test)
+    });
+}
