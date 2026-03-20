@@ -2,90 +2,80 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Video, Plus, Play, Trash2, Edit3, Loader2, User, Mic, Globe, Sparkles } from 'lucide-react';
+import { Video, Plus, Trash2, Loader2, Sparkles, User, X, Film, Zap, BarChart3 } from 'lucide-react';
 
-interface VideoAvatarItem {
+interface VideoAvatar {
   _id: string;
-  clientId: string;
   name: string;
-  avatarUrl: string;
-  voiceId: string;
   provider: 'heygen' | 'did' | 'custom';
-  style: 'professional' | 'casual' | 'friendly';
-  gender: 'male' | 'female' | 'neutral';
-  language: string;
-  isActive: boolean;
+  style: string;
+  gender: string;
+  status: 'active' | 'inactive' | 'processing';
+  thumbnailUrl?: string;
+  voiceId?: string;
+  createdAt: string;
 }
 
-const stagger = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
-
-const PROVIDERS = [
-  { value: 'heygen', label: 'HeyGen' },
-  { value: 'did', label: 'D-ID' },
-  { value: 'custom', label: 'Custom' },
-];
-
-const STYLES = ['professional', 'casual', 'friendly'];
-const GENDERS = ['male', 'female', 'neutral'];
-
 export default function VideoAvatarsPage() {
-  const [avatars, setAvatars] = useState<VideoAvatarItem[]>([]);
+  const [avatars, setAvatars] = useState<VideoAvatar[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
-  const [testText, setTestText] = useState('');
-  const [testingId, setTestingId] = useState<string | null>(null);
-  const [videoResult, setVideoResult] = useState<{ videoUrl: string; duration: number } | null>(null);
-  const [clientId, setClientId] = useState('');
-  const [form, setForm] = useState({
+  const [creating, setCreating] = useState(false);
+  const [generating, setGenerating] = useState<string | null>(null);
+  const [createForm, setCreateForm] = useState({
     name: '',
     provider: 'heygen' as 'heygen' | 'did' | 'custom',
-    style: 'professional' as 'professional' | 'casual' | 'friendly',
-    gender: 'neutral' as 'male' | 'female' | 'neutral',
-    language: 'en',
+    style: 'professional',
+    gender: 'female',
     voiceId: '',
   });
 
   const fetchAvatars = useCallback(async () => {
-    if (!clientId) {
-      setLoading(false);
-      return;
-    }
     try {
-      const res = await fetch(`/api/video-avatars?clientId=${clientId}`);
+      const res = await fetch('/api/video-avatars');
       const json = await res.json();
-      if (json.success) setAvatars(json.data || []);
+      if (json.success) {
+        setAvatars(json.data || []);
+      } else {
+        setError(json.error || 'Failed to load avatars');
+      }
     } catch {
-      // ignore
+      setError('Failed to fetch video avatars');
     } finally {
       setLoading(false);
     }
-  }, [clientId]);
+  }, []);
 
   useEffect(() => {
-    if (clientId) fetchAvatars();
-  }, [clientId, fetchAvatars]);
+    fetchAvatars();
+  }, [fetchAvatars]);
 
   const createAvatar = async () => {
-    if (!form.name || !clientId) return;
+    if (!createForm.name) return;
+    setCreating(true);
     try {
-      await fetch('/api/video-avatars', {
+      const res = await fetch('/api/video-avatars', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clientId, ...form }),
+        body: JSON.stringify(createForm),
       });
-      setShowCreate(false);
-      setForm({ name: '', provider: 'heygen', style: 'professional', gender: 'neutral', language: 'en', voiceId: '' });
-      fetchAvatars();
+      const json = await res.json();
+      if (json.success) {
+        setShowCreate(false);
+        setCreateForm({
+          name: '',
+          provider: 'heygen',
+          style: 'professional',
+          gender: 'female',
+          voiceId: '',
+        });
+        fetchAvatars();
+      }
     } catch {
       // ignore
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -98,147 +88,213 @@ export default function VideoAvatarsPage() {
     }
   };
 
-  const generatePreview = async (avatarId: string) => {
-    if (!testText) return;
-    setTestingId(avatarId);
-    setVideoResult(null);
+  const generateVideo = async (id: string) => {
+    setGenerating(id);
     try {
-      const res = await fetch('/api/video-avatars/generate', {
+      await fetch('/api/video-avatars/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatarId, text: testText }),
+        body: JSON.stringify({ avatarId: id }),
       });
-      const json = await res.json();
-      if (json.success) setVideoResult(json.data);
+      fetchAvatars();
     } catch {
       // ignore
     } finally {
-      setTestingId(null);
+      setGenerating(null);
+    }
+  };
+
+  const activeAvatars = avatars.filter((a) => a.status === 'active').length;
+  const totalAvatars = avatars.length;
+  const generationsToday = avatars.filter((a) => {
+    const today = new Date().toDateString();
+    return new Date(a.createdAt).toDateString() === today;
+  }).length;
+
+  const providerColor = (provider: string) => {
+    switch (provider) {
+      case 'heygen':
+        return 'bg-purple-500/20 text-purple-400';
+      case 'did':
+        return 'bg-cyan-500/20 text-cyan-400';
+      case 'custom':
+        return 'bg-orange-500/20 text-orange-400';
+      default:
+        return 'bg-gray-500/20 text-gray-400';
+    }
+  };
+
+  const statusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-500/20 text-green-400';
+      case 'processing':
+        return 'bg-yellow-500/20 text-yellow-400';
+      case 'inactive':
+        return 'bg-gray-500/20 text-gray-400';
+      default:
+        return 'bg-gray-500/20 text-gray-400';
     }
   };
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6 p-6">
+    <div className="min-h-screen space-y-6 bg-[#0a0a0f] p-6">
       {/* Header */}
-      <motion.div variants={fadeUp} className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-purple-500/20 p-2">
+          <div className="rounded-xl bg-purple-500/20 p-2.5">
             <Video className="h-6 w-6 text-purple-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">AI Video Avatars</h1>
-            <p className="text-sm text-gray-400">Create AI-powered video responses for your widgets</p>
+            <h1 className="text-2xl font-bold text-white">Video Avatars</h1>
+            <p className="text-sm text-gray-400">Manage AI-powered video avatar personas</p>
           </div>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
+          className="flex items-center gap-2 rounded-xl bg-blue-500/20 px-4 py-2 text-blue-400 transition-colors hover:bg-blue-500/30"
         >
           <Plus className="h-4 w-4" />
           Create Avatar
         </button>
       </motion.div>
 
-      {/* Client ID Selector */}
-      <motion.div variants={fadeUp} className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
-        <label className="mb-2 block text-sm text-gray-400">Select Widget / Client ID</label>
-        <input
-          type="text"
-          placeholder="Enter client ID..."
-          value={clientId}
-          onChange={(e) => setClientId(e.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
-        />
-      </motion.div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[
+          {
+            label: 'Total Avatars',
+            value: totalAvatars,
+            icon: Film,
+            color: 'text-blue-400',
+            bg: 'bg-blue-500/10',
+          },
+          {
+            label: 'Active',
+            value: activeAvatars,
+            icon: Zap,
+            color: 'text-green-400',
+            bg: 'bg-green-500/10',
+          },
+          {
+            label: 'Generations Today',
+            value: generationsToday,
+            icon: BarChart3,
+            color: 'text-purple-400',
+            bg: 'bg-purple-500/10',
+          },
+        ].map((card, index) => (
+          <motion.div
+            key={card.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 backdrop-blur"
+          >
+            <div className="mb-3 flex items-center gap-3">
+              <div className={`rounded-lg p-2 ${card.bg}`}>
+                <card.icon className={`h-4 w-4 ${card.color}`} />
+              </div>
+              <span className="text-sm text-gray-400">{card.label}</span>
+            </div>
+            <div className="text-3xl font-bold text-white">{card.value}</div>
+          </motion.div>
+        ))}
+      </div>
 
-      {/* Create Modal */}
+      {/* Create Avatar Form */}
       {showCreate && (
-        <motion.div variants={fadeUp} className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-          <h3 className="mb-4 text-lg font-semibold text-white">Create New Avatar</h3>
-          <div className="mb-4 grid grid-cols-2 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 backdrop-blur"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-white">Create New Avatar</h3>
+            <button onClick={() => setShowCreate(false)} className="text-gray-400 hover:text-white">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Name</label>
+              <label className="mb-1.5 block text-xs text-gray-400">Name</label>
               <input
                 type="text"
                 placeholder="Avatar name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
+                value={createForm.name}
+                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.05] px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-blue-500/50 focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Provider</label>
+              <label className="mb-1.5 block text-xs text-gray-400">Provider</label>
               <select
-                value={form.provider}
-                onChange={(e) => setForm({ ...form, provider: e.target.value as 'heygen' | 'did' | 'custom' })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+                value={createForm.provider}
+                onChange={(e) =>
+                  setCreateForm({
+                    ...createForm,
+                    provider: e.target.value as 'heygen' | 'did' | 'custom',
+                  })
+                }
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.05] px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
               >
-                {PROVIDERS.map((p) => (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
-                  </option>
-                ))}
+                <option value="heygen">HeyGen</option>
+                <option value="did">D-ID</option>
+                <option value="custom">Custom</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Style</label>
+              <label className="mb-1.5 block text-xs text-gray-400">Style</label>
               <select
-                value={form.style}
-                onChange={(e) => setForm({ ...form, style: e.target.value as 'professional' | 'casual' | 'friendly' })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+                value={createForm.style}
+                onChange={(e) => setCreateForm({ ...createForm, style: e.target.value })}
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.05] px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
               >
-                {STYLES.map((s) => (
-                  <option key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
-                  </option>
-                ))}
+                <option value="professional">Professional</option>
+                <option value="casual">Casual</option>
+                <option value="friendly">Friendly</option>
+                <option value="formal">Formal</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Gender</label>
+              <label className="mb-1.5 block text-xs text-gray-400">Gender</label>
               <select
-                value={form.gender}
-                onChange={(e) => setForm({ ...form, gender: e.target.value as 'male' | 'female' | 'neutral' })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+                value={createForm.gender}
+                onChange={(e) => setCreateForm({ ...createForm, gender: e.target.value })}
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.05] px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
               >
-                {GENDERS.map((g) => (
-                  <option key={g} value={g}>
-                    {g.charAt(0).toUpperCase() + g.slice(1)}
-                  </option>
-                ))}
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="neutral">Neutral</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Language</label>
-              <input
-                type="text"
-                placeholder="en"
-                value={form.language}
-                onChange={(e) => setForm({ ...form, language: e.target.value })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-gray-500">Voice ID</label>
+              <label className="mb-1.5 block text-xs text-gray-400">Voice ID (optional)</label>
               <input
                 type="text"
                 placeholder="Voice identifier"
-                value={form.voiceId}
-                onChange={(e) => setForm({ ...form, voiceId: e.target.value })}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
+                value={createForm.voiceId}
+                onChange={(e) => setCreateForm({ ...createForm, voiceId: e.target.value })}
+                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.05] px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-blue-500/50 focus:outline-none"
               />
             </div>
           </div>
           <div className="flex gap-2">
             <button
               onClick={createAvatar}
-              className="rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
+              disabled={creating || !createForm.name}
+              className="flex items-center gap-2 rounded-xl bg-blue-500/20 px-4 py-2 text-blue-400 transition-colors hover:bg-blue-500/30 disabled:opacity-40"
             >
-              Create
+              {creating && <Loader2 className="h-4 w-4 animate-spin" />}
+              Create Avatar
             </button>
             <button
               onClick={() => setShowCreate(false)}
-              className="rounded-lg bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/20"
+              className="rounded-xl bg-white/[0.05] px-4 py-2 text-gray-300 transition-colors hover:bg-white/[0.1]"
             >
               Cancel
             </button>
@@ -246,111 +302,100 @@ export default function VideoAvatarsPage() {
         </motion.div>
       )}
 
-      {/* Avatar Gallery */}
-      {loading ? (
-        <div className="flex h-40 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-20 text-gray-400">
+          <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+          Loading video avatars...
         </div>
-      ) : (
-        <motion.div variants={stagger} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {avatars.length === 0 && clientId && (
-            <motion.div variants={fadeUp} className="col-span-full py-12 text-center text-gray-400">
-              <User className="mx-auto mb-3 h-12 w-12 opacity-50" />
-              <p>No avatars created yet</p>
+      )}
+
+      {/* Error */}
+      {error && !loading && (
+        <div className="py-12 text-center text-red-400">
+          <p>{error}</p>
+          <button onClick={fetchAvatars} className="mt-3 text-sm text-blue-400 hover:underline">
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Avatars Grid */}
+      {!loading && !error && (
+        <>
+          {avatars.length === 0 ? (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-16 text-center text-gray-400">
+              <Video className="mx-auto mb-3 h-12 w-12 opacity-30" />
+              <p>No video avatars yet</p>
+              <p className="mt-1 text-sm">Create your first AI avatar to get started</p>
             </motion.div>
-          )}
-          {avatars.map((avatar) => (
-            <motion.div
-              key={avatar._id}
-              variants={fadeUp}
-              className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-all hover:bg-white/10"
-            >
-              <div className="mb-3 flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-white">{avatar.name}</h3>
-                  <span className="text-xs text-gray-400 capitalize">
-                    {avatar.provider} / {avatar.style}
-                  </span>
-                </div>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => deleteAvatar(avatar._id)}
-                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="mb-4 space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-400">
-                  <User className="h-3.5 w-3.5" />
-                  <span className="capitalize">{avatar.gender}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Globe className="h-3.5 w-3.5" />
-                  <span>{avatar.language}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Mic className="h-3.5 w-3.5" />
-                  <span>{avatar.voiceId || 'No voice set'}</span>
-                </div>
-              </div>
-
-              {/* Test Area */}
-              <div className="border-t border-white/10 pt-3">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Type text to generate..."
-                    value={testText}
-                    onChange={(e) => setTestText(e.target.value)}
-                    className="flex-1 rounded border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
-                  />
-                  <button
-                    onClick={() => generatePreview(avatar._id)}
-                    disabled={testingId === avatar._id}
-                    className="flex items-center gap-1 rounded bg-purple-600 px-3 py-1.5 text-xs text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
-                  >
-                    {testingId === avatar._id ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {avatars.map((avatar, index) => (
+                <motion.div
+                  key={avatar._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur"
+                >
+                  {/* Thumbnail Area */}
+                  <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-purple-500/10 to-blue-500/10">
+                    {avatar.thumbnailUrl ? (
+                      <img src={avatar.thumbnailUrl} alt={avatar.name} className="h-full w-full object-cover" />
                     ) : (
-                      <Play className="h-3 w-3" />
+                      <User className="h-16 w-16 text-gray-600" />
                     )}
-                    Test
-                  </button>
-                </div>
-              </div>
+                    <div className="absolute top-3 right-3 flex gap-2">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${providerColor(avatar.provider)}`}
+                      >
+                        {avatar.provider}
+                      </span>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColor(avatar.status)}`}>
+                        {avatar.status}
+                      </span>
+                    </div>
+                  </div>
 
-              <span
-                className={`mt-3 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                  avatar.isActive ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
-                }`}
-              >
-                {avatar.isActive ? 'Active' : 'Inactive'}
-              </span>
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
+                  {/* Info */}
+                  <div className="p-4">
+                    <h3 className="mb-1 font-semibold text-white">{avatar.name}</h3>
+                    <div className="mb-4 flex items-center gap-3 text-xs text-gray-400">
+                      <span className="capitalize">{avatar.style}</span>
+                      <span className="h-1 w-1 rounded-full bg-gray-600" />
+                      <span className="capitalize">{avatar.gender}</span>
+                      <span className="h-1 w-1 rounded-full bg-gray-600" />
+                      <span>{new Date(avatar.createdAt).toLocaleDateString()}</span>
+                    </div>
 
-      {/* Video Preview */}
-      {videoResult && (
-        <motion.div variants={fadeUp} className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-          <div className="mb-3 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-400" />
-            <h3 className="text-lg font-semibold text-white">Generated Video Preview</h3>
-          </div>
-          <div className="flex h-48 items-center justify-center rounded-lg bg-black/30 p-4">
-            {videoResult.videoUrl ? (
-              <video src={videoResult.videoUrl} controls className="max-h-full rounded" />
-            ) : (
-              <p className="text-sm text-gray-500">Video generation submitted. Check provider dashboard for result.</p>
-            )}
-          </div>
-          <p className="mt-2 text-xs text-gray-400">Duration: {videoResult.duration}s</p>
-        </motion.div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => generateVideo(avatar._id)}
+                        disabled={generating === avatar._id}
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-purple-500/20 px-3 py-2 text-sm text-purple-400 transition-colors hover:bg-purple-500/30 disabled:opacity-40"
+                      >
+                        {generating === avatar._id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3.5 w-3.5" />
+                        )}
+                        Generate
+                      </button>
+                      <button
+                        onClick={() => deleteAvatar(avatar._id)}
+                        className="flex items-center justify-center gap-1.5 rounded-xl bg-red-500/10 px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/20"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </>
       )}
-    </motion.div>
+    </div>
   );
 }
