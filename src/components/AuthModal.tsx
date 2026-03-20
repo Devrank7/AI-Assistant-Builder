@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, X, FlaskConical } from 'lucide-react';
 import { Button, Input } from '@/components/ui';
@@ -14,6 +14,8 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const ref = searchParams.get('ref');
   const [tab, setTab] = useState<'login' | 'signup'>(initialTab);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -64,7 +66,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, ...(ref ? { referralCode: ref } : {}) }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
