@@ -33,6 +33,14 @@ export interface IOrganization extends Document {
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   limits: OrgLimits;
+  whiteLabel: {
+    enabled: boolean;
+    customDomain: string | null;
+    hideBranding: boolean;
+    brandName: string | null;
+    brandColor: string | null;
+    logoUrl: string | null;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,6 +60,14 @@ const OrganizationSchema = new Schema<IOrganization>(
       maxMessages: { type: Number, default: 100 },
       maxTeamMembers: { type: Number, default: 1 },
       features: { type: [String], default: ['chat'] },
+    },
+    whiteLabel: {
+      enabled: { type: Boolean, default: false },
+      customDomain: { type: String, default: null },
+      hideBranding: { type: Boolean, default: false },
+      brandName: { type: String, default: null },
+      brandColor: { type: String, default: null },
+      logoUrl: { type: String, default: null },
     },
   },
   { timestamps: true }
