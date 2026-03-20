@@ -32,6 +32,16 @@ import {
   RefreshCw,
   Brain,
   BotMessageSquare,
+  Eye,
+  Video,
+  Target,
+  Building2,
+  ShieldCheck,
+  Crown,
+  Network,
+  Blocks,
+  Handshake,
+  PackageSearch,
 } from 'lucide-react';
 
 const navGroups = [
@@ -51,6 +61,8 @@ const navGroups = [
       { label: 'AI Builder', href: '/dashboard/builder', icon: Sparkles },
       { label: 'Flows', href: '/dashboard/flows', icon: Workflow },
       { label: 'Marketplace', href: '/dashboard/marketplace', icon: Store },
+      { label: 'Premium Market', href: '/dashboard/premium-marketplace', icon: Crown },
+      { label: 'Widget Builder v2', href: '/dashboard/widget-builder-v2', icon: Blocks },
       { label: 'Integrations', href: '/dashboard/integrations', icon: Plug },
       { label: 'Installation', href: '/dashboard/installation', icon: Download },
       { label: 'API Docs', href: '/dashboard/developer/docs', icon: Book },
@@ -62,7 +74,11 @@ const navGroups = [
     label: 'AI AGENTS',
     items: [
       { label: 'Agents', href: '/dashboard/agents', icon: BotMessageSquare },
+      { label: 'Agent Store', href: '/dashboard/agent-store', icon: PackageSearch },
       { label: 'Intelligence', href: '/dashboard/intelligence', icon: Brain },
+      { label: 'Video Avatars', href: '/dashboard/video-avatars', icon: Video },
+      { label: 'Co-Browsing', href: '/dashboard/cobrowsing', icon: Eye },
+      { label: 'Predictions', href: '/dashboard/predictions', icon: Target },
     ],
   },
   {
@@ -78,9 +94,13 @@ const navGroups = [
     label: 'WORKSPACE',
     items: [
       { label: 'Team', href: '/dashboard/team', icon: Users },
+      { label: 'Brands', href: '/dashboard/brands', icon: Building2 },
+      { label: 'Reseller Portal', href: '/dashboard/reseller', icon: Handshake },
       { label: 'Billing', href: '/dashboard/billing', icon: CreditCard },
       { label: 'Settings', href: '/dashboard/settings', icon: Settings },
       { label: 'Domains', href: '/dashboard/settings/domains', icon: Globe },
+      { label: 'Compliance', href: '/dashboard/compliance', icon: ShieldCheck },
+      { label: 'GraphQL API', href: '/dashboard/developer/graphql', icon: Network },
       { label: 'Referrals', href: '/dashboard/referrals', icon: Gift },
     ],
   },
