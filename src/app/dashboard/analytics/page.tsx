@@ -1,8 +1,23 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Card, Button, Badge } from '@/components/ui';
-import { BarChart3, TrendingUp, MessageSquare, Clock, ThumbsUp, CalendarDays, Hash, Radio } from 'lucide-react';
+import {
+  BarChart3,
+  TrendingUp,
+  MessageSquare,
+  Clock,
+  ThumbsUp,
+  CalendarDays,
+  Hash,
+  Radio,
+  Brain,
+  AlertTriangle,
+  BookOpen,
+  ArrowRight,
+} from 'lucide-react';
 
 interface WidgetAnalytics {
   clientId: string;
@@ -35,11 +50,31 @@ interface AnalyticsData {
   widgets: WidgetAnalytics[];
 }
 
+interface KnowledgeGap {
+  text: string;
+  count: number;
+}
+
+interface AiQualityData {
+  resolutionRate: number;
+  totalAnswered: number;
+  totalUnanswered: number;
+  knowledgeGaps: KnowledgeGap[];
+}
+
+/* ── Animations ── */
+const fadeIn = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.4, 0.25, 1] as const } },
+};
+
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
   const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
+  const [aiQuality, setAiQuality] = useState<AiQualityData | null>(null);
+  const [aiQualityLoading, setAiQualityLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -54,9 +89,23 @@ export default function AnalyticsPage() {
     }
   }, [days]);
 
+  const fetchAiQuality = useCallback(async () => {
+    setAiQualityLoading(true);
+    try {
+      const res = await fetch(`/api/analytics/ai-quality?days=${days}`);
+      const json = await res.json();
+      if (json.success) setAiQuality(json.data);
+    } catch {
+      // ignore
+    } finally {
+      setAiQualityLoading(false);
+    }
+  }, [days]);
+
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchAiQuality();
+  }, [fetchData, fetchAiQuality]);
 
   if (loading) {
     return (
@@ -316,6 +365,160 @@ export default function AnalyticsPage() {
           </div>
         </Card>
       </div>
+
+      {/* AI Quality Metrics */}
+      <motion.div {...fadeIn}>
+        <div className="mb-4 flex items-center gap-2">
+          <Brain className="text-text-tertiary h-5 w-5" />
+          <h2 className="text-text-primary text-lg font-semibold">AI Quality Metrics</h2>
+        </div>
+
+        {aiQualityLoading ? (
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card className="h-48 animate-pulse opacity-60" />
+            <Card className="h-48 animate-pulse opacity-60" />
+          </div>
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Resolution Rate Card */}
+            <Card className="bg-bg-secondary border-border">
+              <div className="mb-4 flex items-center gap-2">
+                <Brain className="text-text-tertiary h-4 w-4" />
+                <h3 className="text-text-primary text-sm font-semibold">Resolution Rate</h3>
+              </div>
+              <div className="flex items-center gap-6">
+                {/* Circular SVG progress ring */}
+                <div className="relative shrink-0">
+                  {(() => {
+                    const rate = aiQuality?.resolutionRate ?? 0;
+                    const radius = 44;
+                    const circumference = 2 * Math.PI * radius;
+                    const offset = circumference - (rate / 100) * circumference;
+                    const ringColor =
+                      rate > 80
+                        ? '#10b981' // emerald-500
+                        : rate >= 50
+                          ? '#f59e0b' // amber-500
+                          : '#ef4444'; // red-500
+                    return (
+                      <svg width={108} height={108} className="-rotate-90">
+                        <circle
+                          cx={54}
+                          cy={54}
+                          r={radius}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={8}
+                          className="text-border opacity-30"
+                        />
+                        <circle
+                          cx={54}
+                          cy={54}
+                          r={radius}
+                          fill="none"
+                          stroke={ringColor}
+                          strokeWidth={8}
+                          strokeLinecap="round"
+                          strokeDasharray={circumference}
+                          strokeDashoffset={offset}
+                          style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+                        />
+                      </svg>
+                    );
+                  })()}
+                  <span
+                    className="absolute inset-0 flex items-center justify-center text-xl font-bold"
+                    style={{
+                      color:
+                        (aiQuality?.resolutionRate ?? 0) > 80
+                          ? '#10b981'
+                          : (aiQuality?.resolutionRate ?? 0) >= 50
+                            ? '#f59e0b'
+                            : '#ef4444',
+                    }}
+                  >
+                    {aiQuality?.resolutionRate ?? 0}%
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <p className="text-text-secondary text-sm">
+                    AI successfully resolved{' '}
+                    <span className="text-text-primary font-semibold">{aiQuality?.totalAnswered ?? 0}</span> of{' '}
+                    <span className="text-text-primary font-semibold">
+                      {((aiQuality?.totalAnswered ?? 0) + (aiQuality?.totalUnanswered ?? 0)).toLocaleString()}
+                    </span>{' '}
+                    questions in the last {days} days.
+                  </p>
+                  <div className="flex items-center gap-1.5">
+                    {(aiQuality?.resolutionRate ?? 0) > 80 ? (
+                      <TrendingUp className="h-3 w-3 text-emerald-500" />
+                    ) : (
+                      <AlertTriangle className="h-3 w-3 text-amber-500" />
+                    )}
+                    <span className="text-text-tertiary text-xs">
+                      {(aiQuality?.resolutionRate ?? 0) > 80
+                        ? 'Great performance — keep your knowledge base updated'
+                        : (aiQuality?.resolutionRate ?? 0) >= 50
+                          ? 'Average performance — review unanswered questions below'
+                          : 'Low performance — expand your knowledge base'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Knowledge Gaps Card */}
+            <Card className="bg-bg-secondary border-border">
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="text-text-tertiary h-4 w-4" />
+                  <h3 className="text-text-primary text-sm font-semibold">Knowledge Gaps</h3>
+                </div>
+                <Link
+                  href="/dashboard/builder"
+                  className="text-text-tertiary hover:text-text-primary flex items-center gap-1 text-xs transition-colors"
+                >
+                  <BookOpen className="h-3 w-3" />
+                  Knowledge Base
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+
+              {!aiQuality || aiQuality.knowledgeGaps.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <BookOpen className="text-text-tertiary mb-2 h-8 w-8 opacity-50" />
+                  <p className="text-text-primary text-sm font-medium">No gaps found</p>
+                  <p className="text-text-tertiary mt-1 text-xs">Your AI is answering all questions successfully.</p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {aiQuality.knowledgeGaps.slice(0, 6).map((gap, i) => (
+                    <div key={i} className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="bg-bg-primary text-text-tertiary flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-medium">
+                          {i + 1}
+                        </span>
+                        <p className="text-text-secondary truncate text-sm">{gap.text}</p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <Badge variant="blue">{gap.count}x</Badge>
+                        <Link
+                          href="/dashboard/builder"
+                          className="text-text-tertiary hover:text-text-primary flex items-center gap-0.5 text-[10px] transition-colors"
+                          title="Add to Knowledge Base"
+                        >
+                          <BookOpen className="h-3 w-3" />
+                          <span className="hidden sm:inline">Add</span>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }
