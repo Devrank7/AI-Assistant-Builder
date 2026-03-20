@@ -76,6 +76,12 @@ export async function POST(request: NextRequest) {
     { upsert: true, new: true }
   );
 
+  const existingUser = await User.findOne({ email: email.toLowerCase() }).select('_id');
+  if (existingUser) {
+    const { notifyTeamInvite } = await import('@/lib/notificationTriggers');
+    await notifyTeamInvite(existingUser._id.toString(), org.name, role).catch(() => {});
+  }
+
   return successResponse({ inviteId: invite._id, token: invite.token, expiresAt: invite.expiresAt });
 }
 

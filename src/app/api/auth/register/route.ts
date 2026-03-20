@@ -82,6 +82,14 @@ export async function POST(request: NextRequest) {
       await applyReferral(referralCode, user._id.toString()).catch(() => {});
     }
 
+    const { notify } = await import('@/lib/notificationTriggers');
+    await notify({
+      type: 'new_client',
+      userId: user._id.toString(),
+      title: 'Welcome to WinBix AI!',
+      message: 'Your account is ready. Create your first AI widget to get started.',
+    }).catch(() => {});
+
     await setAuthCookies(accessToken, refreshToken);
 
     return successResponse(
