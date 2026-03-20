@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock MongoDB connection
-const mockConnectDB = vi.fn().mockResolvedValue(undefined);
+const { mockConnectDB, mockCreate, mockFindOne } = vi.hoisted(() => ({
+  mockConnectDB: vi.fn().mockResolvedValue(undefined),
+  mockCreate: vi.fn(),
+  mockFindOne: vi.fn(),
+}));
+
 vi.mock('@/lib/mongodb', () => ({ default: mockConnectDB }));
 
-// Mock CustomDomain model
-const mockCreate = vi.fn();
-const mockFindOne = vi.fn();
 vi.mock('@/models/CustomDomain', () => ({
   default: {
     create: (...args: unknown[]) => mockCreate(...args),
