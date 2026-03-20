@@ -30,6 +30,8 @@ import {
   Globe,
   TrendingUp,
   RefreshCw,
+  Brain,
+  BotMessageSquare,
 } from 'lucide-react';
 
 const navGroups = [
@@ -54,6 +56,13 @@ const navGroups = [
       { label: 'API Docs', href: '/dashboard/developer/docs', icon: Book },
       { label: 'API', href: '/dashboard/settings/api-keys', icon: Key },
       { label: 'Training Studio', href: '/dashboard/training', icon: GraduationCap },
+    ],
+  },
+  {
+    label: 'AI AGENTS',
+    items: [
+      { label: 'Agents', href: '/dashboard/agents', icon: BotMessageSquare },
+      { label: 'Intelligence', href: '/dashboard/intelligence', icon: Brain },
     ],
   },
   {
