@@ -85,7 +85,8 @@ describe('webhookService', () => {
     mockWebhookUpdateOne.mockResolvedValue({});
 
     const { triggerWebhooks } = await import('@/lib/webhookService');
-    await triggerWebhooks('client1', 'new_lead', { name: 'Test' });
+    // Use unique clientId to avoid deduplication from previous tests
+    await triggerWebhooks('client-disable-test', 'new_lead', { name: 'Test' });
 
     const updateCall = mockWebhookUpdateOne.mock.calls[0];
     expect(updateCall[1]).toHaveProperty('isActive', false);
