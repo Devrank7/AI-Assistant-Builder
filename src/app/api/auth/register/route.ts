@@ -75,6 +75,13 @@ export async function POST(request: NextRequest) {
     user.refreshTokens.push(refreshTokenHash);
     await user.save();
 
+    // Apply referral if code provided
+    const referralCode = body.referralCode;
+    if (referralCode) {
+      const { applyReferral } = await import('@/lib/referral');
+      await applyReferral(referralCode, user._id.toString()).catch(() => {});
+    }
+
     await setAuthCookies(accessToken, refreshToken);
 
     return successResponse(
