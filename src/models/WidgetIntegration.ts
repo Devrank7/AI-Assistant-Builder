@@ -1,22 +1,35 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
-const widgetIntegrationSchema = new mongoose.Schema(
+export interface IWidgetIntegration extends Document {
+  userId: string;
+  organizationId: string;
+  widgetId: string;
+  integrationSlug: string;
+  enabledActions: string[];
+  enabled: boolean;
+  triggerEvents: string[];
+  config: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const WidgetIntegrationSchema = new Schema<IWidgetIntegration>(
   {
     userId: { type: String, required: true, index: true },
-    widgetId: { type: String, required: true, index: true },
-    connectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Integration', required: true },
+    organizationId: { type: String, required: true, index: true },
+    widgetId: { type: String, required: true },
     integrationSlug: { type: String, required: true },
+    enabledActions: { type: [String], default: [] },
     enabled: { type: Boolean, default: true },
-    enabledActions: [{ type: String }],
-    config: {
-      fieldMapping: { type: mongoose.Schema.Types.Mixed, default: {} },
-      aiInstruction: { type: String, default: '' },
-    },
+    triggerEvents: { type: [String], default: [] },
+    config: { type: Schema.Types.Mixed, default: {} },
   },
   { timestamps: true }
 );
 
-widgetIntegrationSchema.index({ widgetId: 1, integrationSlug: 1 }, { unique: true });
-widgetIntegrationSchema.index({ userId: 1, widgetId: 1 });
+WidgetIntegrationSchema.index({ widgetId: 1, integrationSlug: 1 }, { unique: true });
 
-export default mongoose.models.WidgetIntegration || mongoose.model('WidgetIntegration', widgetIntegrationSchema);
+const WidgetIntegration: Model<IWidgetIntegration> =
+  mongoose.models.WidgetIntegration || mongoose.model<IWidgetIntegration>('WidgetIntegration', WidgetIntegrationSchema);
+
+export default WidgetIntegration;
