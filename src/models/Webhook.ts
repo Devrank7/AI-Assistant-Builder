@@ -6,7 +6,28 @@ export type WebhookEvent =
   | 'widget_error'
   | 'cost_threshold'
   | 'payment_success'
-  | 'payment_failed';
+  | 'payment_failed'
+  | 'lead_captured'
+  | 'chat_started'
+  | 'handoff_requested'
+  | 'knowledge_gap_detected'
+  | 'widget_feedback'
+  | 'appointment_booked';
+
+export const WEBHOOK_EVENTS: WebhookEvent[] = [
+  'new_chat',
+  'new_lead',
+  'widget_error',
+  'cost_threshold',
+  'payment_success',
+  'payment_failed',
+  'lead_captured',
+  'chat_started',
+  'handoff_requested',
+  'knowledge_gap_detected',
+  'widget_feedback',
+  'appointment_booked',
+];
 
 export interface IWebhook extends Document {
   clientId: string;
@@ -18,6 +39,8 @@ export interface IWebhook extends Document {
   failureCount: number;
   createdAt: Date;
   updatedAt: Date;
+  userId?: string;
+  organizationId?: string;
 }
 
 const WebhookSchema = new Schema<IWebhook>(
@@ -55,6 +78,8 @@ const WebhookSchema = new Schema<IWebhook>(
       type: Number,
       default: 0,
     },
+    userId: { type: String, index: true },
+    organizationId: { type: String, index: true },
   },
   {
     timestamps: true,

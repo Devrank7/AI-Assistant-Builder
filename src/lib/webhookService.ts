@@ -16,6 +16,75 @@ interface WebhookPayload {
   data: Record<string, unknown>;
 }
 
+/** Retry delays in milliseconds: 5s, 30s, 5min */
+export const RETRY_DELAYS = [5000, 30000, 300000];
+
+/** In-memory deduplication set: eventId → expiry timestamp */
+const seenEvents = new Map<string, number>();
+
+function getEventId(clientId: string, event: WebhookEvent, timestamp: string): string {
+  return `${clientId}:${event}:${timestamp}`;
+}
+
+function cleanExpiredEventIds(): void {
+  const now = Date.now();
+  for (const [key, expiry] of seenEvents.entries()) {
+    if (now > expiry) seenEvents.delete(key);
+  }
+}
+
+/**
+ * Attempt delivery of a webhook with retry on failure using exponential backoff.
+ */
+async function attemptDelivery(
+  webhookId: string,
+  url: string,
+  secret: string,
+  body: string,
+  headers: Record<string, string>,
+  currentFailureCount: number,
+  retryIndex: number
+): Promise<void> {
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...headers },
+      body,
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (response.ok) {
+      await Webhook.updateOne({ _id: webhookId }, { lastTriggered: new Date(), failureCount: 0 });
+      return;
+    }
+    throw new Error(`HTTP ${response.status}`);
+  } catch (err) {
+    const newFailCount = currentFailureCount + 1;
+
+    if (retryIndex < RETRY_DELAYS.length) {
+      // More retries available — schedule next attempt
+      setTimeout(() => {
+        attemptDelivery(webhookId, url, secret, body, headers, newFailCount, retryIndex + 1).catch((e) =>
+          console.error(
+            `Webhook retry ${retryIndex + 1} failed for ${url}:`,
+            e instanceof Error ? e.message : 'Unknown error'
+          )
+        );
+      }, RETRY_DELAYS[retryIndex]);
+    } else {
+      // All retries exhausted — persist failure and possibly disable
+      await Webhook.updateOne(
+        { _id: webhookId },
+        {
+          failureCount: newFailCount,
+          ...(newFailCount >= 10 ? { isActive: false } : {}),
+        }
+      );
+      console.error(`Webhook all retries exhausted for ${url}:`, err instanceof Error ? err.message : 'Unknown error');
+    }
+  }
+}
+
 /**
  * Trigger webhooks for a specific event
  */
@@ -35,12 +104,22 @@ export async function triggerWebhooks(
   let sent = 0;
   let failed = 0;
 
+  const timestamp = new Date().toISOString();
+  cleanExpiredEventIds();
+
+  // Deduplication check
+  const eventId = getEventId(clientId, event, timestamp);
+  if (seenEvents.has(eventId)) {
+    return { sent, failed };
+  }
+  seenEvents.set(eventId, Date.now() + 60000);
+
   for (const webhook of webhooks) {
     try {
       const payload: WebhookPayload = {
         event,
         clientId,
-        timestamp: new Date().toISOString(),
+        timestamp,
         data,
       };
 
@@ -67,9 +146,10 @@ export async function triggerWebhooks(
       }
     } catch (err) {
       failed++;
-      const newFailCount = (webhook.failureCount || 0) + 1;
+      const currentFailureCount = webhook.failureCount || 0;
+      const newFailCount = currentFailureCount + 1;
 
-      // Disable webhook after 10 consecutive failures
+      // Persist initial failure
       await Webhook.updateOne(
         { _id: webhook._id },
         {
@@ -82,6 +162,27 @@ export async function triggerWebhooks(
         `Webhook failed for ${webhook.url} (${event}):`,
         err instanceof Error ? err.message : 'Unknown error'
       );
+
+      // Schedule retry if webhook not disabled
+      if (newFailCount < 10) {
+        const payload: WebhookPayload = { event, clientId, timestamp, data };
+        const body = JSON.stringify(payload);
+        const signature = generateSignature(body, webhook.secret);
+        const headers: Record<string, string> = {
+          'X-Webhook-Signature': signature,
+          'X-Webhook-Event': event,
+          'X-Webhook-Timestamp': timestamp,
+        };
+
+        setTimeout(() => {
+          attemptDelivery(String(webhook._id), webhook.url, webhook.secret, body, headers, newFailCount, 1).catch((e) =>
+            console.error(
+              `Webhook retry scheduling failed for ${webhook.url}:`,
+              e instanceof Error ? e.message : 'Unknown error'
+            )
+          );
+        }, RETRY_DELAYS[0]);
+      }
     }
   }
 

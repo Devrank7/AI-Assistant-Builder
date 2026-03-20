@@ -60,3 +60,18 @@ if (typeof globalThis !== 'undefined') {
       // Flow engine not available yet (during build or test)
     });
 }
+
+// Auto-register webhook trigger listener (lazy, non-blocking)
+if (typeof globalThis !== 'undefined') {
+  import('./webhookService')
+    .then(({ triggerWebhooks }) => {
+      emitter.on('*', (event: EventPayload) => {
+        triggerWebhooks(event.clientId, event.eventType as any, event.payload).catch((err) =>
+          console.error('Webhook trigger error:', err)
+        );
+      });
+    })
+    .catch(() => {
+      // Webhook service not available
+    });
+}
