@@ -23,6 +23,8 @@ import {
   Mail,
   Workflow,
   Gift,
+  Book,
+  Key,
 } from 'lucide-react';
 
 const navGroups = [
@@ -43,6 +45,8 @@ const navGroups = [
       { label: 'Flows', href: '/dashboard/flows', icon: Workflow },
       { label: 'Integrations', href: '/dashboard/integrations', icon: Plug },
       { label: 'Installation', href: '/dashboard/installation', icon: Download },
+      { label: 'API Docs', href: '/dashboard/developer/docs', icon: Book },
+      { label: 'API', href: '/dashboard/settings/api-keys', icon: Key },
     ],
   },
   {
