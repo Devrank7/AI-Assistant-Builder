@@ -197,7 +197,7 @@ export const proactiveTools: ToolDefinition[] = [
       }
 
       ctx.write({ type: 'suggestions', suggestions });
-      ctx.write({ type: 'progress', stage: 'suggestions', status: 'complete' });
+      ctx.write({ type: 'progress', message: 'Suggestions complete' });
       return { success: true, count: suggestions.length };
     },
   },
@@ -251,5 +251,8 @@ export const proactiveTools: ToolDefinition[] = [
         error: 'analyze_competitors is deferred to v2. It will be available in a future update.',
       };
     },
+  },
+];
+
   },
 ];
