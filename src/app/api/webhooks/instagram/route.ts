@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processGlobalInstagramWebhook, processInstagramWebhook } from '@/lib/instagramService';
 
-const VERIFY_TOKEN = process.env.INSTAGRAM_VERIFY_TOKEN || 'winbix_instagram_verify';
+const VERIFY_TOKEN = process.env.INSTAGRAM_VERIFY_TOKEN;
 
 /**
  * GET /api/webhooks/instagram — Instagram webhook verification
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('hub.verify_token');
   const challenge = request.nextUrl.searchParams.get('hub.challenge');
 
-  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+  if (VERIFY_TOKEN && mode === 'subscribe' && token === VERIFY_TOKEN) {
     console.log('[Instagram] Webhook verified');
     return new Response(challenge, { status: 200 });
   }

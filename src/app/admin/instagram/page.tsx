@@ -293,7 +293,7 @@ export default function AdminInstagramPage() {
                 </button>
               </div>
               <p className="mt-1 text-xs text-gray-600">
-                Verify Token: <code className="text-gray-400">winbix_instagram_verify</code>
+                Verify Token: use the value from <code className="text-gray-400">INSTAGRAM_VERIFY_TOKEN</code> env var
               </p>
             </div>
           </div>
@@ -491,10 +491,11 @@ export default function AdminInstagramPage() {
                     <code className="rounded bg-white/10 px-1 py-0.5 text-[var(--neon-cyan)]">
                       https://winbixai.com/api/webhooks/instagram
                     </code>{' '}
-                    and verify token to{' '}
+                    and verify token to the value of your{' '}
                     <code className="rounded bg-white/10 px-1 py-0.5 text-[var(--neon-cyan)]">
-                      winbix_instagram_verify
-                    </code>
+                      INSTAGRAM_VERIFY_TOKEN
+                    </code>{' '}
+                    env var
                   </p>
                 </div>
               </div>

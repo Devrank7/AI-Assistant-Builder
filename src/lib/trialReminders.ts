@@ -12,6 +12,11 @@ import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
 import { sendEmail, sendTelegram, isEmailAllowed, getUnsubscribeFooter } from '@/lib/notifications';
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
+if (!BASE_URL) {
+  console.warn('[trialReminders] Neither NEXT_PUBLIC_BASE_URL nor NEXTAUTH_URL is set');
+}
+
 const TRIAL_DAYS = 30;
 const GRACE_PERIOD_DAYS = 3;
 
@@ -153,7 +158,7 @@ async function sendGracePeriodStartedEmail(
         <p style="color: #d1d5db;">Ваши 30 дней бесплатного использования подошли к концу.</p>
         <p style="color: #fff; font-weight: bold;">У вас есть ${GRACE_PERIOD_DAYS} дня (Grace Period), чтобы оплатить подписку, иначе виджет будет отключен.</p>
         <div style="margin: 24px 0;">
-          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
+          <a href="${BASE_URL}/cabinet"
              style="display: inline-block; background: #f59e0b; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
             Оплатить подписку
           </a>
@@ -189,7 +194,7 @@ async function sendTrialReminderEmail(
         <p style="color: #d1d5db;">Ваш бесплатный период использования WinBix AI заканчивается через <strong style="color: #fff;">${daysLeft} ${getDayWord(daysLeft)}</strong>.</p>
         <p style="color: #d1d5db;">Чтобы продолжить работу вашего AI-виджета, настройте оплату в вашем кабинете.</p>
         <div style="margin: 24px 0;">
-          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
+          <a href="${BASE_URL}/cabinet"
              style="display: inline-block; background: linear-gradient(135deg, #06b6d4, #a855f7); color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
             Перейти в кабинет
           </a>
@@ -224,7 +229,7 @@ async function sendTrialExpiredEmail(
         <p style="color: #d1d5db;">Ваш бесплатный период использования WinBix AI истёк. Виджет был приостановлен.</p>
         <p style="color: #d1d5db;">Настройте оплату, чтобы возобновить работу.</p>
         <div style="margin: 24px 0;">
-          <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cabinet"
+          <a href="${BASE_URL}/cabinet"
              style="display: inline-block; background: #ef4444; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 600;">
             Возобновить подписку
           </a>

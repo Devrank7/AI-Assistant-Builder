@@ -1,17 +1,7 @@
-import { CRMAdapter, CalendarAdapter } from './types';
+import { CRMAdapter, CalendarAdapter, CalendarSlot, BookingRequest } from './types';
 import { hubspotAdapter } from './hubspot';
-
-// NOTE: Full calendar plugin implementations (IntegrationPlugin interface) exist at:
-//   src/lib/integrations/plugins/google-calendar/index.ts  → googleCalendarPlugin
-//   src/lib/integrations/plugins/calendly/index.ts         → calendlyPlugin
-//
-// Those plugins use the generic IntegrationPlugin interface (execute/healthCheck/connect)
-// which is different from the CalendarAdapter interface (getAvailability/createBooking)
-// used by this registry.
-//
-// TODO: Either wrap the IntegrationPlugin implementations to satisfy CalendarAdapter,
-// or migrate callers to use the PluginRegistry (src/lib/integrations/core/PluginRegistry.ts)
-// which already supports these plugins natively.
+import { googleCalendarPlugin } from './plugins/google-calendar';
+import { calendlyPlugin } from './plugins/calendly';
 
 const crmAdapters: Record<string, CRMAdapter> = {
   hubspot: hubspotAdapter,
@@ -24,9 +14,86 @@ const crmAdapters: Record<string, CRMAdapter> = {
   // monday: mondayAdapter,
 };
 
+/**
+ * Wraps googleCalendarPlugin (IntegrationPlugin) to satisfy CalendarAdapter interface.
+ * getAvailability → execute('checkAvailability') → maps busy blocks to CalendarSlot[]
+ * createBooking   → execute('createEvent')        → returns { id, link }
+ */
+const googleCalendarAdapter: CalendarAdapter = {
+  provider: 'google_calendar',
+
+  async getAvailability(accessToken: string, startDate: string, endDate: string): Promise<CalendarSlot[]> {
+    const result = await googleCalendarPlugin.execute(
+      'checkAvailability',
+      { timeMin: startDate, timeMax: endDate },
+      { apiKey: accessToken }
+    );
+    if (!result.success || !result.data) return [];
+    const busy = (result.data as { busy: { start: string; end: string }[] }).busy || [];
+    return busy.map((b) => ({ start: b.start, end: b.end, available: false }));
+  },
+
+  async createBooking(accessToken: string, booking: BookingRequest): Promise<{ id: string; link?: string }> {
+    const result = await googleCalendarPlugin.execute(
+      'createEvent',
+      {
+        title: booking.title,
+        start: booking.startTime,
+        end: booking.endTime,
+        attendees: [booking.attendeeEmail],
+      },
+      { apiKey: accessToken }
+    );
+    if (!result.success || !result.data) {
+      throw new Error(result.error || 'Failed to create Google Calendar event');
+    }
+    const data = result.data as { id: string; htmlLink?: string };
+    return { id: data.id, link: data.htmlLink };
+  },
+};
+
+/**
+ * Wraps calendlyPlugin (IntegrationPlugin) to satisfy CalendarAdapter interface.
+ * getAvailability → execute('getEventTypes') → returns event types as available slots
+ * createBooking   → execute('createBooking') → returns { id }
+ */
+const calendlyAdapter: CalendarAdapter = {
+  provider: 'calendly',
+
+  async getAvailability(accessToken: string, _startDate: string, _endDate: string): Promise<CalendarSlot[]> {
+    // Calendly doesn't expose a free/busy endpoint — return available event types as slots
+    const result = await calendlyPlugin.execute('getEventTypes', {}, { apiKey: accessToken });
+    if (!result.success || !result.data) return [];
+    const eventTypes = Array.isArray(result.data) ? result.data : [result.data];
+    return eventTypes.map((et: { id?: string; name?: string; url?: string }) => ({
+      start: _startDate,
+      end: _endDate,
+      available: true,
+      // Extra info surfaced through the slot fields
+      ...(et.url ? { link: et.url } : {}),
+    }));
+  },
+
+  async createBooking(_accessToken: string, booking: BookingRequest): Promise<{ id: string; link?: string }> {
+    const result = await calendlyPlugin.execute(
+      'createBooking',
+      {
+        email: booking.attendeeEmail,
+        name: booking.attendeeName || booking.attendeeEmail,
+      },
+      { apiKey: _accessToken }
+    );
+    if (!result.success || !result.data) {
+      throw new Error(result.error || 'Failed to create Calendly booking');
+    }
+    const data = result.data as { id?: string; uri?: string };
+    return { id: data.id || data.uri || 'unknown' };
+  },
+};
+
 const calendarAdapters: Record<string, CalendarAdapter> = {
-  // google_calendar and calendly are implemented as IntegrationPlugins, not CalendarAdapters.
-  // See NOTE above.
+  google_calendar: googleCalendarAdapter,
+  calendly: calendlyAdapter,
 };
 
 export function getCRMAdapter(provider: string): CRMAdapter | null {

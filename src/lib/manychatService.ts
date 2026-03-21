@@ -275,7 +275,7 @@ export async function processManyChatWebhook(body: ManyChatWebhookBody): Promise
   const inputText = body.last_input_text;
   if (!inputText) {
     console.warn('[ManyChat] Empty message received:', JSON.stringify(body).slice(0, 200));
-    return buildResponse('Не удалось обработать сообщение.');
+    return buildResponse("Sorry, I couldn't process that message. Please try rephrasing.");
   }
 
   // --- /clear command: delete all sessions for this user ---
@@ -292,7 +292,7 @@ export async function processManyChatWebhook(body: ManyChatWebhookBody): Promise
     } catch (err) {
       console.error('[ManyChat] /clear error:', err);
     }
-    return buildResponse('Сессия успешно очищена.');
+    return buildResponse('Session cleared successfully.');
   }
 
   const { type: messageType, mediaUrl } = detectMessageType(body);
@@ -314,7 +314,7 @@ export async function processManyChatWebhook(body: ManyChatWebhookBody): Promise
   // --- Voice/Photo: async processing (no 10s limit) ---
   if (messageType !== 'text' && mediaUrl && body.subscriber_id) {
     // Load processing message from DB config (quick query)
-    let processingMsg = 'Секунду, обрабатываю...';
+    let processingMsg = 'Processing...';
     try {
       await connectDB();
       const igConfig = await InstagramConfig.findOne().select('processingMessage').lean();
@@ -330,7 +330,7 @@ export async function processManyChatWebhook(body: ManyChatWebhookBody): Promise
   }
 
   // --- Text: synchronous processing (within 9s) ---
-  const timeoutResponse = buildResponse('Извините, ответ занимает слишком много времени. Попробуйте ещё раз.');
+  const timeoutResponse = buildResponse('Sorry, the response is taking too long. Please try again.');
 
   return withTimeout(
     processMessage(inputText, messageType, undefined, sessionId, metadata),
@@ -358,7 +358,7 @@ async function processMediaAsync(
     }
   } catch (error) {
     console.error('[ManyChat] Async media processing error:', error);
-    await sendViaManyChatAPI(subscriberId, 'Произошла ошибка при обработке. Попробуйте отправить текстом.');
+    await sendViaManyChatAPI(subscriberId, 'An error occurred while processing. Please try sending a text message.');
   }
 }
 
@@ -406,18 +406,18 @@ async function processMessage(
         media.mimeType = 'audio/aac';
         console.log(`[ManyChat] Voice mimeType set to: ${media.mimeType}`);
         audioData = media;
-        textMessage = 'Пользователь отправил голосовое сообщение. Послушай его и ответь на то, что он сказал.';
+        textMessage = 'The user sent a voice message. Listen to it and respond to what they said.';
       } else {
-        return buildResponse('Не удалось обработать голосовое сообщение. Попробуйте отправить текстом.');
+        return buildResponse("Sorry, I couldn't process the voice message. Please try sending a text message.");
       }
     }
 
     if (actualType === 'photo' && mediaUrl) {
       if (media) {
         imageData = media;
-        textMessage = 'Пользователь отправил фото. Посмотри на него и ответь уместно.';
+        textMessage = 'The user sent a photo. Look at it and respond appropriately.';
       } else {
-        return buildResponse('Не удалось обработать фото. Попробуйте отправить ещё раз.');
+        return buildResponse("Sorry, I couldn't process the photo. Please try sending it again.");
       }
     }
 
@@ -433,14 +433,14 @@ async function processMessage(
     let prompt: string;
 
     if (isMedia) {
-      prompt = 'Отвечай кратко и по делу. Отвечай на том языке, на котором пишет пользователь.';
+      prompt = 'Respond concisely and to the point. Reply in the same language the user writes in.';
     } else {
       prompt = systemPrompt;
     }
 
     if (history.length > 0) {
       const historyText = history.map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n');
-      prompt += `\n\nИстория разговора:\n${historyText}`;
+      prompt += `\n\nConversation history:\n${historyText}`;
     }
 
     prompt += `\n\nUser: ${textMessage}`;
@@ -478,7 +478,7 @@ async function processMessage(
     const candidate = result.response.candidates?.[0];
     if (candidate?.finishReason && !['STOP', 'MAX_TOKENS'].includes(candidate.finishReason)) {
       console.warn(`[ManyChat] Gemini blocked response: finishReason=${candidate.finishReason}`);
-      return buildResponse('Извините, не могу ответить на это сообщение. Попробуйте переформулировать.');
+      return buildResponse("Sorry, I couldn't process that message. Please try rephrasing.");
     }
 
     let responseText: string;
@@ -489,7 +489,7 @@ async function processMessage(
       const errMsg = textError instanceof Error ? textError.message : String(textError);
       if (errMsg.includes('PROHIBITED_CONTENT') || errMsg.includes('blocked')) {
         console.warn(`[ManyChat] Gemini PROHIBITED_CONTENT: ${errMsg.slice(0, 200)}`);
-        return buildResponse('Извините, не могу ответить на это сообщение. Попробуйте переформулировать.');
+        return buildResponse("Sorry, I couldn't process that message. Please try rephrasing.");
       }
       throw textError;
     }
@@ -509,9 +509,9 @@ async function processMessage(
     const errMsg = error instanceof Error ? error.message : String(error);
     if (errMsg.includes('PROHIBITED_CONTENT') || errMsg.includes('blocked') || errMsg.includes('SAFETY')) {
       console.warn(`[ManyChat] Gemini content blocked (catch-all): ${errMsg.slice(0, 200)}`);
-      return buildResponse('Извините, не могу ответить на это сообщение. Попробуйте переформулировать.');
+      return buildResponse("Sorry, I couldn't process that message. Please try rephrasing.");
     }
     console.error('[ManyChat] Processing error:', error);
-    return buildResponse('Произошла ошибка. Попробуйте позже.');
+    return buildResponse('An error occurred. Please try again later.');
   }
 }

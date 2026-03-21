@@ -9,7 +9,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
+if (!BASE_URL) {
+  console.warn('[emailService] Neither NEXT_PUBLIC_BASE_URL nor NEXTAUTH_URL is set');
+}
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${BASE_URL}/reset-password?token=${token}`;

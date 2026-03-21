@@ -5,7 +5,10 @@ import { successResponse, Errors } from '@/lib/apiResponse';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
+if (!BASE_URL) {
+  console.warn('[stripe/portal] Neither NEXT_PUBLIC_BASE_URL nor NEXTAUTH_URL is set');
+}
 
 export async function POST(request: NextRequest) {
   const auth = await verifyUser(request);

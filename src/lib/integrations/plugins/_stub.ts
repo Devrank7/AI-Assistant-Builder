@@ -18,7 +18,10 @@ export function createStubPlugin(manifest: PluginManifest): IntegrationPlugin {
       return this.testConnection(credentials);
     },
     async execute(action): Promise<ExecutionResult> {
-      return { success: false, error: `Action "${action}" not yet implemented for ${manifest.name}` };
+      return {
+        success: false,
+        error: `The "${manifest.name}" integration is not yet configured. To enable it, provide valid credentials for "${manifest.slug}" in your integration settings. Action requested: "${action}".`,
+      };
     },
     describeCapabilities() {
       return `${manifest.name}: ${manifest.actions.map((a) => a.name).join(', ')}`;

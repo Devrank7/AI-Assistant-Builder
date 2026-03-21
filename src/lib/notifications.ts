@@ -31,7 +31,10 @@ export async function isEmailAllowed(clientIdentifier: { email?: string; clientI
  */
 export function getUnsubscribeFooter(clientToken?: string): string {
   if (!clientToken) return '';
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
+  if (!baseUrl) {
+    console.warn('[notifications] Neither NEXT_PUBLIC_BASE_URL nor NEXTAUTH_URL is set');
+  }
   return `
     <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee; text-align: center;">
       <p style="color: #999; font-size: 11px;">

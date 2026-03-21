@@ -83,7 +83,10 @@ export async function executeAction(input: ActionInput): Promise<ActionResult> {
 
       if (channel === 'telegram') {
         // Use internal API to send notification
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
+        if (!baseUrl) {
+          console.warn('[actionExecutor] Neither NEXT_PUBLIC_BASE_URL nor NEXTAUTH_URL is set');
+        }
         const res = await fetch(`${baseUrl}/api/telegram/notify`, {
           method: 'POST',
           headers: {

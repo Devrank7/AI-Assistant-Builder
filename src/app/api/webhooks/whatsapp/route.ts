@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processWhatsAppWebhook } from '@/lib/whatsappService';
 
-const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'winbix_whatsapp_verify';
+const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 
 /**
  * GET /api/webhooks/whatsapp — WhatsApp webhook verification
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('hub.verify_token');
   const challenge = request.nextUrl.searchParams.get('hub.challenge');
 
-  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+  if (VERIFY_TOKEN && mode === 'subscribe' && token === VERIFY_TOKEN) {
     console.log('[WhatsApp] Webhook verified');
     return new Response(challenge, { status: 200 });
   }

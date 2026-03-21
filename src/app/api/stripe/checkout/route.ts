@@ -6,7 +6,10 @@ import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import type { Plan, BillingPeriod } from '@/models/User';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
+if (!BASE_URL) {
+  console.warn('[stripe/checkout] Neither NEXT_PUBLIC_BASE_URL nor NEXTAUTH_URL is set');
+}
 
 const VALID_PLANS: Plan[] = ['basic', 'pro'];
 const VALID_PERIODS: BillingPeriod[] = ['monthly', 'annual'];
