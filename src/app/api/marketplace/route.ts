@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
-import MarketplaceTemplate, { MARKETPLACE_NICHES } from '@/models/MarketplaceTemplate';
+import MarketplaceTemplate, { MARKETPLACE_NICHES, type MarketplaceNiche } from '@/models/MarketplaceTemplate';
 
 export async function GET(request: NextRequest) {
   await connectDB();
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')));
 
   const filter: Record<string, unknown> = { status: 'published' };
-  if (niche && MARKETPLACE_NICHES.includes(niche as any)) filter.niche = niche;
+  if (niche && MARKETPLACE_NICHES.includes(niche as MarketplaceNiche)) filter.niche = niche;
   if (widgetType) filter.widgetType = widgetType;
   if (tier && ['official', 'community'].includes(tier)) filter.tier = tier;
   if (search) filter.$text = { $search: search };

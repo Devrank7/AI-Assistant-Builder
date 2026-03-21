@@ -444,14 +444,29 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
       sender: 'bot',
     }).catch(() => {});
 
-    // Handoff detection
-    const contact = await Contact.findOne({ contactId })
-      .lean()
-      .catch(() => null);
+    // Handoff detection — track consecutiveLowConfidence per session
+    const [contact, sessionLog] = await Promise.all([
+      Contact.findOne({ contactId })
+        .lean()
+        .catch(() => null),
+      ChatLog.findOne({ clientId: input.clientId, sessionId: input.sessionId })
+        .select('consecutiveLowConfidence')
+        .lean()
+        .catch(() => null),
+    ]);
+    const isLowConfidence = !context || context.trim().length === 0;
+    const prevLowConfidence =
+      (sessionLog as { consecutiveLowConfidence?: number } | null)?.consecutiveLowConfidence ?? 0;
+    const newLowConfidence = isLowConfidence ? prevLowConfidence + 1 : 0;
+    // Persist updated counter
+    ChatLog.findOneAndUpdate(
+      { clientId: input.clientId, sessionId: input.sessionId },
+      { $set: { consecutiveLowConfidence: newLowConfidence } }
+    ).catch(() => {});
     const handoffResult = detectHandoff({
       message: input.message,
-      consecutiveLowConfidence: 0, // TODO: tracked separately if needed
-      contactLeadScore: contact?.leadScore ?? 0,
+      consecutiveLowConfidence: newLowConfidence,
+      contactLeadScore: (contact as { leadScore?: number } | null)?.leadScore ?? 0,
       messageText: input.message,
     });
     if (handoffResult.shouldHandoff && handoffResult.reason) {
@@ -774,13 +789,28 @@ Only use :::form ONCE per conversation. Use plain text for normal responses.`;
               sender: 'bot',
             }).catch(() => {});
 
-            // Handoff detection
-            const streamContact = await Contact.findOne({ contactId: streamContactId })
-              .lean()
-              .catch(() => null);
+            // Handoff detection — track consecutiveLowConfidence per session
+            const [streamContact, streamSessionLog] = await Promise.all([
+              Contact.findOne({ contactId: streamContactId })
+                .lean()
+                .catch(() => null),
+              ChatLog.findOne({ clientId: input.clientId, sessionId: input.sessionId })
+                .select('consecutiveLowConfidence')
+                .lean()
+                .catch(() => null),
+            ]);
+            const streamIsLowConfidence = !context || context.trim().length === 0;
+            const streamPrevLowConfidence =
+              (streamSessionLog as { consecutiveLowConfidence?: number } | null)?.consecutiveLowConfidence ?? 0;
+            const streamNewLowConfidence = streamIsLowConfidence ? streamPrevLowConfidence + 1 : 0;
+            // Persist updated counter
+            ChatLog.findOneAndUpdate(
+              { clientId: input.clientId, sessionId: input.sessionId },
+              { $set: { consecutiveLowConfidence: streamNewLowConfidence } }
+            ).catch(() => {});
             const streamHandoff = detectHandoff({
               message: input.message,
-              consecutiveLowConfidence: 0,
+              consecutiveLowConfidence: streamNewLowConfidence,
               contactLeadScore: (streamContact as Record<string, number> | null)?.leadScore ?? 0,
               messageText: input.message,
             });

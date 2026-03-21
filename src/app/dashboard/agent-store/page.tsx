@@ -627,13 +627,11 @@ export default function AgentStorePage() {
       clearTimeout(searchDebounce.current);
       searchDebounce.current = setTimeout(() => fetchAgents(true), search ? 400 : 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, category, pricing, sort, search]);
+  }, [tab, category, pricing, sort, search, fetchAgents]);
 
   useEffect(() => {
     if (tab === 'browse' && page > 1) fetchAgents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, tab, fetchAgents]);
 
   // ── Actions ───────────────────────────────────────────────────────────────
 

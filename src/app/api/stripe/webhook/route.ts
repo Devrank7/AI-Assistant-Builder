@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { stripe, getPlanFromPriceId } from '@/lib/stripe';
 import { Errors } from '@/lib/apiResponse';
 import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
+import User, { type SubStatus } from '@/models/User';
 import Stripe from 'stripe';
 
 export const runtime = 'nodejs';
@@ -75,8 +75,11 @@ export async function POST(request: NextRequest) {
         past_due: 'past_due',
         trialing: 'trial',
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      user.subscriptionStatus = (statusMap[subscription.status] || subscription.status) as any;
+      const validStatuses: SubStatus[] = ['trial', 'active', 'past_due', 'canceled'];
+      const mappedStatus = statusMap[subscription.status] ?? subscription.status;
+      user.subscriptionStatus = (
+        validStatuses.includes(mappedStatus as SubStatus) ? mappedStatus : 'active'
+      ) as SubStatus;
 
       await user.save();
       break;

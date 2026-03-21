@@ -58,7 +58,7 @@ function StatCard({
 
   useEffect(() => {
     if (inView) start();
-  }, [inView]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [inView, start]);
 
   return (
     <motion.div

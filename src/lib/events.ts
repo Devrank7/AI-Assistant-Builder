@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import Event from '@/models/Event';
+import type { WebhookEvent } from '@/models/Webhook';
 
 const emitter = new EventEmitter();
 emitter.setMaxListeners(50);
@@ -66,7 +67,7 @@ if (typeof globalThis !== 'undefined') {
   import('./webhookService')
     .then(({ triggerWebhooks }) => {
       emitter.on('*', (event: EventPayload) => {
-        triggerWebhooks(event.clientId, event.eventType as any, event.payload).catch((err) =>
+        triggerWebhooks(event.clientId, event.eventType as WebhookEvent, event.payload).catch((err) =>
           console.error('Webhook trigger error:', err)
         );
       });

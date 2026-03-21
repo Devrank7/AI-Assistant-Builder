@@ -2,11 +2,11 @@ import mongoose from 'mongoose';
 import { seedKnowledgeIfNeeded } from './seedKnowledge';
 import { syncClientsIfNeeded } from './syncClients';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-widget-admin';
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
-}
+const MONGODB_URI: string =
+  process.env.MONGODB_URI ??
+  (() => {
+    throw new Error('MONGODB_URI environment variable is not set');
+  })();
 
 interface MongooseCache {
   conn: typeof mongoose | null;

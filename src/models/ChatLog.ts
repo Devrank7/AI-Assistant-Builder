@@ -17,6 +17,7 @@ export interface IChatLog extends Document {
     channel?: 'website' | 'telegram' | 'whatsapp' | 'instagram';
   };
   variantId?: string | null;
+  consecutiveLowConfidence: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,6 +40,7 @@ const ChatLogSchema = new Schema(
       channel: { type: String, enum: ['website', 'telegram', 'whatsapp', 'instagram'], default: 'website' },
     },
     variantId: { type: String, default: null, index: true },
+    consecutiveLowConfidence: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

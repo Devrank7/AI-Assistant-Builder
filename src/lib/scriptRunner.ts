@@ -224,8 +224,10 @@ async function getSecrets(clientId: string, channel: string): Promise<Record<str
     if (!channelConfig?.config) return {};
 
     const secrets: Record<string, string> = {};
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rawConfig = channelConfig.config as any;
+    const rawConfig = channelConfig.config as Record<string, unknown> & {
+      toObject?: () => Record<string, unknown>;
+      secrets?: Record<string, unknown>;
+    };
     const configObj = rawConfig.toObject ? rawConfig.toObject() : rawConfig;
 
     for (const [key, value] of Object.entries(configObj)) {

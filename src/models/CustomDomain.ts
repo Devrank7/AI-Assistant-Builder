@@ -1,6 +1,13 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type DomainStatus = 'pending_verification' | 'verified' | 'ssl_provisioning' | 'active' | 'failed' | 'expired';
+export type DomainStatus =
+  | 'pending_verification'
+  | 'verified'
+  | 'ssl_pending'
+  | 'ssl_provisioning'
+  | 'active'
+  | 'failed'
+  | 'expired';
 
 export interface ICustomDomain extends Document {
   organizationId: string;
@@ -27,7 +34,7 @@ const CustomDomainSchema = new Schema<ICustomDomain>(
     cnameTarget: { type: String, default: 'proxy.winbixai.com' },
     status: {
       type: String,
-      enum: ['pending_verification', 'verified', 'ssl_provisioning', 'active', 'failed', 'expired'],
+      enum: ['pending_verification', 'verified', 'ssl_pending', 'ssl_provisioning', 'active', 'failed', 'expired'],
       default: 'pending_verification',
     },
     sslCertificateId: { type: String },

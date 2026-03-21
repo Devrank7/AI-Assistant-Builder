@@ -311,6 +311,7 @@ export default function OnboardingPage() {
   const [direction, setDirection] = useState(1);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [skipping, setSkipping] = useState(false);
   const [widgetCreating, setWidgetCreating] = useState(false);
   const [widgetCreated, setWidgetCreated] = useState(false);
@@ -504,14 +505,28 @@ export default function OnboardingPage() {
   /* ─── Verify Installation ─── */
   const verifyInstallation = useCallback(async () => {
     setVerifying(true);
-    await new Promise((r) => setTimeout(r, 1800));
-    setVerified(true);
-    setVerifying(false);
-  }, []);
+    try {
+      const res = await fetch('/api/installation/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: firstWidgetId,
+          url: businessInfo.website,
+        }),
+      });
+      const data = await res.json();
+      setVerified(data?.data?.verified || false);
+    } catch {
+      setVerified(false);
+    } finally {
+      setVerifying(false);
+    }
+  }, [firstWidgetId, businessInfo.website]);
 
   /* ─── Complete Onboarding ─── */
   const completeOnboarding = useCallback(async () => {
     setSaving(true);
+    setSaveError(null);
     try {
       await fetch('/api/onboarding', {
         method: 'POST',
@@ -523,8 +538,9 @@ export default function OnboardingPage() {
         }),
       });
       await refreshUser();
-    } catch {
-      // silent
+    } catch (err) {
+      console.error('[Onboarding] Failed to save onboarding data:', err);
+      setSaveError('Failed to save your progress. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -560,7 +576,7 @@ export default function OnboardingPage() {
       setShowConfetti(true);
       completeOnboarding();
     }
-  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [step, completeOnboarding]);
 
   /* ─── Loading state ─── */
   if (loading) {
@@ -637,6 +653,19 @@ export default function OnboardingPage() {
 
       {/* Main content */}
       <div className="relative z-10 w-full max-w-xl px-6 py-24">
+        {/* Save error banner */}
+        {saveError && (
+          <div className="mb-4 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
+            <span>{saveError}</span>
+            <button
+              onClick={() => setSaveError(null)}
+              className="ml-3 text-red-400 hover:text-red-600 dark:hover:text-red-300"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
         {/* Progress */}
         <div className="mb-12">
           <ProgressIndicator step={step} total={TOTAL_STEPS} />

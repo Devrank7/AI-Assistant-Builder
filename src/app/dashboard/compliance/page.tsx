@@ -359,7 +359,7 @@ export default function CompliancePage() {
 
   useEffect(() => {
     if (!loading) fetchAuditLog(auditPage, auditSearch);
-  }, [loading, auditPage, fetchAuditLog]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loading, auditPage, fetchAuditLog]);
 
   const handleSearchChange = (val: string) => {
     setAuditSearch(val);

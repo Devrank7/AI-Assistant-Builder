@@ -307,6 +307,10 @@ export async function processTelegramUpdate(update: TelegramUpdate): Promise<voi
  * Generate Telegram deep link for client
  */
 export function generateTelegramLink(clientToken: string): string {
-  const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'WinBixAIBot';
+  const botUsername = process.env.TELEGRAM_BOT_USERNAME;
+  if (!botUsername) {
+    console.warn('[TelegramBot] TELEGRAM_BOT_USERNAME is not set; Telegram deep link will be empty');
+    return '';
+  }
   return `https://t.me/${botUsername}?start=${clientToken}`;
 }

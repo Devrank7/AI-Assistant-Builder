@@ -18,7 +18,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
-import { PRICING_PLANS, getFeatureComparison, getPlanById } from '@/lib/pricing';
+import { PRICING_PLANS, getFeatureComparison, getPlanById, type PricingPlanId } from '@/lib/pricing';
 import { Button, Badge } from '@/components/ui';
 
 /* ── Display font ── */
@@ -121,7 +121,7 @@ export default function BillingPage() {
   };
 
   const currentPlanId = user?.plan === 'none' || user?.plan === 'basic' ? 'free' : user?.plan || 'free';
-  const currentPlan = getPlanById(currentPlanId as any);
+  const currentPlan = getPlanById(currentPlanId as PricingPlanId);
   const hasSubscription = user?.plan && user.plan !== 'none' && user.plan !== 'free';
   const features = getFeatureComparison();
   const planStyle = getPlanStyle(currentPlanId);

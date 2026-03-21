@@ -98,12 +98,20 @@ export async function provisionSSL(domainId: string): Promise<ICustomDomain> {
   if (!domain) throw new Error('Domain not found');
   if (domain.status !== 'verified') throw new Error('Domain must be verified before SSL provisioning');
 
-  // TODO: PLACEHOLDER — Real SSL provisioning requires ACME/Let's Encrypt integration
-  // (e.g., via Caddy's automatic HTTPS, certbot, or the ACME protocol directly).
-  // This stub marks the domain as 'ssl_pending' to indicate SSL has been requested
-  // but not yet confirmed as provisioned. The reverse proxy must handle actual
-  // certificate issuance and renewal before the domain is fully active.
-  domain.status = 'ssl_provisioning';
+  // STUB — Real SSL provisioning requires external ACME/Let's Encrypt integration.
+  // Options for a real implementation:
+  //   - Caddy server: automatic HTTPS via Caddy's admin API (POST /config/apps/tls)
+  //   - certbot: run `certbot certonly --webroot` or DNS challenge via CLI/API
+  //   - ACME protocol directly: use a library like `acme-client` (npm) to issue certs
+  //   - Reverse proxy delegation: have the proxy (nginx/Caddy/Traefik) handle cert
+  //     issuance automatically when it sees the first request for this domain.
+  // Until one of the above is wired up, the domain stays in 'ssl_pending' so callers
+  // know SSL was requested but is NOT yet active. Do NOT set status to 'active' here.
+  console.log(
+    `[CustomDomain] SSL requested for domain ${domain.domain} (id: ${domainId}). ` +
+      'SSL is NOT provisioned automatically — external ACME/certbot/Caddy integration required.'
+  );
+  domain.status = 'ssl_pending';
   domain.sslExpiresAt = undefined;
   await domain.save();
 

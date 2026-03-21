@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
-import { processSequenceForUser } from '@/lib/emailSequences';
+import { processSequenceForUser, type SequenceUser } from '@/lib/emailSequences';
 import { successResponse, Errors } from '@/lib/apiResponse';
 
 export async function POST(request: NextRequest) {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     let totalSent = 0;
     for (const user of users) {
-      const sentIds = await processSequenceForUser(user as any);
+      const sentIds = await processSequenceForUser(user as unknown as SequenceUser);
       if (sentIds.length > 0) {
         await User.findByIdAndUpdate(user._id, {
           $push: { emailSequencesSent: { $each: sentIds } },

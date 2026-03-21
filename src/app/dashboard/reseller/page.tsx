@@ -198,21 +198,23 @@ function fmt(n: number | undefined | null) {
 
 function AnimatedNumber({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
+  const displayRef = useRef(0);
   const raf = useRef<number>(0);
   useEffect(() => {
-    const start = display;
+    const start = displayRef.current;
     const end = value;
     const dur = 600;
     const startTime = performance.now();
     const tick = (now: number) => {
       const t = Math.min((now - startTime) / dur, 1);
       const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(start + (end - start) * eased);
+      const next = start + (end - start) * eased;
+      displayRef.current = next;
+      setDisplay(next);
       if (t < 1) raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
   return <span>${fmt(display)}</span>;
 }
