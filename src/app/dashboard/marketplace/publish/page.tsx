@@ -79,7 +79,7 @@ export default function PublishTemplatePage() {
     }
   }
 
-  function handleWidgetSelect(widgetId: string) {
+  async function handleWidgetSelect(widgetId: string) {
     setSelectedWidget(widgetId);
     const widget = widgets.find((w) => w._id === widgetId || w.clientId === widgetId);
     if (widget) {
@@ -87,6 +87,21 @@ export default function PublishTemplatePage() {
       setConfigJson({});
       if (!name && widget.name) {
         setName(widget.name);
+      }
+      try {
+        const clientId = widget.clientId || widgetId;
+        const res = await fetch(`/api/clients/${clientId}/theme`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data?.theme) {
+            setThemeJson(data.data.theme);
+          }
+          if (data.success && data.data?.config) {
+            setConfigJson(data.data.config);
+          }
+        }
+      } catch {
+        // Could not fetch theme — leave as empty object
       }
     }
   }

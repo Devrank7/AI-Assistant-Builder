@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { successResponse, Errors } from '@/lib/apiResponse';
 import {
   getSSOConfigByDomain,
@@ -45,8 +45,16 @@ export async function POST(request: NextRequest) {
     if (config.protocol === 'oidc') {
       const state = randomBytes(16).toString('hex');
       const redirectUrl = buildOIDCRedirectUrl(config, callbackUrl, state);
-      // In production, store state in a short-lived session/cookie for CSRF protection
-      return successResponse({ redirectUrl, protocol: 'oidc', state });
+      // Store state server-side in a secure httpOnly cookie for CSRF verification in the callback
+      const response = NextResponse.json({ success: true, data: { redirectUrl, protocol: 'oidc' } });
+      response.cookies.set('sso_oidc_state', state, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 10, // 10 minutes — long enough to complete the OIDC flow
+      });
+      return response;
     }
 
     return Errors.badRequest('Unsupported SSO protocol');

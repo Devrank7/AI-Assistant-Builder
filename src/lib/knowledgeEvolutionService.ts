@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import connectDB from './mongodb';
 import KnowledgeEvolutionTracker, { type IKnowledgeEvolutionTracker } from '@/models/KnowledgeEvolutionTracker';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
+import { generateEmbedding } from '@/lib/gemini';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -262,11 +263,12 @@ export async function applyChange(evolutionId: string, changeIndex: number): Pro
   const snippet = change.newSnippet || change.oldSnippet || '';
 
   if (change.type === 'added' && change.newSnippet) {
-    // Create a new knowledge chunk
+    // Create a new knowledge chunk with a real embedding
+    const embedding = await generateEmbedding(change.newSnippet);
     await KnowledgeChunk.create({
       clientId: tracker.clientId,
       text: change.newSnippet,
-      embedding: [],
+      embedding,
       source: tracker.sourceUrl,
     });
   } else if (change.type === 'removed' && change.oldSnippet) {
@@ -278,19 +280,21 @@ export async function applyChange(evolutionId: string, changeIndex: number): Pro
   } else if (change.type === 'modified') {
     // Upsert — find by old snippet, update with new
     if (change.oldSnippet && change.newSnippet) {
+      const embedding = await generateEmbedding(change.newSnippet);
       const found = await KnowledgeChunk.findOne({
         clientId: tracker.clientId,
         text: { $regex: change.oldSnippet.slice(0, 80).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' },
       });
       if (found) {
         found.text = change.newSnippet;
+        found.embedding = embedding;
         found.source = tracker.sourceUrl;
         await found.save();
       } else {
         await KnowledgeChunk.create({
           clientId: tracker.clientId,
           text: change.newSnippet,
-          embedding: [],
+          embedding,
           source: tracker.sourceUrl,
         });
       }
@@ -321,8 +325,8 @@ export async function applyAllChanges(evolutionId: string): Promise<{ applied: n
       try {
         await applyChange(evolutionId, i);
         applied++;
-      } catch {
-        // continue
+      } catch (err) {
+        console.error(`[knowledgeEvolution] Failed to apply change ${i} for ${evolutionId}:`, err);
       }
     }
   }

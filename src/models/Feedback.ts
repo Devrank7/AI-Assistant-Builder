@@ -7,6 +7,7 @@ export interface IFeedback extends Document {
   rating: 'up' | 'down';
   comment?: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const FeedbackSchema = new Schema<IFeedback>(

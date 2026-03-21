@@ -10,6 +10,7 @@ export interface IVideoAvatar extends Document {
   gender: 'male' | 'female' | 'neutral';
   language: string;
   isActive: boolean;
+  status: 'active' | 'inactive' | 'processing';
   apiConfig: {
     apiKey?: string;
     avatarId?: string;
@@ -42,6 +43,11 @@ const VideoAvatarSchema = new Schema(
     },
     language: { type: String, default: 'en' },
     isActive: { type: Boolean, default: true },
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'processing'],
+      default: 'active',
+    },
     apiConfig: {
       apiKey: { type: String },
       avatarId: { type: String },

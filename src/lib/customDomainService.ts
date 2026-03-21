@@ -98,10 +98,13 @@ export async function provisionSSL(domainId: string): Promise<ICustomDomain> {
   if (!domain) throw new Error('Domain not found');
   if (domain.status !== 'verified') throw new Error('Domain must be verified before SSL provisioning');
 
-  // In production, SSL is handled by reverse proxy (e.g., Caddy, nginx with certbot)
-  // Here we mark the domain as active
-  domain.status = 'active';
-  domain.sslExpiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days
+  // TODO: PLACEHOLDER — Real SSL provisioning requires ACME/Let's Encrypt integration
+  // (e.g., via Caddy's automatic HTTPS, certbot, or the ACME protocol directly).
+  // This stub marks the domain as 'ssl_pending' to indicate SSL has been requested
+  // but not yet confirmed as provisioned. The reverse proxy must handle actual
+  // certificate issuance and renewal before the domain is fully active.
+  domain.status = 'ssl_provisioning';
+  domain.sslExpiresAt = undefined;
   await domain.save();
 
   return domain;

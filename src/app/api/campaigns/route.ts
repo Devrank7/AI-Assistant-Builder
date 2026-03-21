@@ -82,7 +82,16 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Campaign id is required' }, { status: 400 });
     }
 
-    const campaign = await OutboundCampaign.findByIdAndUpdate(id, { $set: updates }, { new: true }).lean();
+    // Enforce ownership: non-admin clients may only update their own campaigns
+    const ownershipFilter: Record<string, unknown> = { _id: id };
+    if (auth.role === 'client') {
+      ownershipFilter.clientId = auth.clientId;
+    }
+
+    const campaign = await OutboundCampaign.findOneAndUpdate(ownershipFilter, { $set: updates }, { new: true }).lean();
+    if (!campaign) {
+      return NextResponse.json({ success: false, error: 'Campaign not found or access denied' }, { status: 404 });
+    }
     return NextResponse.json({ success: true, campaign });
   } catch (error) {
     console.error('Campaigns PATCH error:', error);
@@ -104,7 +113,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Campaign id is required' }, { status: 400 });
     }
 
-    await OutboundCampaign.findByIdAndDelete(id);
+    // Enforce ownership: non-admin clients may only delete their own campaigns
+    const ownershipFilter: Record<string, unknown> = { _id: id };
+    if (auth.role === 'client') {
+      ownershipFilter.clientId = auth.clientId;
+    }
+
+    const deleted = await OutboundCampaign.findOneAndDelete(ownershipFilter);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: 'Campaign not found or access denied' }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Campaigns DELETE error:', error);

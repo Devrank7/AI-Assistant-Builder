@@ -330,7 +330,39 @@ function SignalCard({ signal, onClick }: { signal: SignalFeedItem; onClick: () =
   );
 }
 
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp?: string;
+}
+
 function ConversationDrawer({ conversationId, onClose }: { conversationId: string | null; onClose: () => void }) {
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [messagesError, setMessagesError] = useState('');
+
+  useEffect(() => {
+    if (!conversationId) {
+      setMessages([]);
+      setMessagesError('');
+      return;
+    }
+    setLoadingMessages(true);
+    setMessagesError('');
+    fetch(`/api/inbox/conversations/${conversationId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          const msgs: ConversationMessage[] = d.data?.messages ?? d.data?.conversation?.messages ?? [];
+          setMessages(msgs);
+        } else {
+          setMessagesError('Could not load conversation');
+        }
+      })
+      .catch(() => setMessagesError('Failed to fetch conversation'))
+      .finally(() => setLoadingMessages(false));
+  }, [conversationId]);
+
   return (
     <AnimatePresence>
       {conversationId && (
@@ -362,11 +394,49 @@ function ConversationDrawer({ conversationId, onClose }: { conversationId: strin
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-5">
-              <div className="text-text-tertiary flex flex-col items-center gap-3 py-12 text-center">
-                <MessageCircle className="h-10 w-10 opacity-30" />
-                <p className="text-sm">Conversation viewer</p>
-                <p className="font-mono text-xs break-all opacity-60">{conversationId}</p>
-              </div>
+              {loadingMessages ? (
+                <div className="text-text-tertiary flex items-center justify-center py-12">
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading messages...
+                </div>
+              ) : messagesError ? (
+                <div className="text-text-tertiary flex flex-col items-center gap-3 py-12 text-center">
+                  <AlertCircle className="h-8 w-8 text-red-400 opacity-60" />
+                  <p className="text-sm text-red-400">{messagesError}</p>
+                  <p className="font-mono text-xs break-all opacity-60">{conversationId}</p>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="text-text-tertiary flex flex-col items-center gap-3 py-12 text-center">
+                  <MessageCircle className="h-10 w-10 opacity-30" />
+                  <p className="text-sm">No messages found</p>
+                  <p className="font-mono text-xs break-all opacity-60">{conversationId}</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {messages.map((msg, i) => (
+                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div
+                        className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                          msg.role === 'user'
+                            ? 'bg-accent text-white'
+                            : 'bg-bg-secondary text-text-primary border-border border'
+                        }`}
+                      >
+                        <p>{msg.content}</p>
+                        {msg.timestamp && (
+                          <p
+                            className={`mt-1 text-[10px] ${msg.role === 'user' ? 'text-white/60' : 'text-text-tertiary'}`}
+                          >
+                            {new Date(msg.timestamp).toLocaleTimeString(undefined, {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         </>

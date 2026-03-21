@@ -1,4 +1,36 @@
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
+
+export type IntegrationProvider =
+  | 'hubspot'
+  | 'salesforce'
+  | 'pipedrive'
+  | 'zoho'
+  | 'freshsales'
+  | 'bitrix24'
+  | 'monday'
+  | 'google_calendar'
+  | 'calendly'
+  | 'stripe'
+  | 'telegram'
+  | 'whatsapp'
+  | 'email_smtp'
+  | 'google_sheets';
+
+export interface IIntegration extends Document {
+  userId: string;
+  provider: IntegrationProvider;
+  accessToken?: string;
+  refreshToken?: string;
+  tokenExpiry?: Date;
+  metadata?: Record<string, unknown>;
+  isActive: boolean;
+  status: 'connected' | 'error' | 'disconnected';
+  lastHealthCheck?: Date;
+  lastError: string | null;
+  aiDiagnostic: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 const integrationSchema = new mongoose.Schema(
   {
@@ -42,4 +74,4 @@ const integrationSchema = new mongoose.Schema(
 
 integrationSchema.index({ userId: 1, provider: 1 }, { unique: true });
 
-export default mongoose.models.Integration || mongoose.model('Integration', integrationSchema);
+export default mongoose.models.Integration || mongoose.model<IIntegration>('Integration', integrationSchema);

@@ -7,6 +7,7 @@ export interface IMarketplaceReview extends Document {
   rating: number;
   comment: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const MarketplaceReviewSchema = new Schema<IMarketplaceReview>(

@@ -160,12 +160,19 @@ export async function findSimilarChunks(
 }
 
 /**
- * Placeholder for cache invalidation
- * With implicit caching, no explicit invalidation is needed.
- * The cache expires automatically based on Gemini's internal TTL.
+ * Placeholder for cache invalidation.
+ *
+ * Currently a no-op because we rely on Gemini's implicit (automatic) caching,
+ * which caches repeated prompt prefixes server-side with its own TTL — there is
+ * no client-side handle to invalidate.
+ *
+ * TODO: If upgrading to explicit caching via the Gemini server SDK
+ * (google-cloud/vertexai or the REST `cachedContents` API), replace this body
+ * with a DELETE call to the named cache resource:
+ *   DELETE https://generativelanguage.googleapis.com/v1beta/cachedContents/{name}
+ * The cache name would need to be stored per-client (e.g. in AISettings) when
+ * the cache is first created.
  */
-export async function invalidatePromptCache(clientId: string): Promise<void> {
-  // No-op for implicit caching
-  // If we upgrade to explicit caching with server SDK, implement here
-  console.log(`Cache invalidation requested for ${clientId} (using implicit caching, no action needed)`);
+export async function invalidatePromptCache(_clientId: string): Promise<void> {
+  // No-op: implicit caching has no client-controlled invalidation mechanism.
 }

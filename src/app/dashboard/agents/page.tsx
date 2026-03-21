@@ -191,6 +191,7 @@ export default function AgentsPage() {
             .filter(Boolean),
           modelPreference: formModel,
           memoryEnabled: formMemory,
+          empathy: formEmpathy,
         }),
       });
       const data = await res.json();
@@ -233,6 +234,7 @@ export default function AgentsPage() {
             .filter(Boolean),
           modelPreference: formModel,
           memoryEnabled: formMemory,
+          empathy: formEmpathy,
         }),
       });
       const data = await res.json();
@@ -503,12 +505,11 @@ export default function AgentsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {[
           { label: 'Total Agents', value: personas.length, icon: Bot },
           { label: 'Active', value: personas.filter((p) => p.isActive).length, icon: Zap },
           { label: 'Memory Enabled', value: personas.filter((p) => p.memoryEnabled).length, icon: Brain },
-          { label: 'Conversations', value: '--', icon: MessageSquare },
         ].map((stat) => (
           <motion.div
             key={stat.label}

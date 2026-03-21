@@ -339,9 +339,21 @@ export async function getHotLeads(clientId: string): Promise<HotLead[]> {
     const leadScore = (c.leadScore as number) ?? 0;
     const leadTemp = (c.leadTemp as string) ?? 'cold';
 
-    // Scan recent chat logs for buying signals
+    // Scan recent chat logs for buying signals — filter by this contact's sessions
     const ChatLog = mongoose.models.ChatLog || mongoose.model('ChatLog', new mongoose.Schema({}, { strict: false }));
-    const recentLogs = await ChatLog.find({ clientId }).sort({ createdAt: -1 }).limit(5).lean();
+    const contactId = c.contactId as string;
+    const recentLogs = await ChatLog.find({
+      clientId,
+      $or: [
+        { contactId },
+        { sessionId: contactId },
+        { visitorId: contactId },
+        { sessionId: { $regex: contactId, $options: 'i' } },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
 
     let buyingKeywordScore = 0;
     const buyingSignalsFound: string[] = [];

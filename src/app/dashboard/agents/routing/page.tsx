@@ -264,11 +264,58 @@ export default function RoutingPage() {
     const lower = testInput.toLowerCase();
     let matched: RoutingRule | null = null;
 
+    const INTENT_KEYWORDS: Record<string, string[]> = {
+      pricing_inquiry: ['price', 'pricing', 'cost', 'how much', 'fee', 'charge', 'rate', 'plan'],
+      booking_request: ['book', 'appointment', 'schedule', 'reserve', 'reservation'],
+      complaint: [
+        'complaint',
+        'unhappy',
+        'dissatisfied',
+        'terrible',
+        'awful',
+        'broken',
+        'not working',
+        'issue',
+        'problem',
+      ],
+      support_request: ['help', 'support', 'issue', 'problem', 'stuck', 'error', 'bug', 'broken'],
+      cancellation: ['cancel', 'cancellation', 'unsubscribe', 'stop', 'end subscription'],
+      product_interest: ['interested', 'tell me more', 'learn more', 'demo', 'trial', 'features'],
+      feature_request: ['feature', 'would be great', 'suggestion', 'idea', 'wish', 'can you add'],
+      billing: ['invoice', 'bill', 'payment', 'charge', 'refund', 'receipt'],
+      general_question: ['what', 'how', 'when', 'where', 'who', 'why', '?'],
+    };
+    const POSITIVE_WORDS = ['great', 'good', 'love', 'excellent', 'happy', 'thanks', 'awesome', 'fantastic', 'perfect'];
+    const NEGATIVE_WORDS = [
+      'bad',
+      'terrible',
+      'awful',
+      'hate',
+      'horrible',
+      'disappointed',
+      'frustrated',
+      'angry',
+      'poor',
+      'worst',
+    ];
+
     for (const rule of rules.filter((r) => r.isActive)) {
       const conditionResults = rule.conditions.map((cond) => {
         if (cond.type === 'keyword') return lower.includes(cond.value.toLowerCase());
         if (cond.type === 'handoff_request') {
           return lower.includes('human') || lower.includes('agent') || lower.includes('person');
+        }
+        if (cond.type === 'intent') {
+          const keywords = INTENT_KEYWORDS[cond.value] || [];
+          return keywords.some((kw) => lower.includes(kw));
+        }
+        if (cond.type === 'sentiment') {
+          const isPositive = POSITIVE_WORDS.some((w) => lower.includes(w));
+          const isNegative = NEGATIVE_WORDS.some((w) => lower.includes(w));
+          if (cond.value === 'positive') return isPositive && !isNegative;
+          if (cond.value === 'negative') return isNegative;
+          if (cond.value === 'neutral') return !isPositive && !isNegative;
+          return false;
         }
         return false;
       });

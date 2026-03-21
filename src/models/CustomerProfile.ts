@@ -54,7 +54,7 @@ export interface ICustomerProfile extends Document {
   messageCount: number;
   lastActiveAt: Date;
   firstSeenAt: Date;
-  sessionsIds: string[];
+  sessionIds: string[];
 
   // Revenue attribution
   totalRevenue: number; // USD
@@ -130,7 +130,7 @@ const CustomerProfileSchema = new Schema<ICustomerProfile>(
     messageCount: { type: Number, default: 0 },
     lastActiveAt: { type: Date, default: Date.now },
     firstSeenAt: { type: Date, default: Date.now },
-    sessionsIds: [String],
+    sessionIds: [String],
 
     totalRevenue: { type: Number, default: 0 },
     lifetimeValue: { type: Number, default: 0 },

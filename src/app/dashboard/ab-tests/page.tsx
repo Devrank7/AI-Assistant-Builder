@@ -834,11 +834,20 @@ export default function ABTestsPage() {
   const handleAction = async (id: string, action: string) => {
     setActionLoading(id);
     try {
-      const res = await fetch(`/api/ab-tests/${id}/start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
-      });
+      let res: Response;
+      if (action === 'start') {
+        res = await fetch(`/api/ab-tests/${id}/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } else {
+        // pause, resume, complete — PATCH with status body
+        res = await fetch(`/api/ab-tests/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: action }),
+        });
+      }
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Failed');
       toastSuccess(`Test ${action}ed`);

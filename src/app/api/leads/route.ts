@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
 import { appendToSheet } from '@/lib/googleSheets';
+import { verifyUser } from '@/lib/auth';
+import { Errors } from '@/lib/apiResponse';
 
 // Lead Schema
 const LeadSchema = new mongoose.Schema({
@@ -127,6 +129,11 @@ export async function POST(request: NextRequest) {
 // GET - Retrieve leads for a client (admin)
 export async function GET(request: NextRequest) {
   try {
+    const auth = await verifyUser(request);
+    if (!auth.authenticated) {
+      return Errors.unauthorized();
+    }
+
     await connectDB();
 
     const { searchParams } = new URL(request.url);

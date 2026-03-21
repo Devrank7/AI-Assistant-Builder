@@ -733,27 +733,48 @@ export default function TrainingStudioPage() {
                 className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl"
               >
                 <h3 className="mb-4 text-lg font-semibold text-white">Quality Score Distribution</h3>
-                <div className="flex h-32 items-end gap-1">
-                  {[
-                    { range: '0-20', color: 'bg-red-500' },
-                    { range: '21-40', color: 'bg-orange-500' },
-                    { range: '41-60', color: 'bg-yellow-500' },
-                    { range: '61-80', color: 'bg-green-500' },
-                    { range: '81-100', color: 'bg-emerald-500' },
-                  ].map((bin) => {
-                    // Approximate distribution based on avg quality
-                    const height = Math.max(10, Math.random() * 100);
-                    return (
-                      <div key={bin.range} className="flex flex-1 flex-col items-center gap-1">
-                        <div
-                          className={`w-full rounded-t ${bin.color} transition-all duration-500`}
-                          style={{ height: `${height}%` }}
-                        />
-                        <span className="text-[10px] text-gray-500">{bin.range}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+                {examples.length === 0 ? (
+                  <div className="flex h-32 items-center justify-center text-sm text-gray-500">
+                    No training examples available
+                  </div>
+                ) : (
+                  <div className="flex h-32 items-end gap-1">
+                    {[
+                      { range: '0-20', color: 'bg-red-500', min: 0, max: 20 },
+                      { range: '21-40', color: 'bg-orange-500', min: 21, max: 40 },
+                      { range: '41-60', color: 'bg-yellow-500', min: 41, max: 60 },
+                      { range: '61-80', color: 'bg-green-500', min: 61, max: 80 },
+                      { range: '81-100', color: 'bg-emerald-500', min: 81, max: 100 },
+                    ].map((bin) => {
+                      const count = examples.filter(
+                        (e) => e.qualityScore >= bin.min && e.qualityScore <= bin.max
+                      ).length;
+                      const maxCount = Math.max(
+                        ...[
+                          [0, 20],
+                          [21, 40],
+                          [41, 60],
+                          [61, 80],
+                          [81, 100],
+                        ].map(
+                          ([mn, mx]) => examples.filter((e) => e.qualityScore >= mn && e.qualityScore <= mx).length
+                        ),
+                        1
+                      );
+                      const height = Math.max(4, (count / maxCount) * 100);
+                      return (
+                        <div key={bin.range} className="flex flex-1 flex-col items-center gap-1">
+                          <div
+                            className={`w-full rounded-t ${bin.color} transition-all duration-500`}
+                            style={{ height: `${height}%` }}
+                            title={`${count} examples`}
+                          />
+                          <span className="text-[10px] text-gray-500">{bin.range}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </motion.div>
 
               {/* Apply Button */}

@@ -28,6 +28,7 @@ export interface IAuditLog extends Document {
   userAgent?: string;
   organizationId?: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const AuditLogSchema = new Schema<IAuditLog>(

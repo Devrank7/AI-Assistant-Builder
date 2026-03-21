@@ -92,7 +92,16 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Product id is required' }, { status: 400 });
     }
 
-    const product = await Product.findByIdAndUpdate(id, { $set: updates }, { new: true }).lean();
+    // Enforce ownership: non-admin clients may only update their own products
+    const ownershipFilter: Record<string, unknown> = { _id: id };
+    if (auth.role === 'client') {
+      ownershipFilter.clientId = auth.clientId;
+    }
+
+    const product = await Product.findOneAndUpdate(ownershipFilter, { $set: updates }, { new: true }).lean();
+    if (!product) {
+      return NextResponse.json({ success: false, error: 'Product not found or access denied' }, { status: 404 });
+    }
     return NextResponse.json({ success: true, product });
   } catch (error) {
     console.error('Products PATCH error:', error);
@@ -115,7 +124,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Product id is required' }, { status: 400 });
     }
 
-    await Product.findByIdAndDelete(id);
+    // Enforce ownership: non-admin clients may only delete their own products
+    const ownershipFilter: Record<string, unknown> = { _id: id };
+    if (auth.role === 'client') {
+      ownershipFilter.clientId = auth.clientId;
+    }
+
+    const deleted = await Product.findOneAndDelete(ownershipFilter);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: 'Product not found or access denied' }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Products DELETE error:', error);

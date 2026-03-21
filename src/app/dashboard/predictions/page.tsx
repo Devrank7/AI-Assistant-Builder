@@ -470,7 +470,19 @@ export default function PredictionsPage() {
                               {c.riskScore >= 70 ? 'Critical' : c.riskScore >= 40 ? 'High' : 'Medium'}
                             </span>
                             <button
-                              onClick={() => setNudged((p) => new Set(p).add(c.contactId))}
+                              onClick={async () => {
+                                try {
+                                  await fetch('/api/predictions/leads', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ contactId: c.contactId, action: 'nudge' }),
+                                  });
+                                } catch (e) {
+                                  console.error('Nudge failed:', e);
+                                } finally {
+                                  setNudged((p) => new Set(p).add(c.contactId));
+                                }
+                              }}
                               disabled={nudged.has(c.contactId)}
                               className="flex items-center gap-1.5 rounded-lg bg-blue-500/20 px-3 py-1.5 text-xs font-medium text-blue-300 transition hover:bg-blue-500/30 disabled:opacity-50"
                             >
@@ -569,7 +581,19 @@ export default function PredictionsPage() {
                               {l.conversionProbability}% prob
                             </span>
                             <button
-                              onClick={() => setPri((p) => new Set(p).add(l.contactId))}
+                              onClick={async () => {
+                                try {
+                                  await fetch('/api/predictions/leads', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ contactId: l.contactId, action: 'prioritize' }),
+                                  });
+                                } catch (e) {
+                                  console.error('Prioritize failed:', e);
+                                } finally {
+                                  setPri((p) => new Set(p).add(l.contactId));
+                                }
+                              }}
                               disabled={pri.has(l.contactId)}
                               className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/30 disabled:opacity-50"
                             >

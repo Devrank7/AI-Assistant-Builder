@@ -23,6 +23,7 @@ export interface IRevenueEvent extends Document {
   externalId?: string; // Stripe payment ID, booking ID, etc.
   metadata?: Record<string, unknown>;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const RevenueEventSchema = new Schema<IRevenueEvent>(

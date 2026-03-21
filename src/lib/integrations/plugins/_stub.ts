@@ -11,7 +11,8 @@ export function createStubPlugin(manifest: PluginManifest): IntegrationPlugin {
     async testConnection(credentials): Promise<HealthResult> {
       const key = credentials.apiKey || credentials.token || Object.values(credentials)[0];
       if (!key) return { healthy: false, error: 'No credentials provided' };
-      return { healthy: true, details: { note: 'Stub — real validation not yet implemented' } };
+      // Stub plugin — no real API validation implemented yet
+      return { healthy: false, error: 'Plugin not fully configured — real connection test not yet implemented' };
     },
     async healthCheck(credentials) {
       return this.testConnection(credentials);

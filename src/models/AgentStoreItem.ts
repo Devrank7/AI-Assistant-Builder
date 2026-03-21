@@ -72,7 +72,7 @@ const AgentReviewSchema = new Schema<IAgentReview>(
 
 const AgentStoreItemSchema = new Schema<IAgentStoreItem>(
   {
-    agentId: { type: String, unique: true, sparse: true },
+    agentId: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     description: { type: String, required: true },
     longDescription: { type: String, default: '' },

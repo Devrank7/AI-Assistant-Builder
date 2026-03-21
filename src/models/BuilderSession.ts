@@ -15,7 +15,7 @@ export interface IBuilderSession extends Document {
   clientId: string | null;
   status: BuilderStatus;
   widgetName: string | null;
-  widgetType: string | null;
+  widgetType: 'ai_chat' | 'smart_faq' | 'lead_form' | null;
   currentStage: 'input' | 'analysis' | 'design' | 'knowledge' | 'deploy' | 'integrations' | 'suggestions' | 'workspace';
   siteProfile: Record<string, unknown> | null;
   knowledgeUploaded: boolean;

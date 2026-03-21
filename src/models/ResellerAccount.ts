@@ -89,8 +89,8 @@ const PayoutHistorySchema = new Schema<IPayoutHistoryEntry>(
 
 const ResellerAccountSchema = new Schema<IResellerAccount>(
   {
-    resellerId: { type: String },
-    userId: { type: String },
+    resellerId: { type: String, required: true },
+    userId: { type: String, required: true },
     organizationId: { type: String },
     companyName: { type: String, default: '' },
     contactEmail: { type: String, default: '' },

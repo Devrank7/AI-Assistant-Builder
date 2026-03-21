@@ -3,6 +3,8 @@ import connectDB from '@/lib/mongodb';
 import ChatLog from '@/models/ChatLog';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
 import { getAnalytics } from '@/lib/analytics';
+import { verifyUser } from '@/lib/auth';
+import { Errors } from '@/lib/apiResponse';
 
 type ExportType = 'chats' | 'knowledge' | 'analytics';
 type ExportFormat = 'csv' | 'json';
@@ -13,6 +15,11 @@ type ExportFormat = 'csv' | 'json';
  */
 export async function GET(request: NextRequest) {
   try {
+    const auth = await verifyUser(request);
+    if (!auth.authenticated) {
+      return Errors.unauthorized();
+    }
+
     await connectDB();
 
     const { searchParams } = new URL(request.url);

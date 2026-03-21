@@ -2,6 +2,7 @@ import connectDB from './mongodb';
 import TrainingExample, { type ITrainingExample } from '@/models/TrainingExample';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
 import Correction from '@/models/Correction';
+import { generateEmbedding } from '@/lib/gemini';
 
 // Try to import generateWithFallback for AI quality scoring
 let generateWithFallback: ((prompt: string) => Promise<string>) | null = null;
@@ -71,8 +72,8 @@ export async function applyTrainingExamples(clientId: string): Promise<{ applied
     // Convert to knowledge chunk
     const text = `Q: ${example.userMessage}\nA: ${example.idealResponse}`;
 
-    // Create a simple embedding placeholder (in production, use actual embeddings)
-    const embedding = new Array(768).fill(0).map(() => Math.random() * 0.01);
+    // Generate a real embedding for semantic search
+    const embedding = await generateEmbedding(text);
 
     await KnowledgeChunk.create({
       clientId,

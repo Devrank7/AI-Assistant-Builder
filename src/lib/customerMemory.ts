@@ -150,7 +150,7 @@ export async function recordActivity(
     {
       $set: { lastActiveAt: new Date() },
       $inc: { visitCount: 1, messageCount },
-      $addToSet: { sessionsIds: sessionId },
+      $addToSet: { sessionIds: sessionId },
     },
     { upsert: true }
   );

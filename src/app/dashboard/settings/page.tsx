@@ -195,6 +195,12 @@ export default function SettingsPage() {
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileError, setProfileError] = useState('');
 
+  // Delete account modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   // Verification
   const [verificationSent, setVerificationSent] = useState(false);
   const [verificationLoading, setVerificationLoading] = useState(false);
@@ -293,6 +299,24 @@ export default function SettingsPage() {
       setPasswordError('Failed to change password');
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    setDeleteError('');
+    try {
+      const res = await fetch('/api/user', { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = '/';
+      } else {
+        setDeleteError(data.error || 'Failed to delete account');
+      }
+    } catch {
+      setDeleteError('Failed to delete account. Please try again.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -740,7 +764,11 @@ export default function SettingsPage() {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => alert('Please contact support to delete your account.')}
+              onClick={() => {
+                setShowDeleteModal(true);
+                setDeleteConfirmText('');
+                setDeleteError('');
+              }}
               className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-red-200/60 bg-white px-4 py-2 text-[12px] font-semibold text-red-600 shadow-sm transition-all hover:border-red-300 hover:bg-red-50 hover:shadow-md dark:border-red-500/15 dark:bg-red-500/5 dark:text-red-400 dark:hover:border-red-500/25 dark:hover:bg-red-500/10"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -749,6 +777,73 @@ export default function SettingsPage() {
           </div>
         </SettingsSection>
       </motion.div>
+
+      {/* Delete Account Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+            onClick={() => setShowDeleteModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md rounded-2xl border border-red-500/20 bg-white p-6 shadow-2xl dark:bg-[#111118]"
+            >
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-semibold text-gray-900 dark:text-white">Delete Account</h3>
+                  <p className="text-[11px] text-gray-400">This action cannot be undone</p>
+                </div>
+              </div>
+              <p className="mb-4 text-[13px] text-gray-600 dark:text-gray-400">
+                All your data, widgets, and configurations will be permanently deleted. To confirm, type{' '}
+                <span className="font-mono font-semibold text-red-500">DELETE</span> below.
+              </p>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type DELETE to confirm"
+                className="mb-4 w-full rounded-xl border border-gray-200/60 bg-gray-50/50 px-3.5 py-2.5 text-[13px] text-gray-900 placeholder-gray-400 focus:border-red-400 focus:outline-none dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white"
+              />
+              <AnimatePresence>
+                {deleteError && (
+                  <div className="mb-3">
+                    <Alert type="error" message={deleteError} />
+                  </div>
+                )}
+              </AnimatePresence>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="rounded-xl border border-gray-200/60 px-4 py-2 text-[12px] font-semibold text-gray-600 transition-all hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-400 dark:hover:bg-white/[0.04]"
+                >
+                  Cancel
+                </button>
+                <motion.button
+                  whileHover={deleteConfirmText !== 'DELETE' || deleteLoading ? undefined : { scale: 1.03 }}
+                  whileTap={deleteConfirmText !== 'DELETE' || deleteLoading ? undefined : { scale: 0.97 }}
+                  onClick={handleDeleteAccount}
+                  disabled={deleteConfirmText !== 'DELETE' || deleteLoading}
+                  className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-[12px] font-semibold text-white shadow-md shadow-red-500/20 transition-all hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {deleteLoading ? <Spinner /> : <Trash2 className="h-3.5 w-3.5" />}
+                  {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

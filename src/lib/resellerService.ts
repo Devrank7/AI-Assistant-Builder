@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import connectDB from './mongodb';
 import ResellerAccount from '@/models/ResellerAccount';
 import Organization from '@/models/Organization';
@@ -59,10 +60,12 @@ export async function createSubAccount(resellerId: string, data: { name: string;
     ownerId: reseller.organizationId,
   });
 
-  // Create admin user for sub-account
+  // Create admin user for sub-account with a hashed random temporary password
+  const tempPassword = new mongoose.Types.ObjectId().toString() + new mongoose.Types.ObjectId().toString();
+  const passwordHash = await bcrypt.hash(tempPassword, 12);
   const user = await User.create({
     email: data.email,
-    passwordHash: new mongoose.Types.ObjectId().toString(), // Placeholder, user must reset
+    passwordHash,
     organizationId: (org._id as Types.ObjectId).toString(),
     plan: data.plan ?? 'basic',
     onboardingCompleted: false,

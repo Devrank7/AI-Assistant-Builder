@@ -96,7 +96,16 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    const persona = await AgentPersona.findByIdAndUpdate(id, { $set: updates }, { new: true }).lean();
+    // Enforce ownership: non-admin clients may only update their own personas
+    const ownershipFilter: Record<string, unknown> = { _id: id };
+    if (auth.role === 'client') {
+      ownershipFilter.clientId = auth.clientId;
+    }
+
+    const persona = await AgentPersona.findOneAndUpdate(ownershipFilter, { $set: updates }, { new: true }).lean();
+    if (!persona) {
+      return NextResponse.json({ success: false, error: 'Persona not found or access denied' }, { status: 404 });
+    }
     return NextResponse.json({ success: true, persona });
   } catch (error) {
     console.error('Personas PATCH error:', error);
@@ -118,7 +127,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Persona id is required' }, { status: 400 });
     }
 
-    await AgentPersona.findByIdAndDelete(id);
+    // Enforce ownership: non-admin clients may only delete their own personas
+    const ownershipFilter: Record<string, unknown> = { _id: id };
+    if (auth.role === 'client') {
+      ownershipFilter.clientId = auth.clientId;
+    }
+
+    const deleted = await AgentPersona.findOneAndDelete(ownershipFilter);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: 'Persona not found or access denied' }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Personas DELETE error:', error);

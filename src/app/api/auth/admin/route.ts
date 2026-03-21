@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Admin token not configured' }, { status: 500 });
     }
 
-    if (token === adminToken) {
+    if (token.length === adminToken.length && timingSafeEqual(Buffer.from(token), Buffer.from(adminToken))) {
       // Create response with success
       const response = NextResponse.json({
         success: true,

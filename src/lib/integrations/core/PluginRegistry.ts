@@ -85,7 +85,14 @@ class PluginRegistry {
     }
 
     const credentials: Record<string, string> = {};
-    if (connection.accessToken) credentials.apiKey = decrypt(connection.accessToken);
+    if (connection.accessToken) {
+      credentials.apiKey = decrypt(connection.accessToken);
+      credentials.accessToken = decrypt(connection.accessToken);
+    }
+    if (connection.refreshToken) credentials.refreshToken = decrypt(connection.refreshToken);
+    if (connection.instanceUrl) credentials.instanceUrl = connection.instanceUrl;
+    if (connection.subdomain) credentials.subdomain = connection.subdomain;
+    if (connection.accountId) credentials.accountId = connection.accountId;
 
     return plugin.execute(action, params, credentials);
   }

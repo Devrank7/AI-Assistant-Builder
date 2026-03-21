@@ -89,7 +89,8 @@ export async function validateSAMLResponse(
         const responseCert = responseCertMatch[1].replace(/\s/g, '');
         const responseFingerprint = createHash('sha256').update(responseCert).digest('hex');
         if (certFingerprint !== responseFingerprint) {
-          console.warn('SSO: Certificate fingerprint mismatch');
+          console.warn('SSO: Certificate fingerprint mismatch — rejecting authentication');
+          return null;
         }
       }
     }
