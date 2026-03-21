@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
-import { Infinity, Palette, Code, Headphones, Shield, Lock, Plug, Zap } from 'lucide-react';
+import { Infinity, Palette, Code, Headphones, Shield, Lock, Plug, Zap, Brain, Mic, Users, Globe } from 'lucide-react';
 
 /* ─── Animation variants ─── */
 const fadeUp = {
@@ -35,65 +35,65 @@ const cardVariant = {
 /* ─── Enterprise features ─── */
 const ENTERPRISE_FEATURES = [
   {
-    icon: Infinity,
-    title: 'Unlimited Widgets & Messages',
-    desc: 'No caps, no throttling. Deploy as many widgets as your business demands with unlimited message throughput.',
+    icon: Lock,
+    title: 'Enterprise SSO (SAML/OIDC)',
+    desc: 'Microsoft Entra, Okta, OneLogin — SAML 2.0 and OIDC protocols. Auto-provisioning users from your identity provider.',
+    color: 'from-red-500/20 to-rose-500/20',
+    iconColor: 'text-red-400',
+    borderHover: 'hover:border-red-500/30',
+  },
+  {
+    icon: Users,
+    title: 'Multi-Agent Orchestration',
+    desc: 'Sales Agent → Support Agent → Billing Agent. Automatic intent detection and handoff. Configurable routing rules.',
     color: 'from-cyan-500/20 to-blue-500/20',
     iconColor: 'text-cyan-400',
     borderHover: 'hover:border-cyan-500/30',
   },
   {
-    icon: Palette,
-    title: 'White-Label Branding',
-    desc: 'Custom domain, remove all WinBix branding. Your product, your identity — powered by our infrastructure.',
-    color: 'from-purple-500/20 to-pink-500/20',
-    iconColor: 'text-purple-400',
-    borderHover: 'hover:border-purple-500/30',
-  },
-  {
-    icon: Code,
-    title: 'Developer API',
-    desc: '1,000 req/min rate limit with full API access. Build anything on top of WinBix with our comprehensive REST API.',
+    icon: Mic,
+    title: 'Real-Time Voice Agent',
+    desc: 'WebRTC voice conversations with AI in the widget. Speech-to-text, AI processing, text-to-speech — seamless.',
     color: 'from-green-500/20 to-emerald-500/20',
     iconColor: 'text-green-400',
     borderHover: 'hover:border-green-500/30',
   },
   {
-    icon: Headphones,
-    title: 'Dedicated Account Manager',
-    desc: 'Your own named contact at WinBix. Onboarding, strategy sessions, and ongoing support whenever you need it.',
+    icon: Brain,
+    title: 'AI Training Studio',
+    desc: 'Upload ideal conversations to teach your AI response style. Human-in-the-loop corrections. Quality scoring.',
+    color: 'from-purple-500/20 to-pink-500/20',
+    iconColor: 'text-purple-400',
+    borderHover: 'hover:border-purple-500/30',
+  },
+  {
+    icon: Palette,
+    title: 'White-Label & Reseller',
+    desc: 'Remove all WinBix branding. Custom domain with auto-SSL. Reseller program with sub-accounts and billing.',
+    color: 'from-indigo-500/20 to-violet-500/20',
+    iconColor: 'text-indigo-400',
+    borderHover: 'hover:border-indigo-500/30',
+  },
+  {
+    icon: Globe,
+    title: 'Custom Domain + Auto-SSL',
+    desc: "Serve your widget from chat.yourdomain.com. DNS validation, Let's Encrypt auto-cert, reverse proxy config.",
     color: 'from-blue-500/20 to-indigo-500/20',
     iconColor: 'text-blue-400',
     borderHover: 'hover:border-blue-500/30',
   },
   {
     icon: Shield,
-    title: 'SLA Guarantee',
-    desc: '99.99% uptime SLA with financial penalties if we miss. Enterprise-level reliability your customers can count on.',
+    title: '99.9% SLA Guarantee',
+    desc: 'Guaranteed uptime with financial penalties. Dedicated account manager. 1-hour response time on all issues.',
     color: 'from-yellow-500/20 to-orange-500/20',
     iconColor: 'text-yellow-400',
     borderHover: 'hover:border-yellow-500/30',
   },
   {
-    icon: Lock,
-    title: 'SSO & Advanced Security',
-    desc: 'AES-256 encryption at rest, HMAC-SHA256 webhook signing, SAML/OIDC SSO, and IP whitelisting out of the box.',
-    color: 'from-red-500/20 to-rose-500/20',
-    iconColor: 'text-red-400',
-    borderHover: 'hover:border-red-500/30',
-  },
-  {
-    icon: Plug,
-    title: 'Custom Integrations',
-    desc: 'Priority plugin development for your ecosystem. Our engineers build the connectors your workflows require.',
-    color: 'from-indigo-500/20 to-violet-500/20',
-    iconColor: 'text-indigo-400',
-    borderHover: 'hover:border-indigo-500/30',
-  },
-  {
     icon: Zap,
-    title: 'Priority Support',
-    desc: '1-hour response time SLA. Escalation paths to senior engineers. 24/7 incident coverage for production issues.',
+    title: 'Advanced Analytics & Intelligence',
+    desc: 'Funnel analysis, cohort retention, revenue attribution, churn prediction. Conversation intelligence with buying signals.',
     color: 'from-amber-500/20 to-yellow-500/20',
     iconColor: 'text-amber-400',
     borderHover: 'hover:border-amber-500/30',

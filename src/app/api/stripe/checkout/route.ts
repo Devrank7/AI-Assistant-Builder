@@ -11,7 +11,7 @@ if (!BASE_URL) {
   console.warn('[stripe/checkout] Neither NEXT_PUBLIC_BASE_URL nor NEXTAUTH_URL is set');
 }
 
-const VALID_PLANS: Plan[] = ['basic', 'pro'];
+const VALID_PLANS: Plan[] = ['basic', 'starter', 'pro', 'enterprise'];
 const VALID_PERIODS: BillingPeriod[] = ['monthly', 'annual'];
 
 export async function POST(request: NextRequest) {

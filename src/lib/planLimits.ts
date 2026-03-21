@@ -5,7 +5,7 @@ export const PLAN_LIMITS: Record<Plan, { widgets: number; messagesPerMonth: numb
   none: { widgets: 0, messagesPerMonth: 0 },
   free: { widgets: 1, messagesPerMonth: 100 },
   basic: { widgets: 1, messagesPerMonth: 1000 },
-  starter: { widgets: 3, messagesPerMonth: 1000 },
+  starter: { widgets: 3, messagesPerMonth: 1_000 },
   pro: { widgets: -1, messagesPerMonth: -1 },
   enterprise: { widgets: -1, messagesPerMonth: -1 },
 };
