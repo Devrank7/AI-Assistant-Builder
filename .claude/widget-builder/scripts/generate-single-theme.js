@@ -1092,7 +1092,8 @@ function genChatMessage(c) {
     const timestampColor = 'text-aw-text-secondary';
     const copyDefault = 'text-aw-text-muted';
     const imgBorder = 'border-aw-surface-border';
-    const userMsgClasses = 'bg-gradient-to-r from-aw-user-msg-from to-aw-user-msg-to text-white rounded-br-md shadow-sm';
+    const userMsgClasses = 'rounded-br-md shadow-sm';
+    const userMsgStyle = `{ backgroundColor: '${c.userMsgFrom}', color: '#ffffff' }`;
 
     return `import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
@@ -1151,15 +1152,17 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                             : isBot
                               ? '${botMsgClasses}'
                               : '${userMsgClasses}'
-                    }\`}>
+                    }\`}
+                    style={!isBot && !isError ? ${userMsgStyle} : undefined}>
+
                         <div className="max-w-none msg-text [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
-                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-aw-link hover:text-aw-link-hover">{children}</a>
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className={\`underline decoration-1 underline-offset-2 transition-colors \${isBot ? 'text-aw-link hover:text-aw-link-hover' : 'text-inherit hover:text-white/80'}\`}>{children}</a>
                                     ),
                                     strong: ({ children }) => (
-                                        <strong className="font-semibold ${strongClasses}">{children}</strong>
+                                        <strong className={\`font-semibold \${isBot ? '${strongClasses}' : 'text-inherit'}\`}>{children}</strong>
                                     ),
                                     li: ({ children }) => (
                                         <li className="text-[12.5px] leading-relaxed">{children}</li>

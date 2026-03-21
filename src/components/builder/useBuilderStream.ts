@@ -284,10 +284,16 @@ export function useBuilderStream() {
 
       const session = data.data;
       const restoredMessages: BuilderMessage[] = (session.messages || []).map(
-        (m: { role: string; content: string; timestamp: string }) => ({
+        (m: {
+          role: string;
+          content: string;
+          timestamp: string;
+          crmInstruction?: { provider: string; steps: string[] };
+        }) => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
           timestamp: m.timestamp || new Date().toISOString(),
+          ...(m.crmInstruction ? { crmInstruction: m.crmInstruction } : {}),
         })
       );
 

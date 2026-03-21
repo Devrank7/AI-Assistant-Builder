@@ -30,6 +30,7 @@ import {
   Search,
 } from 'lucide-react';
 import { Card, Button, EmptyState } from '@/components/ui';
+import { motion } from 'framer-motion';
 
 const PRODUCTION_URL = 'https://winbixai.com';
 
@@ -58,11 +59,17 @@ interface TabStep {
   warning?: string;
 }
 
+interface TabDifficulty {
+  level: 'instant' | 'easy' | 'medium';
+  label: string;
+}
+
 interface TabDef {
   id: TabId;
   label: string;
   icon: string;
   description: string;
+  difficulty: TabDifficulty;
   steps: (embedCode: string, embedCodeDefer: string, clientId: string) => TabStep[];
 }
 
@@ -86,6 +93,7 @@ const TABS: TabDef[] = [
     label: 'Script Tag',
     icon: '🔖',
     description: 'Universal — works on any HTML page',
+    difficulty: { level: 'easy', label: '~2 min' },
     steps: (embedCode) => [
       {
         title: 'Copy the embed code',
@@ -121,44 +129,34 @@ ${embedCode}
     id: 'wordpress',
     label: 'WordPress',
     icon: '🔵',
-    description: 'Using WPCode plugin (recommended)',
-    steps: (embedCode) => [
+    description: 'One-click plugin install — no coding required',
+    difficulty: { level: 'instant', label: 'One-Click' },
+    steps: (embedCode, _, clientId) => [
       {
-        title: 'Install the WPCode plugin',
+        title: 'Download the WinBix AI Plugin',
         content:
-          'In your WordPress admin panel, go to Plugins → Add New. Search for "WPCode" (formerly Insert Headers and Footers). Install and activate.',
-        tip: 'WPCode is the safest method — changes survive theme updates.',
+          'Click the download button below to get the WinBix AI plugin .zip file, pre-configured with your widget ID.',
+        tip: 'The plugin is lightweight (~5KB) and pre-configured with your unique widget ID — no setup needed after activation.',
       },
       {
-        title: 'Open Code Snippets → Header & Footer',
-        content: 'In the left sidebar, go to Code Snippets → Header & Footer. You will see input areas for each zone.',
+        title: 'Upload to WordPress',
+        content:
+          'In your WordPress admin panel, go to Plugins → Add New → Upload Plugin. Click "Choose File" and select the downloaded winbix-ai-widget.zip file. Then click "Install Now".',
+        tip: 'You can also drag-and-drop the .zip file onto the upload area in newer WordPress versions.',
       },
       {
-        title: 'Paste in the Footer section',
-        content: 'Scroll to the "Body" or "Footer" section. Paste the embed code there.',
+        title: 'Activate',
+        content:
+          'Click "Activate Plugin". Done! The widget will automatically appear on all pages of your WordPress site. No configuration required.',
+        tip: 'To deactivate later, simply go to Plugins and click Deactivate next to "WinBix AI Widget".',
+      },
+      {
+        title: 'Alternative: Manual installation with WPCode',
+        content:
+          'If you prefer not to use the plugin, you can install manually using the WPCode plugin. Go to Plugins → Add New, search for "WPCode", install and activate it. Then go to Code Snippets → Header & Footer, and paste the embed code into the Footer section:',
         code: embedCode,
         language: 'html',
-      },
-      {
-        title: 'Save changes',
-        content: 'Click "Save Changes". The widget now appears on every page of your WordPress site.',
-      },
-      {
-        title: 'Alternative: Theme functions.php',
-        content:
-          'Advanced users can enqueue the script via functions.php. Go to Appearance → Theme File Editor → functions.php and add:',
-        code: `function winbix_widget_script() {
-    wp_enqueue_script(
-        'winbix-ai-widget',
-        '${embedCode.match(/src="([^"]+)"/)?.[1] ?? ''}',
-        [],
-        null,
-        true  // load in footer
-    );
-}
-add_action( 'wp_enqueue_scripts', 'winbix_widget_script' );`,
-        language: 'php',
-        warning: 'Editing functions.php directly can break your site. Use a child theme or WPCode instead.',
+        warning: 'This manual method works but the plugin approach above is simpler and recommended.',
       },
     ],
   },
@@ -167,6 +165,7 @@ add_action( 'wp_enqueue_scripts', 'winbix_widget_script' );`,
     label: 'Shopify',
     icon: '🟢',
     description: 'Add to theme.liquid',
+    difficulty: { level: 'easy', label: '~3 min' },
     steps: (_, embedCodeDefer) => [
       {
         title: 'Open your Shopify admin',
@@ -201,6 +200,7 @@ ${embedCodeDefer}
     label: 'React / Next.js',
     icon: '⚛️',
     description: 'useEffect or Next.js Script component',
+    difficulty: { level: 'medium', label: '~5 min' },
     steps: (embedCode, _, clientId) => [
       {
         title: 'Option A: Next.js Script component (recommended for Next.js)',
@@ -274,6 +274,7 @@ export default function App({ Component, pageProps }) {
     label: 'Google Tag Manager',
     icon: '🏷️',
     description: 'Deploy via GTM without touching code',
+    difficulty: { level: 'easy', label: '~3 min' },
     steps: (embedCode) => [
       {
         title: 'Open Google Tag Manager',
@@ -313,6 +314,7 @@ export default function App({ Component, pageProps }) {
     label: 'Wix',
     icon: '🟣',
     description: 'Via Wix Custom Code settings',
+    difficulty: { level: 'easy', label: '~2 min' },
     steps: (embedCode) => [
       {
         title: 'Open your Wix Dashboard',
@@ -341,6 +343,7 @@ export default function App({ Component, pageProps }) {
     label: 'Tilda',
     icon: '🟡',
     description: 'Via Tilda Site Settings',
+    difficulty: { level: 'easy', label: '~2 min' },
     steps: (embedCode) => [
       {
         title: 'Open Site Settings',
@@ -368,6 +371,7 @@ export default function App({ Component, pageProps }) {
     label: 'Webflow',
     icon: '🔷',
     description: 'Via Webflow Project Settings',
+    difficulty: { level: 'easy', label: '~2 min' },
     steps: (embedCode) => [
       {
         title: 'Open Project Settings',
@@ -444,6 +448,10 @@ export default function InstallationPage() {
   const [activeTab, setActiveTab] = useState<TabId>('script');
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set([0]));
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // WordPress plugin download state
+  const [wpDownloading, setWpDownloading] = useState(false);
+  const [wpDownloadError, setWpDownloadError] = useState<string | null>(null);
 
   // Verification state
   const [verifyUrl, setVerifyUrl] = useState('');
@@ -553,6 +561,43 @@ export default function InstallationPage() {
     setExpandedSteps(new Set([0]));
     const w = widgets.find((x) => x.clientId === clientId);
     setVerifyUrl(w?.website || '');
+  };
+
+  const downloadWordPressPlugin = async () => {
+    if (!widget) return;
+    setWpDownloading(true);
+    setWpDownloadError(null);
+    try {
+      const res = await fetch(`/api/installation/wordpress-plugin?clientId=${widget.clientId}`);
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'winbix-ai-widget.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setWpDownloadError('Failed to download plugin. Please try again.');
+    } finally {
+      setWpDownloading(false);
+    }
+  };
+
+  // ── Difficulty badge helper ──
+  const getDifficultyBadge = (difficulty: TabDifficulty) => {
+    const colors = {
+      instant: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      easy: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    };
+    return (
+      <span
+        className={`rounded-full border px-1.5 py-0.5 text-[9px] leading-none font-semibold ${colors[difficulty.level]}`}
+      >
+        {difficulty.label}
+      </span>
+    );
   };
 
   // ── Loading state ──
@@ -756,6 +801,124 @@ export default function InstallationPage() {
         </div>
       </Card>
 
+      {/* ── One-Click Installs ── */}
+      <div className="mb-8">
+        <div className="mb-4 flex items-center gap-2">
+          <Zap className="h-5 w-5 text-emerald-400" />
+          <h2 className="text-text-primary text-lg font-semibold">One-Click Install</h2>
+          <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
+            Recommended
+          </span>
+        </div>
+        <p className="text-text-secondary mb-4 text-sm">No coding required — install your widget with a single click</p>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {/* WordPress Card */}
+          <motion.button
+            onClick={downloadWordPressPlugin}
+            disabled={wpDownloading || !widget}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0 }}
+            className="group relative flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 text-left transition-all duration-300 hover:border-emerald-500/30 hover:bg-emerald-500/[0.04] hover:shadow-lg hover:shadow-emerald-500/5 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {/* WordPress Logo SVG */}
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#21759B]/15">
+              <svg viewBox="0 0 24 24" className="h-7 w-7 text-[#21759B]" fill="currentColor">
+                <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zM3.009 12c0-1.247.26-2.432.727-3.508l4.002 10.965A8.993 8.993 0 013.009 12zm8.991 9c-.908 0-1.782-.146-2.6-.415l2.762-8.024 2.83 7.755c.019.045.04.088.063.13A8.95 8.95 0 0112 21zm1.19-13.234c.554-.029 1.053-.088 1.053-.088.496-.059.437-.787-.058-.758 0 0-1.491.117-2.453.117-.903 0-2.422-.117-2.422-.117-.497-.029-.556.729-.059.758 0 0 .47.059.966.088l1.435 3.931-2.015 6.044-3.354-9.975c.555-.029 1.054-.088 1.054-.088.496-.059.437-.787-.059-.758 0 0-1.49.117-2.452.117-.172 0-.376-.004-.588-.011A8.983 8.983 0 0112 3.009c2.349 0 4.494.901 6.1 2.375-.039-.003-.076-.009-.116-.009-1.073 0-1.832.935-1.832 1.938 0 .903.524 1.666 1.082 2.569.418.729.907 1.665.907 3.016 0 .935-.359 2.021-.832 3.535l-1.09 3.643-3.039-9.076zm4.701 1.862c.838 1.373 1.318 2.953 1.318 4.635 0 3.56-1.932 6.664-4.806 8.331l2.953-8.543c.552-1.378.736-2.48.736-3.46 0-.355-.024-.685-.068-.993l-.133.03z" />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-text-primary text-sm font-semibold">WordPress Plugin</div>
+              <div className="text-text-tertiary mt-0.5 text-xs">Download &amp; activate — zero code needed</div>
+            </div>
+            <div className="flex-shrink-0">
+              {wpDownloading ? (
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/15">
+                  <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
+                </div>
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/15 transition-colors group-hover:bg-emerald-500/25">
+                  <Download className="h-4 w-4 text-emerald-400" />
+                </div>
+              )}
+            </div>
+          </motion.button>
+
+          {/* Shopify Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
+            className="relative flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 opacity-70"
+          >
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#96BF48]/15">
+              <svg viewBox="0 0 24 24" className="h-7 w-7 text-[#96BF48]" fill="currentColor">
+                <path d="M15.337 3.415c-.026-.021-.063-.035-.1-.03-.035.003-3.767.555-3.767.555s-2.487-2.483-2.766-2.757c-.278-.278-.82-.194-.972-.147 0 0-.5.154-1.314.404C6.09.58 5.677.095 5.18.017 4.678-.063 4.073.22 3.772.83c-.303.612-.43 1.392-.324 2.088.057.375.476 2.42.476 2.42S2.396 6.04 2.16 6.282c-.238.243-.192.574-.192.654 0 .08.025.115.1.372.072.258 1.667 6.356 1.667 6.356l5.898 1.318 3.473-1.14s-2.282-7.324-2.308-7.413a.093.093 0 00-.06-.062c-.026-.008-2.077-.448-2.077-.448s1.745-4.803 2.11-5.818c.03-.082.03-.147.012-.21-.03-.107-.06-.14-.23-.225-.103-.05-.36-.166-.36-.166s2.37-.344 2.932-.42c.098-.013.167-.047.212-.085zM6.548 1.52a2.02 2.02 0 01.515-.222l-.727 2.24c-.283-.947-.375-1.5-.33-1.794.024-.165.243-.224.542-.224zm-1.37.217c.07 0 .15.012.237.04L4.02 5.652s-.362-1.887-.412-2.21c-.067-.44.052-.99.247-1.384.194-.392.59-.546.89-.546l.434.225zm4.483 4.245l-.772 2.388-2.17-.47s1.123-3.096 1.587-4.38c.044-.121.17-.218.17-.218l1.185 2.68z" />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-text-primary text-sm font-semibold">Shopify App</div>
+              <div className="text-text-tertiary mt-0.5 text-xs">Coming Soon — Join waitlist</div>
+            </div>
+            <span className="flex-shrink-0 rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+              Coming Q2 2026
+            </span>
+          </motion.div>
+
+          {/* Wix Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="relative flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 opacity-70"
+          >
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#FAAD4D]/15">
+              <svg viewBox="0 0 24 24" className="h-7 w-7 text-[#FAAD4D]" fill="currentColor">
+                <path d="M7.834 4.5L5.6 19.5h-.013L3.348 4.5H.5l3.402 15h3.576L9.5 7.77 11.522 19.5h3.576l3.402-15h-2.848l-2.24 15-.012 0L11.166 4.5z" />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-text-primary text-sm font-semibold">Wix App</div>
+              <div className="text-text-tertiary mt-0.5 text-xs">Coming Soon</div>
+            </div>
+            <span className="flex-shrink-0 rounded-full border border-gray-500/20 bg-gray-500/10 px-2 py-0.5 text-[10px] font-semibold text-gray-400">
+              Coming Soon
+            </span>
+          </motion.div>
+
+          {/* Webflow Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+            className="relative flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 opacity-70"
+          >
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#4353FF]/15">
+              <svg viewBox="0 0 24 24" className="h-7 w-7 text-[#4353FF]" fill="currentColor">
+                <path d="M17.802 8.56s-1.946 6.066-2.07 6.47c-.036-.445-.85-6.47-.85-6.47-2.238 0-3.418 1.56-4.041 3.227 0 0-1.574 4.09-1.669 4.348-.014-.386-.4-4.268-.4-4.268C8.534 9.695 6.696 8.56 5.353 8.56l2.14 11.88c2.338-.016 3.588-1.563 4.237-3.24 0 0 1.33-3.428 1.39-3.594.026.366.862 6.834.862 6.834 2.35-.016 3.6-1.498 4.266-3.19L21.5 8.56h-3.698z" />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-text-primary text-sm font-semibold">Webflow App</div>
+              <div className="text-text-tertiary mt-0.5 text-xs">Coming Soon</div>
+            </div>
+            <span className="flex-shrink-0 rounded-full border border-gray-500/20 bg-gray-500/10 px-2 py-0.5 text-[10px] font-semibold text-gray-400">
+              Coming Soon
+            </span>
+          </motion.div>
+        </div>
+
+        {wpDownloadError && (
+          <div className="mt-3 rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3">
+            <p className="text-xs leading-relaxed text-red-400">
+              <span className="font-semibold">Error: </span>
+              {wpDownloadError}
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* ── Platform Tabs ── */}
       <div className="mb-4 flex items-center gap-2">
         <Blocks className="text-text-secondary h-5 w-5" />
@@ -771,7 +934,7 @@ export default function InstallationPage() {
               setActiveTab(tab.id);
               setExpandedSteps(new Set([0]));
             }}
-            className={`flex flex-shrink-0 flex-col items-center gap-0.5 rounded-xl border px-4 py-2.5 text-sm transition-all ${
+            className={`flex flex-shrink-0 flex-col items-center gap-1 rounded-xl border px-4 py-2.5 text-sm transition-all ${
               activeTab === tab.id
                 ? 'border-accent bg-accent/10 text-accent shadow-sm'
                 : 'border-border text-text-secondary hover:border-accent/40 hover:text-text-primary'
@@ -779,6 +942,7 @@ export default function InstallationPage() {
           >
             <span className="text-base leading-none">{tab.icon}</span>
             <span className="leading-none font-medium">{tab.label}</span>
+            {getDifficultyBadge(tab.difficulty)}
           </button>
         ))}
       </div>
@@ -813,6 +977,27 @@ export default function InstallationPage() {
             {expandedSteps.has(idx) && (
               <div className="border-border border-t px-5 py-4">
                 <p className="text-text-secondary text-sm leading-relaxed">{step.content}</p>
+
+                {/* WordPress download button for Step 1 */}
+                {activeTab === 'wordpress' && idx === 0 && (
+                  <button
+                    onClick={downloadWordPressPlugin}
+                    disabled={wpDownloading || !widget}
+                    className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {wpDownloading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Downloading...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4" />
+                        Download Plugin (.zip)
+                      </>
+                    )}
+                  </button>
+                )}
 
                 {step.code && (
                   <CodeBlock

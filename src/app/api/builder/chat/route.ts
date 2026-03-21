@@ -100,12 +100,21 @@ export async function POST(request: NextRequest) {
 
     const stream = createSSEStream(async (write) => {
       try {
+        // Track crm_instruction events so we can persist them with the assistant message
+        let lastCrmInstruction: { provider: string; steps: string[] } | undefined;
+        const wrappedWrite: typeof write = (event) => {
+          if (event.type === 'crm_instruction') {
+            lastCrmInstruction = { provider: event.provider, steps: event.steps };
+          }
+          write(event);
+        };
+
         const toolContext: ToolContext = {
           sessionId: currentSessionId,
           userId: auth.userId,
           baseUrl,
           cookie,
-          write,
+          write: wrappedWrite,
           userPlan,
           pendingFileText: pendingFileTexts.get(currentSessionId)?.text,
         };
@@ -115,7 +124,7 @@ export async function POST(request: NextRequest) {
           messages: conversationMessages,
           toolRegistry,
           toolContext,
-          write,
+          write: wrappedWrite,
         });
 
         // Clean up pending file text
@@ -127,6 +136,7 @@ export async function POST(request: NextRequest) {
             role: 'assistant',
             content: assistantText,
             timestamp: new Date(),
+            ...(lastCrmInstruction ? { crmInstruction: lastCrmInstruction } : {}),
           });
         }
 
@@ -134,12 +144,24 @@ export async function POST(request: NextRequest) {
         if (toolCallsMade.includes('analyze_site')) session.currentStage = 'analysis';
         if (toolCallsMade.includes('generate_design') || toolCallsMade.includes('select_theme'))
           session.currentStage = 'design';
-        if (toolCallsMade.includes('build_deploy')) {
-          session.currentStage = 'deploy';
-          session.status = 'deployed';
-        }
         if (toolCallsMade.includes('crawl_knowledge')) {
           session.knowledgeUploaded = true;
+          session.currentStage = 'knowledge';
+        }
+        // After knowledge is uploaded and widget is built, move to customize stage
+        if (
+          session.knowledgeUploaded &&
+          session.clientId &&
+          !toolCallsMade.includes('build_deploy') &&
+          (session.currentStage === 'knowledge' || session.currentStage === 'design')
+        ) {
+          session.currentStage = 'customize';
+        }
+        if (toolCallsMade.includes('build_deploy')) {
+          // If knowledge was already uploaded, go straight to deploy
+          // Otherwise set deploy stage
+          session.currentStage = 'deploy';
+          session.status = 'deployed';
         }
 
         // Reload session from DB — tools may have updated clientId, stage, etc.

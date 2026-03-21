@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Syne } from 'next/font/google';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -132,6 +133,7 @@ function WidgetCard({
   copiedId: string | null;
   onCopy: (id: string) => void;
 }) {
+  const router = useRouter();
   const style = getTypeStyle(widget.clientType);
   const TypeIcon = style.icon;
   const isCopied = copiedId === widget.clientId;
@@ -140,7 +142,8 @@ function WidgetCard({
     <motion.div
       variants={staggerItem}
       layout
-      className="group relative overflow-hidden rounded-2xl border border-gray-200/60 bg-white transition-all duration-300 hover:border-gray-300/80 hover:shadow-lg dark:border-white/[0.06] dark:bg-[#111118] dark:hover:border-white/[0.12] dark:hover:shadow-[0_8px_40px_rgba(0,0,0,0.3)]"
+      onClick={() => router.push(`/dashboard/builder?client=${widget.clientId}`)}
+      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-gray-200/60 bg-white transition-all duration-300 hover:border-gray-300/80 hover:shadow-lg dark:border-white/[0.06] dark:bg-[#111118] dark:hover:border-white/[0.12] dark:hover:shadow-[0_8px_40px_rgba(0,0,0,0.3)]"
       style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.02)' }}
     >
       {/* Gradient accent line */}
@@ -286,6 +289,7 @@ function WidgetRow({
   copiedId: string | null;
   onCopy: (id: string) => void;
 }) {
+  const router = useRouter();
   const style = getTypeStyle(widget.clientType);
   const TypeIcon = style.icon;
   const isCopied = copiedId === widget.clientId;
@@ -294,7 +298,8 @@ function WidgetRow({
     <motion.div
       variants={staggerItem}
       layout
-      className="group relative flex items-center gap-4 border-b border-gray-100 px-5 py-4 transition-colors last:border-0 hover:bg-gray-50/50 dark:border-white/[0.04] dark:hover:bg-white/[0.02]"
+      onClick={() => router.push(`/dashboard/builder?client=${widget.clientId}`)}
+      className="group relative flex cursor-pointer items-center gap-4 border-b border-gray-100 px-5 py-4 transition-colors last:border-0 hover:bg-gray-50/50 dark:border-white/[0.04] dark:hover:bg-white/[0.02]"
     >
       {/* Left accent */}
       <div

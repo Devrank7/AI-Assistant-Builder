@@ -54,16 +54,18 @@ function ChatMessage({ role, content, timestamp, isError, onRetry, imageUrl, onI
                             ? 'bg-red-50 text-red-600 border border-red-200 rounded-bl-md'
                             : isBot
                               ? 'bg-aw-surface-card text-aw-text-primary border border-aw-surface-border shadow-sm rounded-bl-md'
-                              : 'bg-gradient-to-r from-aw-user-msg-from to-aw-user-msg-to text-white rounded-br-md shadow-sm'
-                    }`}>
+                              : 'rounded-br-md shadow-sm'
+                    }`}
+                    style={!isBot && !isError ? { backgroundColor: '#0e5eba', color: '#ffffff' } : undefined}>
+
                         <div className="max-w-none msg-text [&>p]:my-0 [&>p+p]:mt-2 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal">
                             <ReactMarkdown
                                 components={{
                                     a: ({ href, children }) => (
-                                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-2 transition-colors text-aw-link hover:text-aw-link-hover">{children}</a>
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className={`underline decoration-1 underline-offset-2 transition-colors ${isBot ? 'text-aw-link hover:text-aw-link-hover' : 'text-inherit hover:text-white/80'}`}>{children}</a>
                                     ),
                                     strong: ({ children }) => (
-                                        <strong className="font-semibold text-aw-text-primary font-semibold">{children}</strong>
+                                        <strong className={`font-semibold ${isBot ? 'text-aw-text-primary font-semibold' : 'text-inherit'}`}>{children}</strong>
                                     ),
                                     li: ({ children }) => (
                                         <li className="text-[12.5px] leading-relaxed">{children}</li>

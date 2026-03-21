@@ -4,6 +4,7 @@ export interface IBuilderMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  crmInstruction?: { provider: string; steps: string[] };
 }
 
 export type BuilderStatus = 'chatting' | 'streaming' | 'building' | 'preview' | 'deployed';
@@ -16,7 +17,7 @@ export interface IBuilderSession extends Document {
   status: BuilderStatus;
   widgetName: string | null;
   widgetType: 'ai_chat' | 'smart_faq' | 'lead_form' | null;
-  currentStage: 'input' | 'analysis' | 'design' | 'knowledge' | 'deploy' | 'integrations' | 'suggestions' | 'workspace';
+  currentStage: 'input' | 'analysis' | 'design' | 'knowledge' | 'customize' | 'deploy';
   siteProfile: Record<string, unknown> | null;
   knowledgeUploaded: boolean;
   connectedIntegrations: {
@@ -56,6 +57,10 @@ const messageSchema = new Schema<IBuilderMessage>(
     role: { type: String, enum: ['user', 'assistant'], required: true },
     content: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
+    crmInstruction: {
+      type: Schema.Types.Mixed,
+      default: undefined,
+    },
   },
   { _id: false }
 );
@@ -79,7 +84,7 @@ const builderSessionSchema = new Schema<IBuilderSession>(
     },
     currentStage: {
       type: String,
-      enum: ['input', 'analysis', 'design', 'knowledge', 'deploy', 'integrations', 'suggestions', 'workspace'],
+      enum: ['input', 'analysis', 'design', 'knowledge', 'customize', 'deploy'],
       default: 'input',
     },
     siteProfile: { type: Schema.Types.Mixed, default: null },

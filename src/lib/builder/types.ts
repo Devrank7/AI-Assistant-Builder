@@ -2,16 +2,7 @@
 
 // --- Stage & Mode constants ---
 
-export const BUILDER_STAGES = [
-  'input',
-  'analysis',
-  'design',
-  'knowledge',
-  'deploy',
-  'integrations',
-  'suggestions',
-  'workspace',
-] as const;
+export const BUILDER_STAGES = ['input', 'analysis', 'design', 'knowledge', 'customize', 'deploy'] as const;
 export type BuilderStage = (typeof BUILDER_STAGES)[number];
 
 export const PANEL_MODES = [

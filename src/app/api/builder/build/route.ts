@@ -165,6 +165,7 @@ export async function POST(request: NextRequest) {
           clientToken: '',
           clientType: 'quick',
           userId: auth.userId,
+          organizationId: auth.organizationId || undefined,
           username: session.widgetName || clientId,
           email: auth.user?.email || '',
           website: (cleanThemeJson.domain as string) || '',

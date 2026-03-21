@@ -141,7 +141,6 @@ export default function BuilderPage() {
     const clientParam = searchParams.get('client');
     if (clientParam) {
       restoredRef.current = true;
-      // Find session by clientId
       fetch('/api/builder/sessions')
         .then((r) => r.json())
         .then((d) => {
@@ -155,6 +154,15 @@ export default function BuilderPage() {
         .catch(() => {});
     }
   }, [searchParams, stream]);
+
+  // Keep URL in sync with active session so reload preserves it
+  useEffect(() => {
+    if (stream.sessionId && !searchParams.get('session')) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('session', stream.sessionId);
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [stream.sessionId, searchParams]);
 
   const handleUrlSubmit = useCallback(
     (input: string) => {
@@ -219,7 +227,7 @@ export default function BuilderPage() {
             <div className="flex min-w-0 flex-1 flex-col">
               {/* Action bar — shows when widget is built or deployed */}
               {stream.widgetClientId && (
-                <div className="border-border bg-bg-secondary/30 flex items-center gap-3 border-b px-5 py-3">
+                <div className="border-border bg-bg-secondary/30 flex items-center justify-center gap-3 border-b px-5 py-3">
                   {/* Preview on Site button */}
                   <PreviewOnSiteButton clientId={stream.widgetClientId} currentTheme={stream.currentTheme} />
 

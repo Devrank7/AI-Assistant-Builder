@@ -1,0 +1,17 @@
+{
+  "current": 2,
+  "versions": [
+    {
+      "v": 1,
+      "date": "2026-03-21T14:28:27.180Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    },
+    {
+      "v": 2,
+      "date": "2026-03-21T14:28:33.112Z",
+      "description": "Initial build",
+      "tool": "build_widget"
+    }
+  ]
+}

@@ -56,15 +56,5 @@ function cleanup() {
     delete (window as unknown as Record<string, unknown>).__WIDGET_CSS__;
   }
 
-  // 5. Clear widget localStorage entries (old chat messages + session IDs)
-  try {
-    for (let i = localStorage.length - 1; i >= 0; i--) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('aiwidget_')) {
-        localStorage.removeItem(key);
-      }
-    }
-  } catch {
-    /* localStorage may be unavailable */
-  }
+  // Note: localStorage (aiwidget_*) is preserved across reloads to keep chat history
 }

@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Sinoptik Glass Light */
+/* Sinoptik Glass */
 :host {
     /* Brand */
     --aw-primary: #0e5eba;
-    --aw-accent: #0c50a0;
+    --aw-accent: #126cd6;
     /* Surfaces */
     --aw-surface-bg: #ffffff;
     --aw-surface-card: #ffffff;
@@ -14,29 +14,29 @@
     --aw-surface-input: #f8fafc;
     --aw-surface-input-focus: #ffffff;
     /* Text */
-    --aw-text-primary: #0f172a;
+    --aw-text-primary: #1e293b;
     --aw-text-secondary: #475569;
     --aw-text-muted: #94a3b8;
     /* Header gradient */
     --aw-header-from: #0e5eba;
-    --aw-header-via: #1066c9;
-    --aw-header-to: #1272d8;
+    --aw-header-via: #126cd6;
+    --aw-header-to: #1a73e8;
     /* Toggle button */
     --aw-toggle-from: #0e5eba;
-    --aw-toggle-via: #1066c9;
-    --aw-toggle-to: #1272d8;
+    --aw-toggle-via: #126cd6;
+    --aw-toggle-to: #1a73e8;
     --aw-toggle-shadow: #0e5eba;
     --aw-toggle-hover-rgb: 14, 94, 186;
     /* Send button */
     --aw-send-from: #0e5eba;
-    --aw-send-hover: #1272d8;
+    --aw-send-hover: #126cd6;
     /* Online dot */
     --aw-online-dot: #10b981;
     --aw-online-dot-border: #ffffff;
     /* User messages */
     --aw-user-msg-from: #0e5eba;
-    --aw-user-msg-to: #1272d8;
-    --aw-user-msg-shadow: #0e5eba;
+    --aw-user-msg-to: #126cd6;
+    --aw-user-msg-shadow: #0e5eba33;
     /* Avatar */
     --aw-avatar-from: #ffffff;
     --aw-avatar-to: #f1f5f9;
@@ -52,21 +52,21 @@
     --aw-chip-hover-border: #cbd5e1;
     /* Links */
     --aw-link: #0e5eba;
-    --aw-link-hover: #0c50a0;
+    --aw-link-hover: #0c50a3;
     /* Copy button */
     --aw-copy-hover: #f1f5f9;
     --aw-copy-active: #e2e8f0;
     /* Focus */
     --aw-focus-border: #0e5eba;
-    --aw-focus-ring: #0e5eba;
+    --aw-focus-ring: #0e5eba33;
     --aw-focus-rgb: 14, 94, 186;
     /* Image button states */
     --aw-img-active-border: #0e5eba;
     --aw-img-active-bg: #eff6ff;
     --aw-img-active-text: #0e5eba;
-    --aw-img-hover-text: #0c50a0;
-    --aw-img-hover-border: #0c50a0;
-    --aw-img-hover-bg: #e0f2fe;
+    --aw-img-hover-text: #0c50a3;
+    --aw-img-hover-border: #126cd6;
+    --aw-img-hover-bg: #f8fafc;
     /* Feedback */
     --aw-feedback-active: #0e5eba;
     --aw-feedback-hover: #eff6ff;

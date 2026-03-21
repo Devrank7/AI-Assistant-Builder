@@ -335,9 +335,14 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
       temperature: config.temperature,
       maxOutputTokens: config.maxTokens,
     },
+    tools: [{ googleSearch: {} } as any],
   });
 
-  const textPrompt = fullSystemPrompt + `\n\nUser question: ${input.message}`;
+  const enhancedSystemPrompt =
+    fullSystemPrompt +
+    `\n\nWEB SEARCH: You have access to Google Search. For ANY question about real-time data (weather, current prices, today's news, live scores, stock prices, current events, schedules, availability, "right now" questions), you MUST use the google_search tool to get fresh, accurate information. NEVER say "I don't have this data" — search for it instead.`;
+
+  const textPrompt = enhancedSystemPrompt + `\n\nUser question: ${input.message}`;
   // Build multimodal content parts if media is present
   const mediaParts: Array<{ inlineData: { data: string; mimeType: string } }> = [];
   if (input.image?.data) {
@@ -625,6 +630,7 @@ export async function routeMessageStream(input: RouteMessageInput): Promise<{
       temperature: config.temperature,
       maxOutputTokens: config.maxTokens,
     },
+    tools: [{ googleSearch: {} } as any],
   });
 
   // Enhance prompt for website channel: page context + follow-up suggestions
@@ -668,6 +674,8 @@ Only use :::form ONCE per conversation. Use plain text for normal responses.`;
     enhancedPrompt +=
       '\n\nIMPORTANT: At the very end of your response, suggest exactly 3 brief follow-up questions the user might want to ask next. Format them EXACTLY as: [SUGGESTIONS]question 1|question 2|question 3[/SUGGESTIONS]. Keep each question under 50 characters. Do not include this format anywhere else in your response.';
   }
+
+  enhancedPrompt += `\n\nWEB SEARCH: You have access to Google Search. For ANY question about real-time data (weather, current prices, today's news, live scores, stock prices, current events, schedules, availability, "right now" questions), you MUST use the google_search tool to get fresh, accurate information. NEVER say "I don't have this data" — search for it instead.`;
 
   const textPrompt = enhancedPrompt + `\n\nUser question: ${input.message}`;
   // Build multimodal content parts if media is present
