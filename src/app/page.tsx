@@ -335,7 +335,7 @@ export default function LandingPage() {
       {/* ════════════════════════════════════════════
           HERO — Apple-level emotional impact
           ════════════════════════════════════════════ */}
-      <section id="hero" className="relative px-6 pt-20 pb-24 md:px-12 md:pt-32 md:pb-36">
+      <section id="hero" className="relative px-6 pt-10 pb-24 md:px-12 md:pt-16 md:pb-36">
         {/* Background effects */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="orb-1 bg-accent/[0.07] absolute -top-[30%] -left-[15%] h-[70vh] w-[70vh] rounded-full blur-[120px]" />
@@ -345,26 +345,27 @@ export default function LandingPage() {
         </div>
 
         <div className="relative mx-auto max-w-7xl">
-          <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
-            {/* Left: Copy */}
-            <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-2xl lg:max-w-none">
-              <motion.div variants={fadeUp}>
-                <div className="border-accent/20 bg-accent/[0.06] text-accent mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium">
-                  <span
-                    className="bg-accent h-1.5 w-1.5 rounded-full"
-                    style={{ animation: 'pulse-ring 2s ease-in-out infinite' }}
-                  />
-                  The AI Sales Platform for 2026
-                </div>
-              </motion.div>
+          {/* Badge — full width */}
+          <motion.div initial="hidden" animate="visible" variants={stagger}>
+            <motion.div variants={fadeUp}>
+              <div className="border-accent/20 bg-accent/[0.06] text-accent mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium">
+                <span
+                  className="bg-accent h-1.5 w-1.5 rounded-full"
+                  style={{ animation: 'pulse-ring 2s ease-in-out infinite' }}
+                />
+                The AI Sales Platform for 2026
+              </div>
+            </motion.div>
+          </motion.div>
 
+          {/* Two-column: headline+copy left, chat mockup right (aligned to top) */}
+          <div className="grid items-start gap-12 lg:grid-cols-[1fr_380px] lg:gap-14 xl:grid-cols-[1fr_420px]">
+            <motion.div initial="hidden" animate="visible" variants={stagger}>
               <motion.h1
                 variants={fadeUp}
-                className={`${syne.className} text-text-primary mb-7 text-[2.75rem] leading-[1.1] font-extrabold tracking-[-0.035em] sm:text-5xl lg:text-[3.75rem]`}
+                className={`${syne.className} text-text-primary mb-7 text-[2.75rem] leading-[1.08] font-extrabold tracking-[-0.035em] sm:text-5xl md:text-[3.5rem] lg:text-[3.75rem]`}
               >
-                Your website
-                <br />
-                never sleeps{' '}
+                Your website never sleeps{' '}
                 <span className="relative">
                   <span className="text-accent relative z-10">again.</span>
                   <span className="bg-accent/10 absolute -inset-x-2 bottom-0 z-0 h-3 rounded-sm" />
@@ -418,7 +419,7 @@ export default function LandingPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right: Live chat mockup */}
+            {/* Right: Live chat mockup — aligned to headline top */}
             <motion.div
               initial={{ opacity: 0, y: 40, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -510,7 +511,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 4, duration: 0.5 }}
-                className="border-border bg-bg-primary absolute -right-6 -bottom-4 rounded-xl border px-4 py-3 shadow-lg"
+                className="border-border bg-bg-primary absolute -right-2 -bottom-14 rounded-xl border px-4 py-3 shadow-lg"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/10">
