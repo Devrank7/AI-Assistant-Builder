@@ -20,9 +20,9 @@ const menuVariants = {
     opacity: 1,
     y: 0,
     pointerEvents: 'auto' as const,
-    transition: { duration: 0.2, ease: [0.25, 0.4, 0.25, 1] },
+    transition: { duration: 0.2, ease: [0.25, 0.4, 0.25, 1] as const },
   },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.15, ease: 'easeIn' } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.15, ease: 'easeIn' as const } },
 };
 
 const navVariants = {
@@ -30,7 +30,7 @@ const navVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.45, ease: [0.25, 0.4, 0.25, 1] },
+    transition: { duration: 0.45, ease: [0.25, 0.4, 0.25, 1] as const },
   },
 };
 

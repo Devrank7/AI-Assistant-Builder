@@ -58,13 +58,13 @@ describe('GET /api/predictions', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 400 when clientId missing', async () => {
+  it('returns empty array when clientId missing', async () => {
     mockVerifyUser.mockResolvedValue(mockAuth as never);
     const { GET } = await import('@/app/api/predictions/route');
     const res = await GET(createRequest('GET', '/api/predictions'));
     const json = await res.json();
-    expect(res.status).toBe(400);
-    expect(json.error).toContain('clientId is required');
+    expect(res.status).toBe(200);
+    expect(json.data).toEqual([]);
   });
 
   it('returns list of predictions', async () => {
@@ -192,13 +192,13 @@ describe('GET /api/predictions/accuracy', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 400 when clientId missing', async () => {
+  it('returns defaults when clientId missing', async () => {
     mockVerifyUser.mockResolvedValue(mockAuth as never);
     const { GET } = await import('@/app/api/predictions/accuracy/route');
     const res = await GET(createRequest('GET', '/api/predictions/accuracy'));
     const json = await res.json();
-    expect(res.status).toBe(400);
-    expect(json.error).toContain('clientId is required');
+    expect(res.status).toBe(200);
+    expect(json.data).toEqual({ avgEngagement: 0, interventions: 0, accuracy: 0 });
   });
 
   it('returns accuracy stats', async () => {

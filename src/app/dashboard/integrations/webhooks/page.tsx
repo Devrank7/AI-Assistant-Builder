@@ -21,7 +21,35 @@ import {
   Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { WEBHOOK_EVENTS, type WebhookEvent } from '@/models/Webhook';
+
+type WebhookEvent =
+  | 'new_chat'
+  | 'new_lead'
+  | 'widget_error'
+  | 'cost_threshold'
+  | 'payment_success'
+  | 'payment_failed'
+  | 'lead_captured'
+  | 'chat_started'
+  | 'handoff_requested'
+  | 'knowledge_gap_detected'
+  | 'widget_feedback'
+  | 'appointment_booked';
+
+const WEBHOOK_EVENTS: WebhookEvent[] = [
+  'new_chat',
+  'new_lead',
+  'widget_error',
+  'cost_threshold',
+  'payment_success',
+  'payment_failed',
+  'lead_captured',
+  'chat_started',
+  'handoff_requested',
+  'knowledge_gap_detected',
+  'widget_feedback',
+  'appointment_booked',
+];
 
 const syne = Syne({ subsets: ['latin'], weight: ['700', '800'], display: 'swap' });
 

@@ -67,13 +67,9 @@ export async function executeAction(input: ActionInput): Promise<ActionResult> {
       } else if (channel === 'instagram') {
         const channelConfig = await ChannelConfig.findOne({ clientId: input.clientId, channel: 'instagram' });
         const igId = contact.channelIds?.instagram;
-        if (channelConfig?.config?.pageId && channelConfig?.config?.accessToken && igId) {
-          sent = await sendInstagramMessage(
-            channelConfig.config.pageId as string,
-            channelConfig.config.accessToken as string,
-            igId,
-            text
-          );
+        const cfgAny = channelConfig?.config as Record<string, unknown> | undefined;
+        if (cfgAny?.pageId && cfgAny?.accessToken && igId) {
+          sent = await sendInstagramMessage(cfgAny.pageId as string, cfgAny.accessToken as string, igId, text);
         }
       }
 

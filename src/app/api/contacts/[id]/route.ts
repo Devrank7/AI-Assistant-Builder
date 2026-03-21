@@ -26,12 +26,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!client) return Errors.notFound('Contact not found');
 
     // Get activity timeline from events
-    const timeline = await Event.find({
+    const rawEvents = await Event.find({
       clientId: contact.clientId,
       'payload.contactId': contact.contactId,
     })
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(50)
+      .lean();
+
+    const timeline = rawEvents.map((evt) => ({
+      id: String(evt._id),
+      type: evt.eventType || 'message',
+      description: (evt.payload as Record<string, unknown>)?.description || evt.eventType || 'Activity',
+      timestamp: evt.createdAt ? new Date(evt.createdAt).toISOString() : new Date().toISOString(),
+      meta: evt.payload || {},
+    }));
 
     // Get conversations
     const conversations = await Conversation.find({ contactId: contact.contactId })

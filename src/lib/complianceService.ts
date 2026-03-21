@@ -1,65 +1,283 @@
 import connectDB from './mongodb';
-import ComplianceConfig from '@/models/ComplianceConfig';
+import ComplianceConfig, { IComplianceConfig } from '@/models/ComplianceConfig';
 
-export async function getComplianceConfig(orgId: string) {
+// ---------------------------------------------------------------------------
+// Score calculation
+// ---------------------------------------------------------------------------
+
+export function calculateSOC2Score(config: Partial<IComplianceConfig>): number {
+  const checks = [
+    config.soc2Enabled,
+    config.auditLogging,
+    config.encryptionAtRest,
+    config.accessControl,
+    config.incidentResponsePlan,
+    config.mfaRequired,
+  ];
+  const passed = checks.filter(Boolean).length;
+  return Math.round((passed / checks.length) * 100);
+}
+
+export function calculateHIPAAScore(config: Partial<IComplianceConfig>): number {
+  const checks = [
+    config.hipaaMode,
+    config.piiEncryption,
+    config.accessAuditTrail,
+    config.dataMinimization,
+    config.breachNotificationPlan,
+    config.encryptionAtRest,
+  ];
+  const passed = checks.filter(Boolean).length;
+  return Math.round((passed / checks.length) * 100);
+}
+
+export function calculateGDPRScore(config: Partial<IComplianceConfig>): number {
+  const checks = [
+    config.gdprConsent,
+    config.rightToErasure,
+    config.dataPortability,
+    config.cookieConsent,
+    config.dpaGenerated,
+    config.dataResidency === 'EU',
+  ];
+  const passed = checks.filter(Boolean).length;
+  return Math.round((passed / checks.length) * 100);
+}
+
+export function calculateComplianceScore(config: Partial<IComplianceConfig>): {
+  soc2: number;
+  hipaa: number;
+  gdpr: number;
+  overall: number;
+} {
+  const soc2 = calculateSOC2Score(config);
+  const hipaa = calculateHIPAAScore(config);
+  const gdpr = calculateGDPRScore(config);
+  // Weighted: SOC2 40%, HIPAA 30%, GDPR 30%
+  const overall = Math.round(soc2 * 0.4 + hipaa * 0.3 + gdpr * 0.3);
+  return { soc2, hipaa, gdpr, overall };
+}
+
+// ---------------------------------------------------------------------------
+// DB helpers
+// ---------------------------------------------------------------------------
+
+export async function getComplianceConfig(orgId: string): Promise<IComplianceConfig> {
   await connectDB();
   let config = await ComplianceConfig.findOne({ organizationId: orgId });
   if (!config) {
-    config = await ComplianceConfig.create({ organizationId: orgId });
+    const scores = calculateComplianceScore({});
+    config = await ComplianceConfig.create({
+      organizationId: orgId,
+      soc2Score: scores.soc2,
+      hipaaScore: scores.hipaa,
+      gdprScore: scores.gdpr,
+      complianceScore: scores.overall,
+    });
   }
   return config;
 }
 
-export async function updateComplianceConfig(orgId: string, data: Record<string, unknown>) {
+export async function updateComplianceConfig(
+  orgId: string,
+  updates: Record<string, unknown>,
+  actorEmail = 'system'
+): Promise<IComplianceConfig> {
   await connectDB();
-  return ComplianceConfig.findOneAndUpdate({ organizationId: orgId }, { $set: data }, { new: true, upsert: true });
-}
 
-export async function generateSOC2AuditReport(orgId: string) {
-  await connectDB();
-  const config = await getComplianceConfig(orgId);
+  // Strip score fields from incoming updates — we recalculate them
+  const {
+    complianceScore: _cs,
+    soc2Score: _s2,
+    hipaaScore: _hs,
+    gdprScore: _gs,
+    ...safeUpdates
+  } = updates as Record<string, unknown>;
+  void _cs;
+  void _s2;
+  void _hs;
+  void _gs;
 
-  const report = {
-    organizationId: orgId,
-    generatedAt: new Date().toISOString(),
-    reportType: 'SOC2 Type II',
-    period: {
-      start: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-      end: new Date().toISOString(),
-    },
-    controls: {
-      accessControl: {
-        status: 'compliant',
-        details: 'Role-based access control implemented with JWT auth',
-      },
-      encryption: {
-        status: config.hipaaMode ? 'compliant' : 'partial',
-        details: config.hipaaMode
-          ? 'PHI field encryption enabled for all PII fields'
-          : 'Standard encryption in transit (TLS). Enable HIPAA mode for field-level encryption.',
-      },
-      dataRetention: {
-        status: 'compliant',
-        retentionDays: config.retentionDays,
-        details: `Data retention policy set to ${config.retentionDays} days`,
-      },
-      auditLogging: {
-        status: config.soc2AuditEnabled ? 'compliant' : 'not_enabled',
-        details: config.soc2AuditEnabled
-          ? 'Audit logging active for all data access events'
-          : 'Enable SOC2 audit mode to activate comprehensive logging',
-      },
-      dataResidency: {
-        status: 'compliant',
-        region: config.dataResidency,
-        details: `Data residency configured: ${config.dataResidency}`,
-      },
-    },
-    piiFieldsEncrypted: config.piiFields,
+  // Fetch current config so we can merge for score calculation
+  const current = await getComplianceConfig(orgId);
+  const merged = { ...current.toObject(), ...safeUpdates };
+
+  const scores = calculateComplianceScore(merged as Partial<IComplianceConfig>);
+
+  const auditEntry = {
+    action: 'settings_updated',
+    user: actorEmail,
+    timestamp: new Date(),
+    details: `Updated fields: ${Object.keys(safeUpdates).join(', ')}`,
   };
 
-  await ComplianceConfig.findOneAndUpdate({ organizationId: orgId }, { $set: { lastAuditExport: new Date() } });
+  const updated = await ComplianceConfig.findOneAndUpdate(
+    { organizationId: orgId },
+    {
+      $set: {
+        ...safeUpdates,
+        soc2Score: scores.soc2,
+        hipaaScore: scores.hipaa,
+        gdprScore: scores.gdpr,
+        complianceScore: scores.overall,
+      },
+      $push: {
+        auditLog: {
+          $each: [auditEntry],
+          $slice: -500, // keep last 500 entries
+        },
+      },
+    },
+    { new: true, upsert: true }
+  );
 
+  return updated!;
+}
+
+// ---------------------------------------------------------------------------
+// Audit log (paginated)
+// ---------------------------------------------------------------------------
+
+export async function getAuditLog(
+  orgId: string,
+  page = 1,
+  limit = 20,
+  search = ''
+): Promise<{ entries: unknown[]; total: number; page: number; totalPages: number }> {
+  await connectDB();
+  const config = await ComplianceConfig.findOne({ organizationId: orgId }).select('auditLog');
+  if (!config) return { entries: [], total: 0, page, totalPages: 0 };
+
+  let entries = [...config.auditLog].reverse(); // newest first
+
+  if (search) {
+    const lower = search.toLowerCase();
+    entries = entries.filter(
+      (e) =>
+        e.action.toLowerCase().includes(lower) ||
+        e.user.toLowerCase().includes(lower) ||
+        e.details.toLowerCase().includes(lower)
+    );
+  }
+
+  const total = entries.length;
+  const totalPages = Math.ceil(total / limit);
+  const start = (page - 1) * limit;
+  const paginated = entries.slice(start, start + limit);
+
+  return { entries: paginated, total, page, totalPages };
+}
+
+// ---------------------------------------------------------------------------
+// Compliance status summary
+// ---------------------------------------------------------------------------
+
+export async function checkComplianceStatus(orgId: string) {
+  const config = await getComplianceConfig(orgId);
+  const scores = calculateComplianceScore(config.toObject());
+
+  return {
+    soc2: scores.soc2,
+    hipaa: scores.hipaa,
+    gdpr: scores.gdpr,
+    overall: scores.overall,
+    lastAuditDate: config.lastAuditDate || null,
+    nextAuditDate: config.nextAuditDate || null,
+    dataResidency: config.dataResidency,
+    retentionDays: config.retentionDays,
+    mfaRequired: config.mfaRequired,
+    ipWhitelistCount: config.ipWhitelist?.length ?? 0,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Compliance report export
+// ---------------------------------------------------------------------------
+
+export async function exportComplianceReport(orgId: string, actorEmail = 'system') {
+  await connectDB();
+  const config = await getComplianceConfig(orgId);
+  const scores = calculateComplianceScore(config.toObject());
+
+  // Record audit entry for the export itself
+  await ComplianceConfig.findOneAndUpdate(
+    { organizationId: orgId },
+    {
+      $set: { lastAuditExport: new Date() },
+      $push: {
+        auditLog: {
+          $each: [
+            {
+              action: 'report_exported',
+              user: actorEmail,
+              timestamp: new Date(),
+              details: 'Full compliance report exported',
+            },
+          ],
+          $slice: -500,
+        },
+      },
+    }
+  );
+
+  const report = {
+    meta: {
+      organizationId: orgId,
+      generatedAt: new Date().toISOString(),
+      generatedBy: actorEmail,
+      reportVersion: '2.0',
+    },
+    scores: {
+      overall: scores.overall,
+      soc2: scores.soc2,
+      hipaa: scores.hipaa,
+      gdpr: scores.gdpr,
+    },
+    soc2: {
+      enabled: config.soc2Enabled,
+      auditLogging: config.auditLogging,
+      encryptionAtRest: config.encryptionAtRest,
+      accessControl: config.accessControl,
+      incidentResponsePlan: config.incidentResponsePlan,
+      mfaRequired: config.mfaRequired,
+    },
+    hipaa: {
+      mode: config.hipaaMode,
+      piiEncryption: config.piiEncryption,
+      accessAuditTrail: config.accessAuditTrail,
+      dataMinimization: config.dataMinimization,
+      breachNotificationPlan: config.breachNotificationPlan,
+    },
+    gdpr: {
+      consentManagement: config.gdprConsent,
+      rightToErasure: config.rightToErasure,
+      dataPortability: config.dataPortability,
+      cookieConsent: config.cookieConsent,
+      dpaGenerated: config.dpaGenerated,
+      dpaGeneratedAt: config.dpaGeneratedAt || null,
+    },
+    dataGovernance: {
+      dataResidency: config.dataResidency,
+      retentionDays: config.retentionDays,
+      ipWhitelistEntries: config.ipWhitelist?.length ?? 0,
+    },
+    auditTimeline: {
+      lastAuditDate: config.lastAuditDate || null,
+      nextAuditDate: config.nextAuditDate || null,
+      lastExport: new Date().toISOString(),
+      recentLogCount: config.auditLog?.length ?? 0,
+    },
+  };
+
+  return report;
+}
+
+// ---------------------------------------------------------------------------
+// Legacy compat exports (used by old API routes)
+// ---------------------------------------------------------------------------
+
+export async function generateSOC2AuditReport(orgId: string) {
+  const report = await exportComplianceReport(orgId);
   return { report };
 }
 
@@ -131,38 +349,8 @@ Signed electronically on ${new Date().toISOString().split('T')[0]}
 
   await ComplianceConfig.findOneAndUpdate(
     { organizationId: orgId },
-    { $set: { gdprDpaGenerated: true, dpaGeneratedAt: new Date() } }
+    { $set: { dpaGenerated: true, gdprDpaGenerated: true, dpaGeneratedAt: new Date() } }
   );
 
   return { document };
-}
-
-export async function checkComplianceStatus(orgId: string) {
-  const config = await getComplianceConfig(orgId);
-
-  const hipaa = {
-    enabled: config.hipaaMode,
-    status: config.hipaaMode ? ('compliant' as const) : ('action_required' as const),
-    actionItems: config.hipaaMode ? [] : ['Enable HIPAA mode to encrypt PHI fields', 'Configure PII field list'],
-  };
-
-  const soc2 = {
-    enabled: config.soc2AuditEnabled,
-    status: config.soc2AuditEnabled ? ('compliant' as const) : ('action_required' as const),
-    lastAudit: config.lastAuditExport || null,
-    actionItems: config.soc2AuditEnabled
-      ? config.lastAuditExport
-        ? []
-        : ['Generate first SOC2 audit report']
-      : ['Enable SOC2 audit logging', 'Generate initial audit report'],
-  };
-
-  const gdpr = {
-    dpaGenerated: config.gdprDpaGenerated,
-    status: config.gdprDpaGenerated ? ('compliant' as const) : ('action_required' as const),
-    dpaGeneratedAt: config.dpaGeneratedAt || null,
-    actionItems: config.gdprDpaGenerated ? [] : ['Generate GDPR Data Processing Agreement'],
-  };
-
-  return { hipaa, soc2, gdpr, dataResidency: config.dataResidency, retentionDays: config.retentionDays };
 }

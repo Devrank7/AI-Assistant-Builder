@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
-import ConversationInsight from '@/models/ConversationInsight';
+import { getSignals } from '@/lib/conversationIntelligence';
 import Client from '@/models/Client';
 
 /**
@@ -17,42 +17,29 @@ export async function GET(request: NextRequest) {
   await connectDB();
   const { searchParams } = new URL(request.url);
   const clientId = searchParams.get('clientId');
-  const type = searchParams.get('type');
+  const type = searchParams.get('type') || undefined;
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20')));
-  const days = parseInt(searchParams.get('days') || '30');
+  const days = Math.min(365, Math.max(1, parseInt(searchParams.get('days') || '30')));
 
   if (!clientId) return Errors.badRequest('clientId is required');
 
   const client = await Client.findOne({ clientId, userId: auth.userId }).select('_id');
   if (!client) return Errors.notFound('Client not found');
 
-  const since = new Date();
-  since.setDate(since.getDate() - days);
-
-  const filter: Record<string, unknown> = {
-    clientId,
-    createdAt: { $gte: since },
-  };
-
-  if (type) filter.type = type;
-
-  const [signals, total] = await Promise.all([
-    ConversationInsight.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean(),
-    ConversationInsight.countDocuments(filter),
-  ]);
-
-  return successResponse({
-    signals,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  });
+  try {
+    const result = await getSignals(clientId, days, type, page, limit);
+    return successResponse({
+      signals: result.signals,
+      pagination: {
+        page,
+        limit,
+        total: result.total,
+        totalPages: result.totalPages,
+      },
+    });
+  } catch (err) {
+    console.error('[intelligence/signals] Error:', err);
+    return Errors.internal('Failed to load signals');
+  }
 }

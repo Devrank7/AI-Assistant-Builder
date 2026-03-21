@@ -84,6 +84,14 @@ function getTypeStyle(clientType: string) {
   return clientType === 'quick' ? TYPE_STYLES.quick : TYPE_STYLES.production;
 }
 
+/* ── Decode HTML entities in widget names ── */
+function decodeHtml(html: string): string {
+  if (!html || !html.includes('&')) return html;
+  const txt = document.createElement('textarea');
+  txt.innerHTML = html;
+  return txt.value;
+}
+
 /* ── Format date ── */
 function fmtDate(d: string) {
   const dt = new Date(d);
@@ -144,8 +152,8 @@ function WidgetCard({
       {/* Card body */}
       <div className="p-5">
         {/* Header row */}
-        <div className="mb-4 flex items-start justify-between">
-          <div className="flex items-center gap-3">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             {/* Type icon */}
             <div
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
@@ -158,9 +166,9 @@ function WidgetCard({
               <TypeIcon className="h-[18px] w-[18px]" />
             </div>
 
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h3 className="truncate text-[15px] font-semibold text-gray-900 dark:text-white">
-                {widget.widgetName}
+                {decodeHtml(widget.widgetName)}
               </h3>
               <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-500">
                 <Clock className="h-3 w-3" />
@@ -208,13 +216,12 @@ function WidgetCard({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 border-t border-gray-100 pt-4 dark:border-white/[0.04]">
+        <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4 dark:border-white/[0.04]">
           <Link
             href={`/dashboard/builder?client=${widget.clientId}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex-1"
           >
-            <Button variant="secondary" size="sm" className="w-full gap-1.5 text-[11px]">
+            <Button variant="secondary" size="sm" className="gap-1.5 text-[11px]">
               <MessageSquare className="h-3 w-3" />
               Edit
             </Button>
@@ -222,9 +229,8 @@ function WidgetCard({
           <Link
             href={`/dashboard/widgets/${widget.clientId}/install`}
             onClick={(e) => e.stopPropagation()}
-            className="flex-1"
           >
-            <Button variant="primary" size="sm" className="w-full gap-1.5 text-[11px]">
+            <Button variant="primary" size="sm" className="gap-1.5 text-[11px]">
               <Code2 className="h-3 w-3" />
               Install
             </Button>
@@ -234,9 +240,8 @@ function WidgetCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex-1"
           >
-            <Button variant="secondary" size="sm" className="w-full gap-1.5 text-[11px]">
+            <Button variant="secondary" size="sm" className="gap-1.5 text-[11px]">
               <ExternalLink className="h-3 w-3" />
               Preview
             </Button>
@@ -244,9 +249,8 @@ function WidgetCard({
           <a
             href={`/dashboard/playground/${widget.clientId}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex-1"
           >
-            <Button variant="secondary" size="sm" className="w-full gap-1.5 text-[11px]">
+            <Button variant="secondary" size="sm" className="gap-1.5 text-[11px]">
               <Settings className="h-3 w-3" />
               Settings
             </Button>
@@ -312,7 +316,7 @@ function WidgetRow({
 
       {/* Name + ID */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-semibold text-gray-900 dark:text-white">{widget.widgetName}</p>
+        <p className="truncate text-[13px] font-semibold text-gray-900 dark:text-white">{decodeHtml(widget.widgetName)}</p>
         <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-gray-400 dark:text-gray-500">
           <code className="font-mono">{widget.clientId}</code>
           <button
@@ -483,15 +487,21 @@ export default function MyWidgetsPage() {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const { copiedId, copy } = useCopyEmbed();
 
-  const fetchWidgets = async () => {
+  const fetchWidgets = async (attempt = 0): Promise<void> => {
     try {
       const res = await fetch('/api/user/widgets');
       const data = await res.json();
       if (data.success && data.data) {
         setWidgets(data.data);
+      } else if (res.status === 401 && attempt < 2) {
+        await new Promise((r) => setTimeout(r, 800));
+        return fetchWidgets(attempt + 1);
       }
     } catch {
-      // ignore
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 800));
+        return fetchWidgets(attempt + 1);
+      }
     } finally {
       setLoading(false);
     }

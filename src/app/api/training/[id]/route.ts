@@ -25,7 +25,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   for (const field of allowedFields) {
     if (body[field] !== undefined) {
-      (example as Record<string, unknown>)[field] = body[field];
+      (example as unknown as Record<string, unknown>)[field] = body[field];
     }
   }
 

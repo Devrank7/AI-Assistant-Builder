@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     if (!auth.authenticated) return auth.response;
 
     const clientId = request.nextUrl.searchParams.get('clientId');
-    if (!clientId) return Errors.badRequest('clientId is required');
+    if (!clientId) return successResponse({ avgEngagement: 0, interventions: 0, accuracy: 0 });
 
     const stats = await getAccuracyStats(clientId);
     return successResponse(stats);

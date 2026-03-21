@@ -65,7 +65,7 @@ function StatCard({
       ref={ref}
       initial={{ opacity: 0, y: 24 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.55, delay, ease: [0.25, 0.4, 0.25, 1] }}
+      transition={{ duration: 0.55, delay, ease: [0.25, 0.4, 0.25, 1] as const }}
       className="flex flex-col items-center gap-2 px-8 py-6"
     >
       <span className="bg-gradient-to-br from-cyan-400 to-blue-500 bg-clip-text text-5xl font-extrabold tracking-tight text-transparent md:text-6xl">
@@ -99,7 +99,7 @@ const fadeUp = {
   visible: (delay = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, delay, ease: [0.25, 0.4, 0.25, 1] },
+    transition: { duration: 0.55, delay, ease: [0.25, 0.4, 0.25, 1] as const },
   }),
 };
 
@@ -115,7 +115,7 @@ const cardVariant = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.4, 0.25, 1] },
+    transition: { duration: 0.5, ease: [0.25, 0.4, 0.25, 1] as const },
   },
 };
 

@@ -2,7 +2,7 @@ import connectDB from './mongodb';
 import ResellerAccount from '@/models/ResellerAccount';
 import Organization from '@/models/Organization';
 import User from '@/models/User';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 export async function createResellerAccount(
   orgId: string,
@@ -15,14 +15,27 @@ export async function createResellerAccount(
 
   const account = await ResellerAccount.create({
     organizationId: orgId,
+    resellerId: orgId,
     name: data.name,
     email: data.email,
+    companyName: data.company,
     company: data.company,
-    maxSubAccounts: data.maxSubAccounts || 50,
+    contactEmail: data.email,
+    maxSubAccounts: data.maxSubAccounts ?? 50,
     subAccounts: [],
     billingOverride: { markupPercent: 20 },
     totalRevenue: 0,
     status: 'active',
+    tier: 'starter',
+    commission: { percentage: 15, minPayout: 50 },
+    earnings: {
+      totalEarnings: 0,
+      pendingEarnings: 0,
+      paidEarnings: 0,
+      thisMonthEarnings: 0,
+      lastMonthEarnings: 0,
+    },
+    settings: { whiteLabel: false },
   });
 
   return account;
@@ -34,30 +47,36 @@ export async function createSubAccount(resellerId: string, data: { name: string;
   const reseller = await ResellerAccount.findById(resellerId);
   if (!reseller) throw new Error('Reseller account not found');
   if (reseller.status !== 'active') throw new Error('Reseller account is suspended');
-  if (reseller.subAccounts.length >= reseller.maxSubAccounts) {
+  const maxAccounts = reseller.maxSubAccounts ?? 50;
+  if (reseller.subAccounts.length >= maxAccounts) {
     throw new Error('Maximum sub-accounts reached');
   }
 
   // Create new organization
   const org = await Organization.create({
     name: data.name,
-    plan: data.plan || 'basic',
-    createdBy: reseller.organizationId,
+    plan: data.plan ?? 'basic',
+    ownerId: reseller.organizationId,
   });
 
   // Create admin user for sub-account
   const user = await User.create({
     email: data.email,
-    password: new mongoose.Types.ObjectId().toString(), // Placeholder, user must reset
-    organizationId: org._id,
-    plan: data.plan || 'basic',
+    passwordHash: new mongoose.Types.ObjectId().toString(), // Placeholder, user must reset
+    organizationId: (org._id as Types.ObjectId).toString(),
+    plan: data.plan ?? 'basic',
     onboardingCompleted: false,
   });
 
-  // Add to reseller's sub-accounts
+  // Add to reseller's sub-accounts using new schema shape
   reseller.subAccounts.push({
-    organizationId: org._id.toString(),
-    name: data.name,
+    accountId: (org._id as Types.ObjectId).toString(),
+    companyName: data.name,
+    email: data.email,
+    plan: data.plan ?? 'basic',
+    status: 'active',
+    widgetCount: 0,
+    monthlyRevenue: 0,
     createdAt: new Date(),
   });
   await reseller.save();
@@ -71,17 +90,16 @@ export async function getSubAccounts(resellerId: string) {
   const reseller = await ResellerAccount.findById(resellerId);
   if (!reseller) throw new Error('Reseller account not found');
 
-  const subOrgIds = reseller.subAccounts.map((s) => s.organizationId);
-  const orgs = await Organization.find({ _id: { $in: subOrgIds } }).lean();
-
-  return reseller.subAccounts.map((sub) => {
-    const org = orgs.find((o) => o._id.toString() === sub.organizationId);
-    return {
-      ...sub,
-      plan: org?.plan || 'unknown',
-      status: org ? 'active' : 'deleted',
-    };
-  });
+  return reseller.subAccounts.map((sub) => ({
+    accountId: sub.accountId,
+    companyName: sub.companyName,
+    email: sub.email,
+    plan: sub.plan,
+    status: sub.status,
+    widgetCount: sub.widgetCount ?? 0,
+    monthlyRevenue: sub.monthlyRevenue ?? 0,
+    createdAt: sub.createdAt,
+  }));
 }
 
 export async function updateBillingOverride(
@@ -108,15 +126,26 @@ export async function getResellerDashboard(resellerId: string) {
   if (!reseller) throw new Error('Reseller account not found');
 
   const totalAccounts = reseller.subAccounts.length;
-  const subOrgIds = reseller.subAccounts.map((s) => s.organizationId);
-  const activeUsers = await User.countDocuments({ organizationId: { $in: subOrgIds } });
+  const activeAccounts = reseller.subAccounts.filter((s) => s.status === 'active').length;
+  const totalMRR = reseller.subAccounts.reduce((sum, s) => sum + (s.monthlyRevenue ?? 0), 0);
 
   return {
     totalAccounts,
-    totalRevenue: reseller.totalRevenue,
-    activeUsers,
-    maxSubAccounts: reseller.maxSubAccounts,
-    markupPercent: reseller.billingOverride.markupPercent,
+    activeAccounts,
+    totalRevenue: reseller.totalRevenue ?? 0,
+    totalMRR,
+    maxSubAccounts: reseller.maxSubAccounts ?? 50,
+    markupPercent: reseller.billingOverride?.markupPercent ?? 20,
+    commissionRate: reseller.commission?.percentage ?? 15,
+    tier: reseller.tier ?? 'starter',
+    earnings: reseller.earnings,
     topAccounts: reseller.subAccounts.slice(0, 5),
+    // Legacy compat fields
+    totalSubAccounts: totalAccounts,
+    monthlyEarnings: reseller.earnings?.thisMonthEarnings ?? 0,
+    pendingPayout: reseller.earnings?.pendingEarnings ?? 0,
+    monthly: [],
+    currentMonth: reseller.earnings?.thisMonthEarnings ?? 0,
+    totalLifetime: reseller.earnings?.totalEarnings ?? 0,
   };
 }

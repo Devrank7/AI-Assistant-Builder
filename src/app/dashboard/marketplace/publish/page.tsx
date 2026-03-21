@@ -51,7 +51,7 @@ export default function PublishTemplatePage() {
       try {
         const res = await fetch('/api/clients');
         const data = await res.json();
-        if (data.success) setWidgets(data.data || []);
+        if (data.success) setWidgets(data.data || data.clients || []);
       } catch {
         // Network error
       }
@@ -129,7 +129,7 @@ export default function PublishTemplatePage() {
   const fadeIn = {
     initial: { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const },
   };
 
   // Success state
@@ -139,7 +139,7 @@ export default function PublishTemplatePage() {
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }}
           className="max-w-md text-center"
         >
           <motion.div
@@ -258,7 +258,7 @@ export default function PublishTemplatePage() {
                               </motion.div>
                             )}
                             <p className="text-text-primary truncate text-sm font-medium">
-                              {widget.name || widget.clientId}
+                              {widget.username || widget.name || widget.clientId}
                             </p>
                             <p className="text-text-secondary mt-0.5 truncate text-xs">{widget.clientId}</p>
                           </button>

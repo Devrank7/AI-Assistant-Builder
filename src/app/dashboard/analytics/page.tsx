@@ -501,7 +501,7 @@ export default function AnalyticsPage() {
                 </Link>
               </div>
 
-              {!aiQuality || aiQuality.knowledgeGaps.length === 0 ? (
+              {!aiQuality || !aiQuality.knowledgeGaps || aiQuality.knowledgeGaps.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
                   <BookOpen className="text-text-tertiary mb-2 h-8 w-8 opacity-50" />
                   <p className="text-text-primary text-sm font-medium">No gaps found</p>

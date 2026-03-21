@@ -54,7 +54,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await webhook.save();
 
     const updated = webhook.toObject();
-    delete (updated as Record<string, unknown>).secret;
+    delete (updated as unknown as Record<string, unknown>).secret;
 
     return successResponse({ webhook: updated }, 'Webhook updated');
   } catch (error) {

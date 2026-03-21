@@ -52,7 +52,7 @@ function Section({
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const }}
       className={className}
     >
       {children}
@@ -306,7 +306,7 @@ export default function AustraliaHomeServicesPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
           >
             <Badge color="orange">
               <span className="h-2 w-2 animate-pulse rounded-full bg-[#FF6B2C]" />

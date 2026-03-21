@@ -272,7 +272,8 @@ export async function loadWidgetTools(clientId: string): Promise<LoadedWidgetToo
     for (const binding of bindings) {
       // Verify the connection is still active
       const connection = await Integration.findOne({
-        _id: binding.connectionId,
+        userId,
+        provider: binding.integrationSlug,
         status: 'connected',
       })
         .select('provider')
@@ -287,7 +288,12 @@ export async function loadWidgetTools(clientId: string): Promise<LoadedWidgetToo
         const actionDef = plugin.manifest.actions.find((a) => a.id === actionId);
         if (!actionDef) continue;
 
-        const tool = buildIntegrationTool(binding.integrationSlug, actionId, actionDef, String(binding.connectionId));
+        const tool = buildIntegrationTool(
+          binding.integrationSlug,
+          actionId,
+          actionDef,
+          connection._id?.toString() || ''
+        );
 
         declarations.push(tool.declaration);
         executors.set(tool.declaration.name, tool.executor);

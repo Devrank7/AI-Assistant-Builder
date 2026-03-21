@@ -165,5 +165,5 @@ export async function importFromThemeJson(
   }));
 
   const created = await WidgetComponent.insertMany(docs);
-  return created;
+  return created as unknown as IWidgetComponent[];
 }

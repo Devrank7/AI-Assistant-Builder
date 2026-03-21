@@ -35,7 +35,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   for (const field of allowedFields) {
     if (body[field] !== undefined) {
-      (rule as Record<string, unknown>)[field] = body[field];
+      (rule as unknown as Record<string, unknown>)[field] = body[field];
     }
   }
 

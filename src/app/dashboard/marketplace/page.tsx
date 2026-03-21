@@ -79,9 +79,9 @@ export default function MarketplacePage() {
 
       const res = await fetch(`/api/marketplace?${params}`);
       const data = await res.json();
-      if (data.success) {
-        setTemplates(data.data.templates);
-        setPagination((prev) => ({ ...prev, ...data.data.pagination }));
+      if (data.success && data.data) {
+        setTemplates(data.data.templates ?? []);
+        setPagination((prev) => ({ ...prev, ...(data.data.pagination ?? {}) }));
       }
     } catch {
       // Network error — leave current state

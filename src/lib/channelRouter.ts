@@ -22,6 +22,8 @@ import Correction from '@/models/Correction';
 import { generateEmbedding, findSimilarChunks } from '@/lib/gemini';
 import { calculateCost, getModel, getDefaultModel } from '@/lib/models';
 import { parseRichBlocks, type RichBlock } from '@/lib/richMessages';
+import { webFetch } from '@/lib/builder/webFetch';
+import { webSearch } from '@/lib/builder/webSearch';
 import { detectHandoffRequest, getActiveHandoff, createHandoff } from '@/lib/handoff';
 import { agenticChatStream } from '@/lib/agenticRouter';
 import { getOrCreateProfile, buildCustomerContext, processConversation } from '@/lib/customerMemory';
@@ -77,20 +79,8 @@ interface AIConfig {
 /**
  * Build RAG context from knowledge chunks and applied corrections
  */
-async function buildContext(clientId: string, message: string, topK: number): Promise<string> {
+export async function buildContext(clientId: string, message: string, topK: number): Promise<string> {
   const allChunks = await KnowledgeChunk.find({ clientId }).select('text embedding source');
-
-  if (allChunks.length === 0) return '';
-
-  const queryEmbedding = await generateEmbedding(message);
-  const chunksWithEmbeddings = allChunks.map((c) => ({
-    text: c.text,
-    embedding: c.embedding,
-  }));
-
-  const relevantChunks = await findSimilarChunks(queryEmbedding, chunksWithEmbeddings, topK, 0.3);
-
-  if (relevantChunks.length === 0) return '';
 
   // Also fetch applied corrections (they have highest priority)
   const corrections = await Correction.find({ clientId, status: 'applied' })
@@ -107,10 +97,75 @@ async function buildContext(clientId: string, message: string, topK: number): Pr
     context += correctionContext + '\n\n';
   }
 
-  // Then RAG chunks
-  context += relevantChunks.map((c, i) => `[${i + 1}] ${c.text}`).join('\n\n');
+  let relevantChunks: Array<{ text: string; similarity: number }> = [];
+
+  if (allChunks.length > 0) {
+    const queryEmbedding = await generateEmbedding(message);
+    const chunksWithEmbeddings = allChunks.map((c) => ({
+      text: c.text,
+      embedding: c.embedding,
+    }));
+    relevantChunks = await findSimilarChunks(queryEmbedding, chunksWithEmbeddings, topK, 0.3);
+  }
+
+  // RAG chunks
+  if (relevantChunks.length > 0) {
+    context += relevantChunks.map((c, i) => `[${i + 1}] ${c.text}`).join('\n\n');
+  }
+
+  // Web fetch fallback: if knowledge base has no good answers, try the web
+  const hasWeakContext = relevantChunks.length === 0 || relevantChunks[0].similarity < 0.4;
+  if (hasWeakContext) {
+    const webContext = await fetchWebFallback(clientId, message);
+    if (webContext) {
+      context += (context ? '\n\n' : '') + webContext;
+    }
+  }
 
   return context;
+}
+
+/**
+ * Web fetch fallback: when knowledge base doesn't have enough info,
+ * try fetching from the client's website first, then general web search.
+ */
+export async function fetchWebFallback(clientId: string, query: string): Promise<string> {
+  try {
+    const client = await Client.findOne({ clientId }).select('website').lean();
+    const website = client?.website;
+
+    // Strategy 1: Fetch from client's website
+    if (website) {
+      const result = await webFetch(website);
+      if (result.content && result.content.length > 50) {
+        return `[WEB CONTEXT - from client website]\n${result.content}`;
+      }
+    }
+
+    // Strategy 2: Web search (Brave) when no website or website fetch failed
+    const searchResults = await webSearch(query, 3);
+    const validResults = searchResults.filter((r) => r.url && r.title !== 'No search API configured');
+
+    if (validResults.length === 0) return '';
+
+    // Fetch the top search result
+    const topResult = validResults[0];
+    const fetched = await webFetch(topResult.url);
+    if (fetched.content && fetched.content.length > 50) {
+      return `[WEB CONTEXT - from web search]\nSource: ${topResult.title} (${topResult.url})\n${fetched.content}`;
+    }
+
+    // If fetch failed, use search descriptions as lightweight context
+    const descriptions = validResults.map((r) => `- ${r.title}: ${r.description}`).join('\n');
+    if (descriptions.length > 30) {
+      return `[WEB CONTEXT - search summaries]\n${descriptions}`;
+    }
+
+    return '';
+  } catch {
+    // Web fallback is best-effort — never break the chat
+    return '';
+  }
 }
 
 /**

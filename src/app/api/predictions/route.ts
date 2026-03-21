@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (!auth.authenticated) return auth.response;
 
     const clientId = request.nextUrl.searchParams.get('clientId');
-    if (!clientId) return Errors.badRequest('clientId is required');
+    if (!clientId) return successResponse([]);
 
     const predictions = await listPredictions(clientId);
     return successResponse(predictions);

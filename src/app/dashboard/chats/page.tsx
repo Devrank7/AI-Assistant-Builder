@@ -256,8 +256,8 @@ function ChatCard({ session, onOpen }: { session: ChatSession; onOpen: (id: stri
 
       <div className="p-5">
         {/* Header */}
-        <div className="mb-3 flex items-start justify-between">
-          <div className="flex items-center gap-3">
+        <div className="mb-3 flex items-start gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <div
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
               style={{
@@ -520,13 +520,31 @@ export default function MyChatsPage() {
   const [view, setView] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
-    fetch('/api/builder/sessions')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.success) setSessions(d.data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    const load = async (attempt = 0) => {
+      try {
+        const r = await fetch('/api/builder/sessions');
+        const d = await r.json();
+        if (!cancelled && d.success) {
+          setSessions(d.data || []);
+        } else if (!cancelled && r.status === 401 && attempt < 2) {
+          // Auth cookie may not be set yet — retry after short delay
+          await new Promise((res) => setTimeout(res, 800));
+          return load(attempt + 1);
+        }
+      } catch {
+        if (!cancelled && attempt < 2) {
+          await new Promise((res) => setTimeout(res, 800));
+          return load(attempt + 1);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const deployedCount = sessions.filter((s) => s.status === 'deployed').length;

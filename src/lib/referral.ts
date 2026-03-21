@@ -16,26 +16,50 @@ export async function generateReferralCode(userId: string): Promise<string> {
 
 export async function applyReferral(code: string, refereeId: string): Promise<boolean> {
   await connectDB();
-  const referrer = await User.findOne({ referralCode: code });
-  if (!referrer) return false;
-  if (referrer._id.toString() === refereeId) return false;
 
-  await Referral.create({
-    referrerId: referrer._id.toString(),
-    refereeId,
-    code,
-    rewardType: 'starter_month',
+  // Find the referral program by code
+  const referralProgram = await Referral.findOne({ referralCode: code, isActive: true });
+  if (!referralProgram) return false;
+  if (referralProgram.referrerId === refereeId) return false;
+
+  // Check if this user was already referred
+  const alreadyReferred = referralProgram.referredUsers.some((u: { userId: string }) => u.userId === refereeId);
+  if (alreadyReferred) return false;
+
+  // Get referee info
+  const referee = await User.findById(refereeId);
+  if (!referee) return false;
+
+  // Add referee to the referral program
+  await Referral.findByIdAndUpdate(referralProgram._id, {
+    $push: {
+      referredUsers: {
+        userId: refereeId,
+        email: referee.email || '',
+        signedUpAt: new Date(),
+        rewardPaid: false,
+        rewardAmount: 0,
+      },
+    },
+    $inc: {
+      'stats.totalSignups': 1,
+    },
   });
 
-  await User.findByIdAndUpdate(refereeId, { referredBy: referrer._id.toString() });
+  await User.findByIdAndUpdate(refereeId, { referredBy: referralProgram.referrerId });
   return true;
 }
 
 export async function getReferralStats(userId: string) {
   await connectDB();
-  const totalReferrals = await Referral.countDocuments({ referrerId: userId });
-  const recent = await Referral.find({ referrerId: userId }).sort({ createdAt: -1 }).limit(20);
-  const rewardsEarned = await Referral.countDocuments({ referrerId: userId, rewardApplied: true });
+  const program = await Referral.findOne({ referrerId: userId });
+  if (!program) {
+    return { totalReferrals: 0, rewardsEarned: 0, recent: [] };
+  }
 
-  return { totalReferrals, rewardsEarned, recent };
+  return {
+    totalReferrals: program.stats.totalSignups,
+    rewardsEarned: program.stats.totalEarnings,
+    recent: program.referredUsers.slice(-20).reverse(),
+  };
 }

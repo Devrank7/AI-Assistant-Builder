@@ -23,22 +23,41 @@ export async function POST(request: NextRequest) {
     if (!auth.authenticated) return auth.response;
 
     const body = await request.json();
-    const { name, slug, logo, primaryColor, secondaryColor, domain, description, isDefault } = body;
-
-    if (!name || !slug) {
-      return Errors.badRequest('name and slug are required');
-    }
-
-    const orgId = auth.organizationId || auth.userId;
-    const brand = await createBrand(orgId, {
+    const {
       name,
-      slug,
       logo,
       primaryColor,
       secondaryColor,
+      accentColor,
+      fontFamily,
       domain,
+      tagline,
       description,
+      socialLinks,
+      widgetIds,
       isDefault,
+      isActive,
+    } = body;
+
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return Errors.badRequest('name is required');
+    }
+
+    const orgId = auth.organizationId || auth.userId;
+    const brand = await createBrand(orgId, auth.userId, {
+      name: name.trim(),
+      logo,
+      primaryColor,
+      secondaryColor,
+      accentColor,
+      fontFamily,
+      domain,
+      tagline,
+      description,
+      socialLinks,
+      widgetIds,
+      isDefault,
+      isActive,
     });
 
     return successResponse(brand, 'Brand created', 201);

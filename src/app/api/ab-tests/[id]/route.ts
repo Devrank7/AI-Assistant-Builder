@@ -14,34 +14,85 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     await connectDB();
     const { id } = await params;
 
+    const test = await ABTest.findById(id).lean();
+    if (!test) return Errors.notFound('A/B test not found');
+
+    const orgId = auth.organizationId || auth.userId;
+    if (test.organizationId !== orgId) return Errors.forbidden();
+
+    // Enrich with statistical analysis
+    const variantData = test.variants.map((v) => ({
+      visitors: v.stats.impressions,
+      conversions: v.stats.conversions,
+    }));
+
+    const statsResult = chiSquaredTest(variantData);
+
+    const variantsWithStats = test.variants.map((v) => {
+      const ci = calculateConfidence(v.stats.impressions, v.stats.conversions);
+      const conversionRate =
+        v.stats.impressions > 0 ? ((v.stats.conversions / v.stats.impressions) * 100).toFixed(2) : '0.00';
+      return {
+        ...v,
+        conversionRate,
+        confidenceInterval: ci,
+      };
+    });
+
+    return successResponse({
+      ...test,
+      variants: variantsWithStats,
+      statistics: {
+        significant: statsResult.significant,
+        confidence: statsResult.confidence,
+        pValue: statsResult.pValue,
+        chiSquared: statsResult.chiSquared,
+        winnerIndex: statsResult.winnerIndex,
+      },
+    });
+  } catch (error) {
+    console.error('Get AB test error:', error);
+    return Errors.internal('Failed to fetch A/B test');
+  }
+}
+
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const auth = await verifyUser(request);
+    if (!auth.authenticated) return auth.response;
+
+    await connectDB();
+    const { id } = await params;
+    const body = await request.json();
+
     const test = await ABTest.findById(id);
     if (!test) return Errors.notFound('A/B test not found');
 
     const orgId = auth.organizationId || auth.userId;
     if (test.organizationId !== orgId) return Errors.forbidden();
 
-    // Calculate statistics
-    const stats = chiSquaredTest(
-      test.variants.map((v) => ({
-        visitors: v.visitors,
-        conversions: v.conversions,
-      }))
-    );
+    if (test.status !== 'draft') {
+      return Errors.badRequest('Can only edit tests in draft status');
+    }
 
-    const variantsWithCI = test.variants.map((v) => ({
-      ...v.toObject(),
-      conversionRate: v.visitors > 0 ? ((v.conversions / v.visitors) * 100).toFixed(2) : '0',
-      ci: calculateConfidence(v.visitors, v.conversions),
-    }));
+    const { name, description, minSampleSize, variants } = body;
+    if (name) test.name = name;
+    if (description !== undefined) test.description = description;
+    if (minSampleSize !== undefined) test.minSampleSize = minSampleSize;
 
-    return successResponse({
-      ...test.toObject(),
-      variants: variantsWithCI,
-      stats,
-    });
+    if (variants) {
+      const total = variants.reduce((s: number, v: { trafficPercent: number }) => s + (v.trafficPercent || 0), 0);
+      if (Math.abs(total - 100) > 0.01) {
+        return Errors.badRequest('Traffic split must total exactly 100%');
+      }
+      test.variants = variants;
+    }
+
+    await test.save();
+    return successResponse(test);
   } catch (error) {
-    console.error('Get AB test error:', error);
-    return Errors.internal('Failed to fetch A/B test');
+    console.error('Update AB test error:', error);
+    return Errors.internal('Failed to update A/B test');
   }
 }
 
@@ -53,7 +104,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await connectDB();
     const { id } = await params;
     const body = await request.json();
-    const { status } = body;
 
     const test = await ABTest.findById(id);
     if (!test) return Errors.notFound('A/B test not found');
@@ -61,49 +111,46 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const orgId = auth.organizationId || auth.userId;
     if (test.organizationId !== orgId) return Errors.forbidden();
 
-    if (status) {
+    // Status transition
+    if (body.status) {
       const validTransitions: Record<string, string[]> = {
         draft: ['running'],
         running: ['paused', 'completed'],
         paused: ['running', 'completed'],
         completed: [],
       };
-      if (!validTransitions[test.status]?.includes(status)) {
-        return Errors.badRequest(`Cannot transition from ${test.status} to ${status}`);
+      if (!validTransitions[test.status]?.includes(body.status)) {
+        return Errors.badRequest(`Cannot transition from ${test.status} to ${body.status}`);
       }
-
-      test.status = status;
-      if (status === 'running' && !test.startedAt) test.startedAt = new Date();
-      if (status === 'completed') {
-        test.endedAt = new Date();
-        // Auto-detect winner
-        const stats = chiSquaredTest(
-          test.variants.map((v) => ({
-            visitors: v.visitors,
-            conversions: v.conversions,
-          }))
-        );
-        if (stats.significant && stats.winnerIndex !== null) {
-          test.winnerVariantId = test.variants[stats.winnerIndex].id;
+      test.status = body.status;
+      if (body.status === 'running' && !test.startDate) test.startDate = new Date();
+      if (body.status === 'completed') {
+        test.endDate = new Date();
+        const variantData = test.variants.map((v) => ({
+          visitors: v.stats.impressions,
+          conversions: v.stats.conversions,
+        }));
+        const result = chiSquaredTest(variantData);
+        test.confidenceLevel = result.confidence;
+        if (result.significant && result.winnerIndex !== null) {
+          test.winnerVariantId = test.variants[result.winnerIndex].variantId;
         }
       }
     }
 
-    // Allow updating variant visitors/conversions (for recording)
-    if (body.variants) {
-      for (const update of body.variants) {
-        const variant = test.variants.find((v) => v.id === update.id);
-        if (variant) {
-          if (update.visitors !== undefined) variant.visitors = update.visitors;
-          if (update.conversions !== undefined) variant.conversions = update.conversions;
-        }
-      }
+    // Increment stats
+    if (body.record) {
+      const { variantId, type } = body.record;
+      const variant = test.variants.find((v) => v.variantId === variantId);
+      if (variant && type === 'impression') variant.stats.impressions += 1;
+      if (variant && type === 'conversion') variant.stats.conversions += 1;
+      if (variant && type === 'conversation') variant.stats.conversations += 1;
     }
 
     await test.save();
     return successResponse(test);
   } catch (error) {
-    console.error('Update AB test error:', error);
+    console.error('Patch AB test error:', error);
     return Errors.internal('Failed to update A/B test');
   }
 }

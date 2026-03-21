@@ -39,7 +39,7 @@ export default function WidgetBuilderV2Page() {
       const res = await fetch('/api/widget-builder-v2');
       const data = await res.json();
       if (data.success) {
-        setProjects(data.data.projects || []);
+        setProjects(data.data?.projects ?? []);
       } else {
         setError(data.error || 'Failed to load projects');
       }

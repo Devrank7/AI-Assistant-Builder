@@ -7,10 +7,11 @@ describe('webSearch', () => {
     vi.stubEnv('BRAVE_SEARCH_API_KEY', 'test-key');
   });
 
-  it('returns empty results when no API key', async () => {
+  it('returns placeholder when no API key', async () => {
     vi.stubEnv('BRAVE_SEARCH_API_KEY', '');
     const results = await webSearch('test query');
-    expect(results).toEqual([]);
+    expect(results).toHaveLength(1);
+    expect(results[0].title).toBe('No search API configured');
   });
 
   it('formats search results correctly', async () => {

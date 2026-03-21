@@ -260,7 +260,7 @@ function CreateKeyModal({
         }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.data) {
         onCreate(data.data.key, data.data.rawKey);
       } else {
         setError(data.error || 'Failed to create key');
@@ -993,7 +993,7 @@ export default function ApiKeysPage() {
     try {
       const res = await fetch('/api/developer/keys');
       const data = await res.json();
-      if (data.success) setKeys(data.data);
+      if (data.success) setKeys(Array.isArray(data.data) ? data.data : []);
     } catch {
       /* silent */
     } finally {

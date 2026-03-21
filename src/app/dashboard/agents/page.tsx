@@ -54,6 +54,7 @@ interface Template {
 interface Widget {
   clientId: string;
   name?: string;
+  username?: string;
 }
 
 const MODEL_LABELS: Record<string, string> = {
@@ -115,7 +116,10 @@ export default function AgentsPage() {
   }, [selectedWidget]);
 
   const fetchPersonas = useCallback(async () => {
-    if (!selectedWidget) return;
+    if (!selectedWidget) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch(`/api/agent-personas?clientId=${selectedWidget}`);
@@ -467,9 +471,10 @@ export default function AgentsPage() {
               onChange={(e) => setSelectedWidget(e.target.value)}
               className="bg-bg-secondary border-border text-text-primary appearance-none rounded-lg border py-2 pr-8 pl-3 text-sm"
             >
+              {widgets.length === 0 && <option value="">Select widget...</option>}
               {widgets.map((w) => (
                 <option key={w.clientId} value={w.clientId}>
-                  {w.name || w.clientId}
+                  {w.username || w.name || w.clientId}
                 </option>
               ))}
             </select>

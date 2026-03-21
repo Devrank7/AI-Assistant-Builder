@@ -77,9 +77,11 @@ export async function sendOperatorReply(input: ReplyInput): Promise<ReplyResult>
         clientId: conversation.clientId,
         channel: 'instagram',
       });
-      if (channelConfig?.config?.accessToken) {
+      const igCfg = channelConfig?.config as Record<string, unknown> | undefined;
+      if (igCfg?.pageId && igCfg?.accessToken) {
         sent = await sendInstagramMessage(
-          channelConfig.config.accessToken as string,
+          igCfg.pageId as string,
+          igCfg.accessToken as string,
           conversation.sessionId,
           input.text
         );

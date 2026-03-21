@@ -61,7 +61,7 @@ function Section({
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const }}
       className={className}
     >
       {children}
@@ -149,7 +149,7 @@ function InstagramDMMockup() {
               key={i}
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={visibleMessages > i ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] as const }}
               className={`flex ${msg.from === 'client' ? 'justify-end' : 'justify-start'}`}
             >
               <div
@@ -445,7 +445,7 @@ export default function TexasBeautyInstagramPage() {
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
             >
               {/* Badge */}
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#B76E79]/20 bg-[#B76E79]/5 px-4 py-1.5">
@@ -546,7 +546,7 @@ export default function TexasBeautyInstagramPage() {
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] as const }}
               className="relative"
             >
               <InstagramDMMockup />

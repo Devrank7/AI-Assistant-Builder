@@ -37,7 +37,7 @@ export async function generateInboxSuggestedReply(conversationId: string): Promi
     if (chunks.length > 0) {
       const queryEmbedding = await generateEmbedding(lastUserMessage.content);
       const relevant = await findSimilarChunks(queryEmbedding, chunks, 5, 0.3);
-      ragContext = relevant.map((c: { content: string }) => c.content).join('\n\n');
+      ragContext = relevant.map((c: { text: string; similarity: number }) => c.text).join('\n\n');
     }
   }
 

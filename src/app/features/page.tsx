@@ -27,7 +27,7 @@ const fadeUp = {
     y: 0,
     transition: {
       duration: 0.55,
-      ease: [0.25, 0.4, 0.25, 1],
+      ease: [0.25, 0.4, 0.25, 1] as const,
       delay: i * 0.08,
     },
   }),
@@ -49,7 +49,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.4, 0.25, 1] },
+    transition: { duration: 0.5, ease: [0.25, 0.4, 0.25, 1] as const },
   },
 };
 
@@ -185,7 +185,7 @@ export default function FeaturesPage() {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: [0.25, 0.4, 0.25, 1] }}
+            transition={{ duration: 0.45, ease: [0.25, 0.4, 0.25, 1] as const }}
             className="border-accent/20 bg-accent-subtle text-accent mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wider uppercase"
           >
             <span className="bg-accent h-1.5 w-1.5 animate-pulse rounded-full" />
@@ -241,7 +241,7 @@ export default function FeaturesPage() {
                   key={feature.title}
                   variants={itemVariants}
                   whileHover={{ scale: 1.025, y: -4 }}
-                  transition={{ duration: 0.25, ease: [0.25, 0.4, 0.25, 1] }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.4, 0.25, 1] as const }}
                   className="group border-border bg-bg-secondary relative flex flex-col gap-4 rounded-2xl border p-6 shadow-sm transition-shadow duration-300 hover:shadow-md"
                   style={{
                     backdropFilter: 'blur(20px)',
@@ -294,7 +294,7 @@ export default function FeaturesPage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.55, ease: [0.25, 0.4, 0.25, 1] }}
+            transition={{ duration: 0.55, ease: [0.25, 0.4, 0.25, 1] as const }}
             className="mb-12 text-center"
           >
             <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">WinBix vs Alternatives</h2>
@@ -307,7 +307,7 @@ export default function FeaturesPage() {
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1], delay: 0.1 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] as const, delay: 0.1 }}
             className="border-border overflow-x-auto rounded-2xl border"
           >
             <table className="w-full text-sm">
@@ -372,7 +372,7 @@ export default function FeaturesPage() {
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
+            transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] as const }}
           >
             <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-5xl">
               Start building{' '}

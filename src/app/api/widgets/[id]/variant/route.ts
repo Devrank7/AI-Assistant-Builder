@@ -22,12 +22,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const variant = activeTest.variants[variantIndex];
 
     // Increment visitor count (fire-and-forget)
-    ABTest.updateOne({ _id: activeTest._id, 'variants.id': variant.id }, { $inc: { 'variants.$.visitors': 1 } })
+    ABTest.updateOne({ _id: activeTest._id, 'variants.variantId': variant.variantId }, { $inc: { 'variants.$.visitors': 1 } })
       .exec()
       .catch(() => {});
 
     return successResponse({
-      variantId: variant.id,
+      variantId: variant.variantId,
       testId: activeTest._id.toString(),
       config: variant.config,
     });

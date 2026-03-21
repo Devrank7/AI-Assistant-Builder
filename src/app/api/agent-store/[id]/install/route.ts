@@ -8,12 +8,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!auth.authenticated) return auth.response;
 
   const { id } = await params;
+
   try {
-    const agent = await installAgent(id);
-    if (!agent) return Errors.notFound('Agent not found');
-    return successResponse(agent, 'Agent installed successfully');
+    const body = await request.json().catch(() => ({}));
+    // clientId can be passed in body, or defaults to userId (personal workspace)
+    const clientId: string = (body as { clientId?: string }).clientId || auth.userId;
+
+    const result = await installAgent(id, clientId, auth.userId);
+    return successResponse(result, 'Agent installed successfully');
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Failed to install agent';
-    return Errors.badRequest(message);
+    return Errors.badRequest(err instanceof Error ? err.message : 'Failed to install agent');
   }
 }

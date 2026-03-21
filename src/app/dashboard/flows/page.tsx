@@ -438,7 +438,7 @@ export default function FlowsPage() {
     try {
       const res = await fetch('/api/flows');
       const data = await res.json();
-      if (data.success) setFlows(data.data.flows);
+      if (data.success) setFlows(data.data?.flows ?? []);
     } catch (err) {
       console.error('Failed to fetch flows:', err);
     } finally {
@@ -450,7 +450,7 @@ export default function FlowsPage() {
     try {
       const res = await fetch('/api/flows/templates');
       const data = await res.json();
-      if (data.success) setTemplates(data.data.templates);
+      if (data.success) setTemplates(data.data?.templates ?? []);
     } catch (err) {
       console.error('Failed to fetch templates:', err);
     }

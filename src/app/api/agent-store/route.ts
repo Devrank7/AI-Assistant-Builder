@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
-import { listAgents, submitAgent } from '@/lib/agentStoreService';
+import { listAgents, submitAgent, seedDefaultAgents } from '@/lib/agentStoreService';
+import { AgentCategory } from '@/models/AgentStoreItem';
 
 export async function GET(request: NextRequest) {
   const auth = await verifyUser(request);
@@ -9,15 +10,22 @@ export async function GET(request: NextRequest) {
 
   const url = new URL(request.url);
   const filters = {
-    category: url.searchParams.get('category') || undefined,
-    niche: url.searchParams.get('niche') || undefined,
     search: url.searchParams.get('search') || undefined,
-    sort: (url.searchParams.get('sort') as 'newest' | 'popular' | 'rating') || undefined,
+    category: url.searchParams.get('category') || undefined,
+    pricing: (url.searchParams.get('pricing') as 'free' | 'premium' | 'all') || undefined,
+    sort: (url.searchParams.get('sort') as 'rating' | 'installs' | 'newest' | 'featured') || 'featured',
     page: url.searchParams.get('page') ? Number(url.searchParams.get('page')) : 1,
     limit: url.searchParams.get('limit') ? Number(url.searchParams.get('limit')) : 20,
   };
 
-  const result = await listAgents(filters);
+  let result = await listAgents(filters);
+
+  // Seed if empty
+  if (result.agents.length === 0 && result.total === 0) {
+    await seedDefaultAgents();
+    result = await listAgents(filters);
+  }
+
   return successResponse(result);
 }
 
@@ -27,18 +35,26 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    if (!body.name || !body.description || !body.niche || !body.systemPrompt) {
-      return Errors.badRequest('Missing required fields: name, description, niche, systemPrompt');
+    const { name, description, longDescription, category, tags, config, pricing } = body;
+
+    if (!name || !description || !category || !config?.systemPrompt || !config?.greeting) {
+      return Errors.badRequest(
+        'Missing required fields: name, description, category, config.systemPrompt, config.greeting'
+      );
     }
 
-    const agent = await submitAgent(auth.userId, {
-      ...body,
-      authorName: auth.user?.email || '',
+    const agent = await submitAgent(auth.userId, auth.user.email || 'Unknown', {
+      name,
+      description,
+      longDescription,
+      category: category as AgentCategory,
+      tags,
+      config,
+      pricing,
     });
 
     return successResponse(agent, 'Agent submitted for review');
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Failed to submit agent';
-    return Errors.badRequest(message);
+    return Errors.badRequest(err instanceof Error ? err.message : 'Failed to submit agent');
   }
 }

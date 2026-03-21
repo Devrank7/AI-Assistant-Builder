@@ -66,7 +66,7 @@ const stagger = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.05, duration: 0.3, ease: 'easeOut' },
+    transition: { delay: i * 0.05, duration: 0.3, ease: 'easeOut' as const },
   }),
 };
 
@@ -117,8 +117,8 @@ export default function TrainingStudioPage() {
       const res = await fetch(`/api/training?${params}`);
       const data = await res.json();
       if (data.success) {
-        setExamples(data.data.examples || []);
-        setTotalPages(data.data.pages || 1);
+        setExamples(data.data?.examples ?? []);
+        setTotalPages(data.data?.pages ?? 1);
       }
     } catch {
       // Failed

@@ -31,16 +31,25 @@ export default function VideoAvatarsPage() {
     voiceId: '',
   });
 
-  const fetchAvatars = useCallback(async () => {
+  const fetchAvatars = useCallback(async (attempt = 0) => {
     try {
       const res = await fetch('/api/video-avatars');
+      if (res.status === 401 && attempt < 2) {
+        await new Promise((r) => setTimeout(r, 800));
+        return fetchAvatars(attempt + 1);
+      }
       const json = await res.json();
       if (json.success) {
         setAvatars(json.data || []);
+        setError('');
       } else {
         setError(json.error || 'Failed to load avatars');
       }
     } catch {
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 800));
+        return fetchAvatars(attempt + 1);
+      }
       setError('Failed to fetch video avatars');
     } finally {
       setLoading(false);
@@ -314,7 +323,7 @@ export default function VideoAvatarsPage() {
       {error && !loading && (
         <div className="py-12 text-center text-red-400">
           <p>{error}</p>
-          <button onClick={fetchAvatars} className="mt-3 text-sm text-blue-400 hover:underline">
+          <button onClick={() => fetchAvatars()} className="mt-3 text-sm text-blue-400 hover:underline">
             Retry
           </button>
         </div>

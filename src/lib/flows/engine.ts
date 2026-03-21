@@ -80,11 +80,11 @@ export async function processEvent(event: EventPayload): Promise<void> {
 
   // 4. Get widget name
   const client = await Client.findOne({ clientId: event.clientId }).lean();
-  const widgetName = ((client as Record<string, unknown>)?.widgetName as string) || event.clientId;
+  const widgetName = ((client as unknown as Record<string, unknown>)?.widgetName as string) || event.clientId;
 
   const templateContext = buildTemplateContext(
-    contact as Record<string, unknown> | null,
-    conversation as Record<string, unknown> | null,
+    contact as unknown as Record<string, unknown> | null,
+    conversation as unknown as Record<string, unknown> | null,
     event,
     widgetName
   );

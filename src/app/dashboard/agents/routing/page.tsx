@@ -105,7 +105,7 @@ const RULE_TEMPLATES = [
 export default function RoutingPage() {
   const [rules, setRules] = useState<RoutingRule[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
-  const [widgets, setWidgets] = useState<Array<{ clientId: string; name?: string }>>([]);
+  const [widgets, setWidgets] = useState<Array<{ clientId: string; name?: string; username?: string }>>([]);
   const [selectedWidget, setSelectedWidget] = useState('');
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -139,7 +139,10 @@ export default function RoutingPage() {
   }, [selectedWidget]);
 
   const fetchRules = useCallback(async () => {
-    if (!selectedWidget) return;
+    if (!selectedWidget) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch(`/api/agent-routing?clientId=${selectedWidget}`);
@@ -250,7 +253,7 @@ export default function RoutingPage() {
 
   const updateCondition = (index: number, field: string, value: string) => {
     const updated = [...formConditions];
-    (updated[index] as Record<string, string>)[field] = value;
+    (updated[index] as unknown as Record<string, string>)[field] = value;
     setFormConditions(updated);
   };
 
@@ -306,9 +309,10 @@ export default function RoutingPage() {
               onChange={(e) => setSelectedWidget(e.target.value)}
               className="bg-bg-secondary border-border text-text-primary appearance-none rounded-lg border py-2 pr-8 pl-3 text-sm"
             >
+              {widgets.length === 0 && <option value="">Select widget...</option>}
               {widgets.map((w) => (
                 <option key={w.clientId} value={w.clientId}>
-                  {w.name || w.clientId}
+                  {w.username || w.name || w.clientId}
                 </option>
               ))}
             </select>

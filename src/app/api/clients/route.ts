@@ -111,7 +111,7 @@ export async function GET() {
     // Return all clients from DB
     const clients = await Client.find().sort({ createdAt: -1 });
 
-    return NextResponse.json({ success: true, clients });
+    return NextResponse.json({ success: true, data: clients, clients });
   } catch (error) {
     console.error('Error fetching clients:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch clients' }, { status: 500 });

@@ -44,7 +44,7 @@ const stagger = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.4, ease: 'easeOut' },
+    transition: { delay: i * 0.1, duration: 0.4, ease: 'easeOut' as const },
   }),
 };
 
@@ -182,7 +182,7 @@ export default function AdvancedAnalyticsPage() {
               <div className="space-y-3">
                 {funnel.map((stage, i) => {
                   const width = Math.max((stage.count / maxFunnelCount) * 100, 4);
-                  const greenToRed = Math.round(120 - (i / (funnel.length - 1)) * 120);
+                  const greenToRed = funnel.length > 1 ? Math.round(120 - (i / (funnel.length - 1)) * 120) : 120;
                   return (
                     <div key={stage.name}>
                       <div className="mb-1 flex items-center justify-between text-sm">

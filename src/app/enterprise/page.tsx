@@ -12,7 +12,7 @@ const fadeUp = {
   visible: (delay = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, ease: [0.25, 0.4, 0.25, 1], delay },
+    transition: { duration: 0.55, ease: [0.25, 0.4, 0.25, 1] as const, delay },
   }),
 };
 
@@ -28,7 +28,7 @@ const cardVariant = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.4, 0.25, 1] },
+    transition: { duration: 0.5, ease: [0.25, 0.4, 0.25, 1] as const },
   },
 };
 

@@ -179,13 +179,12 @@ export async function provisionSSOUser(
     user = await User.create({
       email,
       name,
-      password: randomBytes(32).toString('hex'), // random password for SSO users
+      passwordHash: randomBytes(32).toString('hex'), // random hash for SSO users
       emailVerified: true,
       plan: 'none',
       subscriptionStatus: 'active',
       organizationId: config.organizationId,
       onboardingCompleted: false,
-      ssoProvider: config.provider,
     });
     isNew = true;
   }

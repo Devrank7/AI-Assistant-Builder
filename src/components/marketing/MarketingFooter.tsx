@@ -45,7 +45,7 @@ const containerVariants = {
     opacity: 1,
     transition: {
       duration: 0.6,
-      ease: [0.25, 0.4, 0.25, 1],
+      ease: [0.25, 0.4, 0.25, 1] as const,
       staggerChildren: 0.07,
     },
   },
@@ -56,7 +56,7 @@ const columnVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.45, ease: [0.25, 0.4, 0.25, 1] },
+    transition: { duration: 0.45, ease: [0.25, 0.4, 0.25, 1] as const },
   },
 };
 
