@@ -35,19 +35,25 @@ export function Modal({ open, onClose, title, description, children, footer, siz
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px] dark:bg-black/70"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-[2px] dark:bg-black/70"
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
     >
       <div
-        className={`w-full ${sizeClasses[size]} border-border bg-bg-primary rounded-2xl border p-6 shadow-lg dark:shadow-none`}
+        className={`my-auto w-full ${sizeClasses[size]} border-border bg-bg-primary flex max-h-[90vh] flex-col rounded-2xl border shadow-lg dark:shadow-none`}
         style={{ animation: 'modal-in 200ms ease-out' }}
       >
-        <h2 className="text-text-primary text-lg font-semibold">{title}</h2>
-        {description && <p className="text-text-secondary mt-1 text-sm">{description}</p>}
-        <div className="mt-4">{children}</div>
-        {footer && <div className="border-border-subtle mt-6 flex justify-end gap-2 border-t pt-4">{footer}</div>}
+        <div className="flex-shrink-0 p-6 pb-0">
+          <h2 className="text-text-primary text-lg font-semibold">{title}</h2>
+          {description && <p className="text-text-secondary mt-1 text-sm">{description}</p>}
+        </div>
+        <div className="mt-4 flex-1 overflow-y-auto px-6">{children}</div>
+        {footer && (
+          <div className="border-border-subtle flex-shrink-0 border-t px-6 py-4">
+            <div className="flex justify-end gap-2">{footer}</div>
+          </div>
+        )}
       </div>
     </div>
   );

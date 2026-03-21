@@ -49,7 +49,8 @@ export default function PublishTemplatePage() {
   useEffect(() => {
     async function loadWidgets() {
       try {
-        const res = await fetch('/api/clients');
+        const { fetchWithRetry } = await import('@/lib/fetchWithRetry');
+        const res = await fetchWithRetry('/api/clients');
         const data = await res.json();
         if (data.success) setWidgets(data.data || data.clients || []);
       } catch {

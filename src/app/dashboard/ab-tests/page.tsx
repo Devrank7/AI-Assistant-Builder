@@ -793,9 +793,13 @@ export default function ABTestsPage() {
 
   const fetchWidgets = useCallback(async () => {
     try {
-      const res = await fetchWithRetry('/api/clients/me');
+      const res = await fetchWithRetry('/api/clients');
       const json = await res.json();
-      if (json.success) setWidgets((json.data || []) as Widget[]);
+      if (json.success) {
+        const list = (json.data || json.clients || []) as Widget[];
+        setWidgets(list);
+        if (list.length > 0) setSelectedWidget((p) => p || list[0].clientId);
+      }
     } catch {
       /* ignore */
     }

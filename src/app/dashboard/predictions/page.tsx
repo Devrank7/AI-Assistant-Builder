@@ -189,7 +189,8 @@ export default function PredictionsPage() {
 
   const fetchWidgets = useCallback(async () => {
     try {
-      const r = await fetch('/api/clients');
+      const { fetchWithRetry } = await import('@/lib/fetchWithRetry');
+      const r = await fetchWithRetry('/api/clients');
       const d = await r.json();
       const list = d.data ?? [];
       setWidgets(list);

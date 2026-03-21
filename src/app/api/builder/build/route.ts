@@ -60,8 +60,18 @@ export async function POST(request: NextRequest) {
     delete cleanThemeJson._widgetConfig;
 
     // Generate clientId from widget name or session id
-    const baseName = session.widgetName || `widget-${session._id}`;
-    const clientId = (widgetConfig?.clientId as string) || slugify(baseName);
+    // Reuse existing clientId on rebuild; generate unique slug on first build
+    const existingClientId = session.clientId || (widgetConfig?.clientId as string);
+    let clientId: string;
+    if (existingClientId) {
+      clientId = existingClientId;
+    } else {
+      const { randomBytes } = await import('crypto');
+      const baseName = session.widgetName || `widget-${session._id}`;
+      const slug = slugify(baseName);
+      const suffix = randomBytes(3).toString('hex');
+      clientId = `${slug}-${suffix}`;
+    }
 
     // Update session status
     session.status = 'building';

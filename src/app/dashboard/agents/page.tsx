@@ -102,7 +102,8 @@ export default function AgentsPage() {
 
   const fetchWidgets = useCallback(async () => {
     try {
-      const res = await fetch('/api/clients');
+      const { fetchWithRetry } = await import('@/lib/fetchWithRetry');
+      const res = await fetchWithRetry('/api/clients');
       const data = await res.json();
       if (data.success && data.data) {
         setWidgets(data.data);

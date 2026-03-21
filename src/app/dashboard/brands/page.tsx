@@ -1080,7 +1080,8 @@ export default function BrandsPage() {
 
   const fetchWidgets = useCallback(async () => {
     try {
-      const res = await fetch('/api/clients');
+      const { fetchWithRetry } = await import('@/lib/fetchWithRetry');
+      const res = await fetchWithRetry('/api/clients');
       const json = await res.json();
       if (json.success) {
         setWidgets(

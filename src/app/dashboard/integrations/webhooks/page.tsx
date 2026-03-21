@@ -223,7 +223,8 @@ export default function WebhooksPage() {
 
   const fetchClients = useCallback(async () => {
     try {
-      const res = await fetch('/api/clients');
+      const { fetchWithRetry } = await import('@/lib/fetchWithRetry');
+      const res = await fetchWithRetry('/api/clients');
       const data = await res.json();
       const list: ClientRecord[] = (Array.isArray(data) ? data : (data.data ?? [])).map(
         (c: { _id: string; clientId?: string; name?: string }) => ({

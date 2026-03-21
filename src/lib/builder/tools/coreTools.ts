@@ -276,7 +276,10 @@ CRITICAL COLOR RULES:
         .toLowerCase()
         .slice(0, 40);
 
-      const clientId = slugFromName || domainSlug || `widget-${Date.now()}`;
+      const { randomBytes } = await import('crypto');
+      const baseSlug = slugFromName || domainSlug || `widget-${Date.now()}`;
+      const suffix = randomBytes(3).toString('hex');
+      const clientId = `${baseSlug}-${suffix}`;
 
       // Generate quick replies, welcome message, and input placeholder from site content
       // Pages may have 'content' (from session.siteProfile) or 'preview' (from tool result)

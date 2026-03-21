@@ -110,7 +110,7 @@ const ClientSchema = new Schema<IClient>(
     },
     website: {
       type: String,
-      required: true,
+      default: '',
     },
     phone: {
       type: String,
