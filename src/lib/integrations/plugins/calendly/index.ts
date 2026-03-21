@@ -114,7 +114,10 @@ export const calendlyPlugin: IntegrationPlugin = {
     return { success: health.healthy, error: health.error, metadata: {} };
   },
 
-  async disconnect(): Promise<void> {},
+  async disconnect(): Promise<void> {
+    // Stateless API key auth — no server-side revocation needed.
+    // Credentials are deleted from our database by the caller.
+  },
 
   async testConnection(credentials: Record<string, string>): Promise<HealthResult> {
     return this.healthCheck(credentials);

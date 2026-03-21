@@ -445,4 +445,125 @@ export const integrationTools: ToolDefinition[] = [
       };
     },
   },
+  {
+    name: 'connect_integration',
+    description:
+      'Connect an integration directly by providing credentials. Use when the user provides an API key, service account JSON, or other credentials in chat. Validates the connection, encrypts credentials, and stores them.',
+    parameters: {
+      type: 'object',
+      properties: {
+        slug: {
+          type: 'string',
+          description:
+            'Integration slug: hubspot, salesforce, pipedrive, google_calendar, calendly, stripe, telegram, whatsapp, email_smtp, google_sheets',
+        },
+        credentials: {
+          type: 'string',
+          description:
+            'JSON object of credentials. For most: {"apiKey": "..."}. For Salesforce: {"apiKey": "...", "instanceUrl": "https://your-org.salesforce.com"}. For Email SMTP: {"apiKey": "password", "host": "smtp.gmail.com", "port": "587", "user": "you@gmail.com"}. For Google Calendar/Sheets with service account: {"apiKey": "<entire service_account.json content>"}',
+        },
+      },
+      required: ['slug', 'credentials'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      const slug = args.slug as string;
+      const userId = ctx.userId;
+      if (!userId) return { success: false, error: 'No user context available' };
+
+      let credentials: Record<string, string>;
+      try {
+        credentials = JSON.parse(args.credentials as string);
+      } catch {
+        return { success: false, error: 'Invalid JSON in credentials parameter' };
+      }
+
+      if (!credentials.apiKey && !credentials.token) {
+        return { success: false, error: 'Credentials must include apiKey or token' };
+      }
+
+      // Get the plugin and validate connection
+      const { pluginRegistry } = await import('@/lib/integrations/core/PluginRegistry');
+      const plugin = pluginRegistry.get(slug);
+      if (!plugin)
+        return {
+          success: false,
+          error: `Unknown integration: "${slug}". Available: hubspot, salesforce, pipedrive, google_calendar, calendly, stripe, telegram, whatsapp, email_smtp, google_sheets`,
+        };
+
+      // Test the connection first
+      const testResult = await plugin.testConnection(credentials);
+      if (!testResult.healthy) {
+        return {
+          success: false,
+          error: `Connection test failed: ${testResult.error}`,
+          suggestion: testResult.suggestion || 'Check that the credentials are correct and the service is accessible.',
+        };
+      }
+
+      // Encrypt and store
+      const { default: connectDB } = await import('@/lib/mongodb');
+      const { default: Integration } = await import('@/models/Integration');
+      const { encrypt } = await import('@/lib/encryption');
+
+      await connectDB();
+
+      // Check if already connected
+      const existing = await Integration.findOne({ userId, provider: slug, status: 'connected' });
+      if (existing) {
+        // Update existing connection with new credentials
+        existing.accessToken = credentials.apiKey ? encrypt(credentials.apiKey) : existing.accessToken;
+        if (credentials.refreshToken) existing.refreshToken = encrypt(credentials.refreshToken);
+        existing.metadata = {
+          ...((existing.metadata as Record<string, unknown>) || {}),
+          ...(credentials.instanceUrl ? { instanceUrl: credentials.instanceUrl } : {}),
+          ...(credentials.subdomain ? { subdomain: credentials.subdomain } : {}),
+          ...(credentials.accountId ? { accountId: credentials.accountId } : {}),
+          ...(credentials.calendarId ? { calendarId: credentials.calendarId } : {}),
+          ...(credentials.host ? { host: credentials.host } : {}),
+          ...(credentials.port ? { port: credentials.port } : {}),
+          ...(credentials.user ? { user: credentials.user } : {}),
+          ...(testResult.details || {}),
+        };
+        existing.status = 'connected';
+        existing.lastError = null;
+        existing.lastHealthCheck = new Date();
+        await existing.save();
+        return {
+          success: true,
+          connectionId: String(existing._id),
+          message: `${plugin.manifest.name} credentials updated and verified. Connection is active.`,
+          details: testResult.details,
+        };
+      }
+
+      // Create new connection
+      const integration = await Integration.create({
+        userId,
+        provider: slug,
+        accessToken: credentials.apiKey ? encrypt(credentials.apiKey) : undefined,
+        refreshToken: credentials.refreshToken ? encrypt(credentials.refreshToken) : undefined,
+        status: 'connected',
+        isActive: true,
+        lastHealthCheck: new Date(),
+        metadata: {
+          ...(credentials.instanceUrl ? { instanceUrl: credentials.instanceUrl } : {}),
+          ...(credentials.subdomain ? { subdomain: credentials.subdomain } : {}),
+          ...(credentials.accountId ? { accountId: credentials.accountId } : {}),
+          ...(credentials.calendarId ? { calendarId: credentials.calendarId } : {}),
+          ...(credentials.host ? { host: credentials.host } : {}),
+          ...(credentials.port ? { port: credentials.port } : {}),
+          ...(credentials.user ? { user: credentials.user } : {}),
+          ...(testResult.details || {}),
+        },
+      });
+
+      return {
+        success: true,
+        connectionId: String(integration._id),
+        message: `${plugin.manifest.name} connected successfully! Use attach_integration_to_widget to bind it to a widget.`,
+        details: testResult.details,
+      };
+    },
+  },
 ];

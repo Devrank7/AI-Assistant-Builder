@@ -24,7 +24,10 @@ export const pipedrivePlugin: IntegrationPlugin = {
     return { success: true };
   },
 
-  async disconnect() {},
+  async disconnect() {
+    // Stateless API key auth — no server-side revocation needed.
+    // Credentials are deleted from our database by the caller.
+  },
 
   async testConnection(credentials): Promise<HealthResult> {
     try {

@@ -1,8 +1,72 @@
 import { IntegrationPlugin, PluginManifest, ExecutionResult } from './types';
-import { decrypt } from '@/lib/encryption';
+import { decrypt, encrypt } from '@/lib/encryption';
 import connectDB from '@/lib/mongodb';
 import Integration from '@/models/Integration';
 import WidgetIntegration from '@/models/WidgetIntegration';
+
+// OAuth2 token refresh configs per provider
+const OAUTH_REFRESH_CONFIGS: Record<string, { tokenUrl: string; clientIdEnv: string; clientSecretEnv: string }> = {
+  google_calendar: {
+    tokenUrl: 'https://oauth2.googleapis.com/token',
+    clientIdEnv: 'GOOGLE_CLIENT_ID',
+    clientSecretEnv: 'GOOGLE_CLIENT_SECRET',
+  },
+  google_sheets: {
+    tokenUrl: 'https://oauth2.googleapis.com/token',
+    clientIdEnv: 'GOOGLE_CLIENT_ID',
+    clientSecretEnv: 'GOOGLE_CLIENT_SECRET',
+  },
+  salesforce: {
+    tokenUrl: 'https://login.salesforce.com/services/oauth2/token',
+    clientIdEnv: 'SALESFORCE_CLIENT_ID',
+    clientSecretEnv: 'SALESFORCE_CLIENT_SECRET',
+  },
+  hubspot: {
+    tokenUrl: 'https://api.hubapi.com/oauth/v1/token',
+    clientIdEnv: 'HUBSPOT_CLIENT_ID',
+    clientSecretEnv: 'HUBSPOT_CLIENT_SECRET',
+  },
+};
+
+async function refreshOAuthToken(provider: string, refreshToken: string, connectionId: string): Promise<string | null> {
+  const config = OAUTH_REFRESH_CONFIGS[provider];
+  if (!config) return null;
+
+  const clientId = process.env[config.clientIdEnv];
+  const clientSecret = process.env[config.clientSecretEnv];
+  if (!clientId || !clientSecret) return null;
+
+  try {
+    const res = await fetch(config.tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        client_id: clientId,
+        client_secret: clientSecret,
+      }),
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const newAccessToken = data.access_token;
+    if (!newAccessToken) return null;
+
+    // Update DB with new token
+    await Integration.findByIdAndUpdate(connectionId, {
+      accessToken: encrypt(newAccessToken),
+      tokenExpiry: new Date(Date.now() + (data.expires_in || 3600) * 1000),
+      ...(data.refresh_token ? { refreshToken: encrypt(data.refresh_token) } : {}),
+      lastError: null,
+    });
+
+    return newAccessToken;
+  } catch {
+    return null;
+  }
+}
 
 class PluginRegistry {
   private plugins: Map<string, IntegrationPlugin> = new Map();
@@ -84,17 +148,47 @@ class PluginRegistry {
       return { success: false, error: `No active connection for "${slug}"` };
     }
 
-    const credentials: Record<string, string> = {};
+    let credentials: Record<string, string> = {};
     if (connection.accessToken) {
       credentials.apiKey = decrypt(connection.accessToken);
       credentials.accessToken = decrypt(connection.accessToken);
     }
     if (connection.refreshToken) credentials.refreshToken = decrypt(connection.refreshToken);
-    if (connection.instanceUrl) credentials.instanceUrl = connection.instanceUrl;
-    if (connection.subdomain) credentials.subdomain = connection.subdomain;
-    if (connection.accountId) credentials.accountId = connection.accountId;
 
-    return plugin.execute(action, params, credentials);
+    // Auto-refresh expired OAuth tokens
+    if (connection.tokenExpiry && connection.refreshToken) {
+      const expiresAt = new Date(connection.tokenExpiry).getTime();
+      const isExpired = expiresAt < Date.now() + 60_000; // refresh if <1 min left
+      if (isExpired) {
+        const decryptedRefresh = decrypt(connection.refreshToken);
+        const newToken = await refreshOAuthToken(slug, decryptedRefresh, String(connection._id));
+        if (newToken) {
+          credentials.apiKey = newToken;
+          credentials.accessToken = newToken;
+        }
+        // If refresh fails, try with existing token anyway — it might still work
+      }
+    }
+
+    // Pull provider-specific fields from metadata
+    const meta = (connection.metadata || {}) as Record<string, unknown>;
+    if (meta.instanceUrl) credentials.instanceUrl = String(meta.instanceUrl);
+    if (meta.subdomain) credentials.subdomain = String(meta.subdomain);
+    if (meta.accountId) credentials.accountId = String(meta.accountId);
+    if (meta.calendarId) credentials.calendarId = String(meta.calendarId);
+    if (meta.botToken) credentials.botToken = String(meta.botToken);
+
+    // Execute with retry on 401 (token might have been refreshed by another request)
+    const result = await plugin.execute(action, params, credentials);
+    if (!result.success && result.error?.includes('401') && connection.refreshToken) {
+      const decryptedRefresh = decrypt(connection.refreshToken);
+      const newToken = await refreshOAuthToken(slug, decryptedRefresh, String(connection._id));
+      if (newToken) {
+        credentials = { ...credentials, apiKey: newToken, accessToken: newToken };
+        return plugin.execute(action, params, credentials);
+      }
+    }
+    return result;
   }
 }
 

@@ -9,12 +9,13 @@ const VALID_PROVIDERS = [
   'hubspot',
   'salesforce',
   'pipedrive',
-  'zoho',
-  'freshsales',
-  'bitrix24',
-  'monday',
   'google_calendar',
   'calendly',
+  'stripe',
+  'telegram',
+  'whatsapp',
+  'email_smtp',
+  'google_sheets',
 ];
 
 export async function GET(request: NextRequest) {

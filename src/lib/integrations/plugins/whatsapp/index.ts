@@ -23,7 +23,10 @@ export const whatsappPlugin: IntegrationPlugin = {
     return { success: true };
   },
 
-  async disconnect() {},
+  async disconnect() {
+    // WHAPI token invalidation handled on their side.
+    // Credentials deleted from our database by the caller.
+  },
 
   async testConnection(credentials): Promise<HealthResult> {
     try {

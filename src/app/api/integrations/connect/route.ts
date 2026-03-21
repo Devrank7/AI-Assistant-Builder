@@ -35,14 +35,26 @@ export async function POST(request: NextRequest) {
   const encryptedAccessToken = credentials.apiKey ? encrypt(credentials.apiKey) : undefined;
   const encryptedRefreshToken = credentials.refreshToken ? encrypt(credentials.refreshToken) : undefined;
 
+  // Collect provider-specific metadata
+  const providerMetadata: Record<string, unknown> = {
+    ...(result.metadata || {}),
+    ...(credentials.instanceUrl ? { instanceUrl: credentials.instanceUrl } : {}),
+    ...(credentials.subdomain ? { subdomain: credentials.subdomain } : {}),
+    ...(credentials.accountId ? { accountId: credentials.accountId } : {}),
+    ...(credentials.calendarId ? { calendarId: credentials.calendarId } : {}),
+    ...(credentials.host ? { host: credentials.host } : {}),
+    ...(credentials.port ? { port: credentials.port } : {}),
+  };
+
   const integration = await Integration.create({
     userId: auth.userId,
     provider: slug,
     accessToken: encryptedAccessToken,
     refreshToken: encryptedRefreshToken,
+    tokenExpiry: credentials.tokenExpiry ? new Date(credentials.tokenExpiry) : undefined,
     status: 'connected',
     isActive: true,
-    metadata: result.metadata || {},
+    metadata: providerMetadata,
   });
 
   return successResponse({ connectionId: String(integration._id) }, 'Connected successfully');

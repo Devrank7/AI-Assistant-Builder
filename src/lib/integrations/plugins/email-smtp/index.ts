@@ -30,7 +30,9 @@ export const emailSmtpPlugin: IntegrationPlugin = {
     return { success: true };
   },
 
-  async disconnect() {},
+  async disconnect() {
+    // SMTP is connectionless per-send — no persistent session to close.
+  },
 
   async testConnection(credentials): Promise<HealthResult> {
     try {

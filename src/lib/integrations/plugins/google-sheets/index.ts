@@ -2,37 +2,23 @@ import { IntegrationPlugin, HealthResult, ExecutionResult } from '../../core/typ
 import manifest from './manifest.json';
 
 const BASE_URL = 'https://sheets.googleapis.com/v4/spreadsheets';
+const SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive.readonly'];
+
+async function resolveAccessToken(apiKey: string): Promise<string> {
+  const { isServiceAccountJSON, getAccessTokenFromServiceAccount } = await import('@/lib/googleServiceAccount');
+  if (isServiceAccountJSON(apiKey)) {
+    return getAccessTokenFromServiceAccount(apiKey, SCOPES);
+  }
+  return apiKey;
+}
 
 async function sheetsFetch(path: string, credentials: Record<string, string>, options?: RequestInit) {
-  // Support either OAuth2 bearer token or service account JSON key
-  let authHeader = '';
-  const apiKey = credentials.apiKey;
-
-  // If it looks like a JSON key, try to use it as a service account (simplified)
-  // For production, use google-auth-library. For now we support bearer token directly.
-  if (apiKey.startsWith('{')) {
-    // Service account JSON — in a real implementation, use JWT to get an access token
-    // For now, fall back to expecting an access token
-    try {
-      const sa = JSON.parse(apiKey);
-      if (sa.access_token) {
-        authHeader = `Bearer ${sa.access_token}`;
-      } else {
-        // Would need google-auth-library for full service account flow
-        authHeader = `Bearer ${apiKey}`;
-      }
-    } catch {
-      authHeader = `Bearer ${apiKey}`;
-    }
-  } else {
-    authHeader = `Bearer ${apiKey}`;
-  }
-
+  const accessToken = await resolveAccessToken(credentials.apiKey);
   return fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: authHeader,
+      Authorization: `Bearer ${accessToken}`,
       ...options?.headers,
     },
   });
@@ -47,16 +33,19 @@ export const googleSheetsPlugin: IntegrationPlugin = {
     return { success: true };
   },
 
-  async disconnect() {},
+  async disconnect() {
+    // Credentials are deleted from our database by the caller.
+  },
 
   async testConnection(credentials): Promise<HealthResult> {
     try {
       // Try to access the Sheets API with a simple drive files list
+      const accessToken = await resolveAccessToken(credentials.apiKey);
       const res = await fetch(
         'https://www.googleapis.com/drive/v3/files?pageSize=1&q=mimeType%3D%27application/vnd.google-apps.spreadsheet%27',
         {
           headers: {
-            Authorization: `Bearer ${credentials.apiKey.startsWith('{') ? JSON.parse(credentials.apiKey).access_token || credentials.apiKey : credentials.apiKey}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );

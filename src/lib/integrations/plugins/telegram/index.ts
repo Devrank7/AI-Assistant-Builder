@@ -14,7 +14,10 @@ export const telegramPlugin: IntegrationPlugin = {
     return { success: true };
   },
 
-  async disconnect() {},
+  async disconnect() {
+    // Webhook cleanup requires bot token, which is not passed to disconnect().
+    // Credentials are deleted from our database by the caller.
+  },
 
   async testConnection(credentials): Promise<HealthResult> {
     try {

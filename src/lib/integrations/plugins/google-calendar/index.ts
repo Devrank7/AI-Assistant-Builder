@@ -2,8 +2,18 @@ import { IntegrationPlugin, HealthResult, ExecutionResult } from '../../core/typ
 import manifest from './manifest.json';
 
 const BASE_URL = 'https://www.googleapis.com/calendar/v3';
+const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
-async function gcalFetch(path: string, accessToken: string, options?: RequestInit) {
+async function resolveAccessToken(apiKey: string): Promise<string> {
+  const { isServiceAccountJSON, getAccessTokenFromServiceAccount } = await import('@/lib/googleServiceAccount');
+  if (isServiceAccountJSON(apiKey)) {
+    return getAccessTokenFromServiceAccount(apiKey, SCOPES);
+  }
+  return apiKey;
+}
+
+async function gcalFetch(path: string, apiKeyOrSA: string, options?: RequestInit) {
+  const accessToken = await resolveAccessToken(apiKeyOrSA);
   return fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -23,7 +33,10 @@ export const googleCalendarPlugin: IntegrationPlugin = {
     return { success: true };
   },
 
-  async disconnect() {},
+  async disconnect() {
+    // Token revocation requires the access token, which is not passed to disconnect().
+    // Credentials are deleted from our database by the caller.
+  },
 
   async testConnection(credentials): Promise<HealthResult> {
     try {

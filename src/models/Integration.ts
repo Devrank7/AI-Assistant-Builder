@@ -4,10 +4,6 @@ export type IntegrationProvider =
   | 'hubspot'
   | 'salesforce'
   | 'pipedrive'
-  | 'zoho'
-  | 'freshsales'
-  | 'bitrix24'
-  | 'monday'
   | 'google_calendar'
   | 'calendly'
   | 'stripe'
@@ -42,10 +38,6 @@ const integrationSchema = new mongoose.Schema(
         'hubspot',
         'salesforce',
         'pipedrive',
-        'zoho',
-        'freshsales',
-        'bitrix24',
-        'monday',
         'google_calendar',
         'calendly',
         'stripe',

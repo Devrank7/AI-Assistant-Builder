@@ -8,10 +8,6 @@ const crmAdapters: Record<string, CRMAdapter> = {
   // Other adapters will be added as they're implemented:
   // salesforce: salesforceAdapter,
   // pipedrive: pipedriveAdapter,
-  // zoho: zohoAdapter,
-  // freshsales: freshsalesAdapter,
-  // bitrix24: bitrix24Adapter,
-  // monday: mondayAdapter,
 };
 
 /**
