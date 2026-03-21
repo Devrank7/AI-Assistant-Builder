@@ -561,8 +561,84 @@ export const integrationTools: ToolDefinition[] = [
       return {
         success: true,
         connectionId: String(integration._id),
-        message: `${plugin.manifest.name} connected successfully! Use attach_integration_to_widget to bind it to a widget.`,
+        message: `${plugin.manifest.name} connected successfully! Use attach_integration_to_widget to bind it to a widget, then enable_ai_actions to activate.`,
         details: testResult.details,
+      };
+    },
+  },
+  {
+    name: 'enable_ai_actions',
+    description:
+      'Enable AI Actions for a widget after connecting and attaching integrations. Sets actionsEnabled=true and auto-generates the actionsSystemPrompt from connected integrations so the widget AI knows what actions it can execute during chat with visitors.',
+    parameters: {
+      type: 'object',
+      properties: {
+        clientId: { type: 'string', description: 'The widget client ID' },
+      },
+      required: ['clientId'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      const clientId = args.clientId as string;
+      const userId = ctx.userId;
+      if (!userId) return { success: false, error: 'No user context available' };
+
+      const { default: connectDB } = await import('@/lib/mongodb');
+      const { default: AISettings } = await import('@/models/AISettings');
+      const { default: WidgetIntegration } = await import('@/models/WidgetIntegration');
+      const { pluginRegistry } = await import('@/lib/integrations/core/PluginRegistry');
+
+      await connectDB();
+
+      // Load all integration bindings for this widget
+      const bindings = await WidgetIntegration.find({
+        widgetId: clientId,
+        enabled: true,
+      }).lean();
+
+      // Build actionsSystemPrompt from connected integrations
+      const actionDescriptions: string[] = [];
+      for (const binding of bindings) {
+        const plugin = pluginRegistry.get(binding.integrationSlug);
+        if (!plugin) continue;
+
+        const enabledActions = binding.enabledActions || [];
+        for (const actionId of enabledActions) {
+          const actionDef = plugin.manifest.actions.find((a: { id: string }) => a.id === actionId);
+          if (!actionDef) continue;
+
+          const params = Object.entries(actionDef.inputSchema || {})
+            .map(([key, type]) => `${key} (${type})`)
+            .join(', ');
+
+          actionDescriptions.push(
+            `- **${binding.integrationSlug}.${actionId}**: ${actionDef.description || actionDef.name}${params ? ` | Params: ${params}` : ''}`
+          );
+        }
+      }
+
+      const actionsPrompt =
+        actionDescriptions.length > 0
+          ? `You have the following integration actions available. Use them proactively when relevant to the conversation:\n\n${actionDescriptions.join('\n')}\n\nIMPORTANT: When a visitor asks about booking, scheduling, contacting, or any action that matches an available tool — USE IT immediately. Don't just describe what you can do — DO IT.`
+          : 'Built-in actions available: collect_lead (save visitor contact info), search_knowledge (search knowledge base), send_notification (notify business owner).';
+
+      // Update AISettings
+      await AISettings.findOneAndUpdate(
+        { clientId },
+        {
+          actionsEnabled: true,
+          actionsSystemPrompt: actionsPrompt,
+        },
+        { upsert: true }
+      );
+
+      return {
+        success: true,
+        actionsEnabled: true,
+        integrationCount: bindings.length,
+        actionCount: actionDescriptions.length,
+        message: `AI Actions enabled! Widget AI can now execute ${actionDescriptions.length} integration actions + 3 built-in tools during chat with visitors.`,
+        actions: actionDescriptions,
       };
     },
   },
