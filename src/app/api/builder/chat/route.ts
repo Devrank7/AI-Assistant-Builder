@@ -119,8 +119,15 @@ export async function POST(request: NextRequest) {
           pendingFileText: pendingFileTexts.get(currentSessionId)?.text,
         };
 
+        // Load memory from previous sessions
+        const { loadSessionMemory } = await import('@/lib/builder/sessionMemory');
+        const memoryContext = await loadSessionMemory(auth.userId, currentSessionId);
+        const systemPromptWithMemory = memoryContext
+          ? `${BUILDER_SYSTEM_PROMPT}\n\n${memoryContext}`
+          : BUILDER_SYSTEM_PROMPT;
+
         const { assistantText, toolCallsMade } = await runAgentLoop({
-          systemPrompt: BUILDER_SYSTEM_PROMPT,
+          systemPrompt: systemPromptWithMemory,
           messages: conversationMessages,
           toolRegistry,
           toolContext,

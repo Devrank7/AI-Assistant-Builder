@@ -1314,13 +1314,111 @@ Return ONLY the complete component file. No markdown fences, no explanation.`,
     category: 'core',
     async executor(args, ctx) {
       const clientId = args.clientId as string;
-      const scriptPath = path.join(process.cwd(), 'quickwidgets', clientId, 'script.js');
-      if (!fs.existsSync(scriptPath)) {
-        return { error: `Widget not found at quickwidgets/${clientId}/script.js` };
+      const widgetDir = path.join(process.cwd(), 'quickwidgets', clientId);
+      const scriptPath = path.join(widgetDir, 'script.js');
+      const configPath = path.join(widgetDir, 'widget.config.json');
+      const infoPath = path.join(widgetDir, 'info.json');
+      const issues: string[] = [];
+
+      // 1. Check script.js exists and get size
+      ctx.write({ type: 'progress', message: 'Checking script.js exists...' });
+      const scriptExists = fs.existsSync(scriptPath);
+      let scriptSize = '';
+      let scriptValid = false;
+      if (!scriptExists) {
+        issues.push(`script.js not found at quickwidgets/${clientId}/script.js`);
+      } else {
+        const stats = fs.statSync(scriptPath);
+        scriptSize = stats.size >= 1024 ? `${(stats.size / 1024).toFixed(0)} KB` : `${stats.size} B`;
+
+        // 2. Validate script.js content markers
+        ctx.write({ type: 'progress', message: 'Validating script.js content markers...' });
+        const scriptContent = fs.readFileSync(scriptPath, 'utf-8');
+        const markers: { name: string; patterns: string[] }[] = [
+          { name: 'CSS injection (__WIDGET_CSS__)', patterns: ['__WIDGET_CSS__'] },
+          { name: 'Config injection (__WIDGET_CONFIG__)', patterns: ['__WIDGET_CONFIG__'] },
+          { name: 'Custom element registration', patterns: ['customElements', 'AIChatWidget'] },
+          { name: 'Shadow DOM', patterns: ['shadow', 'shadowRoot'] },
+        ];
+        scriptValid = true;
+        for (const marker of markers) {
+          const found = marker.patterns.some((p) => scriptContent.includes(p));
+          if (!found) {
+            scriptValid = false;
+            issues.push(`script.js missing marker: ${marker.name}`);
+          }
+        }
       }
-      const stats = fs.statSync(scriptPath);
-      ctx.write({ type: 'progress', message: 'Widget test passed' });
-      return { success: true, size: stats.size, exists: true };
+
+      // 3. Check widget.config.json
+      ctx.write({ type: 'progress', message: 'Checking widget.config.json...' });
+      let configValid = false;
+      if (!fs.existsSync(configPath)) {
+        issues.push('widget.config.json not found');
+      } else {
+        try {
+          const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+          const requiredFields = ['clientId', 'botName', 'welcomeMessage'];
+          const missing = requiredFields.filter((f) => !(f in config));
+          if (missing.length > 0) {
+            issues.push(`widget.config.json missing fields: ${missing.join(', ')}`);
+          } else {
+            configValid = true;
+          }
+        } catch {
+          issues.push('widget.config.json is not valid JSON');
+        }
+      }
+
+      // 4. Check info.json
+      ctx.write({ type: 'progress', message: 'Checking info.json...' });
+      const infoJsonExists = fs.existsSync(infoPath);
+      if (!infoJsonExists) {
+        issues.push('info.json not found');
+      }
+
+      // 5. Test chat API
+      ctx.write({ type: 'progress', message: 'Testing chat API...' });
+      let chatApiResponds = false;
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        const res = await fetch(`${ctx.baseUrl}/api/chat/stream`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: ctx.cookie || '',
+          },
+          body: JSON.stringify({ clientId, message: 'test', channel: 'web' }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        chatApiResponds = res.status === 200;
+        if (!chatApiResponds) {
+          issues.push(`Chat API returned status ${res.status}`);
+        }
+      } catch (err) {
+        issues.push(`Chat API error: ${(err as Error).message}`);
+      }
+
+      const allPassed = issues.length === 0;
+      ctx.write({
+        type: 'progress',
+        message: allPassed ? 'All widget tests passed!' : `Widget tests completed with ${issues.length} issue(s)`,
+      });
+
+      return {
+        success: allPassed,
+        checks: {
+          scriptExists,
+          scriptSize,
+          scriptValid,
+          configValid,
+          infoJsonExists,
+          chatApiResponds,
+        },
+        issues,
+      };
     },
   },
   {

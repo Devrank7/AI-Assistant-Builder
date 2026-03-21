@@ -131,6 +131,7 @@ export async function POST(request: NextRequest) {
             clientType: 'quick',
             widgetName: session.widgetName || clientId,
             website: (cleanThemeJson.domain as string) || '',
+            frameable: null,
             userId: auth.userId,
             builtAt: new Date().toISOString(),
           },
@@ -156,6 +157,17 @@ export async function POST(request: NextRequest) {
 </body>
 </html>`;
       fs.writeFileSync(path.join(quickwidgetsDir, 'preview.html'), previewHtml);
+
+      // 7c. Capture website screenshot for preview (fire-and-forget, don't block the response)
+      const domain = cleanThemeJson.domain as string;
+      if (domain) {
+        const websiteUrl = domain.startsWith('http') ? domain : `https://${domain}`;
+        import('@/lib/screenshot').then(({ captureScreenshot }) => {
+          captureScreenshot(clientId, websiteUrl).catch((err) =>
+            console.warn(`[Build] Screenshot capture failed for ${clientId}:`, err)
+          );
+        });
+      }
 
       // 8. Create or update Client record in DB
       const existingClient = await Client.findOne({ clientId });

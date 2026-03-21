@@ -23,6 +23,7 @@ import DataList from './templates/DataList';
 import StatusCard from './templates/StatusCard';
 import ExternalLink from './templates/ExternalLink';
 import useIntegration from '../hooks/useIntegration';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 const POSITION_MAP = {
     'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6 items-end',
@@ -120,6 +121,15 @@ export function Widget({ config }) {
     const { offset, isDragging, onPointerDown, onPointerMove, onPointerUp, resetPosition, dragStyle } = useDrag(config.clientId);
     const { isListening, isSupported: voiceSupported, transcript, startListening, stopListening } = useVoice(voiceLocale);
     const { execute: executeIntegration } = useIntegration(config);
+    const { track } = useAnalytics(config);
+
+    // Analytics: track widget load once
+    useEffect(() => { try { track('widget_load'); } catch {} }, []);
+
+    // Analytics: track widget open/close
+    useEffect(() => {
+        try { track(isOpen ? 'widget_open' : 'widget_close'); } catch {}
+    }, [isOpen]);
 
     const handleVoiceToggle = useCallback(() => {
         if (isListening) {
@@ -285,6 +295,7 @@ export function Widget({ config }) {
         }
         setInputValue('');
         if (inputRef.current) inputRef.current.style.height = 'auto';
+        try { track('message_sent', { hasImage: !!selectedImage }); } catch {}
     };
 
     const handleRichAction = useCallback((urlOrType, label) => {
@@ -343,7 +354,7 @@ export function Widget({ config }) {
         isListening, voiceSupported, handleVoiceToggle, handleSwipeStart, handleSwipeMove,
         handleSwipeEnd, scrollToBottom, handleChatScroll, toggleMute, cycleFontSize, exportChat,
         handleImageSelect, removeSelectedImage, handleSubmit, handleRichAction, handleKeyDown,
-        showQuickReplies, getDayLabel, getTimeLabel, shouldShowSeparator, executeIntegration,
+        showQuickReplies, getDayLabel, getTimeLabel, shouldShowSeparator, executeIntegration, track,
     };
 
     // Read widget structure (allows runtime customization)
