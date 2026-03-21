@@ -4,6 +4,8 @@ import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
 import { getDashboardData } from '@/lib/conversationIntelligence';
 import Client from '@/models/Client';
+import { requirePlanFeature } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 /**
  * GET /api/intelligence/dashboard — Aggregated intelligence data
@@ -13,6 +15,9 @@ import Client from '@/models/Client';
 export async function GET(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
+
+  const planErr = requirePlanFeature(auth.user.plan as Plan, 'conversation_intelligence', 'Conversation Intelligence');
+  if (planErr) return Errors.forbidden(planErr);
 
   await connectDB();
   const { searchParams } = new URL(request.url);

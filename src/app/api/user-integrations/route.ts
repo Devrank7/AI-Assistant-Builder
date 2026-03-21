@@ -4,6 +4,8 @@ import { successResponse, Errors } from '@/lib/apiResponse';
 import { encrypt } from '@/lib/encryption';
 import connectDB from '@/lib/mongodb';
 import Integration from '@/models/Integration';
+import { PLAN_CRM_PROVIDERS } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 const VALID_PROVIDERS = [
   'hubspot',
@@ -34,8 +36,10 @@ export async function POST(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
 
-  if (auth.user.plan !== 'pro') {
-    return Errors.forbidden('CRM integrations require a Pro plan');
+  const plan = auth.user.plan as Plan;
+  const allowedProviders = PLAN_CRM_PROVIDERS[plan] || [];
+  if (allowedProviders !== 'all' && allowedProviders.length === 0) {
+    return Errors.forbidden('CRM integrations require a Starter plan or higher. Please upgrade.');
   }
 
   const body = await request.json();
@@ -43,6 +47,13 @@ export async function POST(request: NextRequest) {
 
   if (!provider || !VALID_PROVIDERS.includes(provider)) {
     return Errors.badRequest(`Invalid provider. Supported: ${VALID_PROVIDERS.join(', ')}`);
+  }
+
+  // Check if this specific provider is allowed on user's plan
+  if (allowedProviders !== 'all' && !allowedProviders.includes(provider)) {
+    return Errors.forbidden(
+      `${provider} integration requires a Pro plan. Your plan allows: ${allowedProviders.join(', ')}.`
+    );
   }
 
   if (!accessToken) {

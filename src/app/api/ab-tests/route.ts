@@ -5,11 +5,16 @@ import ABTest from '@/models/ABTest';
 import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
 import { createTest } from '@/lib/abTestService';
+import { requirePlanFeature, PLAN_LIMITS } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 export async function GET(request: NextRequest) {
   try {
     const auth = await verifyUser(request);
     if (!auth.authenticated) return auth.response;
+
+    const planErr = requirePlanFeature(auth.user.plan as Plan, 'ab_testing', 'A/B Testing');
+    if (planErr) return Errors.forbidden(planErr);
 
     await connectDB();
 
@@ -34,6 +39,9 @@ export async function POST(request: NextRequest) {
     const auth = await verifyUser(request);
     if (!auth.authenticated) return auth.response;
 
+    const planErrPost = requirePlanFeature(auth.user.plan as Plan, 'ab_testing', 'A/B Testing');
+    if (planErrPost) return Errors.forbidden(planErrPost);
+
     const body = await request.json();
     const { name, description, clientId, minSampleSize, variants } = body;
 
@@ -51,6 +59,22 @@ export async function POST(request: NextRequest) {
     }
 
     const orgId = auth.organizationId || auth.userId;
+
+    // Enforce concurrent A/B test limit
+    await connectDB();
+    const plan = auth.user.plan as Plan;
+    const limit = PLAN_LIMITS[plan]?.abTests ?? 0;
+    if (limit !== -1) {
+      const activeCount = await ABTest.countDocuments({
+        organizationId: orgId,
+        status: { $in: ['draft', 'running'] },
+      });
+      if (activeCount >= limit) {
+        return Errors.forbidden(
+          `A/B test limit reached (${activeCount}/${limit} active). Upgrade to Enterprise for unlimited tests.`
+        );
+      }
+    }
 
     const test = await createTest(auth.userId, orgId, {
       name,

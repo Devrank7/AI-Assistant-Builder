@@ -51,16 +51,25 @@ export default function CoBrowsingPage() {
   const [createForm, setCreateForm] = useState({ clientId: '', visitorId: '' });
   const [creating, setCreating] = useState(false);
 
-  const fetchSessions = useCallback(async () => {
+  const fetchSessions = useCallback(async (attempt = 0) => {
     try {
       const res = await fetch('/api/cobrowsing');
+      if (res.status === 401 && attempt < 2) {
+        await new Promise((r) => setTimeout(r, 800));
+        return fetchSessions(attempt + 1);
+      }
       const json = await res.json();
       if (json.success) {
         setSessions(json.data || []);
+        setError('');
       } else {
         setError(json.error || 'Failed to load sessions');
       }
-    } catch (err) {
+    } catch {
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 800));
+        return fetchSessions(attempt + 1);
+      }
       setError('Failed to fetch co-browsing sessions');
     } finally {
       setLoading(false);
@@ -282,7 +291,7 @@ export default function CoBrowsingPage() {
       {error && !loading && (
         <div className="py-12 text-center text-red-400">
           <p>{error}</p>
-          <button onClick={fetchSessions} className="mt-3 text-sm text-blue-400 hover:underline">
+          <button onClick={() => fetchSessions()} className="mt-3 text-sm text-blue-400 hover:underline">
             Retry
           </button>
         </div>

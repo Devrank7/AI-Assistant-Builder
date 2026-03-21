@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import ChannelConfig from '@/models/ChannelConfig';
 import { verifyAdminOrClient } from '@/lib/auth';
+import { PLAN_CHANNELS } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 /**
  * GET /api/channels?clientId=X — List connected channels (admin/client auth)
@@ -56,6 +58,27 @@ export async function POST(request: NextRequest) {
     }
 
     await connectDB();
+
+    // Enforce channel access by plan
+    const Client = (await import('@/models/Client')).default;
+    const User = (await import('@/models/User')).default;
+    const client = await Client.findOne({ clientId }).select('userId').lean();
+    if (client) {
+      const owner = await User.findById((client as { userId?: string }).userId)
+        .select('plan')
+        .lean();
+      const ownerPlan = ((owner as { plan?: string })?.plan || 'free') as Plan;
+      const allowedChannels = PLAN_CHANNELS[ownerPlan] || PLAN_CHANNELS.free;
+      if (!allowedChannels.includes(channel)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `${channel} channel requires a higher plan. Allowed channels: ${allowedChannels.join(', ')}`,
+          },
+          { status: 403 }
+        );
+      }
+    }
 
     const updateData: Record<string, unknown> = {
       isActive: true,

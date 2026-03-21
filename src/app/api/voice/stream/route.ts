@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server';
 import { processVoiceMessage } from '@/lib/voiceAgent';
 import { successResponse, Errors } from '@/lib/apiResponse';
+import { verifyUser } from '@/lib/auth';
+import { requirePlanFeature } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 /**
  * POST /api/voice/stream — Process voice transcript through AI pipeline
@@ -10,6 +13,12 @@ import { successResponse, Errors } from '@/lib/apiResponse';
  */
 export async function POST(request: NextRequest) {
   try {
+    const auth = await verifyUser(request);
+    if (!auth.authenticated) return auth.response;
+
+    const planErr = requirePlanFeature(auth.user.plan as Plan, 'voice_ai', 'Voice AI Agent');
+    if (planErr) return Errors.forbidden(planErr);
+
     const body = await request.json();
 
     if (!body.clientId) return Errors.badRequest('clientId is required');

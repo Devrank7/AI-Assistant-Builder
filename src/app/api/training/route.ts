@@ -5,10 +5,15 @@ import { addTrainingExample } from '@/lib/trainingStudio';
 import connectDB from '@/lib/mongodb';
 import TrainingExample from '@/models/TrainingExample';
 import Client from '@/models/Client';
+import { requirePlanFeature } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 export async function GET(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
+
+  const planErr = requirePlanFeature(auth.user.plan as Plan, 'training_studio', 'AI Training Studio');
+  if (planErr) return Errors.forbidden(planErr);
 
   const { searchParams } = new URL(request.url);
   const clientId = searchParams.get('clientId');
@@ -41,6 +46,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
+
+  const planErrPost = requirePlanFeature(auth.user.plan as Plan, 'training_studio', 'AI Training Studio');
+  if (planErrPost) return Errors.forbidden(planErrPost);
 
   try {
     const body = await request.json();

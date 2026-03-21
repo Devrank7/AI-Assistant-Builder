@@ -4,6 +4,8 @@ import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
 import AgentPersona from '@/models/AgentPersona';
 import Client from '@/models/Client';
+import { requirePlanFeature } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 /**
  * GET /api/agent-personas — List personas by clientId
@@ -11,6 +13,9 @@ import Client from '@/models/Client';
 export async function GET(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
+
+  const planErr = requirePlanFeature(auth.user.plan as Plan, 'ai_personas', 'AI Agent Personas');
+  if (planErr) return Errors.forbidden(planErr);
 
   await connectDB();
   const { searchParams } = new URL(request.url);
@@ -33,6 +38,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
+
+  const planErrPost = requirePlanFeature(auth.user.plan as Plan, 'ai_personas', 'AI Agent Personas');
+  if (planErrPost) return Errors.forbidden(planErrPost);
 
   await connectDB();
   const body = await request.json();

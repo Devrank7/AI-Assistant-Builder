@@ -5,6 +5,8 @@ import connectDB from '@/lib/mongodb';
 import Integration from '@/models/Integration';
 import { encrypt } from '@/lib/encryption';
 import { pluginRegistry } from '@/lib/integrations/core/PluginRegistry';
+import { PLAN_CRM_PROVIDERS } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 export async function POST(request: NextRequest) {
   const rateLimited = applyRateLimit(request, 'api');
@@ -13,12 +15,21 @@ export async function POST(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return Errors.unauthorized();
 
-  if (auth.user.plan !== 'pro') {
-    return Errors.forbidden('Pro plan required');
+  const plan = auth.user.plan as Plan;
+  const allowedProviders = PLAN_CRM_PROVIDERS[plan] || [];
+  if (allowedProviders !== 'all' && allowedProviders.length === 0) {
+    return Errors.forbidden('Integrations require a Starter plan or higher. Please upgrade.');
   }
 
   const { slug, credentials } = await request.json();
   if (!slug || !credentials) return Errors.badRequest('slug and credentials are required');
+
+  // Check if this specific provider is allowed on user's plan
+  if (allowedProviders !== 'all' && !allowedProviders.includes(slug)) {
+    return Errors.forbidden(
+      `${slug} integration requires a Pro plan. Your plan allows: ${allowedProviders.join(', ')}.`
+    );
+  }
 
   const plugin = pluginRegistry.get(slug);
   if (!plugin) return Errors.badRequest(`Unknown integration: ${slug}`);

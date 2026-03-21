@@ -44,6 +44,15 @@ export async function POST(request: NextRequest) {
       return Errors.badRequest('No theme configuration found. Continue chatting to generate one.');
     }
 
+    // Enforce widget limit
+    const { checkWidgetLimit } = await import('@/lib/planLimits');
+    const widgetCheck = await checkWidgetLimit(auth.userId, auth.user.plan as import('@/models/User').Plan);
+    if (!widgetCheck.allowed) {
+      return Errors.forbidden(
+        `Widget limit reached (${widgetCheck.used}/${widgetCheck.limit}). Upgrade your plan to create more widgets.`
+      );
+    }
+
     // Extract widgetConfig if stored alongside themeJson
     const widgetConfig = (themeData._widgetConfig as Record<string, unknown>) || null;
     // Remove _widgetConfig from themeJson before writing

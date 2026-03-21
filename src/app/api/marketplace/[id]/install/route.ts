@@ -17,6 +17,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return Errors.notFound('Template not found');
   }
 
+  // Enforce widget limit
+  const { checkWidgetLimit } = await import('@/lib/planLimits');
+  const widgetCheck = await checkWidgetLimit(auth.userId, auth.user.plan as import('@/models/User').Plan);
+  if (!widgetCheck.allowed) {
+    return Errors.forbidden(
+      `Widget limit reached (${widgetCheck.used}/${widgetCheck.limit}). Upgrade your plan to create more widgets.`
+    );
+  }
+
   // Create a new client from template
   const Client = (await import('@/models/Client')).default;
   const clientId = `mp-${crypto.randomBytes(6).toString('hex')}`;

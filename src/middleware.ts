@@ -50,6 +50,8 @@ export function middleware(request: NextRequest) {
     '/api/contacts',
     '/api/inbox',
     '/api/flows',
+    '/api/cobrowsing',
+    '/api/video-avatars',
   ];
   if (adminApiPaths.some((p) => pathname.startsWith(p))) {
     const authHeader = request.headers.get('authorization');

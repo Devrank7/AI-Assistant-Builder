@@ -4,6 +4,8 @@ import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
 import AgentPersona from '@/models/AgentPersona';
 import Client from '@/models/Client';
+import { requirePlanFeature } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 /**
  * GET /api/agent-personas/[id] — Get a single persona
@@ -11,6 +13,9 @@ import Client from '@/models/Client';
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
+
+  const planErr = requirePlanFeature(auth.user.plan as Plan, 'ai_personas', 'AI Agent Personas');
+  if (planErr) return Errors.forbidden(planErr);
 
   await connectDB();
   const { id } = await params;

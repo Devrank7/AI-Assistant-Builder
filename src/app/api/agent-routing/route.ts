@@ -4,6 +4,8 @@ import { verifyUser } from '@/lib/auth';
 import { successResponse, Errors } from '@/lib/apiResponse';
 import AgentRoutingRule from '@/models/AgentRoutingRule';
 import Client from '@/models/Client';
+import { requirePlanFeature } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 /**
  * GET /api/agent-routing — List routing rules for a client
@@ -11,6 +13,9 @@ import Client from '@/models/Client';
 export async function GET(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
+
+  const planErr = requirePlanFeature(auth.user.plan as Plan, 'multi_agent', 'Multi-Agent Orchestration');
+  if (planErr) return Errors.forbidden(planErr);
 
   await connectDB();
   const { searchParams } = new URL(request.url);
@@ -32,6 +37,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = await verifyUser(request);
   if (!auth.authenticated) return auth.response;
+
+  const planErrPost = requirePlanFeature(auth.user.plan as Plan, 'multi_agent', 'Multi-Agent Orchestration');
+  if (planErrPost) return Errors.forbidden(planErrPost);
 
   await connectDB();
   const body = await request.json();

@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminOrClient } from '@/lib/auth';
 import { getInboxThreads, getInboxStats } from '@/lib/inboxManager';
 import type { InboxStatus } from '@/models/InboxMessage';
+import { requirePlanFeature } from '@/lib/planLimits';
+import type { Plan } from '@/models/User';
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,6 +29,21 @@ export async function GET(request: NextRequest) {
 
     if (!clientId) {
       return NextResponse.json({ success: false, error: 'clientId is required' }, { status: 400 });
+    }
+
+    // Enforce Enterprise plan for omnichannel inbox
+    const Client = (await import('@/models/Client')).default;
+    const User = (await import('@/models/User')).default;
+    const client = await Client.findOne({ clientId }).select('userId').lean();
+    if (client) {
+      const owner = await User.findById((client as { userId?: string }).userId)
+        .select('plan')
+        .lean();
+      const ownerPlan = ((owner as { plan?: string })?.plan || 'free') as Plan;
+      const planErr = requirePlanFeature(ownerPlan, 'omnichannel_inbox', 'Omnichannel Inbox');
+      if (planErr) {
+        return NextResponse.json({ success: false, error: planErr }, { status: 403 });
+      }
     }
 
     if (stats) {
