@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
     const phpContent = generatePluginPhp(clientId, clientType);
     const zipBuffer = createZip('winbix-ai-widget/winbix-ai-widget.php', phpContent);
 
-    return new Response(zipBuffer, {
+    return new Response(new Uint8Array(zipBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/zip',
