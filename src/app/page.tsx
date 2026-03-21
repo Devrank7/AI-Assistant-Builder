@@ -1448,7 +1448,7 @@ export default function LandingPage() {
             whileInView="visible"
             viewport={{ once: true, margin: '-60px' }}
             variants={stagger}
-            className="grid grid-cols-1 gap-5 md:grid-cols-3"
+            className="grid grid-cols-1 gap-5 md:grid-cols-4"
           >
             {/* Free */}
             <motion.div variants={fadeUp} className="border-border bg-bg-secondary rounded-xl border p-8">
@@ -1478,6 +1478,36 @@ export default function LandingPage() {
               </ul>
               <Button variant="secondary" className="w-full justify-center" onClick={openSignup}>
                 Get Started Free
+              </Button>
+            </motion.div>
+
+            {/* Starter */}
+            <motion.div variants={fadeUp} className="border-border bg-bg-secondary rounded-xl border p-8">
+              <div className="mb-6">
+                <h3 className="text-text-primary mb-2 text-lg font-bold">Starter</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-text-primary text-4xl font-extrabold tracking-tight">$29</span>
+                  <span className="text-text-tertiary">/mo</span>
+                </div>
+                <p className="text-text-secondary mt-2 text-sm">For small businesses ready to automate sales.</p>
+              </div>
+              <ul className="mb-8 space-y-3">
+                {[
+                  '3 widgets (Chat + FAQ + Form)',
+                  '1,000 messages/mo',
+                  'Web + Telegram channels',
+                  'Customer memory & profiles',
+                  'HubSpot + Google Sheets',
+                  'Custom branding',
+                ].map((f) => (
+                  <li key={f} className="text-text-secondary flex items-center gap-3 text-sm">
+                    <Check className="text-accent h-4 w-4 flex-shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button variant="secondary" className="w-full justify-center" onClick={openSignup}>
+                Start Free Trial
               </Button>
             </motion.div>
 
