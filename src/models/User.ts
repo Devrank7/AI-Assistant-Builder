@@ -54,7 +54,7 @@ const UserSchema = new Schema<IUser>(
     organizationId: { type: String, default: null, index: true },
     onboardingCompleted: { type: Boolean, default: false },
     niche: { type: String, default: null },
-    referralCode: { type: String, default: null, unique: true, sparse: true },
+    referralCode: { type: String, unique: true, sparse: true },
     referredBy: { type: String, default: null, index: true },
     emailSequencesSent: { type: [String], default: [] },
   },
