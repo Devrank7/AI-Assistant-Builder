@@ -1380,7 +1380,7 @@ export default function OnboardingPage() {
               {/* Primary CTA: Go to AI Builder */}
               <motion.button
                 onClick={() => {
-                  if (!saving && !saveError) router.push('/dashboard/ai-builder');
+                  if (!saving && !saveError) router.push('/dashboard/builder');
                 }}
                 disabled={saving || !!saveError}
                 className={`${btnPrimary} shimmer-btn mb-3 w-full`}
