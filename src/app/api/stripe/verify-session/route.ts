@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
   const user = await User.findById(auth.userId);
   if (!user) return Errors.notFound('User not found');
 
-  // Only process if plan is still 'none' (webhook hasn't fired yet)
-  if (user.plan === 'none' && session.subscription) {
+  // Process if plan hasn't been upgraded yet (webhook hasn't fired yet)
+  if ((!user.plan || user.plan === 'none' || user.plan === 'free') && session.subscription) {
     const subscriptionId = session.subscription as string;
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     const priceId = subscription.items.data[0]?.price?.id;

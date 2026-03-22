@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Syne } from 'next/font/google';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/components/AuthProvider';
 import { Button, Badge } from '@/components/ui';
 import { AnimatedNumber, MotionList, MotionItem } from '@/components/ui/motion';
@@ -395,6 +395,174 @@ function hasNonZeroData(arr: { count: number }[] | undefined): boolean {
   return arr.some((item) => item.count > 0);
 }
 
+/* ─── Confetti Particle ─── */
+function ConfettiParticle({ index }: { index: number }) {
+  const colors = [
+    '#06b6d4',
+    '#3B82F6',
+    '#6366F1',
+    '#f472b6',
+    '#fbbf24',
+    '#34d399',
+    '#a78bfa',
+    '#fb923c',
+    '#22d3ee',
+    '#818cf8',
+  ];
+  const color = colors[index % colors.length];
+  const vals = useRef({
+    x: 0,
+    y: 0,
+    rotate: 0,
+    duration: 2.2,
+    delay: 0,
+  });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    vals.current = {
+      x: (Math.random() - 0.5) * 1000,
+      y: -(Math.random() * 700 + 300),
+      rotate: Math.random() * 720 - 360,
+      duration: 2 + Math.random() * 1.2,
+      delay: Math.random() * 0.6,
+    };
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const size = Math.random() > 0.5 ? 'h-2 w-2' : 'h-1.5 w-3';
+  return (
+    <motion.div
+      className={`absolute top-1/2 left-1/2 ${size} rounded-sm`}
+      style={{ background: color }}
+      initial={{ x: 0, y: 0, opacity: 1, scale: 0, rotate: 0 }}
+      animate={{
+        x: vals.current.x,
+        y: vals.current.y,
+        opacity: [1, 1, 0],
+        scale: [0, 1.2, 0.5],
+        rotate: vals.current.rotate,
+      }}
+      transition={{ duration: vals.current.duration, ease: 'easeOut', delay: vals.current.delay }}
+    />
+  );
+}
+
+/* ─── Subscription Success Celebration ─── */
+function SubscriptionCelebration({ planName, onClose }: { planName: string; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 6000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Backdrop */}
+      <motion.div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        onClick={onClose}
+      />
+
+      {/* Confetti burst */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {Array.from({ length: 60 }).map((_, i) => (
+          <ConfettiParticle key={i} index={i} />
+        ))}
+      </div>
+
+      {/* Success card */}
+      <motion.div
+        className="relative z-10 mx-4 w-full max-w-md overflow-hidden rounded-3xl border border-white/[0.08] p-8 text-center"
+        style={{
+          background: 'linear-gradient(145deg, rgba(6,182,212,0.08), rgba(99,102,241,0.06), rgba(15,23,42,0.95))',
+          boxShadow:
+            '0 25px 80px rgba(6,182,212,0.15), 0 0 0 1px rgba(6,182,212,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
+        }}
+        initial={{ scale: 0.5, y: 40, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.9, y: 20, opacity: 0 }}
+        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.1 }}
+      >
+        {/* Glow ring */}
+        <motion.div
+          className="absolute -top-20 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.3), transparent 70%)' }}
+          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+
+        {/* Check icon */}
+        <motion.div
+          className="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl"
+          style={{
+            background: 'linear-gradient(135deg, #06b6d4, #6366f1)',
+            boxShadow: '0 8px 32px rgba(6,182,212,0.3)',
+          }}
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', damping: 12, stiffness: 200, delay: 0.3 }}
+        >
+          <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <motion.path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 13l4 4L19 7"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.5, delay: 0.6, ease: 'easeOut' }}
+            />
+          </svg>
+        </motion.div>
+
+        {/* Text */}
+        <motion.h2
+          className={`${syne.className} mb-2 text-2xl font-bold text-white`}
+          initial={{ y: 15, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          Welcome to {planName}!
+        </motion.h2>
+        <motion.p
+          className="mb-6 text-sm text-gray-400"
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          Your subscription is active. All premium features are now unlocked.
+        </motion.p>
+
+        {/* CTA */}
+        <motion.button
+          onClick={onClose}
+          className="rounded-xl px-8 py-3 text-sm font-semibold text-white transition-all hover:brightness-110"
+          style={{
+            background: 'linear-gradient(135deg, #0891b2, #4f46e5)',
+            boxShadow: '0 4px 20px rgba(6,182,212,0.25)',
+          }}
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          Let&apos;s Build Something Amazing
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 /* ════════════════════════════════════════════════════════════════════ */
 
 export default function DashboardOverview() {
@@ -403,6 +571,7 @@ export default function DashboardOverview() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState(30);
+  const [subscriptionSuccess, setSubscriptionSuccess] = useState<string | null>(null);
 
   /* Stripe session verification */
   useEffect(() => {
@@ -414,7 +583,17 @@ export default function DashboardOverview() {
       body: JSON.stringify({ sessionId }),
     })
       .then((res) => res.json())
-      .then(() => refreshUser())
+      .then((data) => {
+        refreshUser();
+        const plan = data.data?.plan || data.plan;
+        const planNames: Record<string, string> = {
+          starter: 'Starter',
+          pro: 'Pro',
+          enterprise: 'Enterprise',
+          basic: 'Basic',
+        };
+        setSubscriptionSuccess(planNames[plan] || 'Pro');
+      })
       .catch(() => {});
     window.history.replaceState({}, '', '/dashboard');
   }, [searchParams, refreshUser]);
@@ -448,6 +627,13 @@ export default function DashboardOverview() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-7 pb-16">
+      {/* ── SUBSCRIPTION SUCCESS CELEBRATION ── */}
+      <AnimatePresence>
+        {subscriptionSuccess && (
+          <SubscriptionCelebration planName={subscriptionSuccess} onClose={() => setSubscriptionSuccess(null)} />
+        )}
+      </AnimatePresence>
+
       {/* ── HEADER ── */}
       <motion.div {...fadeUp} className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
