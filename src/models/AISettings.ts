@@ -22,9 +22,10 @@ export interface IAISettings extends Document {
   updatedAt: Date;
 }
 
-const defaultSystemPrompt = `Ты полезный AI-ассистент. Отвечай вежливо и по существу.
-Используй предоставленную информацию из базы знаний для ответов.
-Если не знаешь ответа, честно скажи об этом.`;
+const defaultSystemPrompt = `You are a helpful AI assistant. Reply politely and to the point.
+Always respond in the same language the user writes in.
+Use the provided knowledge base to answer questions.
+If you don't know the answer, say so honestly.`;
 
 const AISettingsSchema = new Schema<IAISettings>(
   {
