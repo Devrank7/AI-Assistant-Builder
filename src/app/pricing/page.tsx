@@ -45,12 +45,21 @@ export default function PricingPage() {
         body: JSON.stringify({ plan: planId, period: annual ? 'annual' : 'monthly' }),
       });
       const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || 'Failed to create checkout session. Please try again.');
+        return;
+      }
+
       const checkoutUrl = data.url || data.data?.url;
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
+      } else {
+        alert('Could not redirect to payment page. Please try again.');
       }
-    } catch {
-      // handle error
+    } catch (err) {
+      console.error('Checkout error:', err);
+      alert('Something went wrong. Please try again.');
     } finally {
       setLoadingPlan(null);
     }
