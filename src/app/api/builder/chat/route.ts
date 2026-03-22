@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     const currentSessionId = session._id.toString();
     activeStreams.set(currentSessionId, true);
 
-    const baseUrl = request.nextUrl.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
     const cookie = request.headers.get('cookie') || '';
     const currentUser = await User.findById(auth.userId);
     const userPlan = currentUser?.plan || 'none';

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     // Proxy to the main chat stream API, marking it as a test message
-    const baseUrl = request.nextUrl.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
     const res = await fetch(`${baseUrl}/api/chat/stream`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
