@@ -42,7 +42,7 @@ const UserSchema = new Schema<IUser>(
     authProvider: { type: String, enum: ['email', 'google'], default: 'email' },
     emailVerified: { type: Boolean, default: false },
     stripeCustomerId: { type: String, required: true, unique: true },
-    plan: { type: String, enum: ['none', 'basic', 'pro', 'free', 'starter', 'enterprise'], default: 'none' },
+    plan: { type: String, enum: ['none', 'basic', 'pro', 'free', 'starter', 'enterprise'], default: 'free' },
     billingPeriod: { type: String, enum: ['monthly', 'annual'], default: 'monthly' },
     subscriptionStatus: { type: String, enum: ['trial', 'active', 'past_due', 'canceled'], default: 'trial' },
     trialEndsAt: { type: Date, default: null },
