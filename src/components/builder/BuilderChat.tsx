@@ -936,7 +936,7 @@ export default function BuilderChat({
             <input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.png,.jpg,.jpeg,.webp"
+              accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.json,.xml,.html,.png,.jpg,.jpeg,.webp"
               onChange={handleFileSelect}
               className="hidden"
             />

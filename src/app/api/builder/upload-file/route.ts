@@ -5,7 +5,21 @@ import { parseDocument } from '@/lib/documentParser';
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 const MAX_TEXT_LENGTH = 500_000; // 500K characters
 
-const ALLOWED_EXTENSIONS = new Set(['pdf', 'docx', 'txt', 'md', 'csv', 'xlsx', 'png', 'jpg', 'jpeg', 'webp']);
+const ALLOWED_EXTENSIONS = new Set([
+  'pdf',
+  'docx',
+  'txt',
+  'md',
+  'csv',
+  'xlsx',
+  'json',
+  'xml',
+  'html',
+  'png',
+  'jpg',
+  'jpeg',
+  'webp',
+]);
 
 export async function POST(request: NextRequest) {
   try {

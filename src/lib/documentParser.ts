@@ -207,6 +207,9 @@ export async function parseDocument(buffer: Buffer, filename: string): Promise<P
       return parseDOCX(buffer, filename);
     case 'txt':
     case 'md':
+    case 'json':
+    case 'xml':
+    case 'html':
       return parseTXT(buffer, filename);
     case 'csv':
       return parseCSV(buffer, filename);
@@ -218,6 +221,8 @@ export async function parseDocument(buffer: Buffer, filename: string): Promise<P
     case 'webp':
       return parseImage(buffer, filename);
     default:
-      throw new Error(`Unsupported file type: .${ext}. Supported: pdf, docx, txt, md, csv, xlsx, png, jpg, jpeg, webp`);
+      throw new Error(
+        `Unsupported file type: .${ext}. Supported: pdf, docx, txt, md, csv, xlsx, json, xml, html, png, jpg, jpeg, webp`
+      );
   }
 }
