@@ -10,6 +10,7 @@ interface BuilderMessage {
   timestamp: string;
   toolCards?: { tool: string; status: 'running' | 'done' | 'error'; result?: Record<string, unknown> }[];
   crmInstruction?: { provider: string; steps: string[] };
+  fileAttachment?: { filename: string; type: string; size: number };
 }
 
 interface StreamState {
@@ -139,11 +140,16 @@ export function useBuilderStream() {
 
   // Shared SSE stream reader
   const streamChat = useCallback(
-    async (displayMessage: string, requestBody: Record<string, unknown>) => {
+    async (
+      displayMessage: string,
+      requestBody: Record<string, unknown>,
+      fileAttachment?: { filename: string; type: string; size: number }
+    ) => {
       const userMsg: BuilderMessage = {
         role: 'user',
         content: displayMessage,
         timestamp: new Date().toISOString(),
+        ...(fileAttachment && { fileAttachment }),
       };
 
       setState((prev) => ({
@@ -242,11 +248,20 @@ export function useBuilderStream() {
       }
     ) => {
       const displayMessage = message || `📎 ${fileContext.filename}`;
-      await streamChat(displayMessage, {
-        sessionId: state.sessionId,
-        message: message || 'User uploaded a file',
-        fileContext,
-      });
+      const fileAttachment = {
+        filename: fileContext.filename,
+        type: fileContext.type,
+        size: fileContext.size,
+      };
+      await streamChat(
+        displayMessage,
+        {
+          sessionId: state.sessionId,
+          message: message || 'User uploaded a file',
+          fileContext,
+        },
+        fileAttachment
+      );
     },
     [state.sessionId, streamChat]
   );

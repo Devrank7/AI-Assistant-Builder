@@ -209,6 +209,11 @@ function buildFullPrompt(
 
   let prompt = config.systemPrompt;
 
+  // Current date/time context so the bot knows what day/time it is
+  const now = new Date();
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  prompt += `\n\nCurrent date and time: ${now.toISOString().slice(0, 16).replace('T', ' ')} (${days[now.getDay()]}). Use this for scheduling, availability, and time-related questions.`;
+
   if (conversationContext) {
     prompt += `\n\nConversation history:\n${conversationContext}`;
   }

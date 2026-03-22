@@ -622,12 +622,47 @@ export const integrationTools: ToolDefinition[] = [
           ? `You have the following integration actions available. Use them proactively when relevant to the conversation:\n\n${actionDescriptions.join('\n')}\n\nIMPORTANT: When a visitor asks about booking, scheduling, contacting, or any action that matches an available tool — USE IT immediately. Don't just describe what you can do — DO IT.`
           : 'Built-in actions available: collect_lead (save visitor contact info), search_knowledge (search knowledge base), send_notification (notify business owner).';
 
+      // Build behavioral instructions based on integration types
+      const integrationSlugs = bindings.map((b: { integrationSlug: string }) => b.integrationSlug);
+      const behaviorLines: string[] = [];
+
+      if (integrationSlugs.some((s: string) => ['google_calendar', 'calendly'].includes(s))) {
+        behaviorLines.push(
+          "BOOKING BEHAVIOR: Your primary goal is to help visitors book appointments. Qualify the visitor (ask their name, desired service, preferred date/time) and then book the appointment using the calendar tool. Be proactive — if the conversation is relevant, suggest booking a meeting. Don't just answer questions passively — guide the conversation toward scheduling."
+        );
+      }
+      if (integrationSlugs.some((s: string) => ['hubspot', 'salesforce', 'pipedrive'].includes(s))) {
+        behaviorLines.push(
+          "LEAD CAPTURE BEHAVIOR: Proactively collect visitor contact information (name, email, phone, company). When a visitor shows interest, create a contact/lead in the CRM. Don't wait for them to ask — naturally guide the conversation to gather their details."
+        );
+      }
+      if (integrationSlugs.some((s: string) => s === 'stripe')) {
+        behaviorLines.push(
+          'PAYMENT BEHAVIOR: When a visitor wants to purchase or pay, help them complete the transaction. Present pricing clearly and guide them through the payment process using the payment tool.'
+        );
+      }
+      if (integrationSlugs.some((s: string) => ['telegram', 'whatsapp', 'email_smtp'].includes(s))) {
+        behaviorLines.push(
+          'NOTIFICATION BEHAVIOR: Send notifications to the business owner when important events happen (new lead, booking request, urgent question).'
+        );
+      }
+
+      // Append behavioral instructions to the MAIN systemPrompt
+      const currentSettings = await AISettings.findOne({ clientId });
+      let updatedSystemPrompt = currentSettings?.systemPrompt || '';
+      // Remove any previous behavioral block to avoid duplication
+      updatedSystemPrompt = updatedSystemPrompt.replace(/\n\n## INTEGRATION BEHAVIOR RULES[\s\S]*?(?=\n\n## |$)/, '');
+      if (behaviorLines.length > 0) {
+        updatedSystemPrompt += `\n\n## INTEGRATION BEHAVIOR RULES\n${behaviorLines.join('\n\n')}`;
+      }
+
       // Update AISettings
       await AISettings.findOneAndUpdate(
         { clientId },
         {
           actionsEnabled: true,
           actionsSystemPrompt: actionsPrompt,
+          systemPrompt: updatedSystemPrompt,
         },
         { upsert: true }
       );
@@ -637,7 +672,8 @@ export const integrationTools: ToolDefinition[] = [
         actionsEnabled: true,
         integrationCount: bindings.length,
         actionCount: actionDescriptions.length,
-        message: `AI Actions enabled! Widget AI can now execute ${actionDescriptions.length} integration actions + 3 built-in tools during chat with visitors.`,
+        behaviorRules: behaviorLines.length,
+        message: `AI Actions enabled! Widget AI can now execute ${actionDescriptions.length} integration actions + 3 built-in tools during chat with visitors. ${behaviorLines.length} behavioral rules added to guide the AI's conversation style.`,
         actions: actionDescriptions,
       };
     },

@@ -273,6 +273,12 @@ For non-REST APIs (OAuth2, GraphQL): generator creates skeleton, then modify_com
 
 **CRITICAL: Always call enable_ai_actions after attaching integrations. Without it, the widget AI won't know about the new actions and can't use them during chat.**
 
+**IMPORTANT: enable_ai_actions does TWO things:**
+1. Generates actionsSystemPrompt with available tools so the AI knows WHAT it can do
+2. Adds behavioral rules to the main systemPrompt so the AI knows HOW to behave (e.g., for Calendar: "proactively qualify visitors and book appointments", for CRM: "collect contact info and create leads")
+
+**You MUST complete ALL 3 steps (connect → attach → enable_ai_actions) for integrations to work. Do NOT skip any step. Uploading knowledge text about integrations is NOT sufficient — the actual API connection must be established.**
+
 **Google Calendar/Sheets with Service Account:**
 - User uploads service_account.json → you call connect_integration({ slug: "google_calendar", credentials: '{"apiKey": "<entire JSON content>"}' })
 - The system auto-detects service account JSON, signs JWT, gets access token
