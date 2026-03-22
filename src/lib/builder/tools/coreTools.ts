@@ -554,21 +554,25 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
 
         ctx.write({ type: 'theme_update', theme: mergedTheme });
 
-        // Auto-rebuild with cssOnly — colors are now CSS variables, so only index.css needs regeneration
+        // Full rebuild needed — JSX still has hardcoded colors (not CSS variables yet)
         ctx.write({ type: 'progress', message: 'Rebuilding widget with new colors...' });
         const buildRes = await fetch(`${ctx.baseUrl}/api/builder/build`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Cookie: ctx.cookie },
-          body: JSON.stringify({ sessionId: ctx.sessionId, cssOnly: true }),
+          body: JSON.stringify({ sessionId: ctx.sessionId }),
         });
 
         if (!buildRes.ok) {
-          return { error: 'Theme updated but rebuild failed.' };
+          const errText = await buildRes.text();
+          console.error('[modify_design] Rebuild failed:', errText);
+          return { error: `Theme updated but rebuild failed: ${errText}` };
         }
 
+        console.log('[modify_design] Rebuild succeeded, emitting widget_ready for', clientId);
         ctx.write({ type: 'widget_ready', clientId });
         return { success: true, clientId, message: `Design updated: ${instruction}` };
       } catch (err) {
+        console.error('[modify_design] Error:', (err as Error).message);
         return { error: `Failed to modify design: ${(err as Error).message}` };
       }
     },
