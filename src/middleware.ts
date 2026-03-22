@@ -15,20 +15,27 @@ export function middleware(request: NextRequest) {
     // Only redirect if BOTH tokens are missing. If access expired but refresh is alive,
     // let the page load — the client-side AuthProvider will auto-refresh.
     if (!accessToken && !refreshToken) {
-      return NextResponse.redirect(new URL('/?auth=login', request.url));
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbixai.com';
+      return NextResponse.redirect(new URL('/?auth=login', baseUrl));
     }
   }
 
   // Admin routes protection
   if (pathname.startsWith('/admin')) {
     const adminToken = request.cookies.get('admin_token')?.value;
-    if (!adminToken) return NextResponse.redirect(new URL('/?auth=required', request.url));
+    if (!adminToken) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbixai.com';
+      return NextResponse.redirect(new URL('/?auth=required', baseUrl));
+    }
   }
 
   // Cabinet routes protection
   if (pathname.startsWith('/cabinet')) {
     const clientToken = request.cookies.get('client_token')?.value;
-    if (!clientToken) return NextResponse.redirect(new URL('/?auth=required', request.url));
+    if (!clientToken) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbixai.com';
+      return NextResponse.redirect(new URL('/?auth=required', baseUrl));
+    }
   }
 
   // Public API routes (no auth required)

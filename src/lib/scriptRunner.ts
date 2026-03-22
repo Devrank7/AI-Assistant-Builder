@@ -267,7 +267,7 @@ function createLogger(clientId: string, channel: string) {
 
 function createAskAI(clientId: string, sessionId: string, metadata: Record<string, unknown>) {
   return async (message: string, overrides?: { sessionId?: string }): Promise<string> => {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbixai.com';
     try {
       const res = await fetch(`${baseUrl}/api/chat`, {
         method: 'POST',

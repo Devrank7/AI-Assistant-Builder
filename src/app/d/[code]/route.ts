@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import ShortLink from '@/models/ShortLink';
 
-function getBaseUrl(request: NextRequest): string {
-  return process.env.NEXT_PUBLIC_BASE_URL || `https://${request.headers.get('host') || 'winbixai.com'}`;
+function getBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_BASE_URL || 'https://winbixai.com';
 }
 
 /**
  * GET /d/[code] — Redirect short link to full demo URL
  */
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
-  const base = getBaseUrl(_request);
+  const base = getBaseUrl();
   try {
     const { code } = await params;
     await connectDB();

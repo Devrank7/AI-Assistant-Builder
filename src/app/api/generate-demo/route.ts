@@ -425,7 +425,7 @@ export async function POST(request: NextRequest) {
 
     // 14. Build response
     const encodedUrl = encodeURIComponent(websiteUrl);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${request.headers.get('host')}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://winbixai.com';
     const demoUrl = `${baseUrl}/demo/client-website?client=${clientId}&type=quick&website=${encodedUrl}`;
     const shortUrl = `${baseUrl}/d/${shortCode}`;
     const embedCode = `<script src="${baseUrl}/quickwidgets/${clientId}/script.js"></script>`;
