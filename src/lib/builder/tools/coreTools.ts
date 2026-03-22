@@ -1620,6 +1620,13 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
         text = ctx.pendingFileText;
       }
 
+      // Detect if the agent is trying to fake an integration by uploading behavioral rules instead of actually connecting
+      const integrationKeywords =
+        /\b(google.?calendar|calendly|hubspot|salesforce|pipedrive|stripe|calendar.?api|service.?account|api.?key|webhook)\b/i;
+      const looksLikeIntegrationRules =
+        /\b(правил|инструкци|если.*(клиент|пользователь)|должен|обязан|при.*запрос|when.*user|must.*book|should.*schedule)\b/i;
+      const isIntegrationFake = integrationKeywords.test(text) && looksLikeIntegrationRules.test(text);
+
       ctx.write({ type: 'progress', stage: 'knowledge', status: 'active' });
       ctx.write({ type: 'progress', message: 'Uploading knowledge...' });
 
@@ -1641,6 +1648,16 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
         await setAIPrompt(clientId, businessType, businessName, ctx.baseUrl, ctx.cookie);
 
         ctx.write({ type: 'progress', stage: 'knowledge', status: 'complete' });
+
+        if (isIntegrationFake) {
+          return {
+            success: true,
+            message: `Knowledge uploaded for ${businessName}.`,
+            warning:
+              'IMPORTANT: This text contains integration-related rules (calendar, CRM, etc.). Uploading text does NOT connect an actual integration. The widget CANNOT book appointments, create CRM contacts, or process payments from text alone. You MUST call connect_integration → attach_integration_to_widget → enable_ai_actions to give the widget real API access. Do NOT tell the user the integration is "connected" — it is NOT.',
+          };
+        }
+
         return { success: true, message: `Knowledge uploaded for ${businessName}.` };
       } catch (err) {
         return { error: `Knowledge upload failed: ${(err as Error).message}` };
