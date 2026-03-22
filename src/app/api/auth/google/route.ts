@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         googleId,
         authProvider: 'google',
         emailVerified: email_verified ?? false,
-        plan: 'none',
+        plan: 'free',
         subscriptionStatus: 'trial',
         stripeCustomerId: `cus_temp_${Date.now()}`,
       });

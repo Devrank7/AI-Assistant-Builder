@@ -5,16 +5,18 @@ import { hashPassword } from '@/lib/passwords';
 import { signAccessToken, signRefreshToken } from '@/lib/jwt';
 
 export async function GET(request: NextRequest) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://winbixai.com';
+
   try {
     const code = request.nextUrl.searchParams.get('code');
     const error = request.nextUrl.searchParams.get('error');
 
     if (error) {
-      return NextResponse.redirect(new URL('/?auth_error=cancelled', request.url));
+      return NextResponse.redirect(new URL('/?auth_error=cancelled', baseUrl));
     }
 
     if (!code) {
-      return NextResponse.redirect(new URL('/?auth_error=no_code', request.url));
+      return NextResponse.redirect(new URL('/?auth_error=no_code', baseUrl));
     }
 
     // Exchange code for tokens
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     if (!tokenRes.ok || !tokenData.id_token) {
       console.error('Google token exchange failed:', tokenData);
-      return NextResponse.redirect(new URL('/?auth_error=token_exchange', request.url));
+      return NextResponse.redirect(new URL('/?auth_error=token_exchange', baseUrl));
     }
 
     // Decode ID token to get user info
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     const payload = ticket.getPayload();
     if (!payload || !payload.email) {
-      return NextResponse.redirect(new URL('/?auth_error=invalid_token', request.url));
+      return NextResponse.redirect(new URL('/?auth_error=invalid_token', baseUrl));
     }
 
     const { sub: googleId, email, name, email_verified } = payload;
@@ -103,7 +105,7 @@ export async function GET(request: NextRequest) {
         googleId,
         authProvider: 'google',
         emailVerified: email_verified ?? false,
-        plan: 'none',
+        plan: 'free',
         subscriptionStatus: 'trial',
         stripeCustomerId: `cus_temp_${Date.now()}`,
       });
@@ -149,13 +151,13 @@ export async function GET(request: NextRequest) {
       path: '/',
     };
 
-    const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+    const redirectResponse = NextResponse.redirect(new URL('/dashboard', baseUrl));
     redirectResponse.cookies.set('access_token', accessToken, { ...cookieOptions, maxAge: 15 * 60 });
     redirectResponse.cookies.set('refresh_token', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 });
 
     return redirectResponse;
   } catch (err) {
     console.error('Google callback error:', err);
-    return NextResponse.redirect(new URL('/?auth_error=server_error', request.url));
+    return NextResponse.redirect(new URL('/?auth_error=server_error', baseUrl));
   }
 }

@@ -182,7 +182,7 @@ export async function provisionSSOUser(
       name,
       passwordHash: randomBytes(32).toString('hex'), // random hash for SSO users
       emailVerified: true,
-      plan: 'none',
+      plan: 'free',
       subscriptionStatus: 'active',
       organizationId: config.organizationId,
       onboardingCompleted: false,

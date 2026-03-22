@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase(),
       passwordHash,
       name,
-      plan: 'none',
+      plan: 'free',
       subscriptionStatus: 'trial',
       stripeCustomerId: `cus_temp_${Date.now()}`,
     });
