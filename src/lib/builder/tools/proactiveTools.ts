@@ -253,6 +253,3 @@ export const proactiveTools: ToolDefinition[] = [
     },
   },
 ];
-
-  },
-];
