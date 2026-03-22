@@ -85,7 +85,8 @@ export async function POST(request: NextRequest) {
     const currentSessionId = session._id.toString();
     activeStreams.set(currentSessionId, true);
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+    // Internal server-to-server calls must use localhost to preserve cookies
+    const baseUrl = `http://localhost:${process.env.PORT || 3000}`;
     const cookie = request.headers.get('cookie') || '';
     const currentUser = await User.findById(auth.userId);
     const userPlan = currentUser?.plan || 'none';
