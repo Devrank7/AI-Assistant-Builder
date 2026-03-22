@@ -329,11 +329,17 @@ function GlassSelect({
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full appearance-none rounded-xl border border-gray-200/80 bg-white/60 py-3 text-sm text-gray-900 backdrop-blur-sm transition-all outline-none focus:border-blue-400/50 focus:bg-white/90 focus:ring-2 focus:ring-blue-500/10 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-white dark:focus:border-blue-500/30 dark:focus:bg-white/[0.06] ${Icon ? 'pr-8 pl-10' : 'px-4 pr-8'}`}
+          className={`w-full appearance-none rounded-xl border border-gray-200/80 bg-white/60 py-3 text-sm text-gray-900 backdrop-blur-sm transition-all outline-none focus:border-blue-400/50 focus:bg-white/90 focus:ring-2 focus:ring-blue-500/10 dark:border-white/[0.08] dark:bg-[#1a1d2e] dark:text-white dark:focus:border-blue-500/30 dark:focus:bg-[#1e2235] ${Icon ? 'pr-8 pl-10' : 'px-4 pr-8'}`}
         >
-          <option value="">Select...</option>
+          <option value="" className="bg-white text-gray-900 dark:bg-[#1a1d2e] dark:text-white">
+            Select...
+          </option>
           {normalized.map((o) => (
-            <option key={o.value || o.label} value={o.value || o.label}>
+            <option
+              key={o.value || o.label}
+              value={o.value || o.label}
+              className="bg-white text-gray-900 dark:bg-[#1a1d2e] dark:text-white"
+            >
               {o.label}
             </option>
           ))}
@@ -1029,11 +1035,17 @@ export default function OnboardingPage() {
                       <select
                         value={businessInfo.useCase}
                         onChange={(e) => setBusinessInfo((b) => ({ ...b, useCase: e.target.value }))}
-                        className="w-full appearance-none rounded-xl border border-gray-200/80 bg-white/60 py-3 pr-8 pl-3 text-sm text-gray-900 backdrop-blur-sm transition-all outline-none focus:border-blue-400/50 focus:bg-white/90 focus:ring-2 focus:ring-blue-500/10 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-white dark:focus:border-blue-500/30 dark:focus:bg-white/[0.06]"
+                        className="w-full appearance-none rounded-xl border border-gray-200/80 bg-white/60 py-3 pr-8 pl-3 text-sm text-gray-900 backdrop-blur-sm transition-all outline-none focus:border-blue-400/50 focus:bg-white/90 focus:ring-2 focus:ring-blue-500/10 dark:border-white/[0.08] dark:bg-[#1a1d2e] dark:text-white dark:focus:border-blue-500/30 dark:focus:bg-[#1e2235]"
                       >
-                        <option value="">Select...</option>
+                        <option value="" className="bg-white text-gray-900 dark:bg-[#1a1d2e] dark:text-white">
+                          Select...
+                        </option>
                         {USE_CASES.map((u) => (
-                          <option key={u.id} value={u.id}>
+                          <option
+                            key={u.id}
+                            value={u.id}
+                            className="bg-white text-gray-900 dark:bg-[#1a1d2e] dark:text-white"
+                          >
                             {u.label}
                           </option>
                         ))}
