@@ -112,6 +112,7 @@ export default function BuilderPage() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [showSessions, setShowSessions] = useState(false);
   const restoredRef = useRef(false);
+  const manualResetRef = useRef(false);
 
   useEffect(() => {
     if (!authLoading && user && !hasPaidPlan) {
@@ -131,7 +132,7 @@ export default function BuilderPage() {
   // Auto-restore session from URL query param (?session=ID or ?client=CLIENT_ID)
   // or restore the most recent session if no params present
   useEffect(() => {
-    if (restoredRef.current) return;
+    if (restoredRef.current || manualResetRef.current) return;
 
     const sessionId = searchParams.get('session');
     if (sessionId) {
@@ -218,6 +219,12 @@ export default function BuilderPage() {
     }
     stream.resetSession();
     setShowSessions(false);
+    manualResetRef.current = true;
+    // Clear session from URL so auto-restore doesn't bring back the old session
+    const url = new URL(window.location.href);
+    url.searchParams.delete('session');
+    url.searchParams.delete('client');
+    window.history.replaceState({}, '', url.toString());
   }, [stream, hasPaidPlan, router]);
 
   const isEmptyState = stream.stage === 'input' && stream.messages.length === 0;
