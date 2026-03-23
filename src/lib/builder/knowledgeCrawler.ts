@@ -81,6 +81,7 @@ export async function uploadKnowledge(
           text: chunk.content,
           source: `builder-crawler: ${chunk.title}`,
         }),
+        signal: AbortSignal.timeout(30000),
       });
 
       if (res.ok) {

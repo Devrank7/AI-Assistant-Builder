@@ -610,13 +610,28 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
       const clientId = args.clientId as string;
       ctx.write({ type: 'progress', stage: 'deploy', status: 'active' });
 
-      const res = await fetch(`${ctx.baseUrl}/api/builder/build`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Cookie: ctx.cookie },
-        body: JSON.stringify({ sessionId: ctx.sessionId }),
-      });
+      let res;
+      try {
+        res = await fetch(`${ctx.baseUrl}/api/builder/build`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Cookie: ctx.cookie },
+          body: JSON.stringify({ sessionId: ctx.sessionId }),
+          signal: AbortSignal.timeout(120000),
+        });
+      } catch (err) {
+        const msg =
+          (err as Error).name === 'TimeoutError'
+            ? 'Build timed out (120s)'
+            : `Build network error: ${(err as Error).message}`;
+        return { success: false, error: msg };
+      }
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        return { success: false, error: `Build returned invalid response (status ${res.status})` };
+      }
       if (!data.success) {
         return { success: false, error: data.error || 'Build failed' };
       }

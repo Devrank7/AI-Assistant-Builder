@@ -172,6 +172,8 @@ export function useBuilderStream() {
       }));
 
       abortRef.current = new AbortController();
+      // Safety timeout: abort if stream runs longer than 5 minutes (widget build can take a while)
+      const safetyTimeout = setTimeout(() => abortRef.current?.abort(), 300000);
 
       try {
         const res = await fetch('/api/builder/chat', {
@@ -183,7 +185,12 @@ export function useBuilderStream() {
         });
 
         if (!res.ok) {
-          const err = await res.json();
+          let err;
+          try {
+            err = await res.json();
+          } catch {
+            err = { error: `Server error (${res.status})` };
+          }
           throw new Error(err.error || 'Failed to connect');
         }
 
@@ -213,12 +220,28 @@ export function useBuilderStream() {
         }
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
+          const raw = (err as Error).message || '';
+          // Convert raw errors to user-friendly messages
+          let friendlyError = raw;
+          if (
+            raw.includes('Failed to fetch') ||
+            raw.includes('NetworkError') ||
+            raw.includes('network') ||
+            raw.includes('ERR_')
+          ) {
+            friendlyError = 'Connection lost. Please check your internet and try again.';
+          } else if (raw.includes('timeout') || raw.includes('TimeoutError') || raw.includes('timed out')) {
+            friendlyError = 'Request timed out. Please try again.';
+          } else if (raw.includes('Not authenticated') || raw.includes('Unauthorized')) {
+            friendlyError = 'Session expired. Please refresh the page.';
+          }
           setState((prev) => ({
             ...prev,
-            error: (err as Error).message,
+            error: friendlyError,
           }));
         }
       } finally {
+        clearTimeout(safetyTimeout);
         setState((prev) => ({ ...prev, isStreaming: false }));
       }
     },
