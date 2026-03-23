@@ -112,7 +112,6 @@ export default function BuilderPage() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [showSessions, setShowSessions] = useState(false);
   const restoredRef = useRef(false);
-  const manualResetRef = useRef(false);
 
   useEffect(() => {
     if (!authLoading && user && !hasPaidPlan) {
@@ -129,10 +128,10 @@ export default function BuilderPage() {
       .catch(() => {});
   }, []);
 
-  // Auto-restore session from URL query param (?session=ID or ?client=CLIENT_ID)
-  // or restore the most recent session if no params present
+  // Restore session from URL query param (?session=ID or ?client=CLIENT_ID)
+  // Without params, show empty state (TemplateSelector) so user can choose
   useEffect(() => {
-    if (restoredRef.current || manualResetRef.current) return;
+    if (restoredRef.current) return;
 
     const sessionId = searchParams.get('session');
     if (sessionId) {
@@ -158,20 +157,8 @@ export default function BuilderPage() {
       return;
     }
 
-    // No URL params — auto-restore the most recent active session
+    // No URL params — show empty state, don't auto-restore
     restoredRef.current = true;
-    fetch('/api/builder/sessions', { credentials: 'include' })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.success && d.data?.length > 0) {
-          // Restore the most recent session (already sorted by updatedAt desc)
-          const latest = d.data[0];
-          if (latest.clientId) {
-            stream.restoreSession(latest._id);
-          }
-        }
-      })
-      .catch(() => {});
   }, [searchParams, stream]);
 
   // Keep URL in sync with active session so reload preserves it
@@ -219,7 +206,6 @@ export default function BuilderPage() {
     }
     stream.resetSession();
     setShowSessions(false);
-    manualResetRef.current = true;
     // Clear session from URL so auto-restore doesn't bring back the old session
     const url = new URL(window.location.href);
     url.searchParams.delete('session');
