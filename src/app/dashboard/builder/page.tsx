@@ -98,6 +98,7 @@ const STAGE_SUGGESTIONS: Record<string, string[]> = {
   analysis: ['Change colors', 'Different style'],
   design: ['I like this one', 'Show different options'],
   knowledge: ['Add more content', 'Skip knowledge base'],
+  customize: ['Change colors', 'Connect Google Calendar', 'Change greeting message', 'Make it darker'],
   deploy: ['Test the widget', 'Connect CRM', 'Change colors'],
   integrations: ['Test CRM integration', 'Add another CRM'],
 };
@@ -119,7 +120,7 @@ export default function BuilderPage() {
   }, [authLoading, user, hasPaidPlan, router]);
 
   useEffect(() => {
-    fetch('/api/builder/sessions')
+    fetch('/api/builder/sessions', { credentials: 'include' })
       .then((r) => r.json())
       .then((d) => {
         if (d.success) setSessions(d.data);
@@ -128,6 +129,7 @@ export default function BuilderPage() {
   }, []);
 
   // Auto-restore session from URL query param (?session=ID or ?client=CLIENT_ID)
+  // or restore the most recent session if no params present
   useEffect(() => {
     if (restoredRef.current) return;
 
@@ -141,7 +143,7 @@ export default function BuilderPage() {
     const clientParam = searchParams.get('client');
     if (clientParam) {
       restoredRef.current = true;
-      fetch('/api/builder/sessions')
+      fetch('/api/builder/sessions', { credentials: 'include' })
         .then((r) => r.json())
         .then((d) => {
           if (d.success && d.data) {
@@ -152,7 +154,23 @@ export default function BuilderPage() {
           }
         })
         .catch(() => {});
+      return;
     }
+
+    // No URL params — auto-restore the most recent active session
+    restoredRef.current = true;
+    fetch('/api/builder/sessions', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data?.length > 0) {
+          // Restore the most recent session (already sorted by updatedAt desc)
+          const latest = d.data[0];
+          if (latest.clientId) {
+            stream.restoreSession(latest._id);
+          }
+        }
+      })
+      .catch(() => {});
   }, [searchParams, stream]);
 
   // Keep URL in sync with active session so reload preserves it
