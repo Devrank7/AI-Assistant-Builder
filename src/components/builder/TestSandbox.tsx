@@ -37,6 +37,7 @@ export default function TestSandbox({ clientId, connectedIntegrations }: Props) 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clientId, message: userMsg, conversationId }),
+        credentials: 'include',
       });
       const data = await res.json();
       if (data.success) {

@@ -48,7 +48,7 @@ const AISettingsSchema = new Schema<IAISettings>(
     greeting: {
       type: String,
       required: true,
-      default: 'Привет! Чем могу помочь?',
+      default: 'Hi there! How can I help?',
     },
     temperature: {
       type: Number,

@@ -179,6 +179,7 @@ export function useBuilderStream() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody),
           signal: abortRef.current.signal,
+          credentials: 'include',
         });
 
         if (!res.ok) {
@@ -293,7 +294,7 @@ export function useBuilderStream() {
   /** Restore a previous session from the API (full messages + state) */
   const restoreSession = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/builder/sessions?id=${id}`);
+      const res = await fetch(`/api/builder/sessions?id=${id}`, { credentials: 'include' });
       const data = await res.json();
       if (!data.success || !data.data) return false;
 

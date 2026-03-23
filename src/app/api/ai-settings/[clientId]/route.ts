@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       settings = await AISettings.create({
         clientId,
         systemPrompt: defaultSystemPrompt || 'You are a helpful AI assistant.',
-        greeting: 'Привет! Чем могу помочь?',
+        greeting: 'Hi there! How can I help?',
         temperature: 0.7,
         maxTokens: 1024,
         topK: 3,

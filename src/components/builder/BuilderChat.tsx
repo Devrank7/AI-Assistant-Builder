@@ -197,6 +197,7 @@ export default function BuilderChat({
         const res = await fetch('/api/builder/upload-file', {
           method: 'POST',
           body: formData,
+          credentials: 'include',
         });
 
         const data = await res.json();
