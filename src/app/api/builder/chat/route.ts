@@ -184,7 +184,9 @@ export async function POST(request: NextRequest) {
           if (freshSession.clientId) {
             const builtWidget =
               toolCallsMade.includes('build_deploy') ||
+              toolCallsMade.includes('generate_design') ||
               toolCallsMade.includes('modify_widget_code') ||
+              toolCallsMade.includes('modify_design') ||
               toolCallsMade.includes('rollback');
             if (builtWidget) {
               write({ type: 'widget_ready', clientId: freshSession.clientId });
