@@ -311,9 +311,9 @@ export async function routeMessage(input: RouteMessageInput): Promise<RouteMessa
   }
 
   // 6b. Emotion AI — analyze sentiment and inject tone adjustment
-  if (config.emotionAIEnabled && input.conversationHistory) {
+  if (config.emotionAIEnabled) {
     const sentiment = analyzeConversationSentiment([
-      ...input.conversationHistory,
+      ...(input.conversationHistory || []),
       { role: 'user', content: input.message },
     ]);
     const emotionContext = buildEmotionContext(sentiment);
@@ -607,9 +607,9 @@ export async function routeMessageStream(input: RouteMessageInput): Promise<{
   }
 
   // 6b. Emotion AI
-  if (config.emotionAIEnabled && input.conversationHistory) {
+  if (config.emotionAIEnabled) {
     const sentiment = analyzeConversationSentiment([
-      ...input.conversationHistory,
+      ...(input.conversationHistory || []),
       { role: 'user', content: input.message },
     ]);
     const emotionContext = buildEmotionContext(sentiment);

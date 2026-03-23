@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { routeMessage } from '@/lib/channelRouter';
+import { checkMessageLimit } from '@/lib/planLimits';
+import Client from '@/models/Client';
+import User from '@/models/User';
+import connectDB from '@/lib/mongodb';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,6 +11,25 @@ export async function POST(request: NextRequest) {
 
     if (!clientId || !message) {
       return NextResponse.json({ success: false, error: 'clientId and message are required' }, { status: 400 });
+    }
+
+    // Message limit check (same as stream endpoint)
+    await connectDB();
+    const client = await Client.findOne({ clientId }).select('userId').lean();
+    if (client?.userId) {
+      const user = await User.findById(client.userId).select('plan').lean();
+      if (user?.plan) {
+        const limitCheck = await checkMessageLimit(String(client.userId), user.plan as import('@/models/User').Plan);
+        if (!limitCheck.allowed) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Message limit reached (${limitCheck.used}/${limitCheck.limit}). Please upgrade your plan.`,
+            },
+            { status: 429 }
+          );
+        }
+      }
     }
 
     const result = await routeMessage({

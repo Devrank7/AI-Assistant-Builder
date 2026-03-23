@@ -183,7 +183,6 @@ export async function POST(request: NextRequest) {
           // Emit widget_ready AFTER all tools complete (build + knowledge + ai-settings)
           if (freshSession.clientId) {
             const builtWidget =
-              toolCallsMade.includes('generate_design') ||
               toolCallsMade.includes('build_deploy') ||
               toolCallsMade.includes('modify_widget_code') ||
               toolCallsMade.includes('rollback');

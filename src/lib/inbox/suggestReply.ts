@@ -47,7 +47,7 @@ export async function generateInboxSuggestedReply(conversationId: string): Promi
 
   // 4. Generate suggestion via Gemini
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const prompt = `You are an operator assistant helping a human customer support agent. Based on the conversation history, knowledge base, and business context below, suggest a helpful reply.
 

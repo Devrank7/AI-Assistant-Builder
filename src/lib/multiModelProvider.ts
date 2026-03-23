@@ -57,7 +57,7 @@ function getProviderConfigs(): ProviderConfig[] {
     configs.push({
       provider: 'gemini',
       apiKey: process.env.GEMINI_API_KEY,
-      defaultModel: 'gemini-2.0-flash',
+      defaultModel: 'gemini-2.5-flash',
       costPerInputToken: 0.000000075,
       costPerOutputToken: 0.0000003,
     });
@@ -106,7 +106,7 @@ export async function generateWithGemini(
 ): Promise<GenerateResult> {
   const { GoogleGenAI } = await import('@google/genai');
   const key = apiKey || process.env.GEMINI_API_KEY || '';
-  const modelId = model || 'gemini-2.0-flash';
+  const modelId = model || 'gemini-2.5-flash';
   const ai = new GoogleGenAI({ apiKey: key });
 
   const config: Record<string, unknown> = {

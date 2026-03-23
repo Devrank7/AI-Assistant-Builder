@@ -374,9 +374,10 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
           if (actionCount + functionCalls.length > config.maxActionsPerSession) {
             controller.enqueue(
               encoder.encode(
-                `data: ${JSON.stringify({ token: '\n\nДостигнут лимит действий за сессию. Пожалуйста, обратитесь к менеджеру для дальнейшей помощи.' })}\n\n`
+                `data: ${JSON.stringify({ token: '\n\nAction limit reached for this session. Please contact a manager for further assistance.' })}\n\n`
               )
             );
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
             break;
           }
 

@@ -122,7 +122,7 @@ export function loadChannelScript(clientId: string, channelFolder: string): Chan
         throw new Error(`require('${id}') is not allowed in channel scripts`);
       },
       console,
-      process: { env: process.env },
+      process: { env: { NODE_ENV: process.env.NODE_ENV, TZ: process.env.TZ } },
       fetch: globalThis.fetch,
       setTimeout,
       clearTimeout,
