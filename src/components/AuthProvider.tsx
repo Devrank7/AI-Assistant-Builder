@@ -42,14 +42,14 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = useCallback(async () => {
     try {
-      let res = await fetch('/api/auth/me');
+      let res = await fetch('/api/auth/me', { credentials: 'include' });
 
       // If access token expired, try refreshing it silently
       if (res.status === 401) {
-        const refreshRes = await fetch('/api/auth/refresh', { method: 'POST' });
+        const refreshRes = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
         if (refreshRes.ok) {
           // Retry with the new access token cookie
-          res = await fetch('/api/auth/me');
+          res = await fetch('/api/auth/me', { credentials: 'include' });
         }
       }
 
@@ -76,7 +76,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     } catch {
       // ignore
     }

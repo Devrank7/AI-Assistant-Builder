@@ -5,6 +5,7 @@ import ClientLanguageProvider from '@/i18n/ClientProvider';
 import CookieConsent from '@/components/CookieConsent';
 import AuthProvider from '@/components/AuthProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import FetchInterceptor from '@/components/FetchInterceptor';
 import './globals.css';
 
 const inter = Inter({
@@ -52,6 +53,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ThemeProvider>
+          <FetchInterceptor />
           <ClientLanguageProvider>
             <AuthProvider>
               <ToastProvider>{children}</ToastProvider>
