@@ -270,9 +270,9 @@ export default function BuilderPage() {
                     Install on Site
                   </Link>
 
-                  {stream.stage === 'deploy' && stream.sessionId && (
+                  {stream.stage === 'deploy' && stream.widgetClientId && (
                     <Link
-                      href={`/dashboard/playground/${stream.sessionId}`}
+                      href={`/dashboard/playground/${stream.widgetClientId}`}
                       className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300"
                       style={{
                         background: 'rgba(6,182,212,0.07)',
