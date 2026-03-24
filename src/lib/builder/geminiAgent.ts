@@ -7,7 +7,8 @@ import type { ToolRegistry, ToolContext } from './toolRegistry';
 import type { SSEEvent, AgentToolName } from './types';
 
 const MAX_TOOL_LOOPS = 15;
-const MODEL_ID = 'gemini-3.1-pro-preview';
+const PRIMARY_MODEL = 'gemini-3.1-pro-preview';
+const FALLBACK_MODEL = 'gemini-2.5-flash-preview-05-20';
 
 interface AgentMessage {
   role: 'user' | 'assistant';
@@ -81,18 +82,23 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
     parts: [{ text: msg.content }],
   }));
 
-  // Create chat — the new SDK handles thought_signatures automatically
-  const chat = ai.chats.create({
-    model: MODEL_ID,
-    config: {
-      systemInstruction: systemPrompt,
-      tools: [{ functionDeclarations }],
-      maxOutputTokens: 65536,
-      temperature: 0.3,
-      topP: 0.8,
-    },
-    history,
-  });
+  // Create chat with model — supports automatic fallback on quota exhaustion
+  function createChat(modelId: string) {
+    return ai.chats.create({
+      model: modelId,
+      config: {
+        systemInstruction: systemPrompt,
+        tools: [{ functionDeclarations }],
+        maxOutputTokens: 65536,
+        temperature: 0.3,
+        topP: 0.8,
+      },
+      history,
+    });
+  }
+
+  let chat = createChat(PRIMARY_MODEL);
+  let currentModel = PRIMARY_MODEL;
 
   let fullAssistantText = '';
   const toolCallsMade: string[] = [];
@@ -106,7 +112,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
   while (loopCount < MAX_TOOL_LOOPS) {
     loopCount++;
 
-    // BUG-002 fix: error recovery for Gemini API calls with retry for transient errors
+    // Error recovery with retry + automatic model fallback on quota exhaustion
     let response;
     const MAX_RETRIES = 3;
     let lastErr: Error | null = null;
@@ -118,8 +124,24 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
       } catch (err) {
         lastErr = err as Error;
         const msg = lastErr.message || '';
+        console.error(
+          `[geminiAgent] sendMessage error (attempt ${attempt + 1}/${MAX_RETRIES}, model=${currentModel}):`,
+          msg
+        );
+
+        // Daily quota exhausted → switch to fallback model immediately
+        const isDailyQuota = /quota.*per.*day|per_day|PerDay|retry in \d+h/i.test(msg);
+        if (isDailyQuota && currentModel === PRIMARY_MODEL) {
+          console.warn(`[geminiAgent] Daily quota exhausted for ${PRIMARY_MODEL}, switching to ${FALLBACK_MODEL}`);
+          currentModel = FALLBACK_MODEL;
+          chat = createChat(FALLBACK_MODEL);
+          lastErr = null;
+          // Retry immediately with fallback model (don't count as attempt)
+          attempt--;
+          continue;
+        }
+
         const isTransient = /503|unavailable|overloaded|resource exhausted|too many requests|429/i.test(msg);
-        console.error(`[geminiAgent] sendMessage error (attempt ${attempt + 1}/${MAX_RETRIES}):`, msg);
         if (isTransient && attempt < MAX_RETRIES - 1) {
           const delay = Math.min(2000 * Math.pow(2, attempt), 8000);
           write({ type: 'text', content: '' }); // keep connection alive
