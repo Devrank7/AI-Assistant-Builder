@@ -10,6 +10,7 @@ import {
   rollbackToVersion,
 } from '../widgetCodeManager';
 import { CODEGEN_SYSTEM_PROMPT, buildCodegenUserPrompt } from '../codegenPrompt';
+import { generateWithFallback } from '../geminiHelpers';
 import type { SiteProfile } from '../types';
 import path from 'path';
 import fs from 'fs';
@@ -164,8 +165,6 @@ export const coreTools: ToolDefinition[] = [
       const style = prefs.style || 'glass';
 
       // 3. Call Gemini to generate theme.json
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
       const themePrompt = `Generate a complete theme.json for a chat widget based on this real website analysis:
 - Business: "${businessName}" (${businessType})
@@ -217,8 +216,7 @@ CRITICAL COLOR RULES:
 
       let themeJson: Record<string, unknown>;
       try {
-        const result = await ai.models.generateContent({
-          model: 'gemini-3.1-pro-preview',
+        const result = await generateWithFallback({
           contents: themePrompt,
           config: { temperature: 0.3 },
         });
@@ -297,8 +295,7 @@ CRITICAL COLOR RULES:
       let welcomeMessage = `Welcome to **${businessName}**! How can I help you?`;
       let inputPlaceholder = 'Type your message...';
       try {
-        const qrResult = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview',
+        const qrResult = await generateWithFallback({
           contents: `You are analyzing a ${businessType} business website: "${businessName}".
 Here is content from the site:
 ${pagesSummary.slice(0, 2000)}
@@ -498,12 +495,8 @@ Return ONLY valid JSON, no markdown.`,
         if (currentTheme[f] !== undefined) mutableSnapshot[f] = currentTheme[f];
       }
 
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-
       try {
-        const result = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview',
+        const result = await generateWithFallback({
           contents: `Here are the COLOR fields of a chat widget theme:
 ${JSON.stringify(mutableSnapshot, null, 2)}
 
@@ -723,8 +716,6 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
       const fullBundle = readWidgetCode(clientId);
 
       ctx.write({ type: 'progress', message: 'Generating modified code...' });
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
       const userPrompt = buildCodegenUserPrompt({
         currentCode,
@@ -735,8 +726,7 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
 
       let generatedCode: string;
       try {
-        const result = await ai.models.generateContent({
-          model: 'gemini-3.1-pro-preview',
+        const result = await generateWithFallback({
           contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
           config: { systemInstruction: CODEGEN_SYSTEM_PROMPT, temperature: 0.3 },
         });
@@ -772,8 +762,7 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
                 themeJson: fullBundle['theme.json'],
                 widgetConfig: fullBundle['widget.config.json'],
               });
-              const retryResult = await ai.models.generateContent({
-                model: 'gemini-3.1-pro-preview',
+              const retryResult = await generateWithFallback({
                 contents: [{ role: 'user', parts: [{ text: retryPrompt }] }],
                 config: { systemInstruction: CODEGEN_SYSTEM_PROMPT, temperature: 0.3 },
               });
@@ -1124,12 +1113,8 @@ Return ONLY valid JSON with these ${MUTABLE_FIELDS.length} fields. No other fiel
       const currentCode = fs.readFileSync(filePath, 'utf-8');
       ctx.write({ type: 'progress', message: `Modifying ${fileName} (${currentCode.split('\n').length} lines)...` });
 
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-
       try {
-        const result = await ai.models.generateContent({
-          model: 'gemini-3.1-pro-preview',
+        const result = await generateWithFallback({
           contents: `${CODEGEN_SYSTEM_PROMPT}
 
 CURRENT CODE:
@@ -1237,12 +1222,8 @@ Return ONLY the complete modified component file. No markdown fences, no explana
 
       ctx.write({ type: 'progress', message: `Generating ${componentName} component...` });
 
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-
       try {
-        const result = await ai.models.generateContent({
-          model: 'gemini-3.1-pro-preview',
+        const result = await generateWithFallback({
           contents: `${CODEGEN_SYSTEM_PROMPT}
 
 Generate a NEW Preact component file named: ${componentName}
@@ -1494,8 +1475,6 @@ Return ONLY the complete component file. No markdown fences, no explanation.`,
       const style = (args.style as string) || 'glass';
 
       // Use Gemini to generate a complete theme.json
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
       const themePrompt = `Generate a complete theme.json for a chat widget with these specs:
 - Business: "${businessName}" (${industry})
@@ -1540,8 +1519,7 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
 
       let themeJson: Record<string, unknown>;
       try {
-        const result = await ai.models.generateContent({
-          model: 'gemini-3.1-pro-preview',
+        const result = await generateWithFallback({
           contents: themePrompt,
           config: { temperature: 0.3 },
         });

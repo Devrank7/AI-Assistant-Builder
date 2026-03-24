@@ -1,5 +1,6 @@
 import type { ToolDefinition } from '../toolRegistry';
 import { webFetch } from '../webFetch';
+import { generateWithFallback } from '../geminiHelpers';
 
 export const universalApiTool: ToolDefinition = {
   name: 'connect_any_api',
@@ -55,8 +56,6 @@ export const universalApiTool: ToolDefinition = {
     }
 
     // 2. Use Gemini to generate integration config from docs
-    const { GoogleGenAI } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
     const configPrompt = `From this API documentation, create an integration.config.json for these actions: ${desiredActions}.
 
@@ -95,8 +94,7 @@ Return ONLY the JSON. No explanation.`;
 
     let configJson: Record<string, unknown>;
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-preview-05-20',
+      const response = await generateWithFallback({
         contents: configPrompt,
       });
       const text = response.text?.trim() || '';
