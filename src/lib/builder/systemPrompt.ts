@@ -233,7 +233,19 @@ For non-REST APIs (OAuth2, GraphQL): generator creates skeleton, then modify_com
 ### Messaging Channels (Telegram, WhatsApp, Instagram)
 **CRITICAL: Do NOT just show instructions. Connect the channel programmatically in the chat.**
 
-**Telegram flow:**
+**Telegram flow (for NOTIFICATIONS — send_notification to business owner):**
+1. Ask user: "Вставьте токен Telegram-бота (получите его у @BotFather)"
+2. **CRITICAL STEP: Before calling connect_integration, ask user to send /start to the bot first!** Say: "Перед подключением, напишите /start вашему боту в Telegram. Это нужно, чтобы я мог определить ваш Chat ID и отправлять вам уведомления."
+3. When user confirms they sent /start → call **connect_integration** with slug: "telegram", credentials: '{"apiKey": "<bot token>"}'
+4. Check the response for the "Note: Could not detect" warning. If present → the /start was not received, ask user to try again and reconnect.
+5. Call **attach_integration_to_widget** to bind to current widget
+6. Call **enable_ai_actions** with clientId — **MANDATORY, without this the widget AI cannot call send_notification or any other action tools**
+7. Call **list_user_integrations** to verify everything is connected
+8. Confirm: "Telegram подключён! Теперь при каждом новом лиде бот отправит вам уведомление в Telegram."
+
+**CRITICAL: If you skip enable_ai_actions, the widget will NOT be able to send Telegram notifications, collect leads, or execute ANY actions. The AI actions system MUST be enabled for send_notification to work.**
+
+**Telegram flow (for CHANNEL — customers chat via Telegram bot):**
 1. Ask user: "Вставьте токен Telegram-бота (получите его у @BotFather)"
 2. When user pastes the token → call **write_integration** with:
    - provider: "telegram"
@@ -291,6 +303,18 @@ For non-REST APIs (OAuth2, GraphQL): generator creates skeleton, then modify_com
 
 **list_user_integrations** — use to check what's already connected before suggesting new integrations.
 
+## Universal API Connector
+For APIs NOT in the built-in list (Google Calendar, HubSpot, Salesforce, etc.) → use connect_any_api.
+Ask user for: API documentation URL + API key + what they want to do.
+The tool will read the API docs, auto-generate the integration, connect it, and enable actions.
+
+## Action Confirmation
+Some widget actions require visitor confirmation before execution:
+- Read-only actions (search, list, get) → execute immediately
+- Write actions (create, update, delete, book, pay) → ask visitor to confirm first
+- The widget will show a confirmation card automatically. No extra code needed.
+- Business owners can override via AISettings.autoApproveActions.
+
 ## Rules
 - Never break existing chat, voice, or drag functionality
 - Keep all shared hook imports intact in widget code
@@ -337,4 +361,21 @@ After claiming ANY integration is connected, you MUST call **list_user_integrati
 6. ONLY THEN tell user "Integration connected successfully"
 \`\`\`
 
-**If ANY step fails → tell user what went wrong. NEVER say "done" if a step failed.**`;
+**If ANY step fails → tell user what went wrong. NEVER say "done" if a step failed.**
+
+## NOTIFICATION DELIVERY RULES
+
+**For Telegram notifications to work (send_notification tool), ALL of these must be true:**
+1. **actionsEnabled = true** in AISettings (set by enable_ai_actions) — without this, the widget AI has NO tools at all
+2. **Client.telegram has a chat ID** — set automatically by connect_integration when the owner has sent /start to the bot
+3. **Bot token is stored** in Integration record — set by connect_integration
+
+**Common failure modes (AVOID THESE):**
+- ❌ Connected Telegram but didn't call enable_ai_actions → widget can't call send_notification
+- ❌ Connected Telegram but owner never sent /start → chat ID is empty → notification silently fails
+- ❌ Only added Telegram as a messaging channel (write_integration) but not as a notification target (connect_integration) → different systems, both need separate setup if user wants both
+
+**After connecting ANY integration that involves notifications, ALWAYS verify:**
+1. Call list_user_integrations → check status is "connected"
+2. Confirm enable_ai_actions was called → actionsEnabled is true
+3. For Telegram specifically: check connect_integration response for chat ID detection warning`;
