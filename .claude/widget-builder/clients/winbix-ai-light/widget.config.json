@@ -3,7 +3,7 @@
   "botName": "WinBix AI",
   "welcomeMessage": "Welcome to **WinBix AI**! I can help you learn about our AI chat widgets, pricing, and features.",
   "inputPlaceholder": "Ask about our platform...",
-  "quickReplies": ["How does it work?", "View pricing", "What channels are supported?", "Get a free demo"],
+  "quickReplies": ["How does it work?", "View pricing", "Get a free demo"],
   "avatar": {
     "type": "initials",
     "initials": "WB"
