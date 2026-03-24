@@ -129,6 +129,28 @@ export function useBuilderStream() {
         case 'widget_ready':
           return { ...prev, widgetClientId: event.clientId, widgetVersion: Date.now() };
 
+        case 'action_trace':
+          if (lastMsg?.role === 'assistant') {
+            const traceCards = [...(lastMsg.toolCards || [])];
+            traceCards.push({
+              tool: (event as { tool: string }).tool,
+              status: (event as { status: string }).status === 'success' ? 'done' : 'error',
+              result: {
+                durationMs: (event as { durationMs: number }).durationMs,
+                summary: (event as { summary?: string }).summary,
+              },
+            });
+            const updated = { ...lastMsg, toolCards: traceCards };
+            return { ...prev, messages: [...msgs.slice(0, -1), updated] };
+          }
+          return prev;
+
+        case 'action_confirm':
+        case 'action_confirmed':
+        case 'action_rejected':
+          // Builder doesn't need to handle widget-side confirmation events
+          return prev;
+
         case 'done':
           return { ...prev, isStreaming: false, knowledgeProgress: null };
 
