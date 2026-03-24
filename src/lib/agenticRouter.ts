@@ -9,7 +9,7 @@
  * Flow:
  * 1. Load widget tools (built-in + integrations)
  * 2. Build system prompt with action instructions
- * 3. Gemini agentic loop (max 5 iterations)
+ * 3. Gemini agentic loop (max 15 iterations)
  * 4. Stream text + action events via SSE
  *
  * Falls back to plain text streaming if no tools are available.
@@ -35,8 +35,12 @@ import { processConversationIntelligence } from '@/lib/conversationIntelligence'
 import { selectPersona } from '@/lib/personaRouter';
 import { upsertInboxThread } from '@/lib/inboxManager';
 import { trackFunnelEvent } from '@/lib/revenueTracker';
+import { ActionTracer } from '@/lib/actionTracer';
+import { getConfirmationLevel } from '@/lib/actionConfirmation';
+import PendingAction from '@/models/PendingAction';
+import { randomUUID } from 'crypto';
 
-const MAX_ACTION_LOOPS = 5;
+const MAX_ACTION_LOOPS = 15;
 
 // ── AI Config ──────────────────────────────────────────────────────────────
 
@@ -53,6 +57,7 @@ interface AgenticConfig {
   emotionAIEnabled: boolean;
   personasEnabled: boolean;
   customerMemoryEnabled: boolean;
+  autoApproveActions: string[];
 }
 
 async function getAgenticConfig(clientId: string): Promise<AgenticConfig> {
@@ -73,6 +78,7 @@ async function getAgenticConfig(clientId: string): Promise<AgenticConfig> {
     emotionAIEnabled: settingsDoc?.emotionAIEnabled ?? false,
     personasEnabled: settingsDoc?.personasEnabled ?? false,
     customerMemoryEnabled: settingsDoc?.customerMemoryEnabled ?? false,
+    autoApproveActions: settingsDoc?.autoApproveActions || [],
   };
 }
 
@@ -160,6 +166,14 @@ You have tools that can perform REAL actions — book appointments, save contact
 4. If a tool fails, apologize and offer a manual alternative.
 5. After a successful action, briefly confirm what was done.
 6. NEVER make up data — only use information the user explicitly provided.`;
+
+    // Planning instruction for complex multi-tool flows
+    if (tools.declarations.length > 3) {
+      prompt += `\n\n### Multi-step execution:
+You can call tools sequentially up to ${config.maxActionsPerSession} times per session.
+For multi-step tasks, execute steps one by one. Track your progress.
+If a step fails, explain what happened and suggest an alternative.`;
+    }
 
     // Custom action instructions from business owner
     if (config.actionsSystemPrompt) {
@@ -330,6 +344,7 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
       let totalInputTokens = 0;
       let totalOutputTokens = 0;
       let actionCount = 0;
+      const tracer = new ActionTracer();
 
       try {
         let nextMessage: string | Part[] = input.message;
@@ -389,12 +404,57 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
             const toolArgs = (fc.args || {}) as Record<string, unknown>;
             actionCount++;
 
-            // Emit action_start event
+            // Check confirmation level
+            const confirmLevel = getConfirmationLevel(toolName, config.autoApproveActions || []);
+
+            if (confirmLevel === 'confirm') {
+              // Store pending action in MongoDB
+              const confirmId = randomUUID();
+              const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min TTL
+
+              await PendingAction.create({
+                confirmId,
+                tool: toolName,
+                args: toolArgs,
+                sessionId: toolCtx.sessionId,
+                widgetId: toolCtx.clientId,
+                userId: toolCtx.userId,
+                expiresAt,
+              });
+
+              // Track in tracer
+              tracer.addConfirmationTrace(toolName, toolArgs, 'pending');
+
+              // Stream confirmation event
+              const description = `${toolName}(${Object.entries(toolArgs)
+                .map(([k, v]) => `${k}: ${v}`)
+                .join(', ')})`;
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: 'action_confirm', tool: toolName, args: toolArgs, confirmId, description })}\n\n`
+                )
+              );
+
+              // Tell Gemini to wait for confirmation
+              functionResponseParts.push({
+                functionResponse: {
+                  name: toolName,
+                  response: {
+                    status: 'awaiting_confirmation',
+                    message: 'Asked visitor to confirm this action before executing.',
+                  },
+                },
+              } as Part);
+              continue;
+            }
+
+            // Auto-execute: emit action_start
             controller.enqueue(
               encoder.encode(`data: ${JSON.stringify({ action_start: toolName, args: toolArgs })}\n\n`)
             );
 
-            // Execute tool
+            // Execute tool with tracing
+            const trace = tracer.startTrace(toolName, toolArgs);
             const executor = tools.executors.get(toolName);
             let toolResult: Record<string, unknown>;
 
@@ -408,9 +468,16 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
               toolResult = { success: false, error: `Tool "${toolName}" not found` };
             }
 
-            // Emit action_result event
+            const completed = trace.finish(toolResult);
+
+            // Emit action_result + trace events
             controller.enqueue(
               encoder.encode(`data: ${JSON.stringify({ action_result: toolName, result: toolResult })}\n\n`)
+            );
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ type: 'action_trace', tool: toolName, status: toolResult.success ? 'success' : 'error', durationMs: completed.durationMs })}\n\n`
+              )
             );
 
             functionResponseParts.push({
@@ -453,6 +520,7 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
                     ],
                   },
                 },
+                ...(tracer.getTraces().length > 0 ? { $set: { actionTraces: tracer.getTraces() } } : {}),
                 $setOnInsert: {
                   clientId: input.clientId,
                   sessionId: input.sessionId,
