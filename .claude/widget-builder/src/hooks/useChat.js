@@ -232,6 +232,27 @@ export default function useChat(config) {
                                         return newMsgs;
                                     });
                                 }
+                                // Action confirmation (HITL)
+                                if (data.type === 'action_confirm') {
+                                    setMessages((prev) => {
+                                        const newMsgs = [...prev];
+                                        const last = newMsgs[newMsgs.length - 1];
+                                        const confirmations = [...(last.confirmations || [])];
+                                        confirmations.push({
+                                            confirmId: data.confirmId,
+                                            tool: data.tool,
+                                            args: data.args,
+                                            description: data.description,
+                                            status: 'pending',
+                                        });
+                                        newMsgs[newMsgs.length - 1] = { ...last, confirmations };
+                                        return newMsgs;
+                                    });
+                                }
+                                // Action trace (observability — stored but not rendered in widget)
+                                if (data.type === 'action_trace') {
+                                    // Traces are for dashboard, not widget UI — no-op here
+                                }
                             } catch (e) {}
                         }
                     }
@@ -305,6 +326,37 @@ export default function useChat(config) {
         try { localStorage.setItem(sessionKey, newId); } catch {}
     }, [storageKey, sessionKey]);
 
+    const handleConfirm = useCallback(async (confirmId, approved) => {
+        try {
+            const res = await fetch((window.__WIDGET_API_BASE__ || '') + '/api/chat/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ confirmId, sessionId: sessionIdRef.current, approved }),
+            });
+            const data = await res.json();
+
+            // Update confirmation status in messages
+            setMessages((prev) => {
+                const newMsgs = [...prev];
+                for (let i = newMsgs.length - 1; i >= 0; i--) {
+                    const msg = newMsgs[i];
+                    if (msg.confirmations) {
+                        const confirmations = msg.confirmations.map(c =>
+                            c.confirmId === confirmId
+                                ? { ...c, status: approved ? 'confirmed' : 'rejected', result: data.result }
+                                : c
+                        );
+                        newMsgs[i] = { ...msg, confirmations };
+                        break;
+                    }
+                }
+                return newMsgs;
+            });
+        } catch (err) {
+            console.error('[useChat] confirm error:', err);
+        }
+    }, []);
+
     // ── Playground live-preview listener ────────────────────────────
     // Listens for PLAYGROUND_THEME_UPDATE messages from the playground
     // control panel and applies CSS variable overrides to the Shadow DOM
@@ -339,6 +391,7 @@ export default function useChat(config) {
         isOffline,
         retryLastMessage,
         clearMessages,
+        handleConfirm,
         sessionId: sessionIdRef.current,
         isReturningUser,
     };
