@@ -14,6 +14,7 @@ import connectDB from '@/lib/mongodb';
 import WidgetIntegration from '@/models/WidgetIntegration';
 import Integration from '@/models/Integration';
 import Client from '@/models/Client';
+import AISettings from '@/models/AISettings';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
 import ChatLog from '@/models/ChatLog';
 import { pluginRegistry } from '@/lib/integrations/core/PluginRegistry';
@@ -144,12 +145,13 @@ const builtinTools: Record<string, WidgetTool> = {
     },
     executor: async (args, ctx) => {
       try {
-        const client = await Client.findOne({ clientId: ctx.clientId }).select('telegram email username').lean();
+        const client = await Client.findOne({ clientId: ctx.clientId }).select('telegram email username userId').lean();
         if (!client) return { success: false, error: 'Client not found' };
 
-        // Try Telegram notification first
+        const text = `🔔 *${args.subject}*\n\n${args.message}\n\n_Widget: ${ctx.clientId}_`;
+
+        // Try Telegram notification via Client.telegram field first
         if (client.telegram && process.env.TELEGRAM_BOT_TOKEN) {
-          const text = `🔔 *${args.subject}*\n\n${args.message}\n\n_Widget: ${ctx.clientId}_`;
           await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -160,6 +162,50 @@ const builtinTools: Record<string, WidgetTool> = {
             }),
           });
           return { success: true, message: 'Notification sent to business owner via Telegram' };
+        }
+
+        // Fallback: check Integration model for connected Telegram bot
+        if (client.userId) {
+          try {
+            const { decrypt } = await import('@/lib/encryption');
+            const tgIntegration = await Integration.findOne({
+              userId: client.userId,
+              provider: 'telegram',
+              status: 'connected',
+            }).lean();
+
+            if (tgIntegration?.accessToken && (tgIntegration.metadata as Record<string, unknown>)?.chatId) {
+              const botToken = decrypt(tgIntegration.accessToken as string);
+              const chatId = (tgIntegration.metadata as Record<string, unknown>).chatId as string;
+              console.log(`[send_notification] Sending Telegram to chatId=${chatId} via bot`);
+              const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: chatId,
+                  text,
+                  parse_mode: 'Markdown',
+                }),
+              });
+              const tgData = await tgRes.json();
+              if (!tgData.ok) {
+                console.error('[send_notification] Telegram API error:', tgData);
+                return { success: false, error: `Telegram error: ${tgData.description || 'Unknown error'}` };
+              }
+              // Also store chatId in Client for faster future lookups
+              await Client.updateOne({ clientId: ctx.clientId }, { $set: { telegram: chatId } });
+              return { success: true, message: 'Notification sent to business owner via Telegram' };
+            } else {
+              console.warn('[send_notification] Integration found but missing accessToken or chatId:', {
+                hasToken: !!tgIntegration?.accessToken,
+                hasChatId: !!(tgIntegration?.metadata as Record<string, unknown>)?.chatId,
+              });
+            }
+          } catch (intErr) {
+            console.error('[send_notification] Integration fallback error:', (intErr as Error).message);
+          }
+        } else {
+          console.warn('[send_notification] Client has no userId, cannot look up integrations');
         }
 
         // Fallback: store as in-app notification
@@ -279,14 +325,27 @@ export async function loadWidgetTools(clientId: string): Promise<LoadedWidgetToo
         .select('provider')
         .lean();
 
-      if (!connection) continue;
+      if (!connection) {
+        console.warn(
+          `[widgetTools] Integration "${binding.integrationSlug}" bound to widget "${clientId}" but no active connection found — skipping`
+        );
+        continue;
+      }
 
       const plugin = pluginRegistry.get(binding.integrationSlug);
-      if (!plugin) continue;
+      if (!plugin) {
+        console.warn(`[widgetTools] Plugin "${binding.integrationSlug}" not found in registry — skipping`);
+        continue;
+      }
 
       for (const actionId of binding.enabledActions || []) {
         const actionDef = plugin.manifest.actions.find((a) => a.id === actionId);
-        if (!actionDef) continue;
+        if (!actionDef) {
+          console.warn(
+            `[widgetTools] Action "${actionId}" not found in plugin "${binding.integrationSlug}" manifest — skipping`
+          );
+          continue;
+        }
 
         const tool = buildIntegrationTool(
           binding.integrationSlug,
@@ -302,10 +361,16 @@ export async function loadWidgetTools(clientId: string): Promise<LoadedWidgetToo
     }
   }
 
-  // 3. Always add built-in tools
-  for (const [name, tool] of Object.entries(builtinTools)) {
-    declarations.push(tool.declaration);
-    executors.set(name, tool.executor);
+  // 3. Check if AI actions are enabled for this widget
+  const aiSettings = await AISettings.findOne({ clientId }).select('actionsEnabled').lean();
+  const actionsEnabled = aiSettings?.actionsEnabled ?? false;
+
+  // 4. Add built-in tools only if actions are enabled (or integrations detected)
+  if (actionsEnabled || hasIntegrations) {
+    for (const [name, tool] of Object.entries(builtinTools)) {
+      declarations.push(tool.declaration);
+      executors.set(name, tool.executor);
+    }
   }
 
   return { declarations, executors, hasIntegrations };
