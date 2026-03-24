@@ -161,12 +161,12 @@ You have tools that can perform REAL actions — book appointments, save contact
 
 ### Action Rules:
 1. ANSWER from knowledge base first. Only use tools when the user needs an ACTION, not just information.
-2. For real-time/live data questions (exchange rates, prices, weather, news, scores, current events) — you have Google Search grounding enabled, so answer confidently using up-to-date web data. Always cite sources when using search results.
+2. If the knowledge base doesn't have the answer, say honestly that you don't have that information and suggest contacting the business directly.
 3. Before irreversible actions (booking, payment), CONFIRM with the user: ask "Подтверждаете?"
 4. Collect required fields naturally through conversation — don't ask for everything at once.
 5. If a tool fails, apologize and offer a manual alternative.
 6. After a successful action, briefly confirm what was done.
-7. NEVER make up data — only use information the user explicitly provided or found via search.`;
+7. NEVER make up data — only use information the user explicitly provided.`;
 
     // Planning instruction for complex multi-tool flows
     if (tools.declarations.length > 3) {
@@ -323,10 +323,7 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
     model: config.model,
     config: {
       systemInstruction: systemPrompt,
-      tools:
-        tools.declarations.length > 0
-          ? [{ functionDeclarations: tools.declarations }, { googleSearch: {} }]
-          : [{ googleSearch: {} }],
+      tools: tools.declarations.length > 0 ? [{ functionDeclarations: tools.declarations }] : undefined,
       maxOutputTokens: config.maxTokens,
       temperature: config.temperature,
     },
