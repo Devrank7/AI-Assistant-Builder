@@ -17,6 +17,7 @@ export interface IAISettings extends Document {
   commerceEnabled: boolean; // Enable in-chat commerce (product catalog, cart, payments)
   customerMemoryEnabled: boolean; // Enable persistent customer memory (Mem0-like)
   autoLearningEnabled: boolean; // Enable auto-learning from negative feedback
+  autoApproveActions: string[]; // Actions that skip confirmation (e.g. ['google_calendar_createEvent'])
   industryTemplate?: string; // Industry template slug (e.g. 'dental', 'beauty_salon')
   createdAt: Date;
   updatedAt: Date;
@@ -106,6 +107,10 @@ const AISettingsSchema = new Schema<IAISettings>(
     autoLearningEnabled: {
       type: Boolean,
       default: false,
+    },
+    autoApproveActions: {
+      type: [String],
+      default: [],
     },
     industryTemplate: {
       type: String,

@@ -18,6 +18,15 @@ export interface IChatLog extends Document {
   };
   variantId?: string | null;
   consecutiveLowConfidence: number;
+  actionTraces?: Array<{
+    tool: string;
+    args: Record<string, unknown>;
+    result: { success: boolean; data?: unknown; error?: string };
+    durationMs: number;
+    timestamp: Date;
+    confirmationRequired: boolean;
+    confirmationStatus?: 'approved' | 'rejected' | 'pending';
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +50,7 @@ const ChatLogSchema = new Schema(
     },
     variantId: { type: String, default: null, index: true },
     consecutiveLowConfidence: { type: Number, default: 0 },
+    actionTraces: [{ type: Schema.Types.Mixed }],
   },
   { timestamps: true }
 );
