@@ -1,14 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useLanguage } from '@/i18n/context';
 import { useTranslation } from '@/i18n/useTranslation';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="mt-12 mb-4 text-2xl font-bold text-white">{children}</h2>;
-}
+import LegalLayout, { SectionTitle } from '@/components/LegalLayout';
 
 /* ───────────────────────────── RUSSIAN ───────────────────────────── */
 
@@ -960,6 +955,81 @@ const CONTENT_MAP: Record<string, () => React.JSX.Element> = {
   ar: ArContent,
 };
 
+/* ──────────────────────────── SECTIONS (for TOC) ────────────────────── */
+
+const TERMS_SECTIONS: Record<string, Array<{ id: string; number: string; title: string }>> = {
+  ru: [
+    { id: 'section-1', number: '1', title: 'Общие положения' },
+    { id: 'section-2', number: '2', title: 'Описание сервиса' },
+    { id: 'section-3', number: '3', title: 'Демо-виджеты' },
+    { id: 'section-4', number: '4', title: 'Регистрация и доступ' },
+    { id: 'section-5', number: '5', title: 'Допустимое использование' },
+    { id: 'section-6', number: '6', title: 'Интеллектуальная собственность' },
+    { id: 'section-7', number: '7', title: 'Тарифы и оплата' },
+    { id: 'section-8', number: '8', title: 'Обработка данных' },
+    { id: 'section-9', number: '9', title: 'Доступность сервиса' },
+    { id: 'section-10', number: '10', title: 'Ответственность' },
+    { id: 'section-11', number: '11', title: 'Изменения условий' },
+    { id: 'section-12', number: '12', title: 'Контакты' },
+  ],
+  en: [
+    { id: 'section-1', number: '1', title: 'General Provisions' },
+    { id: 'section-2', number: '2', title: 'Service Description' },
+    { id: 'section-3', number: '3', title: 'Demo Widgets' },
+    { id: 'section-4', number: '4', title: 'Registration & Access' },
+    { id: 'section-5', number: '5', title: 'Acceptable Use' },
+    { id: 'section-6', number: '6', title: 'Intellectual Property' },
+    { id: 'section-7', number: '7', title: 'Pricing & Payment' },
+    { id: 'section-8', number: '8', title: 'Data Processing' },
+    { id: 'section-9', number: '9', title: 'Service Availability' },
+    { id: 'section-10', number: '10', title: 'Liability' },
+    { id: 'section-11', number: '11', title: 'Changes to Terms' },
+    { id: 'section-12', number: '12', title: 'Contact Info' },
+  ],
+  uk: [
+    { id: 'section-1', number: '1', title: 'Загальні положення' },
+    { id: 'section-2', number: '2', title: 'Опис сервісу' },
+    { id: 'section-3', number: '3', title: 'Демо-віджети' },
+    { id: 'section-4', number: '4', title: 'Реєстрація та доступ' },
+    { id: 'section-5', number: '5', title: 'Допустиме використання' },
+    { id: 'section-6', number: '6', title: 'Інтелектуальна власність' },
+    { id: 'section-7', number: '7', title: 'Тарифи та оплата' },
+    { id: 'section-8', number: '8', title: 'Обробка даних' },
+    { id: 'section-9', number: '9', title: 'Доступність сервісу' },
+    { id: 'section-10', number: '10', title: 'Відповідальність' },
+    { id: 'section-11', number: '11', title: 'Зміни умов' },
+    { id: 'section-12', number: '12', title: 'Контакти' },
+  ],
+  pl: [
+    { id: 'section-1', number: '1', title: 'Postanowienia ogólne' },
+    { id: 'section-2', number: '2', title: 'Opis usługi' },
+    { id: 'section-3', number: '3', title: 'Widżety demo' },
+    { id: 'section-4', number: '4', title: 'Rejestracja i dostęp' },
+    { id: 'section-5', number: '5', title: 'Dopuszczalne użycie' },
+    { id: 'section-6', number: '6', title: 'Własność intelektualna' },
+    { id: 'section-7', number: '7', title: 'Cennik i płatności' },
+    { id: 'section-8', number: '8', title: 'Przetwarzanie danych' },
+    { id: 'section-9', number: '9', title: 'Dostępność usługi' },
+    { id: 'section-10', number: '10', title: 'Odpowiedzialność' },
+    { id: 'section-11', number: '11', title: 'Zmiany warunków' },
+    { id: 'section-12', number: '12', title: 'Kontakt' },
+  ],
+  ar: [
+    { id: 'section-1', number: '1', title: 'أحكام عامة' },
+    { id: 'section-2', number: '2', title: 'وصف الخدمة' },
+    { id: 'section-3', number: '3', title: 'ويدجت العرض' },
+    { id: 'section-4', number: '4', title: 'التسجيل والوصول' },
+    { id: 'section-5', number: '5', title: 'الاستخدام المقبول' },
+    { id: 'section-6', number: '6', title: 'الملكية الفكرية' },
+    { id: 'section-7', number: '7', title: 'الأسعار والدفع' },
+    { id: 'section-8', number: '8', title: 'معالجة البيانات' },
+    { id: 'section-9', number: '9', title: 'توفر الخدمة' },
+    { id: 'section-10', number: '10', title: 'المسؤولية' },
+    { id: 'section-11', number: '11', title: 'تغييرات الشروط' },
+    { id: 'section-12', number: '12', title: 'معلومات الاتصال' },
+  ],
+};
+
 /* ──────────────────────────── MAIN COMPONENT ────────────────────── */
 
 export default function TermsContent() {
@@ -985,65 +1055,15 @@ export default function TermsContent() {
   };
 
   return (
-    <div className="bg-gradient-animated relative min-h-screen overflow-hidden">
-      <div className="aurora" />
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" />
-
-      {/* ── Navigation ── */}
-      <nav className="relative z-20 flex items-center justify-between px-6 py-5 md:px-12">
-        <Link href="/" className="flex items-center gap-3 text-white transition-opacity hover:opacity-80">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)]">
-            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.591-.659L5 14.5m14 0V6.5a2.25 2.25 0 00-2.25-2.25h-9.5A2.25 2.25 0 005 6.5v8"
-              />
-            </svg>
-          </div>
-          <span className="text-lg font-bold">WinBix AI</span>
-        </Link>
-
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher />
-          <Link
-            href="/"
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-gray-300 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-          >
-            {tc('nav.home')}
-          </Link>
-        </div>
-      </nav>
-
-      {/* ── Content ── */}
-      <div className="relative z-10 mx-auto max-w-3xl px-6 pt-8 pb-24">
-        <h1 className="mb-2 text-4xl font-bold text-white md:text-5xl">
-          {titleBefore}
-          <span className="gradient-text">{titleAccent}</span>
-        </h1>
-        <p className="mb-8 text-sm text-gray-500">{lastUpdated[lang] || lastUpdated.ru}</p>
-
-        <div className="space-y-4 text-base leading-relaxed text-gray-400">
-          <Content />
-        </div>
-
-        {/* ── Footer ── */}
-        <div className="glow-line mt-16 mb-8 h-px" />
-        <footer className="flex flex-col items-center justify-between gap-4 text-sm text-gray-600 md:flex-row">
-          <p>
-            &copy; {new Date().getFullYear()} WinBix AI. {tc('footer.rights')}
-          </p>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="text-gray-500 transition-colors hover:text-gray-300">
-              {tc('footer.privacy')}
-            </Link>
-            <Link href="/" className="text-gray-500 transition-colors hover:text-gray-300">
-              {tc('footer.home')}
-            </Link>
-          </div>
-        </footer>
-      </div>
-    </div>
+    <LegalLayout
+      titleBefore={titleBefore}
+      titleAccent={titleAccent}
+      lastUpdated={lastUpdated[lang] || lastUpdated.ru}
+      icon="terms"
+      siblingLink={{ href: '/privacy', label: tc('footer.privacy') }}
+      sections={TERMS_SECTIONS[lang] || TERMS_SECTIONS.ru}
+    >
+      <Content />
+    </LegalLayout>
   );
 }

@@ -1,18 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useLanguage } from '@/i18n/context';
 import { useTranslation } from '@/i18n/useTranslation';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="mt-12 mb-4 text-2xl font-bold text-white">{children}</h2>;
-}
-
-function SubTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="mt-8 mb-3 text-lg font-semibold text-white">{children}</h3>;
-}
+import LegalLayout, { SectionTitle, SubTitle } from '@/components/LegalLayout';
 
 /* ─────────────────────────── RUSSIAN ─────────────────────────── */
 
@@ -113,21 +104,21 @@ function RuContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Название</th>
               <th className="py-2 pr-4">Тип</th>
               <th className="py-2 pr-4">Срок</th>
               <th className="py-2">Назначение</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">admin_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">7 дней</td>
               <td className="py-2">Аутентификация администратора</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">client_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">30 дней</td>
@@ -145,16 +136,15 @@ function RuContent() {
       <p>AI-виджет на сайте клиента использует localStorage браузера для:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_messages_&#123;clientId&#125;</span> — сохранение
-          истории чата для продолжения сессии
+          <span className="font-mono text-xs">widget_messages_&#123;clientId&#125;</span> — сохранение истории чата для
+          продолжения сессии
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_position_&#123;clientId&#125;</span> — позиция кнопки
-          виджета на странице
+          <span className="font-mono text-xs">widget_position_&#123;clientId&#125;</span> — позиция кнопки виджета на
+          странице
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">cookie_consent</span> — статус принятия cookie на данном
-          сайте
+          <span className="font-mono text-xs">cookie_consent</span> — статус принятия cookie на данном сайте
         </li>
       </ul>
       <p>Данные localStorage хранятся только в браузере пользователя и не передаются на сервер.</p>
@@ -175,37 +165,37 @@ function RuContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Цель обработки</th>
               <th className="py-2">Правовое основание</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Предоставление и поддержка сервиса AI-ассистента</td>
               <td className="py-2">Исполнение договора (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Обработка запросов и генерация ответов AI</td>
               <td className="py-2">Исполнение договора (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Управление учётными записями и подписками</td>
               <td className="py-2">Исполнение договора (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Аналитика и улучшение качества ответов AI</td>
               <td className="py-2">Законный интерес (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Обработка платежей и выставление счетов</td>
               <td className="py-2">Исполнение договора (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Техническая поддержка и безопасность</td>
               <td className="py-2">Законный интерес (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Соблюдение требований законодательства</td>
               <td className="py-2">Юридическое обязательство (Art. 6(1)(c))</td>
             </tr>
@@ -245,39 +235,39 @@ function RuContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Тип данных</th>
               <th className="py-2 pr-4">Срок хранения</th>
               <th className="py-2">Удаление</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Cookie (аутентификация)</td>
               <td className="py-2 pr-4">7–30 дней</td>
               <td className="py-2">Автоматически</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Журнал аудита</td>
               <td className="py-2 pr-4">90 дней</td>
               <td className="py-2">Автоматически (TTL)</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">История чатов</td>
               <td className="py-2 pr-4">До удаления аккаунта</td>
               <td className="py-2">По запросу или при удалении аккаунта</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Данные лидов</td>
               <td className="py-2 pr-4">До удаления аккаунта</td>
               <td className="py-2">По запросу клиента</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Данные учётной записи</td>
               <td className="py-2 pr-4">До удаления аккаунта</td>
               <td className="py-2">По запросу</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Счета и платежи</td>
               <td className="py-2 pr-4">Согласно требованиям законодательства</td>
               <td className="py-2">В установленные законом сроки</td>
@@ -312,7 +302,7 @@ function RuContent() {
       </ul>
       <p>
         Для реализации своих прав свяжитесь с нами:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+        <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
           winbix.ai@gmail.com
         </a>
       </p>
@@ -351,18 +341,13 @@ function RuContent() {
       <ul className="ml-6 list-disc space-y-1">
         <li>
           Email:{' '}
-          <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+          <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
             winbix.ai@gmail.com
           </a>
         </li>
         <li>
           Telegram:{' '}
-          <a
-            href="https://t.me/winbix_ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--neon-cyan)] hover:underline"
-          >
+          <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="hover:underline">
             @winbix_ai
           </a>
         </li>
@@ -472,21 +457,21 @@ function EnContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Name</th>
               <th className="py-2 pr-4">Type</th>
               <th className="py-2 pr-4">Duration</th>
               <th className="py-2">Purpose</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">admin_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">7 days</td>
               <td className="py-2">Administrator authentication</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">client_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">30 days</td>
@@ -504,16 +489,15 @@ function EnContent() {
       <p>The AI widget on the client&apos;s site uses browser localStorage for:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_messages_&#123;clientId&#125;</span> — saving chat
-          history for session continuation
+          <span className="font-mono text-xs">widget_messages_&#123;clientId&#125;</span> — saving chat history for
+          session continuation
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_position_&#123;clientId&#125;</span> — widget button
-          position on the page
+          <span className="font-mono text-xs">widget_position_&#123;clientId&#125;</span> — widget button position on
+          the page
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">cookie_consent</span> — cookie acceptance status on this
-          site
+          <span className="font-mono text-xs">cookie_consent</span> — cookie acceptance status on this site
         </li>
       </ul>
       <p>localStorage data is stored only in the user&apos;s browser and is not transmitted to the server.</p>
@@ -534,37 +518,37 @@ function EnContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Processing Purpose</th>
               <th className="py-2">Legal Basis</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Providing and supporting the AI assistant service</td>
               <td className="py-2">Performance of a contract (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Processing requests and generating AI responses</td>
               <td className="py-2">Performance of a contract (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Managing client accounts and subscriptions</td>
               <td className="py-2">Performance of a contract (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Analytics and improving AI response quality</td>
               <td className="py-2">Legitimate interest (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Processing payments and invoicing</td>
               <td className="py-2">Performance of a contract (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Technical support and security</td>
               <td className="py-2">Legitimate interest (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Compliance with legal requirements</td>
               <td className="py-2">Legal obligation (Art. 6(1)(c))</td>
             </tr>
@@ -604,39 +588,39 @@ function EnContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Data Type</th>
               <th className="py-2 pr-4">Retention Period</th>
               <th className="py-2">Deletion</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Cookies (authentication)</td>
               <td className="py-2 pr-4">7–30 days</td>
               <td className="py-2">Automatically</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Audit log</td>
               <td className="py-2 pr-4">90 days</td>
               <td className="py-2">Automatically (TTL)</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Chat history</td>
               <td className="py-2 pr-4">Until account deletion</td>
               <td className="py-2">On request or account deletion</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Lead data</td>
               <td className="py-2 pr-4">Until account deletion</td>
               <td className="py-2">On client request</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Account data</td>
               <td className="py-2 pr-4">Until account deletion</td>
               <td className="py-2">On request</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Invoices and payments</td>
               <td className="py-2 pr-4">As required by law</td>
               <td className="py-2">Within legally prescribed periods</td>
@@ -671,7 +655,7 @@ function EnContent() {
       </ul>
       <p>
         To exercise your rights, contact us:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+        <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
           winbix.ai@gmail.com
         </a>
       </p>
@@ -710,18 +694,13 @@ function EnContent() {
       <ul className="ml-6 list-disc space-y-1">
         <li>
           Email:{' '}
-          <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+          <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
             winbix.ai@gmail.com
           </a>
         </li>
         <li>
           Telegram:{' '}
-          <a
-            href="https://t.me/winbix_ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--neon-cyan)] hover:underline"
-          >
+          <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="hover:underline">
             @winbix_ai
           </a>
         </li>
@@ -829,21 +808,21 @@ function UkContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Назва</th>
               <th className="py-2 pr-4">Тип</th>
               <th className="py-2 pr-4">Термін</th>
               <th className="py-2">Призначення</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">admin_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">7 днів</td>
               <td className="py-2">Автентифікація адміністратора</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">client_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">30 днів</td>
@@ -861,16 +840,15 @@ function UkContent() {
       <p>AI-віджет на сайті клієнта використовує localStorage браузера для:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_messages_&#123;clientId&#125;</span> — збереження
-          історії чату для продовження сесії
+          <span className="font-mono text-xs">widget_messages_&#123;clientId&#125;</span> — збереження історії чату для
+          продовження сесії
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_position_&#123;clientId&#125;</span> — позиція кнопки
-          віджета на сторінці
+          <span className="font-mono text-xs">widget_position_&#123;clientId&#125;</span> — позиція кнопки віджета на
+          сторінці
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">cookie_consent</span> — статус прийняття cookie на цьому
-          сайті
+          <span className="font-mono text-xs">cookie_consent</span> — статус прийняття cookie на цьому сайті
         </li>
       </ul>
       <p>Дані localStorage зберігаються лише у браузері користувача і не передаються на сервер.</p>
@@ -891,37 +869,37 @@ function UkContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Мета обробки</th>
               <th className="py-2">Правова підстава</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Надання та підтримка сервісу AI-асистента</td>
               <td className="py-2">Виконання договору (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Обробка запитів та генерація відповідей AI</td>
               <td className="py-2">Виконання договору (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Управління обліковими записами та підписками</td>
               <td className="py-2">Виконання договору (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Аналітика та покращення якості відповідей AI</td>
               <td className="py-2">Законний інтерес (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Обробка платежів та виставлення рахунків</td>
               <td className="py-2">Виконання договору (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Технічна підтримка та безпека</td>
               <td className="py-2">Законний інтерес (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Дотримання законодавчих вимог</td>
               <td className="py-2">Юридичне зобов&apos;язання (Art. 6(1)(c))</td>
             </tr>
@@ -963,39 +941,39 @@ function UkContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Тип даних</th>
               <th className="py-2 pr-4">Строк зберігання</th>
               <th className="py-2">Видалення</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Cookie (автентифікація)</td>
               <td className="py-2 pr-4">7–30 днів</td>
               <td className="py-2">Автоматично</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Журнал аудиту</td>
               <td className="py-2 pr-4">90 днів</td>
               <td className="py-2">Автоматично (TTL)</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Історія чатів</td>
               <td className="py-2 pr-4">До видалення облікового запису</td>
               <td className="py-2">За запитом або при видаленні облікового запису</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Дані лідів</td>
               <td className="py-2 pr-4">До видалення облікового запису</td>
               <td className="py-2">За запитом клієнта</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Дані облікового запису</td>
               <td className="py-2 pr-4">До видалення облікового запису</td>
               <td className="py-2">За запитом</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Рахунки та платежі</td>
               <td className="py-2 pr-4">Відповідно до вимог законодавства</td>
               <td className="py-2">У встановлені законом строки</td>
@@ -1029,7 +1007,7 @@ function UkContent() {
       </ul>
       <p>
         Для реалізації своїх прав зв&apos;яжіться з нами:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+        <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
           winbix.ai@gmail.com
         </a>
       </p>
@@ -1068,18 +1046,13 @@ function UkContent() {
       <ul className="ml-6 list-disc space-y-1">
         <li>
           Email:{' '}
-          <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+          <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
             winbix.ai@gmail.com
           </a>
         </li>
         <li>
           Telegram:{' '}
-          <a
-            href="https://t.me/winbix_ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--neon-cyan)] hover:underline"
-          >
+          <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="hover:underline">
             @winbix_ai
           </a>
         </li>
@@ -1187,21 +1160,21 @@ function PlContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Nazwa</th>
               <th className="py-2 pr-4">Typ</th>
               <th className="py-2 pr-4">Okres</th>
               <th className="py-2">Przeznaczenie</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">admin_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">7 dni</td>
               <td className="py-2">Uwierzytelnianie administratora</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">client_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">30 dni</td>
@@ -1219,16 +1192,15 @@ function PlContent() {
       <p>Widżet AI na stronie klienta wykorzystuje localStorage przeglądarki do:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_messages_&#123;clientId&#125;</span> — zapisywanie
-          historii czatu w celu kontynuacji sesji
+          <span className="font-mono text-xs">widget_messages_&#123;clientId&#125;</span> — zapisywanie historii czatu w
+          celu kontynuacji sesji
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_position_&#123;clientId&#125;</span> — pozycja
-          przycisku widżetu na stronie
+          <span className="font-mono text-xs">widget_position_&#123;clientId&#125;</span> — pozycja przycisku widżetu na
+          stronie
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">cookie_consent</span> — status akceptacji plików cookie na
-          tej stronie
+          <span className="font-mono text-xs">cookie_consent</span> — status akceptacji plików cookie na tej stronie
         </li>
       </ul>
       <p>Dane localStorage są przechowywane wyłącznie w przeglądarce użytkownika i nie są przesyłane na serwer.</p>
@@ -1249,37 +1221,37 @@ function PlContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Cel przetwarzania</th>
               <th className="py-2">Podstawa prawna</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Świadczenie i wspieranie usługi asystenta AI</td>
               <td className="py-2">Wykonanie umowy (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Przetwarzanie zapytań i generowanie odpowiedzi AI</td>
               <td className="py-2">Wykonanie umowy (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Zarządzanie kontami klientów i subskrypcjami</td>
               <td className="py-2">Wykonanie umowy (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Analityka i poprawa jakości odpowiedzi AI</td>
               <td className="py-2">Uzasadniony interes (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Przetwarzanie płatności i wystawianie faktur</td>
               <td className="py-2">Wykonanie umowy (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Wsparcie techniczne i bezpieczeństwo</td>
               <td className="py-2">Uzasadniony interes (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Spełnianie wymogów prawnych</td>
               <td className="py-2">Obowiązek prawny (Art. 6(1)(c))</td>
             </tr>
@@ -1321,39 +1293,39 @@ function PlContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">Typ danych</th>
               <th className="py-2 pr-4">Okres przechowywania</th>
               <th className="py-2">Usunięcie</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Cookie (uwierzytelnianie)</td>
               <td className="py-2 pr-4">7–30 dni</td>
               <td className="py-2">Automatycznie</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Dziennik audytu</td>
               <td className="py-2 pr-4">90 dni</td>
               <td className="py-2">Automatycznie (TTL)</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Historia czatów</td>
               <td className="py-2 pr-4">Do usunięcia konta</td>
               <td className="py-2">Na żądanie lub po usunięciu konta</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Dane leadów</td>
               <td className="py-2 pr-4">Do usunięcia konta</td>
               <td className="py-2">Na żądanie klienta</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Dane konta</td>
               <td className="py-2 pr-4">Do usunięcia konta</td>
               <td className="py-2">Na żądanie</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">Faktury i płatności</td>
               <td className="py-2 pr-4">Zgodnie z wymogami prawa</td>
               <td className="py-2">W terminach określonych prawem</td>
@@ -1389,7 +1361,7 @@ function PlContent() {
       </ul>
       <p>
         Aby skorzystać ze swoich praw, skontaktuj się z nami:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+        <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
           winbix.ai@gmail.com
         </a>
       </p>
@@ -1428,18 +1400,13 @@ function PlContent() {
       <ul className="ml-6 list-disc space-y-1">
         <li>
           Email:{' '}
-          <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+          <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
             winbix.ai@gmail.com
           </a>
         </li>
         <li>
           Telegram:{' '}
-          <a
-            href="https://t.me/winbix_ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--neon-cyan)] hover:underline"
-          >
+          <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="hover:underline">
             @winbix_ai
           </a>
         </li>
@@ -1543,21 +1510,21 @@ function ArContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">الاسم</th>
               <th className="py-2 pr-4">النوع</th>
               <th className="py-2 pr-4">المدة</th>
               <th className="py-2">الغرض</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">admin_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">7 أيام</td>
               <td className="py-2">مصادقة المسؤول</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4 font-mono text-xs">client_token</td>
               <td className="py-2 pr-4">HttpOnly, Secure</td>
               <td className="py-2 pr-4">30 يومًا</td>
@@ -1575,16 +1542,14 @@ function ArContent() {
       <p>يستخدم ويدجت الذكاء الاصطناعي على موقع العميل localStorage في المتصفح لـ:</p>
       <ul className="ml-6 list-disc space-y-1">
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_messages_&#123;clientId&#125;</span> — حفظ سجل
-          الدردشة لاستئناف الجلسة
+          <span className="font-mono text-xs">widget_messages_&#123;clientId&#125;</span> — حفظ سجل الدردشة لاستئناف
+          الجلسة
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">widget_position_&#123;clientId&#125;</span> — موضع زر
-          الويدجت على الصفحة
+          <span className="font-mono text-xs">widget_position_&#123;clientId&#125;</span> — موضع زر الويدجت على الصفحة
         </li>
         <li>
-          <span className="font-mono text-xs text-gray-300">cookie_consent</span> — حالة قبول ملفات تعريف الارتباط على
-          هذا الموقع
+          <span className="font-mono text-xs">cookie_consent</span> — حالة قبول ملفات تعريف الارتباط على هذا الموقع
         </li>
       </ul>
       <p>يتم تخزين بيانات localStorage فقط في متصفح المستخدم ولا يتم إرسالها إلى الخادم.</p>
@@ -1605,37 +1570,37 @@ function ArContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">غرض المعالجة</th>
               <th className="py-2">الأساس القانوني</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">تقديم ودعم خدمة مساعد الذكاء الاصطناعي</td>
               <td className="py-2">تنفيذ العقد (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">معالجة الطلبات وإنشاء ردود الذكاء الاصطناعي</td>
               <td className="py-2">تنفيذ العقد (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">إدارة حسابات العملاء والاشتراكات</td>
               <td className="py-2">تنفيذ العقد (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">التحليلات وتحسين جودة ردود الذكاء الاصطناعي</td>
               <td className="py-2">المصلحة المشروعة (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">معالجة المدفوعات وإصدار الفواتير</td>
               <td className="py-2">تنفيذ العقد (Art. 6(1)(b))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">الدعم التقني والأمان</td>
               <td className="py-2">المصلحة المشروعة (Art. 6(1)(f))</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">الامتثال للمتطلبات القانونية</td>
               <td className="py-2">الالتزام القانوني (Art. 6(1)(c))</td>
             </tr>
@@ -1671,39 +1636,39 @@ function ArContent() {
       <div className="my-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-gray-300">
+            <tr className="border-b border-current/10">
               <th className="py-2 pr-4">نوع البيانات</th>
               <th className="py-2 pr-4">فترة الاحتفاظ</th>
               <th className="py-2">الحذف</th>
             </tr>
           </thead>
-          <tbody className="text-gray-400">
-            <tr className="border-b border-white/5">
+          <tbody className="text-inherit">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">ملفات تعريف الارتباط (المصادقة)</td>
               <td className="py-2 pr-4">7–30 يومًا</td>
               <td className="py-2">تلقائيًا</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">سجل التدقيق</td>
               <td className="py-2 pr-4">90 يومًا</td>
               <td className="py-2">تلقائيًا (TTL)</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">سجل الدردشة</td>
               <td className="py-2 pr-4">حتى حذف الحساب</td>
               <td className="py-2">بناءً على الطلب أو عند حذف الحساب</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">بيانات العملاء المحتملين</td>
               <td className="py-2 pr-4">حتى حذف الحساب</td>
               <td className="py-2">بناءً على طلب العميل</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">بيانات الحساب</td>
               <td className="py-2 pr-4">حتى حذف الحساب</td>
               <td className="py-2">بناءً على الطلب</td>
             </tr>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-current/5">
               <td className="py-2 pr-4">الفواتير والمدفوعات</td>
               <td className="py-2 pr-4">وفقًا لمتطلبات القانون</td>
               <td className="py-2">خلال الفترات المحددة قانونيًا</td>
@@ -1736,7 +1701,7 @@ function ArContent() {
       </ul>
       <p>
         لممارسة حقوقك، تواصل معنا:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+        <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
           winbix.ai@gmail.com
         </a>
       </p>
@@ -1775,18 +1740,13 @@ function ArContent() {
       <ul className="ml-6 list-disc space-y-1">
         <li>
           البريد الإلكتروني:{' '}
-          <a href="mailto:winbix.ai@gmail.com" className="text-[var(--neon-cyan)] hover:underline">
+          <a href="mailto:winbix.ai@gmail.com" className="hover:underline">
             winbix.ai@gmail.com
           </a>
         </li>
         <li>
           Telegram:{' '}
-          <a
-            href="https://t.me/winbix_ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--neon-cyan)] hover:underline"
-          >
+          <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="hover:underline">
             @winbix_ai
           </a>
         </li>
@@ -1803,6 +1763,79 @@ const CONTENT_MAP: Record<string, () => React.JSX.Element> = {
   uk: UkContent,
   pl: PlContent,
   ar: ArContent,
+};
+
+const PRIVACY_SECTIONS: Record<string, Array<{ id: string; number: string; title: string }>> = {
+  ru: [
+    { id: 'section-1', number: '1', title: 'Общие положения' },
+    { id: 'section-2', number: '2', title: 'Какие данные мы собираем' },
+    { id: 'section-3', number: '3', title: 'Условия оплаты' },
+    { id: 'section-4', number: '4', title: 'Файлы cookie' },
+    { id: 'section-5', number: '5', title: 'Как мы используем данные' },
+    { id: 'section-6', number: '6', title: 'Передача данных' },
+    { id: 'section-7', number: '7', title: 'Сроки хранения' },
+    { id: 'section-8', number: '8', title: 'Ваши права' },
+    { id: 'section-9', number: '9', title: 'Демо-страницы' },
+    { id: 'section-10', number: '10', title: 'Безопасность' },
+    { id: 'section-11', number: '11', title: 'Изменения' },
+    { id: 'section-12', number: '12', title: 'Контакты' },
+  ],
+  en: [
+    { id: 'section-1', number: '1', title: 'General Provisions' },
+    { id: 'section-2', number: '2', title: 'Data We Collect' },
+    { id: 'section-3', number: '3', title: 'Payment Terms' },
+    { id: 'section-4', number: '4', title: 'Cookies & Storage' },
+    { id: 'section-5', number: '5', title: 'How We Use Data' },
+    { id: 'section-6', number: '6', title: 'Data Transfer' },
+    { id: 'section-7', number: '7', title: 'Data Retention' },
+    { id: 'section-8', number: '8', title: 'Your Rights' },
+    { id: 'section-9', number: '9', title: 'Demo Pages' },
+    { id: 'section-10', number: '10', title: 'Data Security' },
+    { id: 'section-11', number: '11', title: 'Policy Changes' },
+    { id: 'section-12', number: '12', title: 'Contact Info' },
+  ],
+  uk: [
+    { id: 'section-1', number: '1', title: 'Загальні положення' },
+    { id: 'section-2', number: '2', title: 'Які дані ми збираємо' },
+    { id: 'section-3', number: '3', title: 'Умови оплати' },
+    { id: 'section-4', number: '4', title: 'Файли cookie' },
+    { id: 'section-5', number: '5', title: 'Як ми використовуємо дані' },
+    { id: 'section-6', number: '6', title: 'Передача даних' },
+    { id: 'section-7', number: '7', title: 'Терміни зберігання' },
+    { id: 'section-8', number: '8', title: 'Ваші права' },
+    { id: 'section-9', number: '9', title: 'Демо-сторінки' },
+    { id: 'section-10', number: '10', title: 'Безпека' },
+    { id: 'section-11', number: '11', title: 'Зміни' },
+    { id: 'section-12', number: '12', title: 'Контакти' },
+  ],
+  pl: [
+    { id: 'section-1', number: '1', title: 'Postanowienia ogólne' },
+    { id: 'section-2', number: '2', title: 'Zbierane dane' },
+    { id: 'section-3', number: '3', title: 'Warunki płatności' },
+    { id: 'section-4', number: '4', title: 'Pliki cookie' },
+    { id: 'section-5', number: '5', title: 'Wykorzystanie danych' },
+    { id: 'section-6', number: '6', title: 'Transfer danych' },
+    { id: 'section-7', number: '7', title: 'Okres przechowywania' },
+    { id: 'section-8', number: '8', title: 'Twoje prawa' },
+    { id: 'section-9', number: '9', title: 'Strony demo' },
+    { id: 'section-10', number: '10', title: 'Bezpieczeństwo' },
+    { id: 'section-11', number: '11', title: 'Zmiany' },
+    { id: 'section-12', number: '12', title: 'Kontakt' },
+  ],
+  ar: [
+    { id: 'section-1', number: '1', title: 'أحكام عامة' },
+    { id: 'section-2', number: '2', title: 'البيانات المجمعة' },
+    { id: 'section-3', number: '3', title: 'شروط الدفع' },
+    { id: 'section-4', number: '4', title: 'ملفات تعريف الارتباط' },
+    { id: 'section-5', number: '5', title: 'استخدام البيانات' },
+    { id: 'section-6', number: '6', title: 'نقل البيانات' },
+    { id: 'section-7', number: '7', title: 'فترة الاحتفاظ' },
+    { id: 'section-8', number: '8', title: 'حقوقك' },
+    { id: 'section-9', number: '9', title: 'صفحات العرض' },
+    { id: 'section-10', number: '10', title: 'أمان البيانات' },
+    { id: 'section-11', number: '11', title: 'التغييرات' },
+    { id: 'section-12', number: '12', title: 'معلومات الاتصال' },
+  ],
 };
 
 export default function PrivacyContent() {
@@ -1828,64 +1861,15 @@ export default function PrivacyContent() {
   };
 
   return (
-    <div className="bg-gradient-animated relative min-h-screen overflow-hidden">
-      <div className="aurora" />
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" />
-
-      {/* Navigation */}
-      <nav className="relative z-20 flex items-center justify-between px-6 py-5 md:px-12">
-        <Link href="/" className="flex items-center gap-3 text-white transition-opacity hover:opacity-80">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-purple)]">
-            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.591-.659L5 14.5m14 0V6.5a2.25 2.25 0 00-2.25-2.25h-9.5A2.25 2.25 0 005 6.5v8"
-              />
-            </svg>
-          </div>
-          <span className="text-lg font-bold">WinBix AI</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher />
-          <Link
-            href="/"
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-gray-300 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-          >
-            {tc('nav.home')}
-          </Link>
-        </div>
-      </nav>
-
-      {/* Content */}
-      <div className="relative z-10 mx-auto max-w-3xl px-6 pt-8 pb-24">
-        <h1 className="mb-2 text-4xl font-bold text-white md:text-5xl">
-          {titleBefore}
-          <span className="gradient-text">{titleAccent}</span>
-        </h1>
-        <p className="mb-8 text-sm text-gray-500">{lastUpdated[lang] || lastUpdated.ru}</p>
-
-        <div className="space-y-4 text-base leading-relaxed text-gray-400">
-          <Content />
-        </div>
-
-        {/* Footer */}
-        <div className="glow-line mt-16 mb-8 h-px" />
-        <footer className="flex flex-col items-center justify-between gap-4 text-sm text-gray-600 md:flex-row">
-          <p>
-            &copy; {new Date().getFullYear()} WinBix AI. {tc('footer.rights')}
-          </p>
-          <div className="flex gap-6">
-            <Link href="/terms" className="text-gray-500 transition-colors hover:text-gray-300">
-              {tc('footer.terms')}
-            </Link>
-            <Link href="/" className="text-gray-500 transition-colors hover:text-gray-300">
-              {tc('footer.home')}
-            </Link>
-          </div>
-        </footer>
-      </div>
-    </div>
+    <LegalLayout
+      titleBefore={titleBefore}
+      titleAccent={titleAccent}
+      lastUpdated={lastUpdated[lang] || lastUpdated.ru}
+      icon="privacy"
+      siblingLink={{ href: '/terms', label: tc('footer.terms') }}
+      sections={PRIVACY_SECTIONS[lang] || PRIVACY_SECTIONS.ru}
+    >
+      <Content />
+    </LegalLayout>
   );
 }
