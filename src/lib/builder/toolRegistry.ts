@@ -8,6 +8,8 @@ export interface ToolContext {
   write: (event: SSEEvent) => void;
   userPlan?: string;
   pendingFileText?: string;
+  /** Set when widget is already built — blocks Phase 1 rebuild tools */
+  clientId?: string;
 }
 
 export type ToolResult = Record<string, unknown>;

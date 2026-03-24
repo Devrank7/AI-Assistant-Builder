@@ -100,6 +100,9 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
   let chat = createChat(PRIMARY_MODEL);
   let currentModel = PRIMARY_MODEL;
 
+  // Phase 1 tools that must NEVER run after a widget is already built
+  const PHASE1_ONLY_TOOLS = new Set(['analyze_site', 'generate_design', 'create_theme_from_scratch']);
+
   let fullAssistantText = '';
   const toolCallsMade: string[] = [];
   let loopCount = 0;
@@ -188,6 +191,32 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
 
     for (const fc of functionCalls) {
       const toolName = fc.name || 'unknown';
+
+      // ⛔ HARD BLOCK: prevent Phase 1 rebuild tools when widget already exists
+      if (toolContext.clientId && PHASE1_ONLY_TOOLS.has(toolName)) {
+        console.warn(
+          `[geminiAgent] BLOCKED ${toolName} — widget "${toolContext.clientId}" already built. Use modify_design/modify_config/modify_component instead.`
+        );
+        const blockResult: Part = {
+          functionResponse: {
+            name: toolName,
+            response: {
+              success: false,
+              error: `BLOCKED: Widget "${toolContext.clientId}" already exists. Do NOT rebuild from scratch. Use modify_design for colors, modify_config for settings, modify_component for layout changes, or integration tools for integrations. NEVER call ${toolName} on an existing widget.`,
+            },
+          },
+        };
+        functionResponseParts.push(blockResult);
+        toolCallsMade.push(toolName);
+        write({
+          type: 'tool_start',
+          tool: toolName as AgentToolName,
+          args: (fc.args || {}) as Record<string, unknown>,
+        });
+        write({ type: 'tool_result', tool: toolName as AgentToolName, result: { blocked: true } });
+        continue;
+      }
+
       write({ type: 'tool_start', tool: toolName as AgentToolName, args: (fc.args || {}) as Record<string, unknown> });
       toolCallsMade.push(toolName);
 

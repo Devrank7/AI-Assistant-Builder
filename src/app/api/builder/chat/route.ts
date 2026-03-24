@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
           write: wrappedWrite,
           userPlan,
           pendingFileText: pendingFileTexts.get(currentSessionId)?.text,
+          clientId: session.clientId || undefined,
         };
 
         // Load memory from previous sessions
