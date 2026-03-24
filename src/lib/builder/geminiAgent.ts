@@ -8,7 +8,7 @@ import type { SSEEvent, AgentToolName } from './types';
 
 const MAX_TOOL_LOOPS = 15;
 const PRIMARY_MODEL = 'gemini-3.1-pro-preview';
-const FALLBACK_MODEL = 'gemini-3.0-pro-preview';
+const FALLBACK_MODEL = 'gemini-3-pro-preview';
 
 interface AgentMessage {
   role: 'user' | 'assistant';
