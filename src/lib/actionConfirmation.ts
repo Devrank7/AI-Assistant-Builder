@@ -1,13 +1,7 @@
 import { pluginRegistry } from '@/lib/integrations/core/PluginRegistry';
 
 // Built-in tools that are always auto-approved (read-only / low risk)
-const ALWAYS_AUTO: Set<string> = new Set([
-  'collect_lead',
-  'search_knowledge',
-  'send_notification',
-  'web_search',
-  'web_fetch',
-]);
+const ALWAYS_AUTO: Set<string> = new Set(['collect_lead', 'search_knowledge', 'send_notification']);
 
 // Action ID prefixes that indicate read-only operations (auto-approve)
 const READ_PREFIXES = ['get', 'list', 'search', 'check', 'fetch', 'find'];
