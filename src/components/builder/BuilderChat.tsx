@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useTheme } from '@/components/ThemeProvider';
 import { useVoiceInput } from './useVoiceInput';
@@ -89,11 +89,34 @@ export default function BuilderChat({
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { isListening, isSupported, startListening, stopListening } = useVoiceInput((text) =>
     setInput((prev) => prev + ' ' + text)
   );
   const prevStreamingRef = useRef(isStreaming);
+
+  // Auto-resize textarea to fit content
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+  }, []);
+
+  // Re-run autoResize whenever input changes (covers Shift+Enter, paste, etc.)
+  useEffect(() => {
+    autoResize();
+  }, [input, autoResize]);
+
+  // Handle keyboard: Enter sends, Shift+Enter adds newline
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const form = e.currentTarget.closest('form');
+      if (form) form.requestSubmit();
+    }
+  }, []);
 
   // Track tool card states for sound triggers
   const prevToolCardsRef = useRef<Map<string, string>>(new Map());
@@ -220,6 +243,7 @@ export default function BuilderChat({
 
         setInput('');
         setAttachedFile(null);
+        if (textareaRef.current) textareaRef.current.style.height = 'auto';
       } catch (err) {
         alert('Failed to upload file. Please try again.');
         console.error('File upload error:', err);
@@ -230,6 +254,7 @@ export default function BuilderChat({
       playSendSound();
       onSendMessage(input.trim());
       setInput('');
+      if (textareaRef.current) textareaRef.current.style.height = 'auto';
     }
   };
 
@@ -962,7 +987,7 @@ export default function BuilderChat({
             backdropFilter: 'blur(20px)',
           }}
         >
-          <div className="flex items-center gap-2 px-3 py-2.5">
+          <div className="flex items-end gap-2 px-3 py-2.5">
             {/* Hidden file input */}
             <input
               ref={fileInputRef}
@@ -1021,10 +1046,14 @@ export default function BuilderChat({
                 </svg>
               </button>
             )}
-            <input
-              type="text"
+            <textarea
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                autoResize();
+              }}
+              onKeyDown={handleKeyDown}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder={
@@ -1035,12 +1064,16 @@ export default function BuilderChat({
                     : 'Describe what you want to build...'
               }
               disabled={isStreaming}
-              className="min-w-0 flex-1 bg-transparent py-2.5 text-[13.5px] outline-none disabled:opacity-40"
+              rows={1}
+              className="min-w-0 flex-1 resize-none bg-transparent py-2.5 text-[13.5px] outline-none disabled:opacity-40"
               style={{
                 color: isDark ? '#e0e4ec' : '#111827',
                 fontFamily: "'Outfit', sans-serif",
                 letterSpacing: '0.01em',
                 caretColor: '#22d3ee',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                lineHeight: '1.5',
               }}
             />
             <button
