@@ -100,8 +100,15 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
   let chat = createChat(PRIMARY_MODEL);
   let currentModel = PRIMARY_MODEL;
 
-  // Phase 1 tools that must NEVER run after a widget is already built
-  const PHASE1_ONLY_TOOLS = new Set(['analyze_site', 'generate_design', 'create_theme_from_scratch']);
+  // Phase 1 tools that must NEVER run after a widget is already built.
+  // crawl_knowledge is blocked because knowledge was already uploaded during Phase 1.
+  // upload_knowledge_text is NOT blocked — user may explicitly add extra knowledge.
+  const PHASE1_ONLY_TOOLS = new Set([
+    'analyze_site',
+    'generate_design',
+    'create_theme_from_scratch',
+    'crawl_knowledge',
+  ]);
 
   let fullAssistantText = '';
   const toolCallsMade: string[] = [];
@@ -202,7 +209,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
             name: toolName,
             response: {
               success: false,
-              error: `BLOCKED: Widget "${toolContext.clientId}" already exists. Do NOT rebuild from scratch. Use modify_design for colors, modify_config for settings, modify_component for layout changes, or integration tools for integrations. NEVER call ${toolName} on an existing widget.`,
+              error: `BLOCKED: Widget "${toolContext.clientId}" already exists. Do NOT rebuild or re-crawl. For changes use: modify_design (colors), modify_config (settings), modify_component (layout), integration tools (Telegram/CRM/etc). For extra knowledge use upload_knowledge_text. NEVER call ${toolName} on an existing widget.`,
             },
           },
         };
