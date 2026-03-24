@@ -8,7 +8,7 @@ import type { SSEEvent, AgentToolName } from './types';
 
 const MAX_TOOL_LOOPS = 15;
 const PRIMARY_MODEL = 'gemini-3.1-pro-preview';
-const FALLBACK_MODEL = 'gemini-3-pro-preview';
+const FALLBACK_MODELS = ['gemini-3-flash-preview', 'gemini-2.5-pro'];
 
 interface AgentMessage {
   role: 'user' | 'assistant';
@@ -129,16 +129,23 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
           msg
         );
 
-        // Daily quota exhausted → switch to fallback model immediately
+        // Daily quota or model not found → try next fallback model
         const isDailyQuota = /quota.*per.*day|per_day|PerDay|retry in \d+h/i.test(msg);
-        if (isDailyQuota && currentModel === PRIMARY_MODEL) {
-          console.warn(`[geminiAgent] Daily quota exhausted for ${PRIMARY_MODEL}, switching to ${FALLBACK_MODEL}`);
-          currentModel = FALLBACK_MODEL;
-          chat = createChat(FALLBACK_MODEL);
-          lastErr = null;
-          // Retry immediately with fallback model (don't count as attempt)
-          attempt--;
-          continue;
+        const isModelNotFound = /not found|NOT_FOUND|404/i.test(msg);
+        if (isDailyQuota || isModelNotFound) {
+          const currentIdx = currentModel === PRIMARY_MODEL ? -1 : FALLBACK_MODELS.indexOf(currentModel);
+          const nextIdx = currentIdx + 1;
+          if (nextIdx < FALLBACK_MODELS.length) {
+            const nextModel = FALLBACK_MODELS[nextIdx];
+            console.warn(
+              `[geminiAgent] ${currentModel} unavailable (${isDailyQuota ? 'quota' : '404'}), switching to ${nextModel}`
+            );
+            currentModel = nextModel;
+            chat = createChat(nextModel);
+            lastErr = null;
+            attempt--;
+            continue;
+          }
         }
 
         const isTransient = /503|unavailable|overloaded|resource exhausted|too many requests|429/i.test(msg);
