@@ -44,6 +44,7 @@ export const AGENT_TOOL_NAMES = [
   'execute_integration_action',
   'check_integration_health',
   'generate_integration',
+  'connect_any_api',
   // No-URL builder
   'create_theme_from_scratch',
   'upload_knowledge_text',
@@ -135,6 +136,10 @@ export type SSEEvent =
   | { type: 'suggestions'; suggestions: Suggestion[] }
   | { type: 'agent_switch'; agent: AgentType; task: string }
   | { type: 'open_connection_wizard'; slug: string }
+  | { type: 'action_confirm'; tool: string; args: Record<string, unknown>; confirmId: string; description: string }
+  | { type: 'action_confirmed'; tool: string; confirmId: string; result: Record<string, unknown> }
+  | { type: 'action_rejected'; tool: string; confirmId: string }
+  | { type: 'action_trace'; tool: string; status: 'success' | 'error'; durationMs: number; summary?: string }
   | { type: 'done' };
 
 // --- CRM Setup (legacy, kept for backward compat) ---
