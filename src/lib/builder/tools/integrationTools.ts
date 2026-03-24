@@ -5,6 +5,7 @@ import { webFetch } from '../webFetch';
 import { validateGeneratedCode, encryptApiKey } from '../security';
 import fs from 'fs';
 import path from 'path';
+import { universalApiTool } from './universalApiTool';
 
 export const integrationTools: ToolDefinition[] = [
   {
@@ -272,7 +273,17 @@ export const integrationTools: ToolDefinition[] = [
       const plugin = pluginRegistry.get(slug);
       if (!plugin) return { success: false, error: `Plugin "${slug}" not found` };
 
-      const allActions = plugin.manifest.actions.map((a) => a.id);
+      const allActions = plugin.manifest.actions.map((a: { id: string }) => a.id);
+      // Validate requested action IDs against manifest
+      if (actionIds.length > 0) {
+        const invalidActions = actionIds.filter((id) => !allActions.includes(id));
+        if (invalidActions.length > 0) {
+          return {
+            success: false,
+            error: `Invalid action IDs: ${invalidActions.join(', ')}. Available actions for ${slug}: ${allActions.join(', ')}`,
+          };
+        }
+      }
       const enabledActions = actionIds.length > 0 ? actionIds : allActions;
 
       await WidgetIntegration.findOneAndUpdate(
@@ -508,6 +519,42 @@ export const integrationTools: ToolDefinition[] = [
 
       await connectDB();
 
+      // For Telegram: try to get owner's chat ID from recent updates
+      let telegramChatId: string | undefined;
+      if (slug === 'telegram' && credentials.apiKey) {
+        try {
+          const updatesRes = await fetch(
+            `https://api.telegram.org/bot${credentials.apiKey}/getUpdates?limit=10&offset=-10`
+          );
+          const updatesData = await updatesRes.json();
+          if (updatesData.ok && updatesData.result?.length > 0) {
+            // Use the most recent /start message or the most recent chat
+            const startMsg = updatesData.result.find(
+              (u: { message?: { text?: string } }) => u.message?.text === '/start'
+            );
+            const chatId = startMsg?.message?.chat?.id || updatesData.result[0]?.message?.chat?.id;
+            if (chatId) telegramChatId = String(chatId);
+          }
+        } catch {
+          // Non-critical — continue without chat ID
+        }
+      }
+
+      // Helper: store Telegram chat ID in Client record
+      const storeTelegramChatId = async (chatId: string) => {
+        if (!ctx.sessionId) return;
+        try {
+          const { default: BuilderSession } = await import('@/models/BuilderSession');
+          const { default: Client } = await import('@/models/Client');
+          const session = await BuilderSession.findById(ctx.sessionId).select('clientId').lean();
+          if (session?.clientId) {
+            await Client.updateOne({ clientId: session.clientId }, { $set: { telegram: chatId } });
+          }
+        } catch {
+          // Non-critical
+        }
+      };
+
       // Check if already connected
       const existing = await Integration.findOne({ userId, provider: slug, status: 'connected' });
       if (existing) {
@@ -523,16 +570,27 @@ export const integrationTools: ToolDefinition[] = [
           ...(credentials.host ? { host: credentials.host } : {}),
           ...(credentials.port ? { port: credentials.port } : {}),
           ...(credentials.user ? { user: credentials.user } : {}),
+          ...(telegramChatId ? { chatId: telegramChatId } : {}),
           ...(testResult.details || {}),
         };
         existing.status = 'connected';
         existing.lastError = null;
         existing.lastHealthCheck = new Date();
         await existing.save();
+
+        // Store chat ID in Client record for Telegram notifications
+        if (slug === 'telegram' && telegramChatId) {
+          await storeTelegramChatId(telegramChatId);
+        }
+
+        const chatIdNote =
+          slug === 'telegram' && !telegramChatId
+            ? ' Note: Could not detect your Telegram chat ID. Please send /start to the bot first, then reconnect.'
+            : '';
         return {
           success: true,
           connectionId: String(existing._id),
-          message: `${plugin.manifest.name} credentials updated and verified. Connection is active.`,
+          message: `${plugin.manifest.name} credentials updated and verified. Connection is active.${chatIdNote}`,
           details: testResult.details,
         };
       }
@@ -554,14 +612,25 @@ export const integrationTools: ToolDefinition[] = [
           ...(credentials.host ? { host: credentials.host } : {}),
           ...(credentials.port ? { port: credentials.port } : {}),
           ...(credentials.user ? { user: credentials.user } : {}),
+          ...(telegramChatId ? { chatId: telegramChatId } : {}),
           ...(testResult.details || {}),
         },
       });
 
+      // Store chat ID in Client record for Telegram notifications
+      if (slug === 'telegram' && telegramChatId) {
+        await storeTelegramChatId(telegramChatId);
+      }
+
+      const chatIdNote =
+        slug === 'telegram' && !telegramChatId
+          ? ' Note: Could not detect your Telegram chat ID. Please send /start to the bot first, then reconnect — or the owner should send /start to the bot so notifications work.'
+          : '';
+
       return {
         success: true,
         connectionId: String(integration._id),
-        message: `${plugin.manifest.name} connected successfully! Use attach_integration_to_widget to bind it to a widget, then enable_ai_actions to activate.`,
+        message: `${plugin.manifest.name} connected successfully! Use attach_integration_to_widget to bind it to a widget, then enable_ai_actions to activate.${chatIdNote}`,
         details: testResult.details,
       };
     },
@@ -667,15 +736,39 @@ export const integrationTools: ToolDefinition[] = [
         { upsert: true }
       );
 
+      // Verification: try loading widget tools to confirm they actually work
+      const warnings: string[] = [];
+      try {
+        const { loadWidgetTools } = await import('@/lib/widgetTools');
+        const loaded = await loadWidgetTools(clientId);
+        if (loaded.declarations.length === 0) {
+          warnings.push(
+            'WARNING: No tools loaded at runtime. Check that integrations are connected and actions are valid.'
+          );
+        } else {
+          const expectedIntegrationTools = actionDescriptions.length;
+          const actualIntegrationTools = loaded.declarations.length - 3; // minus 3 built-in
+          if (actualIntegrationTools < expectedIntegrationTools) {
+            warnings.push(
+              `WARNING: Only ${actualIntegrationTools} of ${expectedIntegrationTools} integration tools loaded at runtime. Some bindings may have missing connections or invalid action IDs.`
+            );
+          }
+        }
+      } catch {
+        warnings.push('WARNING: Could not verify tool loading. Check widget configuration.');
+      }
+
       return {
         success: true,
         actionsEnabled: true,
         integrationCount: bindings.length,
         actionCount: actionDescriptions.length,
         behaviorRules: behaviorLines.length,
-        message: `AI Actions enabled! Widget AI can now execute ${actionDescriptions.length} integration actions + 3 built-in tools during chat with visitors. ${behaviorLines.length} behavioral rules added to guide the AI's conversation style.`,
+        message: `AI Actions enabled! Widget AI can now execute ${actionDescriptions.length} integration actions + 3 built-in tools during chat with visitors. ${behaviorLines.length} behavioral rules added to guide the AI's conversation style.${warnings.length > 0 ? '\n\n' + warnings.join('\n') : ''}`,
         actions: actionDescriptions,
+        ...(warnings.length > 0 ? { warnings } : {}),
       };
     },
   },
+  universalApiTool,
 ];
