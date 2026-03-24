@@ -106,14 +106,40 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
   while (loopCount < MAX_TOOL_LOOPS) {
     loopCount++;
 
-    // BUG-002 fix: error recovery for Gemini API calls
+    // BUG-002 fix: error recovery for Gemini API calls with retry for transient errors
     let response;
-    try {
-      response = await chat.sendMessage(nextSendArgs);
-    } catch (err) {
-      const errMsg = (err as Error).message || 'Gemini API error';
-      console.error('[geminiAgent] sendMessage error:', errMsg);
-      write({ type: 'error', message: errMsg, recoverable: true });
+    const MAX_RETRIES = 3;
+    let lastErr: Error | null = null;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        response = await chat.sendMessage(nextSendArgs);
+        lastErr = null;
+        break;
+      } catch (err) {
+        lastErr = err as Error;
+        const msg = lastErr.message || '';
+        const isTransient = /503|unavailable|overloaded|resource exhausted|too many requests|429/i.test(msg);
+        console.error(`[geminiAgent] sendMessage error (attempt ${attempt + 1}/${MAX_RETRIES}):`, msg);
+        if (isTransient && attempt < MAX_RETRIES - 1) {
+          const delay = Math.min(2000 * Math.pow(2, attempt), 8000);
+          write({ type: 'text', content: '' }); // keep connection alive
+          await new Promise((r) => setTimeout(r, delay));
+          continue;
+        }
+        break;
+      }
+    }
+    if (lastErr || !response) {
+      const rawMsg = lastErr?.message || 'Gemini API error';
+      const isOverloaded = /503|unavailable|overloaded|high demand/i.test(rawMsg);
+      const isQuota = /429|too many requests|resource exhausted|quota/i.test(rawMsg);
+      const friendlyMsg = isOverloaded
+        ? 'The AI model is temporarily overloaded. Please try again in a moment.'
+        : isQuota
+          ? 'API rate limit reached. Please wait a few seconds and try again.'
+          : 'Something went wrong with the AI service. Please try again.';
+      console.error('[geminiAgent] all retries failed:', rawMsg);
+      write({ type: 'error', message: friendlyMsg, recoverable: true });
       break;
     }
 
