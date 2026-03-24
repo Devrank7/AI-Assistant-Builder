@@ -20,6 +20,8 @@ import ChatLog from '@/models/ChatLog';
 import { pluginRegistry } from '@/lib/integrations/core/PluginRegistry';
 import { decrypt } from '@/lib/encryption';
 import { generateEmbedding, findSimilarChunks } from '@/lib/gemini';
+import { webSearch } from '@/lib/builder/webSearch';
+import { webFetch } from '@/lib/builder/webFetch';
 import type { ExecutionResult } from '@/lib/integrations/core/types';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -210,6 +212,66 @@ const builtinTools: Record<string, WidgetTool> = {
 
         // Fallback: store as in-app notification
         return { success: true, message: 'Notification recorded. Business owner will be notified.' };
+      } catch (err) {
+        return { success: false, error: (err as Error).message };
+      }
+    },
+  },
+
+  web_search: {
+    declaration: {
+      name: 'web_search',
+      description:
+        'Search the internet for real-time information. Use when the user asks about current events, live data (exchange rates, weather, news, prices, scores), or anything that requires up-to-date information not available in the knowledge base.',
+      parameters: {
+        type: Type.OBJECT,
+        properties: {
+          query: { type: Type.STRING, description: 'Search query in the language most likely to return good results' },
+        },
+        required: ['query'],
+      },
+    },
+    executor: async (args) => {
+      try {
+        const query = args.query as string;
+        const results = await webSearch(query, 5);
+        if (results.length === 0) return { success: true, results: [], message: 'No results found' };
+        return {
+          success: true,
+          results: results.map((r) => ({ title: r.title, url: r.url, snippet: r.description })),
+          count: results.length,
+        };
+      } catch (err) {
+        return { success: false, error: (err as Error).message };
+      }
+    },
+  },
+
+  web_fetch: {
+    declaration: {
+      name: 'web_fetch',
+      description:
+        'Fetch and read the content of a specific web page. Use after web_search to get detailed information from a URL, or when the user provides a direct link. Returns the page content as text.',
+      parameters: {
+        type: Type.OBJECT,
+        properties: {
+          url: { type: Type.STRING, description: 'The full URL to fetch (must start with http:// or https://)' },
+        },
+        required: ['url'],
+      },
+    },
+    executor: async (args) => {
+      try {
+        const url = args.url as string;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          return { success: false, error: 'URL must start with http:// or https://' };
+        }
+        const result = await webFetch(url);
+        if (result.error) return { success: false, error: result.error };
+        return {
+          success: true,
+          content: (result.content || '').slice(0, 15000),
+        };
       } catch (err) {
         return { success: false, error: (err as Error).message };
       }

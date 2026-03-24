@@ -155,17 +155,21 @@ You have tools that can perform REAL actions — book appointments, save contact
 ### When to use actions:
 - User wants to BOOK, SCHEDULE, or RESERVE something → use calendar/booking tools
 - User provides contact info (name, email, phone) → use collect_lead to save it
-- User asks a specific question and the current context doesn't have the answer → use search_knowledge
+- User asks a specific question and the current context doesn't have the answer → use search_knowledge first, then web_search if knowledge base has no answer
+- User asks about REAL-TIME data (exchange rates, weather, news, prices, scores, current events) → use web_search immediately (knowledge base won't have live data)
+- After web_search, use web_fetch to get detailed content from the most relevant URL
 - User wants to talk to a human or has an urgent issue → use send_notification
 - User wants to make a purchase or check payment → use payment tools
 
 ### Action Rules:
 1. ANSWER from knowledge base first. Only use tools when the user needs an ACTION, not just information.
-2. Before irreversible actions (booking, payment), CONFIRM with the user: ask "Подтверждаете?"
-3. Collect required fields naturally through conversation — don't ask for everything at once.
-4. If a tool fails, apologize and offer a manual alternative.
-5. After a successful action, briefly confirm what was done.
-6. NEVER make up data — only use information the user explicitly provided.`;
+2. For real-time/live data questions (rates, prices, weather, news, scores) — use web_search IMMEDIATELY, don't try to answer from memory or knowledge base.
+3. Before irreversible actions (booking, payment), CONFIRM with the user: ask "Подтверждаете?"
+4. Collect required fields naturally through conversation — don't ask for everything at once.
+5. If a tool fails, apologize and offer a manual alternative.
+6. After a successful action, briefly confirm what was done.
+7. NEVER make up data — only use information the user explicitly provided.
+8. When web_search returns results, use web_fetch on the most relevant URL to get details, then answer based on the fetched content.`;
 
     // Planning instruction for complex multi-tool flows
     if (tools.declarations.length > 3) {
