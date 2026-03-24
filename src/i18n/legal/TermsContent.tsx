@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useLanguage } from '@/i18n/context';
 import { useTranslation } from '@/i18n/useTranslation';
 import LegalLayout, { SectionTitle } from '@/components/LegalLayout';
@@ -121,7 +122,7 @@ function RuContent() {
       <SectionTitle>8. Обработка данных</SectionTitle>
       <p>
         Обработка данных осуществляется в соответствии с нашей{' '}
-        <Link href="/privacy" className="text-white underline hover:text-gray-300">
+        <Link href="/privacy" className="underline">
           Политикой конфиденциальности
         </Link>
         .
@@ -178,18 +179,13 @@ function RuContent() {
       <SectionTitle>14. Контактная информация</SectionTitle>
       <p>
         Email:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-white underline hover:text-gray-300">
+        <a href="mailto:winbix.ai@gmail.com" className="underline">
           winbix.ai@gmail.com
         </a>
       </p>
       <p>
         Telegram:{' '}
-        <a
-          href="https://t.me/winbix_ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white underline hover:text-gray-300"
-        >
+        <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="underline">
           @winbix_ai
         </a>
       </p>
@@ -312,7 +308,7 @@ function EnContent() {
       <SectionTitle>8. Data Processing</SectionTitle>
       <p>
         Data processing is carried out in accordance with our{' '}
-        <Link href="/privacy" className="text-white underline hover:text-gray-300">
+        <Link href="/privacy" className="underline">
           Privacy Policy
         </Link>
         .
@@ -366,18 +362,13 @@ function EnContent() {
       <SectionTitle>14. Contact Information</SectionTitle>
       <p>
         Email:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-white underline hover:text-gray-300">
+        <a href="mailto:winbix.ai@gmail.com" className="underline">
           winbix.ai@gmail.com
         </a>
       </p>
       <p>
         Telegram:{' '}
-        <a
-          href="https://t.me/winbix_ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white underline hover:text-gray-300"
-        >
+        <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="underline">
           @winbix_ai
         </a>
       </p>
@@ -500,7 +491,7 @@ function UkContent() {
       <SectionTitle>8. Обробка даних</SectionTitle>
       <p>
         Обробка даних здійснюється відповідно до нашої{' '}
-        <Link href="/privacy" className="text-white underline hover:text-gray-300">
+        <Link href="/privacy" className="underline">
           Політики конфіденційності
         </Link>
         .
@@ -555,18 +546,13 @@ function UkContent() {
       <SectionTitle>14. Контактна інформація</SectionTitle>
       <p>
         Email:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-white underline hover:text-gray-300">
+        <a href="mailto:winbix.ai@gmail.com" className="underline">
           winbix.ai@gmail.com
         </a>
       </p>
       <p>
         Telegram:{' '}
-        <a
-          href="https://t.me/winbix_ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white underline hover:text-gray-300"
-        >
+        <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="underline">
           @winbix_ai
         </a>
       </p>
@@ -688,7 +674,7 @@ function PlContent() {
       <SectionTitle>8. Przetwarzanie danych</SectionTitle>
       <p>
         Przetwarzanie danych odbywa się zgodnie z naszą{' '}
-        <Link href="/privacy" className="text-white underline hover:text-gray-300">
+        <Link href="/privacy" className="underline">
           Polityką prywatności
         </Link>
         .
@@ -746,18 +732,13 @@ function PlContent() {
       <SectionTitle>14. Dane kontaktowe</SectionTitle>
       <p>
         Email:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-white underline hover:text-gray-300">
+        <a href="mailto:winbix.ai@gmail.com" className="underline">
           winbix.ai@gmail.com
         </a>
       </p>
       <p>
         Telegram:{' '}
-        <a
-          href="https://t.me/winbix_ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white underline hover:text-gray-300"
-        >
+        <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="underline">
           @winbix_ai
         </a>
       </p>
@@ -877,7 +858,7 @@ function ArContent() {
       <SectionTitle>8. معالجة البيانات</SectionTitle>
       <p>
         تتم معالجة البيانات وفقاً لـ{' '}
-        <Link href="/privacy" className="text-white underline hover:text-gray-300">
+        <Link href="/privacy" className="underline">
           سياسة الخصوصية
         </Link>{' '}
         الخاصة بنا.
@@ -926,18 +907,13 @@ function ArContent() {
       <SectionTitle>14. معلومات الاتصال</SectionTitle>
       <p>
         البريد الإلكتروني:{' '}
-        <a href="mailto:winbix.ai@gmail.com" className="text-white underline hover:text-gray-300">
+        <a href="mailto:winbix.ai@gmail.com" className="underline">
           winbix.ai@gmail.com
         </a>
       </p>
       <p>
         تيليجرام:{' '}
-        <a
-          href="https://t.me/winbix_ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white underline hover:text-gray-300"
-        >
+        <a href="https://t.me/winbix_ai" target="_blank" rel="noopener noreferrer" className="underline">
           @winbix_ai
         </a>
       </p>
