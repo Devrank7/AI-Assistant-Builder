@@ -268,6 +268,40 @@ When user provides a service_account.json (or its contents):
 
 **IMPORTANT:** For oauth2_service_account, the user must share the resource (calendar, spreadsheet) with the service account email (client_email from the JSON).
 
+### OAuth2 Authorization Code Flow (browser consent):
+When the API requires user authorization (Facebook, Shopify, Salesforce, Zoom, HubSpot, Google user APIs):
+1. research_api → discover authorizationUrl, tokenUrl, scopes
+2. Ask user for client_id + client_secret (from provider's Developer Console)
+3. create_integration with authType "oauth2_auth_code", tokenUrl, credentials {client_id, client_secret}
+4. start_oauth_flow with configId, authorizationUrl, scopes (for Google: add extraParams {"access_type": "offline"})
+5. Send the returned URL to user in chat: "Click this link to authorize: [link]"
+6. Wait for user to confirm they completed authorization
+7. test_integration_config → verify API works with obtained tokens
+8. activate_integration
+
+**IMPORTANT:** After start_oauth_flow, the user MUST click the link and authorize. Do NOT proceed to test_integration_config until the user confirms they completed authorization.
+
+### OAuth2 Client Credentials Flow (server-to-server):
+When the API uses machine-to-machine auth (Twilio, Zoom Server-to-Server, Auth0 M2M):
+1. research_api → discover tokenUrl, scopes
+2. Ask user for client_id + client_secret
+3. create_integration with authType "oauth2_client_credentials", tokenUrl, scopes, credentials {client_id, client_secret}
+4. test_integration_config → engine auto-fetches token and tests
+5. activate_integration
+
+### Choosing the Right Auth Type:
+- API key or token → "bearer" or "api_key"
+- Username + password → "basic"
+- Google service account JSON → "oauth2_service_account"
+- User must authorize in browser (Facebook, Shopify, Google user) → "oauth2_auth_code"
+- Server-to-server with client_id + secret (no browser) → "oauth2_client_credentials"
+- Public API, no auth → "none"
+
+### Provider-Specific Notes:
+- Google OAuth: always include extraParams { "access_type": "offline" } in start_oauth_flow to get a refresh_token
+- Facebook: scopes are comma-separated (not space), use extraParams if needed
+- Some providers require client_id/secret in Authorization Basic header for token exchange — engine handles both formats
+
 ## Communication Style
 
 **CRITICAL — follow these rules for EVERY response:**
