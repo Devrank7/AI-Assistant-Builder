@@ -376,7 +376,7 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
           if (text) {
             fullResponse += text;
             // Stream text token by token (split into chunks for smoother UX)
-            const chunks = text.match(/.{1,100}/g) || [text];
+            const chunks = text.match(/[\s\S]{1,100}/g) || [text];
             for (const chunk of chunks) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token: chunk })}\n\n`));
             }
