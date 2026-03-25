@@ -42,6 +42,7 @@ export const AGENT_TOOL_NAMES = [
   'activate_integration',
   'deactivate_integration',
   'list_integrations',
+  'start_oauth_flow',
   // No-URL builder
   'create_theme_from_scratch',
   'upload_knowledge_text',

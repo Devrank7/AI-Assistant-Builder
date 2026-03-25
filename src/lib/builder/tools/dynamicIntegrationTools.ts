@@ -174,6 +174,11 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
           description:
             'JSON array of OAuth2 scopes (required for oauth2_service_account, e.g., ["https://www.googleapis.com/auth/calendar"])',
         },
+        tokenUrl: {
+          type: 'string',
+          description:
+            'Token endpoint URL for OAuth2 flows (required for oauth2_auth_code and oauth2_client_credentials)',
+        },
         systemPromptAddition: {
           type: 'string',
           description: 'Extra instructions for the widget AI about this integration',
@@ -217,6 +222,7 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
         baseUrl: args.baseUrl as string,
         actions: actions as any[],
         config,
+        tokenUrl: args.tokenUrl as string | undefined,
       });
 
       if (!validation.valid) {
@@ -242,6 +248,7 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
             headerPrefix: (args.headerPrefix as string) || undefined,
             authValueField: args.authValueField as string | undefined,
             ...(args.scopes ? { scopes: JSON.parse(args.scopes as string) } : {}),
+            ...(args.tokenUrl ? { tokenUrl: args.tokenUrl as string } : {}),
           },
           baseUrl: args.baseUrl as string,
           actions,
@@ -499,6 +506,132 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
         success: true,
         integrations,
         total: integrations.length,
+      };
+    },
+  },
+
+  // ─── 7. start_oauth_flow ──────────────────────────────────────────────
+  {
+    name: 'start_oauth_flow',
+    description:
+      'Start OAuth2 Authorization Code flow. Generates a secure authorization URL with PKCE that the user must visit to grant access. Only use for oauth2_auth_code integrations.',
+    parameters: {
+      type: 'object',
+      properties: {
+        configId: { type: 'string', description: 'ID of the IntegrationConfig (from create_integration)' },
+        authorizationUrl: {
+          type: 'string',
+          description: 'Provider authorization endpoint (e.g., "https://accounts.google.com/o/oauth2/v2/auth")',
+        },
+        scopes: {
+          type: 'string',
+          description: 'JSON array of OAuth2 scopes (e.g., ["https://www.googleapis.com/auth/calendar"])',
+        },
+        extraParams: {
+          type: 'string',
+          description:
+            'Optional JSON object of extra query params (e.g., {"access_type": "offline"} for Google refresh tokens)',
+        },
+      },
+      required: ['configId', 'authorizationUrl', 'scopes'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      await connectDB();
+      const crypto = await import('crypto');
+      const { validateUrl } = await import('@/lib/integrations/engine');
+      const { decrypt } = await import('@/lib/encryption');
+      const OAuthState = (await import('@/models/OAuthState')).default;
+
+      // Validate authorizationUrl
+      const authUrl = args.authorizationUrl as string;
+      const urlCheck = validateUrl(authUrl);
+      if (!urlCheck.valid) {
+        return { success: false, error: `Invalid authorization URL: ${urlCheck.error}` };
+      }
+
+      // Load integration config
+      const config = await IntegrationConfig.findOne({
+        _id: args.configId as string,
+        userId: ctx.userId,
+      });
+      if (!config) {
+        return { success: false, error: 'Integration config not found' };
+      }
+      if (config.auth.type !== 'oauth2_auth_code') {
+        return { success: false, error: `Auth type is "${config.auth.type}", expected "oauth2_auth_code"` };
+      }
+
+      // Get client_id from encrypted credentials
+      let decrypted: Record<string, unknown>;
+      try {
+        decrypted = JSON.parse(decrypt(config.auth.credentials));
+      } catch {
+        return { success: false, error: 'Failed to decrypt credentials' };
+      }
+      const clientId = decrypted.client_id as string;
+      if (!clientId) {
+        return { success: false, error: 'No client_id in credentials' };
+      }
+
+      // Parse scopes
+      let scopes: string[];
+      try {
+        scopes = JSON.parse(args.scopes as string);
+      } catch {
+        return { success: false, error: 'Invalid JSON in scopes parameter' };
+      }
+
+      // Parse extraParams
+      let extraParams: Record<string, string> = {};
+      if (args.extraParams) {
+        try {
+          extraParams = JSON.parse(args.extraParams as string);
+        } catch {
+          return { success: false, error: 'Invalid JSON in extraParams parameter' };
+        }
+      }
+
+      // Generate PKCE code_verifier (64 bytes → base64url) and code_challenge (SHA-256)
+      const codeVerifier = crypto.randomBytes(64).toString('base64url');
+      const codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64url');
+
+      // Generate state (32 bytes → hex)
+      const state = crypto.randomBytes(32).toString('hex');
+
+      // Save OAuthState to MongoDB (TTL: 15 minutes)
+      await OAuthState.create({
+        state,
+        configId: config._id.toString(),
+        sessionId: ctx.sessionId,
+        userId: ctx.userId,
+        codeVerifier,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      });
+
+      // Build authorization URL
+      const redirectUri =
+        process.env.NODE_ENV === 'production'
+          ? 'https://winbixai.com/api/oauth/callback'
+          : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/oauth/callback`;
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: 'code',
+        scope: scopes.join(' '),
+        state,
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        ...extraParams,
+      });
+
+      const fullAuthUrl = `${authUrl}?${params.toString()}`;
+
+      return {
+        success: true,
+        authorizationUrl: fullAuthUrl,
+        message: `Send this link to the user so they can authorize the integration. The link expires in 15 minutes.`,
+        expiresIn: '15 minutes',
       };
     },
   },
