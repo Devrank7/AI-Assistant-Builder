@@ -1,5 +1,7 @@
 // src/lib/builder/tools/coreTools.ts
 import type { ToolDefinition, ToolContext } from '../toolRegistry';
+import { webSearch } from '../webSearch';
+import { webFetch } from '../webFetch';
 import { analyzeSite } from '../siteAnalyzer';
 import { uploadKnowledge, setAIPrompt } from '../knowledgeCrawler';
 import {
@@ -1655,6 +1657,92 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
       } catch (err) {
         return { error: `Knowledge upload failed: ${(err as Error).message}` };
       }
+    },
+  },
+
+  // ── General-purpose tools (moved from integrationTools) ──────────────
+  {
+    name: 'web_search',
+    description:
+      'Search the internet using Brave Search API. Use for finding API documentation, tutorials, best practices.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        count: { type: 'string', description: 'Number of results (default 10, max 20)' },
+      },
+      required: ['query'],
+    },
+    category: 'core',
+    async executor(args) {
+      const query = args.query as string;
+      const count = parseInt((args.count as string) || '10', 10);
+      const results = await webSearch(query, Math.min(count, 20));
+      return { success: true, results, count: results.length };
+    },
+  },
+  {
+    name: 'web_fetch',
+    description:
+      'Fetch and parse any URL. Converts HTML to clean markdown (30K char limit). Use for reading API docs, web pages.',
+    parameters: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'URL to fetch' },
+      },
+      required: ['url'],
+    },
+    category: 'core',
+    async executor(args) {
+      const url = args.url as string;
+      const result = await webFetch(url);
+      if (result.error) return { success: false, error: result.error };
+      return { success: true, content: result.content };
+    },
+  },
+  {
+    name: 'guide_user',
+    description:
+      'Generate step-by-step instructions for the user (how to get API key, configure settings, etc.). Returns formatted instruction card.',
+    parameters: {
+      type: 'object',
+      properties: {
+        topic: { type: 'string', description: 'What to guide the user on (e.g., "get Calendly API key")' },
+        steps: { type: 'string', description: 'JSON array of step strings' },
+      },
+      required: ['topic', 'steps'],
+    },
+    category: 'core',
+    async executor(args, ctx) {
+      const topic = args.topic as string;
+      let steps: string[];
+      try {
+        steps = JSON.parse(args.steps as string);
+      } catch {
+        steps = [args.steps as string];
+      }
+      ctx.write({ type: 'crm_instruction', provider: topic, steps });
+      return { success: true, message: `Instructions displayed for: ${topic}` };
+    },
+  },
+  {
+    name: 'open_connection_wizard',
+    description: 'Instruct the UI to open the integration connection wizard for a specific provider.',
+    parameters: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'Integration slug (e.g., "hubspot", "stripe")' },
+      },
+      required: ['slug'],
+    },
+    category: 'core',
+    async executor(args, ctx) {
+      const slug = args.slug as string;
+      ctx.write({ type: 'open_connection_wizard', slug });
+      return {
+        success: true,
+        message: `Opening connection wizard for ${slug}. The user will complete the setup in the marketplace UI.`,
+      };
     },
   },
 ];
