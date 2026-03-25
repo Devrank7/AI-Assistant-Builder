@@ -78,16 +78,14 @@ export async function geminiSearch(query: string): Promise<GeminiSearchResponse>
   const metadata = response.candidates?.[0]?.groundingMetadata;
 
   // Extract sources from grounding chunks
-  const sources: SearchResult[] = (metadata?.groundingChunks || [])
-    .filter((chunk: Record<string, unknown>) => chunk.web)
-    .map((chunk: Record<string, unknown>) => {
-      const web = chunk.web as { uri?: string; title?: string };
-      return {
-        title: web.title || '',
-        url: web.uri || '',
-        description: '',
-      };
-    });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sources: SearchResult[] = (metadata?.groundingChunks || ([] as any[]))
+    .filter((chunk) => chunk.web)
+    .map((chunk) => ({
+      title: chunk.web?.title || '',
+      url: chunk.web?.uri || '',
+      description: '',
+    }));
 
   // Enrich descriptions from grounding supports
   const supports = metadata?.groundingSupports || [];
