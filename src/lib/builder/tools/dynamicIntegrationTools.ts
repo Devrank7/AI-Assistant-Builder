@@ -9,28 +9,9 @@ import { loadWidgetTools } from '@/lib/widgetTools';
 import { pluginRegistry } from '@/lib/integrations/core/PluginRegistry';
 import connectDB from '@/lib/mongodb';
 
-// ── Helper: web search via Brave ─────────────────────────────────────────
+// ── Helper: web search via Gemini Search grounding ──────────────────────
 
-async function braveSearch(query: string, count = 5): Promise<{ title: string; url: string; snippet: string }[]> {
-  const apiKey = process.env.BRAVE_SEARCH_API_KEY;
-  if (!apiKey) return [];
-
-  try {
-    const params = new URLSearchParams({ q: query, count: String(count) });
-    const res = await fetch(`https://api.search.brave.com/res/v1/web/search?${params}`, {
-      headers: { Accept: 'application/json', 'Accept-Encoding': 'gzip', 'X-Subscription-Token': apiKey },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.web?.results || []).map((r: { title: string; url: string; description: string }) => ({
-      title: r.title,
-      url: r.url,
-      snippet: r.description,
-    }));
-  } catch {
-    return [];
-  }
-}
+import { geminiSearch } from '../webSearch';
 
 async function fetchPageMarkdown(url: string, maxLen = 30000): Promise<string> {
   try {
@@ -120,24 +101,31 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
       const provider = args.provider as string;
       const topic = args.topic as string;
 
-      const results = await braveSearch(`${provider} API documentation ${topic}`, 5);
-      if (results.length === 0) {
+      const searchResult = await geminiSearch(`${provider} API documentation ${topic}`);
+      if (searchResult.sources.length === 0 && !searchResult.text) {
         return {
           success: false,
           error: 'No documentation found. Ask the user for the API base URL and endpoint details.',
         };
       }
 
-      // Fetch top 2 results
+      // Fetch top 2 source pages for detailed docs
       const docs: string[] = [];
-      for (const r of results.slice(0, 2)) {
-        const content = await fetchPageMarkdown(r.url, 15000);
-        docs.push(`## ${r.title}\nURL: ${r.url}\n\n${content}`);
+      for (const src of searchResult.sources.slice(0, 2)) {
+        if (src.url) {
+          const content = await fetchPageMarkdown(src.url, 15000);
+          docs.push(`## ${src.title}\nURL: ${src.url}\n\n${content}`);
+        }
+      }
+
+      // Include Gemini's grounded summary
+      if (searchResult.text) {
+        docs.unshift(`## Gemini Search Summary\n\n${searchResult.text}`);
       }
 
       return {
         success: true,
-        searchResults: results.map((r) => ({ title: r.title, url: r.url, snippet: r.snippet })),
+        searchResults: searchResult.sources.map((r) => ({ title: r.title, url: r.url, snippet: r.description })),
         documentation: docs.join('\n\n---\n\n'),
       };
     },

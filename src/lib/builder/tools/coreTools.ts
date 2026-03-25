@@ -1664,7 +1664,7 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
   {
     name: 'web_search',
     description:
-      'Search the internet using Brave Search API. Use for finding API documentation, tutorials, best practices.',
+      'Search the internet using Gemini Search (Google Search grounding). Use for finding API documentation, tutorials, best practices.',
     parameters: {
       type: 'object',
       properties: {
