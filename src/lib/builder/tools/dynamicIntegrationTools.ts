@@ -1,0 +1,508 @@
+// src/lib/builder/tools/dynamicIntegrationTools.ts
+import type { ToolDefinition } from '../toolRegistry';
+import IntegrationConfig from '@/models/IntegrationConfig';
+import AISettings from '@/models/AISettings';
+import WidgetIntegration from '@/models/WidgetIntegration';
+import { encrypt } from '@/lib/encryption';
+import { validateConfig, executeAction } from '@/lib/integrations/engine';
+import { loadWidgetTools } from '@/lib/widgetTools';
+import { pluginRegistry } from '@/lib/integrations/core/PluginRegistry';
+import connectDB from '@/lib/mongodb';
+
+// ── Helper: web search via Brave ─────────────────────────────────────────
+
+async function braveSearch(query: string, count = 5): Promise<{ title: string; url: string; snippet: string }[]> {
+  const apiKey = process.env.BRAVE_SEARCH_API_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const params = new URLSearchParams({ q: query, count: String(count) });
+    const res = await fetch(`https://api.search.brave.com/res/v1/web/search?${params}`, {
+      headers: { Accept: 'application/json', 'Accept-Encoding': 'gzip', 'X-Subscription-Token': apiKey },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.web?.results || []).map((r: { title: string; url: string; description: string }) => ({
+      title: r.title,
+      url: r.url,
+      snippet: r.description,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function fetchPageMarkdown(url: string, maxLen = 30000): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'WinBixAI-Builder/1.0' },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return `[Error: HTTP ${res.status}]`;
+    const html = await res.text();
+    // Simple HTML to text extraction
+    const text = html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, '\n')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    return text.slice(0, maxLen);
+  } catch (err) {
+    return `[Error: ${(err as Error).message}]`;
+  }
+}
+
+// ── Helper: Build unified actionsSystemPrompt ────────────────────────────
+
+async function buildUnifiedActionsPrompt(
+  clientId: string,
+  userId: string
+): Promise<{ prompt: string; actionCount: number }> {
+  let prompt = '## Available Integration Actions\n\n';
+  let actionCount = 0;
+
+  // 1. Plugin-based integrations (from WidgetIntegration)
+  const bindings = await WidgetIntegration.find({ widgetId: clientId, enabled: true }).lean();
+  for (const binding of bindings) {
+    const plugin = pluginRegistry.get(binding.integrationSlug);
+    if (!plugin) continue;
+    for (const actionId of binding.enabledActions || []) {
+      const actionDef = plugin.manifest.actions.find((a: { id: string }) => a.id === actionId);
+      if (!actionDef) continue;
+      const toolName = `${binding.integrationSlug}_${actionId}`;
+      prompt += `- **${toolName}**: ${actionDef.description}\n`;
+      actionCount++;
+    }
+  }
+
+  // 2. Config-driven integrations (from IntegrationConfig)
+  const configs = await IntegrationConfig.find({ clientId, status: 'active' }).lean();
+  for (const config of configs) {
+    for (const action of config.actions) {
+      const toolName = `${config.provider}_${action.id}`;
+      prompt += `- **${toolName}**: ${action.description}\n`;
+      actionCount++;
+    }
+    if (config.systemPromptAddition) {
+      prompt += `\n${config.systemPromptAddition}\n`;
+    }
+  }
+
+  return { prompt, actionCount };
+}
+
+// ── Tools ────────────────────────────────────────────────────────────────
+
+export const dynamicIntegrationTools: ToolDefinition[] = [
+  // ─── 1. research_api ───────────────────────────────────────────────────
+  {
+    name: 'research_api',
+    description:
+      'Research an API documentation to understand endpoints, authentication, and parameters. Use before creating an integration config. Returns raw documentation text.',
+    parameters: {
+      type: 'object',
+      properties: {
+        provider: { type: 'string', description: 'API provider name (e.g., "telegram", "hubspot", "stripe")' },
+        topic: { type: 'string', description: 'Specific topic to research (e.g., "send message", "create contact")' },
+      },
+      required: ['provider', 'topic'],
+    },
+    category: 'integration',
+    async executor(args) {
+      const provider = args.provider as string;
+      const topic = args.topic as string;
+
+      const results = await braveSearch(`${provider} API documentation ${topic}`, 5);
+      if (results.length === 0) {
+        return {
+          success: false,
+          error: 'No documentation found. Ask the user for the API base URL and endpoint details.',
+        };
+      }
+
+      // Fetch top 2 results
+      const docs: string[] = [];
+      for (const r of results.slice(0, 2)) {
+        const content = await fetchPageMarkdown(r.url, 15000);
+        docs.push(`## ${r.title}\nURL: ${r.url}\n\n${content}`);
+      }
+
+      return {
+        success: true,
+        searchResults: results.map((r) => ({ title: r.title, url: r.url, snippet: r.snippet })),
+        documentation: docs.join('\n\n---\n\n'),
+      };
+    },
+  },
+
+  // ─── 2. create_integration ─────────────────────────────────────────────
+  {
+    name: 'create_integration',
+    description:
+      'Create a new integration config for a widget. Validates the config structure, encrypts credentials, and saves as draft. Must call test_integration_config after to verify it works.',
+    parameters: {
+      type: 'object',
+      properties: {
+        provider: { type: 'string', description: 'Integration provider slug (e.g., "telegram", "hubspot")' },
+        displayName: { type: 'string', description: 'Human-readable name (e.g., "Telegram Notifications")' },
+        authType: { type: 'string', description: 'Auth type: "api_key", "bearer", "basic", or "none"' },
+        credentials: { type: 'string', description: 'JSON string with auth credentials (e.g., {"token": "abc123"})' },
+        authValueField: {
+          type: 'string',
+          description: 'Which credential field to use for auth header (e.g., "token", "apiKey")',
+        },
+        headerName: {
+          type: 'string',
+          description: 'Auth header name (default: "Authorization" for bearer, "X-API-Key" for api_key)',
+        },
+        headerPrefix: {
+          type: 'string',
+          description: 'Auth header value prefix (default: "Bearer " for bearer, "" for api_key)',
+        },
+        baseUrl: {
+          type: 'string',
+          description:
+            'Base URL with optional {{auth.X}} templates (e.g., "https://api.telegram.org/bot{{auth.token}}")',
+        },
+        actions: {
+          type: 'string',
+          description:
+            'JSON array of action definitions with id, name, description, method, path, bodyTemplate, inputSchema',
+        },
+        config: { type: 'string', description: 'JSON object with static config values (e.g., {"chat_id": "123456"})' },
+        systemPromptAddition: {
+          type: 'string',
+          description: 'Extra instructions for the widget AI about this integration',
+        },
+      },
+      required: ['provider', 'displayName', 'authType', 'credentials', 'baseUrl', 'actions'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      await connectDB();
+
+      // Parse JSON params
+      let credentials: Record<string, unknown>;
+      let actions: Array<Record<string, unknown>>;
+      let config: Record<string, unknown>;
+      try {
+        credentials = JSON.parse(args.credentials as string);
+      } catch {
+        return { success: false, error: 'Invalid JSON in credentials parameter' };
+      }
+      try {
+        actions = JSON.parse(args.actions as string);
+      } catch {
+        return { success: false, error: 'Invalid JSON in actions parameter' };
+      }
+      try {
+        config = args.config ? JSON.parse(args.config as string) : {};
+      } catch {
+        return { success: false, error: 'Invalid JSON in config parameter' };
+      }
+
+      if (!ctx.clientId) {
+        return { success: false, error: 'No widget built yet. Build a widget first before adding integrations.' };
+      }
+
+      // Validate
+      const validation = validateConfig({
+        authType: args.authType as string,
+        authValueField: args.authValueField as string | undefined,
+        credentials,
+        baseUrl: args.baseUrl as string,
+        actions: actions as any[],
+        config,
+      });
+
+      if (!validation.valid) {
+        return {
+          success: false,
+          error: `Config validation failed:\n${validation.errors.join('\n')}`,
+          errors: validation.errors,
+        };
+      }
+
+      // Encrypt credentials
+      const encryptedCreds = encrypt(JSON.stringify(credentials));
+
+      // Upsert (allows fixing a broken draft)
+      const doc = await IntegrationConfig.findOneAndUpdate(
+        { userId: ctx.userId, clientId: ctx.clientId, provider: args.provider as string },
+        {
+          displayName: args.displayName as string,
+          auth: {
+            type: args.authType as string,
+            credentials: encryptedCreds,
+            headerName: (args.headerName as string) || undefined,
+            headerPrefix: (args.headerPrefix as string) || undefined,
+            authValueField: args.authValueField as string | undefined,
+          },
+          baseUrl: args.baseUrl as string,
+          actions,
+          config,
+          systemPromptAddition: (args.systemPromptAddition as string) || undefined,
+          status: 'draft',
+          consecutiveFailures: 0,
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+
+      return {
+        success: true,
+        configId: doc._id.toString(),
+        provider: args.provider,
+        actionsCreated: actions.map((a: any) => a.id),
+        message: `Integration config created as draft. Now call test_integration_config to verify it works.`,
+      };
+    },
+  },
+
+  // ─── 3. test_integration_config ────────────────────────────────────────
+  {
+    name: 'test_integration_config',
+    description:
+      'Test an integration config by executing a real API call. Use after create_integration to verify the config works. Updates status to "tested" on success.',
+    parameters: {
+      type: 'object',
+      properties: {
+        configId: { type: 'string', description: 'The configId returned by create_integration' },
+        actionId: { type: 'string', description: 'Which action to test (e.g., "send_message")' },
+        testInputs: {
+          type: 'string',
+          description: 'JSON with test input values (e.g., {"message": "Test from WinBix"})',
+        },
+      },
+      required: ['configId', 'actionId', 'testInputs'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      await connectDB();
+
+      const configDoc = await IntegrationConfig.findById(args.configId as string);
+      if (!configDoc) {
+        return { success: false, error: `Integration config not found: ${args.configId}` };
+      }
+      if (configDoc.userId !== ctx.userId) {
+        return { success: false, error: 'Integration config belongs to a different user' };
+      }
+
+      let testInputs: Record<string, unknown>;
+      try {
+        testInputs = JSON.parse(args.testInputs as string);
+      } catch {
+        return { success: false, error: 'Invalid JSON in testInputs parameter' };
+      }
+
+      ctx.write({ type: 'progress', message: `Testing ${configDoc.provider} integration...` });
+
+      const result = await executeAction(configDoc, args.actionId as string, testInputs);
+
+      // Update test result
+      configDoc.lastTestResult = {
+        success: result.success,
+        response: result.data,
+        error: result.error,
+        timestamp: new Date(),
+      };
+
+      if (result.success) {
+        configDoc.status = 'tested';
+        configDoc.consecutiveFailures = 0;
+      }
+
+      await configDoc.save();
+
+      if (result.success) {
+        return {
+          success: true,
+          message: `Test passed! Action "${args.actionId}" executed successfully. Call activate_integration to make it live.`,
+          response: result.data,
+        };
+      } else {
+        return {
+          success: false,
+          error: `Test failed: ${result.error}. Fix the config with create_integration and test again.`,
+          details: result.data,
+        };
+      }
+    },
+  },
+
+  // ─── 4. activate_integration ───────────────────────────────────────────
+  {
+    name: 'activate_integration',
+    description:
+      'Activate a tested integration on the widget. Makes its actions available to the widget AI as callable tools. Must call test_integration_config first.',
+    parameters: {
+      type: 'object',
+      properties: {
+        configId: { type: 'string', description: 'The configId to activate' },
+      },
+      required: ['configId'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      await connectDB();
+
+      const configDoc = await IntegrationConfig.findById(args.configId as string);
+      if (!configDoc) {
+        return { success: false, error: `Integration config not found: ${args.configId}` };
+      }
+      if (configDoc.userId !== ctx.userId) {
+        return { success: false, error: 'Integration config belongs to a different user' };
+      }
+      if (configDoc.status === 'draft') {
+        return {
+          success: false,
+          error: 'Integration must be tested first. Call test_integration_config before activating.',
+        };
+      }
+
+      // Set active
+      configDoc.status = 'active';
+      await configDoc.save();
+
+      // Build unified actionsSystemPrompt
+      const { prompt, actionCount } = await buildUnifiedActionsPrompt(configDoc.clientId, ctx.userId);
+
+      // Update AISettings
+      await AISettings.findOneAndUpdate(
+        { clientId: configDoc.clientId },
+        {
+          actionsEnabled: true,
+          actionsSystemPrompt: prompt,
+        },
+        { upsert: true }
+      );
+
+      // Verify tools load
+      const tools = await loadWidgetTools(configDoc.clientId);
+      const expectedToolNames = configDoc.actions.map((a) => `${configDoc.provider}_${a.id}`);
+      const loadedNames = tools.declarations.map((d) => d.name);
+      const allLoaded = expectedToolNames.every((n) => loadedNames.includes(n));
+
+      return {
+        success: true,
+        activeActions: expectedToolNames,
+        totalActions: actionCount,
+        widgetToolsVerified: allLoaded,
+        message: allLoaded
+          ? `Integration activated! Widget now has ${expectedToolNames.length} new tool(s): ${expectedToolNames.join(', ')}`
+          : `Integration activated but some tools failed to load. Check the config.`,
+      };
+    },
+  },
+
+  // ─── 5. deactivate_integration ─────────────────────────────────────────
+  {
+    name: 'deactivate_integration',
+    description:
+      'Deactivate an integration, removing its tools from the widget. The config is preserved and can be reactivated later.',
+    parameters: {
+      type: 'object',
+      properties: {
+        configId: { type: 'string', description: 'The configId to deactivate' },
+      },
+      required: ['configId'],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      await connectDB();
+
+      const configDoc = await IntegrationConfig.findById(args.configId as string);
+      if (!configDoc) {
+        return { success: false, error: `Integration config not found: ${args.configId}` };
+      }
+      if (configDoc.userId !== ctx.userId) {
+        return { success: false, error: 'Integration config belongs to a different user' };
+      }
+
+      configDoc.status = 'inactive';
+      await configDoc.save();
+
+      // Rebuild prompt without this integration
+      const { prompt, actionCount } = await buildUnifiedActionsPrompt(configDoc.clientId, ctx.userId);
+
+      if (actionCount === 0) {
+        await AISettings.findOneAndUpdate(
+          { clientId: configDoc.clientId },
+          { actionsEnabled: false, actionsSystemPrompt: '' }
+        );
+      } else {
+        await AISettings.findOneAndUpdate({ clientId: configDoc.clientId }, { actionsSystemPrompt: prompt });
+      }
+
+      return {
+        success: true,
+        message: `Integration "${configDoc.displayName}" deactivated. ${actionCount} actions remain active.`,
+      };
+    },
+  },
+
+  // ─── 6. list_integrations ──────────────────────────────────────────────
+  {
+    name: 'list_integrations',
+    description:
+      'List all integrations for the current widget (both marketplace plugins and config-driven integrations).',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
+    category: 'integration',
+    async executor(args, ctx) {
+      if (!ctx.clientId) {
+        return { success: false, error: 'No widget built yet.' };
+      }
+
+      await connectDB();
+      const integrations: Array<{
+        provider: string;
+        displayName: string;
+        status: string;
+        type: 'plugin' | 'config';
+        actions: string[];
+      }> = [];
+
+      // Plugin-based
+      const bindings = await WidgetIntegration.find({ widgetId: ctx.clientId, enabled: true }).lean();
+      for (const binding of bindings) {
+        const plugin = pluginRegistry.get(binding.integrationSlug);
+        integrations.push({
+          provider: binding.integrationSlug,
+          displayName: plugin?.manifest.name || binding.integrationSlug,
+          status: 'active',
+          type: 'plugin',
+          actions: (binding.enabledActions || []) as string[],
+        });
+      }
+
+      // Config-driven
+      const configs = await IntegrationConfig.find({ clientId: ctx.clientId }).lean();
+      for (const config of configs) {
+        integrations.push({
+          provider: config.provider,
+          displayName: config.displayName,
+          status: config.status,
+          type: 'config',
+          actions: config.actions.map((a) => a.id),
+        });
+      }
+
+      return {
+        success: true,
+        integrations,
+        total: integrations.length,
+      };
+    },
+  },
+];
