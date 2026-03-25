@@ -182,6 +182,74 @@ async function getServiceAccountToken(
   return token;
 }
 
+/**
+ * Retry a fetch with exponential backoff (max 3 attempts).
+ * Only retries on 429 (rate limit) or 5xx server errors.
+ */
+async function fetchWithRetry(url: string, opts: RequestInit, maxAttempts = 3): Promise<Response> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const response = await fetch(url, opts);
+    if (response.ok || attempt === maxAttempts || (response.status < 429 && response.status !== 408)) {
+      return response;
+    }
+    if (response.status !== 408 && response.status !== 429 && response.status < 500) {
+      return response;
+    }
+    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+    await new Promise((r) => setTimeout(r, delay));
+  }
+  throw new Error('fetchWithRetry: exhausted attempts');
+}
+
+/**
+ * Fetch an access token using OAuth2 Client Credentials grant.
+ * Caches the token until 5 minutes before expiry.
+ */
+async function getClientCredentialsToken(
+  clientId: string,
+  clientSecret: string,
+  tokenUrl: string,
+  scopes: string[] = []
+): Promise<string> {
+  const cacheKey = `cc:${crypto
+    .createHash('sha256')
+    .update(clientId + clientSecret)
+    .digest('hex')}`;
+  const cached = TOKEN_CACHE.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.token;
+  }
+
+  const bodyParams = new URLSearchParams({
+    grant_type: 'client_credentials',
+    client_id: clientId,
+    client_secret: clientSecret,
+  });
+  if (scopes.length > 0) {
+    bodyParams.set('scope', scopes.join(' '));
+  }
+
+  const response = await fetchWithRetry(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: bodyParams.toString(),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Client credentials token exchange failed (${response.status}): ${text}`);
+  }
+
+  const data = (await response.json()) as { access_token: string; expires_in: number; token_type?: string };
+  if (data.token_type && data.token_type.toLowerCase() !== 'bearer') {
+    console.warn(`[engine] Unexpected token_type "${data.token_type}" from ${tokenUrl}, using as Bearer`);
+  }
+  const token = data.access_token;
+  TOKEN_CACHE.set(cacheKey, { token, expiresAt: Date.now() + (data.expires_in - 300) * 1000 });
+
+  return token;
+}
+
 // ── Auth Header Construction ─────────────────────────────────────────────
 
 export async function buildAuthHeader(
@@ -223,6 +291,20 @@ export async function buildAuthHeader(
         throw new Error('Service account auth requires at least one scope in auth.scopes');
       }
       const token = await getServiceAccountToken(clientEmail, privateKey, scopes, tokenUri);
+      return { Authorization: `Bearer ${token}` };
+    }
+    case 'oauth2_client_credentials': {
+      const clientId = decrypted.client_id as string;
+      const clientSecret = decrypted.client_secret as string;
+      const tokenUrl = auth.tokenUrl;
+      const scopes = auth.scopes || [];
+      if (!clientId || !clientSecret) {
+        throw new Error('Client credentials auth requires client_id and client_secret in credentials');
+      }
+      if (!tokenUrl) {
+        throw new Error('Client credentials auth requires tokenUrl in auth config');
+      }
+      const token = await getClientCredentialsToken(clientId, clientSecret, tokenUrl, scopes);
       return { Authorization: `Bearer ${token}` };
     }
     case 'none':
@@ -441,13 +523,24 @@ export function validateConfig(params: {
   baseUrl: string;
   actions: IIntegrationConfigAction[];
   config: Record<string, unknown>;
+  tokenUrl?: string;
 }): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   // Auth type
-  if (!['api_key', 'bearer', 'basic', 'none', 'oauth2_service_account'].includes(params.authType)) {
+  if (
+    ![
+      'api_key',
+      'bearer',
+      'basic',
+      'none',
+      'oauth2_service_account',
+      'oauth2_auth_code',
+      'oauth2_client_credentials',
+    ].includes(params.authType)
+  ) {
     errors.push(
-      `Invalid auth type: "${params.authType}". Must be: api_key, bearer, basic, none, oauth2_service_account`
+      `Invalid auth type: "${params.authType}". Must be: api_key, bearer, basic, none, oauth2_service_account, oauth2_auth_code, oauth2_client_credentials`
     );
   }
 
@@ -473,6 +566,38 @@ export function validateConfig(params: {
     }
     if (!('private_key' in params.credentials)) {
       errors.push('Service account auth requires "private_key" in credentials');
+    }
+  }
+
+  // client credentials auth
+  if (params.authType === 'oauth2_client_credentials') {
+    if (!('client_id' in params.credentials)) {
+      errors.push('Client credentials auth requires "client_id" in credentials');
+    }
+    if (!('client_secret' in params.credentials)) {
+      errors.push('Client credentials auth requires "client_secret" in credentials');
+    }
+    if (!params.tokenUrl) {
+      errors.push('Client credentials auth requires tokenUrl');
+    } else {
+      const tokenUrlCheck = validateUrl(params.tokenUrl);
+      if (!tokenUrlCheck.valid) errors.push(`tokenUrl: ${tokenUrlCheck.error}`);
+    }
+  }
+
+  // auth code
+  if (params.authType === 'oauth2_auth_code') {
+    if (!('client_id' in params.credentials)) {
+      errors.push('Auth code auth requires "client_id" in credentials');
+    }
+    if (!('client_secret' in params.credentials)) {
+      errors.push('Auth code auth requires "client_secret" in credentials');
+    }
+    if (!params.tokenUrl) {
+      errors.push('Auth code auth requires tokenUrl');
+    } else {
+      const tokenUrlCheck = validateUrl(params.tokenUrl);
+      if (!tokenUrlCheck.valid) errors.push(`tokenUrl: ${tokenUrlCheck.error}`);
     }
   }
 
