@@ -28,11 +28,12 @@ export interface IIntegrationConfig extends Document {
   provider: string;
   displayName: string;
   auth: {
-    type: 'api_key' | 'bearer' | 'basic' | 'none';
+    type: 'api_key' | 'bearer' | 'basic' | 'none' | 'oauth2_service_account';
     credentials: string;
     headerName?: string;
     headerPrefix?: string;
     authValueField?: string;
+    scopes?: string[];
   };
   baseUrl: string;
   actions: IIntegrationConfigAction[];
@@ -86,13 +87,14 @@ const IntegrationConfigSchema = new Schema<IIntegrationConfig>(
     auth: {
       type: {
         type: String,
-        enum: ['api_key', 'bearer', 'basic', 'none'],
+        enum: ['api_key', 'bearer', 'basic', 'none', 'oauth2_service_account'],
         required: true,
       },
       credentials: { type: String, required: true },
       headerName: String,
       headerPrefix: String,
       authValueField: String,
+      scopes: { type: [String], default: undefined },
     },
     baseUrl: { type: String, required: true },
     actions: { type: [IntegrationConfigActionSchema], required: true },

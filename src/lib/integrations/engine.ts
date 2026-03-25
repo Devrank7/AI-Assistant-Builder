@@ -1,5 +1,6 @@
 // src/lib/integrations/engine.ts
 import { decrypt } from '@/lib/encryption';
+import crypto from 'crypto';
 import type { IIntegrationConfig, IIntegrationConfigAction } from '@/models/IntegrationConfig';
 
 // ── Types ────────────────────────────────────────────────────────────────
@@ -105,12 +106,88 @@ export function validateUrl(url: string): { valid: boolean; error?: string } {
   }
 }
 
+// ── OAuth2 Service Account (JWT → Access Token) ─────────────────────────
+
+const TOKEN_CACHE = new Map<string, { token: string; expiresAt: number }>();
+
+function base64url(data: Buffer | string): string {
+  const buf = typeof data === 'string' ? Buffer.from(data) : data;
+  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/**
+ * Create a signed JWT for Google service account auth.
+ * Uses RS256 (RSA + SHA-256) as required by Google's OAuth2 token endpoint.
+ */
+function createServiceAccountJWT(
+  clientEmail: string,
+  privateKey: string,
+  scopes: string[],
+  tokenUri: string = 'https://oauth2.googleapis.com/token'
+): string {
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: clientEmail,
+    scope: scopes.join(' '),
+    aud: tokenUri,
+    iat: now,
+    exp: now + 3600, // 1 hour
+  };
+
+  const segments = [base64url(JSON.stringify(header)), base64url(JSON.stringify(payload))];
+  const signingInput = segments.join('.');
+
+  const sign = crypto.createSign('RSA-SHA256');
+  sign.update(signingInput);
+  const signature = sign.sign(privateKey);
+
+  return `${signingInput}.${base64url(signature)}`;
+}
+
+/**
+ * Exchange a service account JWT for an access token.
+ * Caches the token until 5 minutes before expiry.
+ */
+async function getServiceAccountToken(
+  clientEmail: string,
+  privateKey: string,
+  scopes: string[],
+  tokenUri: string = 'https://oauth2.googleapis.com/token'
+): Promise<string> {
+  const cacheKey = `${clientEmail}:${scopes.join(',')}`;
+  const cached = TOKEN_CACHE.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.token;
+  }
+
+  const jwt = createServiceAccountJWT(clientEmail, privateKey, scopes, tokenUri);
+
+  const response = await fetch(tokenUri, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Service account token exchange failed (${response.status}): ${text}`);
+  }
+
+  const data = (await response.json()) as { access_token: string; expires_in: number };
+  const token = data.access_token;
+  // Cache with 5 minute safety margin
+  TOKEN_CACHE.set(cacheKey, { token, expiresAt: Date.now() + (data.expires_in - 300) * 1000 });
+
+  return token;
+}
+
 // ── Auth Header Construction ─────────────────────────────────────────────
 
-export function buildAuthHeader(
+export async function buildAuthHeader(
   auth: IIntegrationConfig['auth'],
   decrypted: Record<string, unknown>
-): Record<string, string> {
+): Promise<Record<string, string>> {
   switch (auth.type) {
     case 'bearer': {
       const field = auth.authValueField || 'token';
@@ -133,6 +210,20 @@ export function buildAuthHeader(
       const password = decrypted.password || '';
       const encoded = Buffer.from(`${username}:${password}`).toString('base64');
       return { Authorization: `Basic ${encoded}` };
+    }
+    case 'oauth2_service_account': {
+      const clientEmail = decrypted.client_email as string;
+      const privateKey = decrypted.private_key as string;
+      const tokenUri = (decrypted.token_uri as string) || 'https://oauth2.googleapis.com/token';
+      const scopes = auth.scopes || [];
+      if (!clientEmail || !privateKey) {
+        throw new Error('Service account credentials require client_email and private_key');
+      }
+      if (scopes.length === 0) {
+        throw new Error('Service account auth requires at least one scope in auth.scopes');
+      }
+      const token = await getServiceAccountToken(clientEmail, privateKey, scopes, tokenUri);
+      return { Authorization: `Bearer ${token}` };
     }
     case 'none':
     default:
@@ -229,8 +320,14 @@ export async function executeAction(
   }
 
   // 7. Build headers
+  let authHeaders: Record<string, string>;
+  try {
+    authHeaders = await buildAuthHeader(config.auth, decrypted);
+  } catch (err) {
+    return { success: false, error: `Auth error: ${(err as Error).message}` };
+  }
   const headers: Record<string, string> = {
-    ...buildAuthHeader(config.auth, decrypted),
+    ...authHeaders,
     ...(action.headers || {}),
   };
 
@@ -348,8 +445,10 @@ export function validateConfig(params: {
   const errors: string[] = [];
 
   // Auth type
-  if (!['api_key', 'bearer', 'basic', 'none'].includes(params.authType)) {
-    errors.push(`Invalid auth type: "${params.authType}". Must be: api_key, bearer, basic, none`);
+  if (!['api_key', 'bearer', 'basic', 'none', 'oauth2_service_account'].includes(params.authType)) {
+    errors.push(
+      `Invalid auth type: "${params.authType}". Must be: api_key, bearer, basic, none, oauth2_service_account`
+    );
   }
 
   // authValueField for bearer/api_key
@@ -364,6 +463,16 @@ export function validateConfig(params: {
   if (params.authType === 'basic') {
     if (!('username' in params.credentials) || !('password' in params.credentials)) {
       errors.push('Basic auth requires "username" and "password" in credentials');
+    }
+  }
+
+  // service account auth
+  if (params.authType === 'oauth2_service_account') {
+    if (!('client_email' in params.credentials)) {
+      errors.push('Service account auth requires "client_email" in credentials');
+    }
+    if (!('private_key' in params.credentials)) {
+      errors.push('Service account auth requires "private_key" in credentials');
     }
   }
 

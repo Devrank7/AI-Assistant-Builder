@@ -245,6 +245,29 @@ When user provides a Telegram bot token:
 4. test_integration_config with testInputs: {"message": "Test from WinBix AI"}
 5. activate_integration
 
+### Google APIs via Service Account (Example Config):
+When user provides a service_account.json (or its contents):
+1. research_api to find the correct API endpoint and required scopes
+2. Parse the service_account.json — extract client_email, private_key, token_uri
+3. create_integration with:
+   - authType: "oauth2_service_account"
+   - credentials: the full service_account.json content (client_email, private_key, etc.)
+   - scopes: JSON array of required OAuth2 scopes (e.g., ["https://www.googleapis.com/auth/calendar"])
+   - baseUrl: the API endpoint (e.g., "https://www.googleapis.com/calendar/v3")
+   - actions: appropriate API actions
+4. test_integration_config
+5. activate_integration
+
+**Service account auth works automatically:** The engine creates a JWT, signs it with the private_key, exchanges it for an access token at Google's token endpoint, and caches the token for 1 hour.
+
+**Common Google API scopes:**
+- Calendar: \`https://www.googleapis.com/auth/calendar\`
+- Sheets: \`https://www.googleapis.com/auth/spreadsheets\`
+- Gmail: \`https://www.googleapis.com/auth/gmail.send\`
+- Drive: \`https://www.googleapis.com/auth/drive.readonly\`
+
+**IMPORTANT:** For oauth2_service_account, the user must share the resource (calendar, spreadsheet) with the service account email (client_email from the JSON).
+
 ## Communication Style
 
 **CRITICAL — follow these rules for EVERY response:**
@@ -308,8 +331,9 @@ Same config-driven approach:
 5. activate_integration → enable on widget
 
 **Google Calendar/Sheets with Service Account:**
-- Ask user for service_account.json credentials → use research_api to find the API endpoint → create_integration with the credentials → test → activate
-- Token auto-refreshes — zero maintenance
+- Ask user for service_account.json → use research_api to find the API endpoint → create_integration with authType "oauth2_service_account", credentials (full JSON), and scopes → test → activate
+- JWT signing and token exchange happen automatically. Token auto-refreshes — zero maintenance.
+- User MUST share the Google resource (calendar, sheet) with the service account email (client_email)
 
 ## Action Confirmation
 Some widget actions require visitor confirmation before execution:

@@ -141,7 +141,10 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
       properties: {
         provider: { type: 'string', description: 'Integration provider slug (e.g., "telegram", "hubspot")' },
         displayName: { type: 'string', description: 'Human-readable name (e.g., "Telegram Notifications")' },
-        authType: { type: 'string', description: 'Auth type: "api_key", "bearer", "basic", or "none"' },
+        authType: {
+          type: 'string',
+          description: 'Auth type: "api_key", "bearer", "basic", "none", or "oauth2_service_account"',
+        },
         credentials: { type: 'string', description: 'JSON string with auth credentials (e.g., {"token": "abc123"})' },
         authValueField: {
           type: 'string',
@@ -166,6 +169,11 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
             'JSON array of action definitions with id, name, description, method, path, bodyTemplate, inputSchema',
         },
         config: { type: 'string', description: 'JSON object with static config values (e.g., {"chat_id": "123456"})' },
+        scopes: {
+          type: 'string',
+          description:
+            'JSON array of OAuth2 scopes (required for oauth2_service_account, e.g., ["https://www.googleapis.com/auth/calendar"])',
+        },
         systemPromptAddition: {
           type: 'string',
           description: 'Extra instructions for the widget AI about this integration',
@@ -233,6 +241,7 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
             headerName: (args.headerName as string) || undefined,
             headerPrefix: (args.headerPrefix as string) || undefined,
             authValueField: args.authValueField as string | undefined,
+            ...(args.scopes ? { scopes: JSON.parse(args.scopes as string) } : {}),
           },
           baseUrl: args.baseUrl as string,
           actions,
