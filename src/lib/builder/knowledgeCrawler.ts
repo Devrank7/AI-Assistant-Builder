@@ -68,32 +68,40 @@ export async function uploadKnowledge(
   const adminToken = process.env.ADMIN_SECRET_TOKEN || '';
   const authCookie = `${cookie}; admin_token=${adminToken}`;
 
-  for (const chunk of allChunks) {
-    try {
-      const res = await fetch(`${baseUrl}/api/knowledge`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: authCookie,
-        },
-        body: JSON.stringify({
-          clientId,
-          text: chunk.content,
-          source: `builder-crawler: ${chunk.title}`,
-        }),
-        signal: AbortSignal.timeout(30000),
-      });
+  // Send chunks in batches of 10 concurrent requests to avoid timeouts
+  const BATCH_SIZE = 10;
 
-      if (res.ok) {
-        result.uploaded++;
-      } else {
+  for (let i = 0; i < allChunks.length; i += BATCH_SIZE) {
+    const batch = allChunks.slice(i, i + BATCH_SIZE);
+
+    const promises = batch.map(async (chunk) => {
+      try {
+        const res = await fetch(`${baseUrl}/api/knowledge`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: authCookie,
+          },
+          body: JSON.stringify({
+            clientId,
+            text: chunk.content,
+            source: `builder-crawler: ${chunk.title}`,
+          }),
+          signal: AbortSignal.timeout(60000),
+        });
+
+        if (res.ok) {
+          result.uploaded++;
+        } else {
+          result.failed++;
+        }
+      } catch {
         result.failed++;
       }
-    } catch {
-      result.failed++;
-    }
+    });
 
-    onProgress?.(result.uploaded, result.total);
+    await Promise.all(promises);
+    onProgress?.(result.uploaded + result.failed, result.total);
   }
 
   return result;

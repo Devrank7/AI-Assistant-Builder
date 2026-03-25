@@ -16,7 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
-import { generateEmbedding, splitTextIntoChunks } from '@/lib/gemini';
+import { generateEmbedding, generateEmbeddingsBatch, splitTextIntoChunks } from '@/lib/gemini';
 import { verifyAdmin } from '@/lib/auth';
 import { crawlWebsite } from '@/lib/crawler';
 import { withRetry } from '@/lib/retry';
@@ -73,34 +73,41 @@ export async function POST(request: NextRequest) {
       await KnowledgeChunk.deleteMany({ clientId });
     }
 
-    // 4. Chunk and embed (batched)
+    // 4. Chunk and embed (parallel batches + bulk insert)
     const textChunks = splitTextIntoChunks(fullText, 500);
-    const BATCH_SIZE = 10;
-    const BATCH_DELAY_MS = 1000;
     let savedChunks = 0;
     let failedChunks = 0;
 
-    for (let i = 0; i < textChunks.length; i += BATCH_SIZE) {
-      const batch = textChunks.slice(i, i + BATCH_SIZE);
-      const results = await Promise.allSettled(
-        batch.map(async (chunkText) => {
-          const embedding = await withRetry(() => generateEmbedding(chunkText), {
-            maxRetries: 3,
-            backoffMs: 2000,
-          });
-          await KnowledgeChunk.create({
-            clientId,
-            text: chunkText,
-            embedding,
-            source: 'deep-crawl',
-          });
-        })
-      );
-      savedChunks += results.filter((r) => r.status === 'fulfilled').length;
-      failedChunks += results.filter((r) => r.status === 'rejected').length;
-
-      if (i + BATCH_SIZE < textChunks.length) {
-        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    try {
+      const embeddings = await generateEmbeddingsBatch(textChunks, 15);
+      const docs = textChunks.map((chunkText, i) => ({
+        clientId,
+        text: chunkText,
+        embedding: embeddings[i],
+        source: 'deep-crawl',
+      }));
+      const inserted = await KnowledgeChunk.insertMany(docs);
+      savedChunks = inserted.length;
+    } catch {
+      // Fallback: batch with individual retry
+      for (let i = 0; i < textChunks.length; i += 10) {
+        const batch = textChunks.slice(i, i + 10);
+        const results = await Promise.allSettled(
+          batch.map(async (chunkText) => {
+            const embedding = await withRetry(() => generateEmbedding(chunkText), {
+              maxRetries: 3,
+              backoffMs: 2000,
+            });
+            await KnowledgeChunk.create({
+              clientId,
+              text: chunkText,
+              embedding,
+              source: 'deep-crawl',
+            });
+          })
+        );
+        savedChunks += results.filter((r) => r.status === 'fulfilled').length;
+        failedChunks += results.filter((r) => r.status === 'rejected').length;
       }
     }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
-import { generateEmbedding, splitTextIntoChunks } from '@/lib/gemini';
+import { generateEmbeddingsBatch, splitTextIntoChunks } from '@/lib/gemini';
 import { verifyAdminOrClient } from '@/lib/auth';
 import { exportClientSeed } from '@/lib/exportSeed';
 
@@ -58,27 +58,24 @@ export async function POST(request: NextRequest) {
 
     // Split text into chunks
     const textChunks = splitTextIntoChunks(text, 500);
-    const createdChunks = [];
 
-    // Process each chunk
-    for (const chunkText of textChunks) {
-      // Generate embedding
-      const embedding = await generateEmbedding(chunkText);
+    // Generate all embeddings in parallel batches (15 at a time)
+    const embeddings = await generateEmbeddingsBatch(textChunks, 15);
 
-      // Save to database
-      const chunk = await KnowledgeChunk.create({
-        clientId,
-        text: chunkText,
-        embedding,
-        source: source || 'manual',
-      });
+    // Bulk-insert all chunks with their embeddings
+    const docs = textChunks.map((chunkText, i) => ({
+      clientId,
+      text: chunkText,
+      embedding: embeddings[i],
+      source: source || 'manual',
+    }));
+    const inserted = await KnowledgeChunk.insertMany(docs);
 
-      createdChunks.push({
-        _id: chunk._id,
-        text: chunk.text,
-        source: chunk.source,
-      });
-    }
+    const createdChunks = inserted.map((chunk) => ({
+      _id: chunk._id,
+      text: chunk.text,
+      source: chunk.source,
+    }));
 
     // Auto-export seed file on local so it deploys with the code
     exportClientSeed(clientId).catch(() => {});

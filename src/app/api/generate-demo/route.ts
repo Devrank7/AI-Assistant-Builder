@@ -17,7 +17,7 @@ import connectDB from '@/lib/mongodb';
 import Client from '@/models/Client';
 import KnowledgeChunk from '@/models/KnowledgeChunk';
 import AISettings from '@/models/AISettings';
-import { generateEmbedding, splitTextIntoChunks } from '@/lib/gemini';
+import { generateEmbedding, generateEmbeddingsBatch, splitTextIntoChunks } from '@/lib/gemini';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from '@/lib/rateLimit';
 import { generateThemeJson, generateWidgetConfig } from '@/lib/themeGenerator';
 import { crawlWebsite } from '@/lib/crawler';
@@ -190,31 +190,37 @@ async function uploadKnowledgeBackground(clientId: string, brandName: string, we
     const textChunks = splitTextIntoChunks(fullText, 500);
     console.log(`[KnowledgeBg] ${clientId}: Processing ${textChunks.length} chunks`);
 
-    const BATCH_SIZE = 10;
-    const BATCH_DELAY_MS = 1000;
     let savedChunks = 0;
 
-    for (let i = 0; i < textChunks.length; i += BATCH_SIZE) {
-      const batch = textChunks.slice(i, i + BATCH_SIZE);
-      const results = await Promise.allSettled(
-        batch.map(async (chunkText) => {
-          const embedding = await withRetry(() => generateEmbedding(chunkText), {
-            maxRetries: 3,
-            backoffMs: 2000,
-          });
-          await KnowledgeChunk.create({
-            clientId,
-            text: chunkText,
-            embedding,
-            source: 'deep-crawl',
-          });
-        })
-      );
-      savedChunks += results.filter((r) => r.status === 'fulfilled').length;
-
-      // Delay between batches to avoid Gemini rate limits
-      if (i + BATCH_SIZE < textChunks.length) {
-        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    try {
+      const embeddings = await generateEmbeddingsBatch(textChunks, 15);
+      const docs = textChunks.map((chunkText, i) => ({
+        clientId,
+        text: chunkText,
+        embedding: embeddings[i],
+        source: 'deep-crawl',
+      }));
+      const inserted = await KnowledgeChunk.insertMany(docs);
+      savedChunks = inserted.length;
+    } catch {
+      // Fallback: batch with individual retry
+      for (let i = 0; i < textChunks.length; i += 10) {
+        const batch = textChunks.slice(i, i + 10);
+        const results = await Promise.allSettled(
+          batch.map(async (chunkText) => {
+            const embedding = await withRetry(() => generateEmbedding(chunkText), {
+              maxRetries: 3,
+              backoffMs: 2000,
+            });
+            await KnowledgeChunk.create({
+              clientId,
+              text: chunkText,
+              embedding,
+              source: 'deep-crawl',
+            });
+          })
+        );
+        savedChunks += results.filter((r) => r.status === 'fulfilled').length;
       }
     }
 

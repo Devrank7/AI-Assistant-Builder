@@ -4,16 +4,47 @@ import { getDefaultModel } from '@/lib/models';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 /**
- * Generate embedding vector for text using Gemini
+ * Generate embedding vector for text using Gemini (with retry + backoff)
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
   const model = genAI.getGenerativeModel({ model: 'gemini-embedding-2-preview' });
+  const MAX_RETRIES = 3;
 
-  const result = await model.embedContent(text);
-  if (!result?.embedding?.values) {
-    throw new Error('Invalid embedding response from Gemini API');
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const result = await model.embedContent(text);
+      if (!result?.embedding?.values) {
+        throw new Error('Invalid embedding response from Gemini API');
+      }
+      return result.embedding.values;
+    } catch (err) {
+      const msg = (err as Error).message || '';
+      const isRetryable = /429|503|quota|resource exhausted|too many|overloaded|unavailable/i.test(msg);
+      if (isRetryable && attempt < MAX_RETRIES - 1) {
+        const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      throw err;
+    }
   }
-  return result.embedding.values;
+  throw new Error('generateEmbedding: max retries exceeded');
+}
+
+/**
+ * Generate embeddings for multiple texts in parallel batches.
+ * Processes BATCH_SIZE texts concurrently to stay within rate limits.
+ */
+export async function generateEmbeddingsBatch(texts: string[], batchSize: number = 15): Promise<number[][]> {
+  const results: number[][] = [];
+
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const batch = texts.slice(i, i + batchSize);
+    const embeddings = await Promise.all(batch.map((t) => generateEmbedding(t)));
+    results.push(...embeddings);
+  }
+
+  return results;
 }
 
 export interface GenerateResponseResult {
