@@ -21,6 +21,8 @@ import { pluginRegistry } from '@/lib/integrations/core/PluginRegistry';
 import { decrypt } from '@/lib/encryption';
 import { generateEmbedding, findSimilarChunks } from '@/lib/gemini';
 import type { ExecutionResult } from '@/lib/integrations/core/types';
+import IntegrationConfig from '@/models/IntegrationConfig';
+import { executeAction as engineExecuteAction } from '@/lib/integrations/engine';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -370,6 +372,81 @@ export async function loadWidgetTools(clientId: string): Promise<LoadedWidgetToo
     for (const [name, tool] of Object.entries(builtinTools)) {
       declarations.push(tool.declaration);
       executors.set(name, tool.executor);
+    }
+  }
+
+  // 5. Load config-driven integrations (from IntegrationConfig)
+  const integrationConfigs = await IntegrationConfig.find({
+    clientId,
+    status: 'active',
+  }).lean();
+
+  for (const config of integrationConfigs) {
+    for (const action of config.actions as Array<{
+      id: string;
+      name: string;
+      description: string;
+      inputSchema: { properties: Record<string, { type: string; description: string }>; required: string[] };
+    }>) {
+      const toolName = `${config.provider}_${action.id}`;
+
+      // Build Gemini function declaration from action.inputSchema
+      const properties: Record<string, { type: Type; description: string }> = {};
+      const required: string[] = action.inputSchema.required || [];
+
+      for (const [key, prop] of Object.entries(action.inputSchema.properties || {})) {
+        properties[key] = {
+          type: mapSchemaType(prop.type),
+          description: prop.description,
+        };
+      }
+
+      declarations.push({
+        name: toolName,
+        description: `[${config.displayName}] ${action.description}`,
+        parameters: {
+          type: Type.OBJECT,
+          properties,
+          required,
+        },
+      });
+
+      // Capture config reference for executor closure
+      const configRef = config;
+      const actionId = action.id;
+
+      executors.set(toolName, async (args) => {
+        try {
+          // Re-fetch config from DB for fresh credentials (in case they were rotated)
+          const freshConfig = await IntegrationConfig.findById(configRef._id);
+          if (!freshConfig || freshConfig.status !== 'active') {
+            return { success: false, error: `Integration "${configRef.displayName}" is no longer active` };
+          }
+
+          const result = await engineExecuteAction(freshConfig, actionId, args);
+
+          // Track consecutive failures for error status transition
+          if (!result.success) {
+            freshConfig.consecutiveFailures = (freshConfig.consecutiveFailures || 0) + 1;
+            if (freshConfig.consecutiveFailures >= 3) {
+              freshConfig.status = 'error';
+              console.error(
+                `[widgetTools] Integration "${configRef.provider}" marked as error after 3 consecutive failures`
+              );
+            }
+            await freshConfig.save();
+          } else if (freshConfig.consecutiveFailures > 0) {
+            freshConfig.consecutiveFailures = 0;
+            await freshConfig.save();
+          }
+
+          return result as Record<string, unknown>;
+        } catch (err) {
+          return { success: false, error: (err as Error).message };
+        }
+      });
+
+      hasIntegrations = true;
     }
   }
 
