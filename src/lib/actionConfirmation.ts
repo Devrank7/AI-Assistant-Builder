@@ -3,8 +3,14 @@ import { pluginRegistry } from '@/lib/integrations/core/PluginRegistry';
 // Built-in tools that are always auto-approved (read-only / low risk)
 const ALWAYS_AUTO: Set<string> = new Set(['collect_lead', 'search_knowledge', 'send_notification']);
 
-// Action ID prefixes that indicate read-only operations (auto-approve)
-const READ_PREFIXES = ['get', 'list', 'search', 'check', 'fetch', 'find'];
+// Action ID prefixes that are auto-approved.
+// The AI agent already confirms with the user conversationally before calling
+// write tools, so system-level confirmation is redundant and breaks the flow
+// (Gemini receives "awaiting_confirmation" but generates "done!" text).
+const AUTO_PREFIXES = ['get', 'list', 'search', 'check', 'fetch', 'find', 'send', 'create', 'book', 'update', 'notify'];
+
+// Only truly destructive operations require system-level confirmation
+const CONFIRM_PREFIXES = ['delete', 'cancel', 'remove', 'revoke'];
 
 /**
  * Determine whether a tool call should execute immediately or require visitor confirmation.
@@ -12,11 +18,8 @@ const READ_PREFIXES = ['get', 'list', 'search', 'check', 'fetch', 'find'];
  * Priority:
  * 1. Built-in tools → always auto
  * 2. Owner override (autoApproveActions) → auto
- * 3. Action ID name heuristic: get_/list_/search_ → auto, create_/cancel_/update_/delete_ → confirm
- * 4. Default → confirm (safe fallback)
- *
- * Note: ActionDefinition does not have a `method` field, so we use name-based heuristics.
- * Tool names follow the pattern: {slug}_{actionId} (e.g., google-calendar_createEvent).
+ * 3. Destructive action heuristic: delete_/cancel_/remove_ → confirm
+ * 4. Default → auto (the AI already confirms conversationally with the user)
  */
 export function getConfirmationLevel(toolName: string, autoApproveActions: string[] = []): 'auto' | 'confirm' {
   // 1. Built-in always auto
@@ -39,14 +42,14 @@ export function getConfirmationLevel(toolName: string, autoApproveActions: strin
     }
   }
 
-  // If we found an actionId, check if it's a read-only pattern
+  // If we found an actionId, check destructive patterns first
   if (actionId) {
     const lowerAction = actionId.toLowerCase();
-    if (READ_PREFIXES.some((prefix) => lowerAction.startsWith(prefix))) {
-      return 'auto';
+    if (CONFIRM_PREFIXES.some((prefix) => lowerAction.startsWith(prefix))) {
+      return 'confirm';
     }
   }
 
-  // 4. Default: confirm (safe)
-  return 'confirm';
+  // 4. Default: auto — AI already confirms conversationally with the user
+  return 'auto';
 }
