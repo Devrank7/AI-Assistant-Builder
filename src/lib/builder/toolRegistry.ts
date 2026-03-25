@@ -1,4 +1,5 @@
 import type { SSEEvent, AgentToolName } from './types';
+import ChatLog from '../../models/ChatLog';
 
 export interface ToolContext {
   sessionId: string;
@@ -11,6 +12,26 @@ export interface ToolContext {
   /** Set when widget is already built — blocks Phase 1 rebuild tools */
   clientId?: string;
 }
+
+/**
+ * Tools that modify the widget and should trigger chat history clearing.
+ * After these tools succeed, end-user chat logs are deleted so visitors
+ * get a fresh experience with the updated widget.
+ */
+const WIDGET_MODIFYING_TOOLS = new Set([
+  'modify_design',
+  'modify_widget_code',
+  'modify_config',
+  'modify_structure',
+  'modify_component',
+  'add_component',
+  'build_deploy',
+  'rollback',
+  'create_integration',
+  'connect_integration',
+  'attach_integration_to_widget',
+  'enable_ai_actions',
+]);
 
 export type ToolResult = Record<string, unknown>;
 
@@ -69,7 +90,22 @@ export class ToolRegistry {
     if (!tool) {
       throw new Error(`Unknown tool: ${name}`);
     }
-    return tool.executor(args, ctx);
+    const result = await tool.executor(args, ctx);
+
+    // Clear end-user chat history after widget-modifying tools succeed
+    if (WIDGET_MODIFYING_TOOLS.has(name) && ctx.clientId) {
+      const clientId = (args.clientId as string) || ctx.clientId;
+      try {
+        const { deletedCount } = await ChatLog.deleteMany({ clientId });
+        if (deletedCount > 0) {
+          console.log(`[ToolRegistry] Cleared ${deletedCount} chat logs for ${clientId} after ${name}`);
+        }
+      } catch (err) {
+        console.error(`[ToolRegistry] Failed to clear chat logs for ${clientId}:`, err);
+      }
+    }
+
+    return result;
   }
 
   getToolsByCategory(category: ToolDefinition['category']): ToolDefinition[] {
