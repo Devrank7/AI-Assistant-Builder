@@ -37,8 +37,11 @@ describe('Builder Types', () => {
     expect(AGENT_TOOL_NAMES).toContain('modify_widget_code');
     expect(AGENT_TOOL_NAMES).toContain('select_theme');
     expect(AGENT_TOOL_NAMES).toContain('rollback');
-    expect(AGENT_TOOL_NAMES).toContain('write_integration');
-    expect(AGENT_TOOL_NAMES).toContain('generate_integration');
-    expect(AGENT_TOOL_NAMES.length).toBe(31);
+    expect(AGENT_TOOL_NAMES).toContain('research_api');
+    expect(AGENT_TOOL_NAMES).toContain('create_integration');
+    expect(AGENT_TOOL_NAMES).toContain('test_integration_config');
+    expect(AGENT_TOOL_NAMES).toContain('activate_integration');
+    expect(AGENT_TOOL_NAMES).toContain('deactivate_integration');
+    expect(AGENT_TOOL_NAMES).toContain('list_integrations');
   });
 });

@@ -440,7 +440,7 @@ export async function loadWidgetTools(clientId: string): Promise<LoadedWidgetToo
             await freshConfig.save();
           }
 
-          return result as Record<string, unknown>;
+          return result as unknown as Record<string, unknown>;
         } catch (err) {
           return { success: false, error: (err as Error).message };
         }

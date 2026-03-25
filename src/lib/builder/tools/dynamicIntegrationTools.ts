@@ -386,9 +386,9 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
 
       // Verify tools load
       const tools = await loadWidgetTools(configDoc.clientId);
-      const expectedToolNames = configDoc.actions.map((a) => `${configDoc.provider}_${a.id}`);
-      const loadedNames = tools.declarations.map((d) => d.name);
-      const allLoaded = expectedToolNames.every((n) => loadedNames.includes(n));
+      const expectedToolNames = configDoc.actions.map((a: { id: string }) => `${configDoc.provider}_${a.id}`);
+      const loadedNames = tools.declarations.map((d: { name: string }) => d.name);
+      const allLoaded = expectedToolNames.every((n: string) => loadedNames.includes(n));
 
       return {
         success: true,
@@ -494,7 +494,7 @@ export const dynamicIntegrationTools: ToolDefinition[] = [
           displayName: config.displayName,
           status: config.status,
           type: 'config',
-          actions: config.actions.map((a) => a.id),
+          actions: config.actions.map((a: { id: string }) => a.id),
         });
       }
 

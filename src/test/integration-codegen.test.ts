@@ -658,41 +658,38 @@ describe('modify_structure — add_widget_component', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 8. generate_integration Gemini Tool
+// 8. Dynamic Integration Tools
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe('generate_integration Gemini Tool', () => {
+describe('Dynamic Integration Tools', () => {
   let integToolsCode: string;
 
   beforeAll(() => {
-    integToolsCode = fs.readFileSync(path.join(ROOT, 'src/lib/builder/tools/integrationTools.ts'), 'utf-8');
+    integToolsCode = fs.readFileSync(path.join(ROOT, 'src/lib/builder/tools/dynamicIntegrationTools.ts'), 'utf-8');
   });
 
-  it('should define generate_integration tool', () => {
-    expect(integToolsCode).toContain("name: 'generate_integration'");
+  it('should define all 6 dynamic integration tools', () => {
+    expect(integToolsCode).toContain("name: 'research_api'");
+    expect(integToolsCode).toContain("name: 'create_integration'");
+    expect(integToolsCode).toContain("name: 'test_integration_config'");
+    expect(integToolsCode).toContain("name: 'activate_integration'");
+    expect(integToolsCode).toContain("name: 'deactivate_integration'");
+    expect(integToolsCode).toContain("name: 'list_integrations'");
   });
 
-  it('should require clientId and config parameters', () => {
-    expect(integToolsCode).toContain("required: ['clientId', 'config']");
+  it('should use validateConfig from engine', () => {
+    expect(integToolsCode).toContain('validateConfig');
+    expect(integToolsCode).toContain('executeAction');
   });
 
-  it('should use schema validator', () => {
-    expect(integToolsCode).toContain('integration-config-schema');
-    expect(integToolsCode).toContain('validateIntegrationConfig');
+  it('should encrypt credentials', () => {
+    expect(integToolsCode).toContain('encrypt');
+    expect(integToolsCode).toContain('encryptedCreds');
   });
 
-  it('should use generator script', () => {
-    expect(integToolsCode).toContain('generate-integration');
-  });
-
-  it('should save config to client integrations directory', () => {
-    expect(integToolsCode).toContain('integrations');
-    expect(integToolsCode).toContain('integration.config.json');
-  });
-
-  it('should return provider and actions on success', () => {
-    expect(integToolsCode).toContain('provider: config.provider');
-    expect(integToolsCode).toContain('actions: config.actions.map');
+  it('should build unified actions prompt', () => {
+    expect(integToolsCode).toContain('buildUnifiedActionsPrompt');
+    expect(integToolsCode).toContain('actionsSystemPrompt');
   });
 });
 
@@ -711,10 +708,11 @@ describe('Gemini Integration Guide', () => {
     expect(guideCode).toContain('export const INTEGRATION_GUIDE');
   });
 
-  it('should include decision tree', () => {
+  it('should include decision tree with new tools', () => {
     expect(guideCode).toContain('Decision Tree');
-    expect(guideCode).toContain('generate_integration');
-    expect(guideCode).toContain('add_widget_component');
+    expect(guideCode).toContain('research_api');
+    expect(guideCode).toContain('create_integration');
+    expect(guideCode).toContain('activate_integration');
   });
 
   it('should list all 5 template components', () => {
@@ -725,22 +723,21 @@ describe('Gemini Integration Guide', () => {
     expect(guideCode).toContain('externalLink');
   });
 
-  it('should include config schema example', () => {
-    expect(guideCode).toContain('integration.config.json');
+  it('should include config-driven schema info', () => {
+    expect(guideCode).toContain('IntegrationConfig');
     expect(guideCode).toContain('provider');
     expect(guideCode).toContain('baseUrl');
-    expect(guideCode).toContain('healthCheck');
   });
 
   it('should include flow examples', () => {
     expect(guideCode).toContain('HubSpot');
-    expect(guideCode).toContain('Calendly');
+    expect(guideCode).toContain('Telegram');
   });
 
-  it('should include rules', () => {
-    expect(guideCode).toContain('NEVER write index.ts manually');
-    expect(guideCode).toContain('ALWAYS web_search');
-    expect(guideCode).toContain('ALWAYS test_integration');
+  it('should include rules with new tool names', () => {
+    expect(guideCode).toContain('ALWAYS call research_api');
+    expect(guideCode).toContain('ALWAYS call test_integration_config');
+    expect(guideCode).toContain('NEVER tell user');
   });
 });
 
@@ -755,14 +752,14 @@ describe('System Prompt Updates', () => {
     systemPrompt = fs.readFileSync(path.join(ROOT, 'src/lib/builder/systemPrompt.ts'), 'utf-8');
   });
 
-  it('should include codegen integration flow', () => {
-    expect(systemPrompt).toContain('Codegen');
-    expect(systemPrompt).toContain('generate_integration');
+  it('should include config-driven integration flow', () => {
+    expect(systemPrompt).toContain('CONFIG-DRIVEN');
+    expect(systemPrompt).toContain('create_integration');
   });
 
   it('should include tool routing for integrations', () => {
-    expect(systemPrompt).toContain('generate_integration');
-    expect(systemPrompt).toContain('add_widget_component');
+    expect(systemPrompt).toContain('research_api');
+    expect(systemPrompt).toContain('activate_integration');
   });
 });
 

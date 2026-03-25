@@ -1,10 +1,10 @@
-export const INTEGRATION_GUIDE = `## Integration Codegen Guide
+export const INTEGRATION_GUIDE = `## Integration Guide — Config-Driven Approach
 
 ### Decision Tree
-- User says "connect X" / "add X integration" → generate_integration (fills config JSON → deterministic code)
+- User says "connect X" / "add X integration" → research_api → create_integration → test_integration_config → activate_integration
 - User says "add booking button" / "add contact form" → modify_structure with add_widget_component (template UI)
 - User says "show event list" / "display status" → modify_structure with add_widget_component (DataList/StatusCard)
-- Integration already exists (check list_user_integrations) → attach_integration_to_widget + add_widget_component
+- Integration already exists (check list_integrations) → already active, no action needed
 
 ### Available Template Components
 | Template | Use for | Key props |
@@ -15,29 +15,19 @@ export const INTEGRATION_GUIDE = `## Integration Codegen Guide
 | statusCard | Show single data point (balance, status) | provider, action, displayFields[], refreshInterval |
 | externalLink | Open external URL | url, label, openIn |
 
-### integration.config.json Schema
-\`\`\`json
-{
-  "provider": "lowercase-slug",
-  "name": "Display Name",
-  "category": "crm|calendar|payment|notification|data",
-  "baseUrl": "https://api.example.com",
-  "auth": { "type": "bearer|api-key-header|basic", "header": "Authorization", "prefix": "Bearer", "fields": [{ "key": "apiKey", "label": "API Key", "type": "password", "required": true }] },
-  "actions": [{ "id": "camelCase", "name": "Display", "method": "GET|POST", "path": "/endpoint", "body": {}, "queryParams": {}, "responseMapping": { "root": "data", "fields": { "ourKey": "apiKey" } } }],
-  "healthCheck": { "method": "GET", "path": "/me", "successField": "id" }
-}
-\`\`\`
-Template vars: \`{{params.X}}\` from action call, \`{{auth.X}}\` from credentials.
+### IntegrationConfig Schema (Config-Driven)
+The builder creates JSON configs, NOT code. The runtime engine executes them deterministically.
+Template vars: \`{{auth.X}}\` from credentials, \`{{config.X}}\` from static config, \`{{input.X}}\` from runtime args.
 
 ### Flow Examples
-**Known plugin (HubSpot):** list_user_integrations → already active → attach_integration_to_widget → add_widget_component (dataForm for contact creation)
-**Stub plugin (Calendly):** web_search Calendly API docs → generate_integration with config → attach → add_widget_component
-**Unknown API:** web_search → web_fetch docs → generate_integration → attach → add_widget_component
+**Any REST API:** research_api → ask user for credentials → create_integration (JSON config) → test_integration_config → activate_integration
+**Marketplace plugin (HubSpot, Stripe):** open_connection_wizard → plugin handles OAuth/connection → list_integrations to verify
+**Telegram notifications:** research_api("telegram", "sendMessage") → get bot token from user → web_fetch getUpdates for chat_id → create_integration → test_integration_config → activate_integration
 
 ### Rules
-- NEVER write index.ts manually for REST APIs — use generate_integration
-- ALWAYS web_search before filling config for unknown APIs
-- ALWAYS test_integration after creation
-- Prefer template components over add_component — they never fail
+- ALWAYS call research_api before creating configs for unknown APIs
+- ALWAYS call test_integration_config after create_integration
+- NEVER tell user "connected" until activate_integration succeeds
+- Use list_integrations to check existing integrations before adding duplicates
 - One integration at a time — don't batch multiple providers
 `;

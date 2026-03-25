@@ -1649,7 +1649,7 @@ All colors must be harmonious, derived from the primary (${primaryColor}) and ac
             success: true,
             message: `Knowledge uploaded for ${businessName}.`,
             warning:
-              'IMPORTANT: This text contains integration-related rules (calendar, CRM, etc.). Uploading text does NOT connect an actual integration. The widget CANNOT book appointments, create CRM contacts, or process payments from text alone. You MUST call connect_integration → attach_integration_to_widget → enable_ai_actions to give the widget real API access. Do NOT tell the user the integration is "connected" — it is NOT.',
+              'IMPORTANT: This text contains integration-related rules (calendar, CRM, etc.). Uploading text does NOT connect an actual integration. The widget CANNOT book appointments, create CRM contacts, or process payments from text alone. You MUST call create_integration → test_integration_config → activate_integration to give the widget real API access. Do NOT tell the user the integration is "connected" — it is NOT.',
           };
         }
 
