@@ -178,6 +178,8 @@ export async function POST(request: NextRequest) {
         if (freshSession) {
           // Merge: keep messages from our local session, take other fields from DB
           freshSession.messages = session.messages;
+          freshSession.currentStage = session.currentStage;
+          freshSession.knowledgeUploaded = session.knowledgeUploaded;
           if (freshSession.status === 'streaming') freshSession.status = 'chatting';
           await freshSession.save();
 
