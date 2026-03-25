@@ -110,6 +110,9 @@ export function validateUrl(url: string): { valid: boolean; error?: string } {
 
 const TOKEN_CACHE = new Map<string, { token: string; expiresAt: number }>();
 
+// Concurrent refresh lock — prevents multiple refreshes for the same configId
+const REFRESH_LOCKS = new Map<string, Promise<string>>();
+
 function base64url(data: Buffer | string): string {
   const buf = typeof data === 'string' ? Buffer.from(data) : data;
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -250,11 +253,94 @@ async function getClientCredentialsToken(
   return token;
 }
 
+/**
+ * Refresh an OAuth2 auth code token. Uses a per-configId lock to prevent
+ * concurrent refreshes from invalidating each other (refresh token rotation).
+ */
+async function refreshAuthCodeToken(
+  refreshToken: string,
+  clientId: string,
+  clientSecret: string,
+  tokenUrl: string,
+  configId?: string
+): Promise<{ access_token: string; refresh_token: string; token_expiry: number }> {
+  const bodyParams = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    client_id: clientId,
+    client_secret: clientSecret,
+  });
+
+  const response = await fetchWithRetry(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: bodyParams.toString(),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    if (configId) {
+      try {
+        const IntegrationConfig = (await import('@/models/IntegrationConfig')).default;
+        await IntegrationConfig.findByIdAndUpdate(configId, { status: 'error' });
+      } catch {
+        /* best effort */
+      }
+    }
+    throw new Error(`OAuth2 token refresh failed (${response.status}): ${text}`);
+  }
+
+  const data = (await response.json()) as {
+    access_token: string;
+    expires_in: number;
+    refresh_token?: string;
+    token_type?: string;
+  };
+
+  if (data.token_type && data.token_type.toLowerCase() !== 'bearer') {
+    console.warn(`[engine] Unexpected token_type "${data.token_type}" from ${tokenUrl}`);
+  }
+
+  const tokenExpiry = Date.now() + data.expires_in * 1000;
+  const newRefreshToken = data.refresh_token || refreshToken;
+
+  // Persist refreshed tokens to DB atomically if configId available
+  if (configId) {
+    try {
+      const { encrypt, decrypt: dec } = await import('@/lib/encryption');
+      const IntegrationConfig = (await import('@/models/IntegrationConfig')).default;
+      const config = await IntegrationConfig.findById(configId);
+      if (config) {
+        const existingCreds = JSON.parse(dec(config.auth.credentials));
+        const updatedCreds = {
+          ...existingCreds,
+          access_token: data.access_token,
+          refresh_token: newRefreshToken,
+          token_expiry: tokenExpiry,
+        };
+        await IntegrationConfig.findOneAndUpdate(
+          { _id: configId },
+          { 'auth.credentials': encrypt(JSON.stringify(updatedCreds)) }
+        );
+      }
+    } catch (err) {
+      console.error('[engine] Failed to persist refreshed tokens:', (err as Error).message);
+    }
+  }
+
+  return {
+    access_token: data.access_token,
+    refresh_token: newRefreshToken,
+    token_expiry: tokenExpiry,
+  };
+}
+
 // ── Auth Header Construction ─────────────────────────────────────────────
 
 export async function buildAuthHeader(
   auth: IIntegrationConfig['auth'],
-  decrypted: Record<string, unknown>
+  decrypted: Record<string, unknown>,
+  configId?: string
 ): Promise<Record<string, string>> {
   switch (auth.type) {
     case 'bearer': {
@@ -292,6 +378,45 @@ export async function buildAuthHeader(
       }
       const token = await getServiceAccountToken(clientEmail, privateKey, scopes, tokenUri);
       return { Authorization: `Bearer ${token}` };
+    }
+    case 'oauth2_auth_code': {
+      const accessToken = decrypted.access_token as string;
+      const refreshToken = decrypted.refresh_token as string;
+      const tokenExpiry = decrypted.token_expiry as number;
+      const tokenUrl = auth.tokenUrl;
+      const clientId = decrypted.client_id as string;
+      const clientSecret = decrypted.client_secret as string;
+
+      if (!accessToken || !refreshToken) {
+        throw new Error('OAuth2 auth code: not yet authorized. User must complete the OAuth flow first.');
+      }
+      if (!tokenUrl) {
+        throw new Error('OAuth2 auth code requires tokenUrl in auth config');
+      }
+
+      // Token still valid (5 min safety margin)
+      if (tokenExpiry && tokenExpiry > Date.now() + 5 * 60 * 1000) {
+        return { Authorization: `Bearer ${accessToken}` };
+      }
+
+      // Token expired — refresh with per-configId lock
+      const lockKey = configId || 'default';
+      let lockPromise = REFRESH_LOCKS.get(lockKey);
+      if (!lockPromise) {
+        lockPromise = refreshAuthCodeToken(refreshToken, clientId, clientSecret, tokenUrl, configId)
+          .then((result) => {
+            REFRESH_LOCKS.delete(lockKey);
+            return result.access_token;
+          })
+          .catch((err) => {
+            REFRESH_LOCKS.delete(lockKey);
+            throw err;
+          });
+        REFRESH_LOCKS.set(lockKey, lockPromise);
+      }
+
+      const newToken = await lockPromise;
+      return { Authorization: `Bearer ${newToken}` };
     }
     case 'oauth2_client_credentials': {
       const clientId = decrypted.client_id as string;
@@ -404,7 +529,7 @@ export async function executeAction(
   // 7. Build headers
   let authHeaders: Record<string, string>;
   try {
-    authHeaders = await buildAuthHeader(config.auth, decrypted);
+    authHeaders = await buildAuthHeader(config.auth, decrypted, config._id?.toString());
   } catch (err) {
     return { success: false, error: `Auth error: ${(err as Error).message}` };
   }

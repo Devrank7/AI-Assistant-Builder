@@ -161,3 +161,141 @@ describe('validateConfig with new auth types', () => {
     expect(result.errors.some((e) => e.includes('HTTPS'))).toBe(true);
   });
 });
+
+describe('oauth2_auth_code in buildAuthHeader', () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  it('should return existing token when not expired', async () => {
+    const auth = {
+      type: 'oauth2_auth_code' as const,
+      credentials: '',
+      tokenUrl: 'https://auth.example.com/token',
+    };
+    const decrypted = {
+      client_id: 'id',
+      client_secret: 'secret',
+      access_token: 'valid_token',
+      refresh_token: 'refresh_123',
+      token_expiry: Date.now() + 600_000, // 10 min from now
+    };
+
+    const result = await buildAuthHeader(auth, decrypted);
+    expect(result).toEqual({ Authorization: 'Bearer valid_token' });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('should refresh expired token', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        access_token: 'new_token_456',
+        expires_in: 3600,
+        token_type: 'bearer',
+        refresh_token: 'new_refresh_789',
+      }),
+    });
+
+    const auth = {
+      type: 'oauth2_auth_code' as const,
+      credentials: '',
+      tokenUrl: 'https://auth.example.com/token',
+    };
+    const decrypted = {
+      client_id: 'id',
+      client_secret: 'secret',
+      access_token: 'expired_token',
+      refresh_token: 'refresh_123',
+      token_expiry: Date.now() - 1000,
+    };
+
+    const result = await buildAuthHeader(auth, decrypted, 'test_config_id');
+    expect(result).toEqual({ Authorization: 'Bearer new_token_456' });
+
+    const [url, opts] = mockFetch.mock.calls[0];
+    expect(url).toBe('https://auth.example.com/token');
+    expect(opts.body).toContain('grant_type=refresh_token');
+    expect(opts.body).toContain('refresh_token=refresh_123');
+  });
+
+  it('should throw when refresh fails', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      text: async () => 'invalid_grant',
+    });
+
+    const auth = {
+      type: 'oauth2_auth_code' as const,
+      credentials: '',
+      tokenUrl: 'https://auth.example.com/token',
+    };
+    const decrypted = {
+      client_id: 'id',
+      client_secret: 'secret',
+      access_token: 'expired',
+      refresh_token: 'bad_refresh',
+      token_expiry: Date.now() - 1000,
+    };
+
+    await expect(buildAuthHeader(auth, decrypted, 'test_id')).rejects.toThrow('refresh failed');
+  });
+
+  it('should throw without access_token in credentials', async () => {
+    const auth = {
+      type: 'oauth2_auth_code' as const,
+      credentials: '',
+      tokenUrl: 'https://auth.example.com/token',
+    };
+    const decrypted = {
+      client_id: 'id',
+      client_secret: 'secret',
+    };
+
+    await expect(buildAuthHeader(auth, decrypted)).rejects.toThrow('not yet authorized');
+  });
+
+  it('should only call fetch once for concurrent refresh requests', async () => {
+    mockFetch.mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                ok: true,
+                json: async () => ({
+                  access_token: 'concurrent_token',
+                  expires_in: 3600,
+                  token_type: 'bearer',
+                  refresh_token: 'new_refresh',
+                }),
+              }),
+            50
+          )
+        )
+    );
+
+    const auth = {
+      type: 'oauth2_auth_code' as const,
+      credentials: '',
+      tokenUrl: 'https://auth.example.com/token',
+    };
+    const decrypted = {
+      client_id: 'id',
+      client_secret: 'secret',
+      access_token: 'expired',
+      refresh_token: 'refresh_concurrent',
+      token_expiry: Date.now() - 1000,
+    };
+
+    const [r1, r2] = await Promise.all([
+      buildAuthHeader(auth, decrypted, 'concurrent_config'),
+      buildAuthHeader(auth, decrypted, 'concurrent_config'),
+    ]);
+
+    expect(r1).toEqual({ Authorization: 'Bearer concurrent_token' });
+    expect(r2).toEqual({ Authorization: 'Bearer concurrent_token' });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+});
