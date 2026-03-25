@@ -112,6 +112,8 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
 
   let fullAssistantText = '';
   const toolCallsMade: string[] = [];
+  const toolCallCounts: Record<string, number> = {};
+  const MAX_SAME_TOOL = 2; // Hard limit: same tool max 2 times per request
   let loopCount = 0;
 
   // First message is the user's text; for function responses, pass Part[] as message
@@ -221,6 +223,35 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<{
           args: (fc.args || {}) as Record<string, unknown>,
         });
         write({ type: 'tool_result', tool: toolName as AgentToolName, result: { blocked: true } });
+        continue;
+      }
+
+      // ⛔ HARD BLOCK: prevent same tool from being called more than MAX_SAME_TOOL times
+      toolCallCounts[toolName] = (toolCallCounts[toolName] || 0) + 1;
+      if (toolCallCounts[toolName] > MAX_SAME_TOOL) {
+        console.warn(
+          `[geminiAgent] BLOCKED ${toolName} — called ${toolCallCounts[toolName]} times (limit: ${MAX_SAME_TOOL})`
+        );
+        functionResponseParts.push({
+          functionResponse: {
+            name: toolName,
+            response: {
+              success: false,
+              error: `BLOCKED: You already called ${toolName} ${MAX_SAME_TOOL} times. STOP calling this tool. Tell the user what happened and ask for their input. Do NOT retry.`,
+            },
+          },
+        } as Part);
+        toolCallsMade.push(toolName);
+        write({
+          type: 'tool_start',
+          tool: toolName as AgentToolName,
+          args: (fc.args || {}) as Record<string, unknown>,
+        });
+        write({
+          type: 'tool_result',
+          tool: toolName as AgentToolName,
+          result: { blocked: true, reason: 'max_calls_exceeded' },
+        });
         continue;
       }
 
