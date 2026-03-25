@@ -170,13 +170,19 @@ class PluginRegistry {
       }
     }
 
-    // Pull provider-specific fields from metadata
+    // Pull all provider-specific fields from metadata
     const meta = (connection.metadata || {}) as Record<string, unknown>;
     if (meta.instanceUrl) credentials.instanceUrl = String(meta.instanceUrl);
     if (meta.subdomain) credentials.subdomain = String(meta.subdomain);
     if (meta.accountId) credentials.accountId = String(meta.accountId);
     if (meta.calendarId) credentials.calendarId = String(meta.calendarId);
     if (meta.botToken) credentials.botToken = String(meta.botToken);
+    if (meta.chatId) credentials.chatId = String(meta.chatId);
+    // SMTP-specific fields
+    if (meta.host) credentials.host = String(meta.host);
+    if (meta.port) credentials.port = String(meta.port);
+    if (meta.user) credentials.user = String(meta.user);
+    if (meta.email) credentials.email = String(meta.email);
 
     // Execute with retry on 401 (token might have been refreshed by another request)
     const result = await plugin.execute(action, params, credentials);

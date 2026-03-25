@@ -1,0 +1,16 @@
+{
+  "clientId": "zminakiev-com-ua",
+  "botName": "Головна - Спортивна школа Зміна",
+  "welcomeMessage": "Вітаємо у **Спортивній школі «Зміна»**! Ми відкриваємо шлях до великого спорту. Чим ми можемо вам допомогти?",
+  "inputPlaceholder": "Напишіть ваше запитання...",
+  "quickReplies": ["Про школу", "Наші тренери", "Умови вступу"],
+  "avatar": {
+    "type": "initials",
+    "initials": "ГО"
+  },
+  "features": {
+    "sound": true,
+    "voiceInput": true,
+    "streaming": true
+  }
+}

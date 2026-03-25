@@ -4,16 +4,16 @@ import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-preact';
 
 function Card({ card, onAction }) {
     return (
-        <div className="flex-shrink-0 w-[170px] sm:w-[200px] rounded-2xl border overflow-hidden bg-white border-gray-100 shadow-sm">
+        <div className="flex-shrink-0 w-[170px] sm:w-[200px] rounded-2xl border overflow-hidden bg-aw-surface-card border-aw-surface-border shadow-sm">
             {card.image && (
                 <img src={card.image} alt={card.title || ''} className="w-full h-[100px] object-cover" loading="lazy" />
             )}
             <div className="p-3 space-y-1.5">
-                <h4 className="font-semibold text-[12.5px] leading-tight text-gray-800">{card.title}</h4>
-                {card.description && <p className="text-[11px] leading-relaxed text-gray-500">{card.description}</p>}
+                <h4 className="font-semibold text-[12.5px] leading-tight text-aw-text-primary">{card.title}</h4>
+                {card.description && <p className="text-[11px] leading-relaxed text-aw-text-secondary">{card.description}</p>}
                 {card.button && (
                     <button onClick={() => onAction?.(card.button.url, card.button.label)}
-                        className="w-full mt-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all bg-[#EFF6FF] text-[#2563EB] hover:bg-[#DBEAFE] flex items-center justify-center gap-1">
+                        className="w-full mt-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all bg-aw-surface-input text-aw-text-primary hover:bg-aw-surface-input-focus flex items-center justify-center gap-1">
                         {card.button.label} <ExternalLink size={10} />
                     </button>
                 )}
@@ -50,14 +50,14 @@ function Carousel({ items, onAction }) {
             </div>
             {canScrollLeft && (
                 <button onClick={() => scroll(-1)}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 border-gray-200 hover:bg-white shadow-md border flex items-center justify-center transition-all z-10">
-                    <ChevronLeft size={14} className="text-gray-600" />
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-aw-surface-card/90 border-aw-surface-border hover:bg-aw-surface-card shadow-md border flex items-center justify-center transition-all z-10">
+                    <ChevronLeft size={14} className="text-aw-text-secondary" />
                 </button>
             )}
             {canScrollRight && (
                 <button onClick={() => scroll(1)}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 border-gray-200 hover:bg-white shadow-md border flex items-center justify-center transition-all z-10">
-                    <ChevronRight size={14} className="text-gray-600" />
+                    className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-aw-surface-card/90 border-aw-surface-border hover:bg-aw-surface-card shadow-md border flex items-center justify-center transition-all z-10">
+                    <ChevronRight size={14} className="text-aw-text-secondary" />
                 </button>
             )}
         </div>
@@ -69,7 +69,7 @@ function ButtonGroup({ buttons, onAction }) {
         <div className="flex flex-wrap gap-1.5">
             {buttons.map((btn, i) => (
                 <button key={i} onClick={() => onAction?.(btn.url, btn.label)}
-                    className="px-2.5 py-1.5 rounded-xl border text-[11px] font-medium transition-all cursor-pointer border-[#DBEAFE] bg-[#EFF6FF] text-[#2563EB] hover:bg-[#DBEAFE] hover:border-[#3B82F6]">
+                    className="px-2.5 py-1.5 rounded-xl border text-[11px] font-medium transition-all cursor-pointer border-aw-surface-border bg-aw-surface-card text-aw-text-primary hover:bg-aw-surface-input hover:border-aw-chip-hover-border">
                     {btn.label}
                 </button>
             ))}
@@ -93,25 +93,25 @@ function LeadForm({ fields, submitLabel, onSubmit }) {
     if (submitted) {
         return (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="rounded-2xl border p-3 text-center bg-gray-50 border-gray-100">
-                <p className="text-[12px] font-medium text-gray-700">✓ Submitted</p>
+                className="rounded-2xl border p-3 text-center bg-aw-surface-card border-aw-surface-border">
+                <p className="text-[12px] font-medium text-aw-text-primary">✓ Submitted</p>
             </motion.div>
         );
     }
 
     return (
         <motion.form initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
-            onSubmit={handleSubmit} className="rounded-2xl border p-3 space-y-2 bg-gray-50 border-gray-100">
+            onSubmit={handleSubmit} className="rounded-2xl border p-3 space-y-2 bg-aw-surface-card border-aw-surface-border">
             {fields.map((f) => (
                 <input key={f.key} type={f.key === 'email' ? 'email' : f.key === 'phone' ? 'tel' : 'text'}
                     placeholder={f.label}
                     value={values[f.key] || ''}
                     onChange={(e) => setValues(prev => ({ ...prev, [f.key]: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border text-[12px] focus:outline-none focus:ring-1 focus:ring-[#FFFFFF] transition-all bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-[#3B82F6]"
+                    className="w-full px-3 py-2 rounded-xl border text-[12px] focus:outline-none focus:ring-1 focus:ring-aw-focus-ring transition-all bg-aw-surface-input border-aw-surface-border text-aw-text-primary placeholder-aw-text-muted focus:border-aw-focus-border"
                 />
             ))}
             <button type="submit"
-                className="w-full py-2 rounded-xl text-[12px] font-semibold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-all shadow-sm">
+                className="w-full py-2 rounded-xl text-[12px] font-semibold text-white bg-aw-send hover:bg-aw-send-hover transition-all shadow-sm">
                 {submitLabel}
             </button>
         </motion.form>

@@ -1,16 +1,33 @@
 {
-  "clientId": "sinoptik-10",
-  "botName": "SINOPTIK: Прогноз погоди в Україні та світі — сьогодні, завтра, на тиждень та на 10 днів",
-  "welcomeMessage": "Вітаємо у **SINOPTIK**! Бажаєте дізнатися найточніший прогноз погоди у вашому місті?",
-  "inputPlaceholder": "Введіть назву міста...",
-  "quickReplies": ["Погода на 10 днів", "Прогноз на завтра", "Погода у Сумах"],
+  "clientId": "winbix-ai-light",
+  "botName": "WinBix AI",
+  "welcomeMessage": "Welcome to **WinBix AI**! I can help you learn about our AI chat widgets, pricing, and features.",
+  "inputPlaceholder": "Ask about our platform...",
+  "quickReplies": ["How does it work?", "View pricing", "Get a free demo"],
   "avatar": {
     "type": "initials",
-    "initials": "SI"
+    "initials": "WB"
+  },
+  "design": {
+    "position": "bottom-right"
   },
   "features": {
     "sound": true,
     "voiceInput": true,
-    "streaming": true
+    "feedback": true,
+    "streaming": true,
+    "tts": true,
+    "autoLang": true,
+    "richCards": true,
+    "leadForm": true,
+    "memory": true,
+    "proactive": {
+      "delay": 8,
+      "message": "Need an AI assistant for your business? Try a free demo!"
+    }
+  },
+  "contacts": {
+    "email": "support@winbixai.com",
+    "website": "https://winbixai.com"
   }
 }

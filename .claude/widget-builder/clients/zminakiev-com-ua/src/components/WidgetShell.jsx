@@ -343,8 +343,7 @@ export function Widget({ config }) {
         isListening, voiceSupported, handleVoiceToggle, handleSwipeStart, handleSwipeMove,
         handleSwipeEnd, scrollToBottom, handleChatScroll, toggleMute, cycleFontSize, exportChat,
         handleImageSelect, removeSelectedImage, handleSubmit, handleRichAction, handleKeyDown,
-        showQuickReplies, getDayLabel, getTimeLabel, shouldShowSeparator,
-        executeIntegration,
+        showQuickReplies, getDayLabel, getTimeLabel, shouldShowSeparator, executeIntegration,
     };
 
     // Read widget structure (allows runtime customization)
@@ -395,7 +394,7 @@ export function Widget({ config }) {
                 )}
             </AnimatePresence>
 
-            <div data-widget-root className={`fixed z-[9999] flex flex-col gap-3 antialiased ${positionClasses}`} style={{ fontFamily: "\'Inter\', -apple-system, BlinkMacSystemFont, sans-serif", ...(isMobile && isOpen ? {} : dragStyle) }}>
+            <div data-widget-root className={`fixed z-[9999] flex flex-col gap-3 antialiased ${positionClasses}`} style={{ fontFamily: "var( --e-global-typography-text-font-family )", ...(isMobile && isOpen ? {} : dragStyle) }}>
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
@@ -405,8 +404,8 @@ export function Widget({ config }) {
                             exit={isMobile ? { y: '100%' } : { opacity: 0, y: 20, scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 300, damping: isMobile ? 30 : 25 }}
                             className={isMobile
-                                ? 'fixed inset-x-0 bottom-0 flex flex-col bg-aw-surface-bg shadow-2xl shadow-black/40 rounded-t-3xl overflow-hidden'
-                                : 'relative w-[85vw] max-w-[370px] h-[60vh] max-h-[540px] sm:w-[370px] sm:h-[540px] rounded-3xl overflow-hidden flex flex-col bg-aw-surface-bg shadow-2xl shadow-black/40 border border-aw-surface-border'}
+                                ? 'fixed inset-x-0 bottom-0 flex flex-col bg-aw-surface-bg shadow-2xl shadow-black/15 rounded-t-3xl overflow-hidden'
+                                : 'relative w-[85vw] max-w-[370px] h-[60vh] max-h-[540px] sm:w-[370px] sm:h-[540px] rounded-3xl overflow-hidden flex flex-col bg-aw-surface-bg shadow-2xl shadow-black/15 border border-aw-surface-border'}
                             ref={isMobile ? panelRef : undefined}
                             style={isMobile ? { height: '90dvh', maxHeight: '90dvh' } : {}}
                             role="dialog"
