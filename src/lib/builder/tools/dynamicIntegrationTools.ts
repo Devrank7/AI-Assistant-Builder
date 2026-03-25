@@ -48,7 +48,11 @@ async function buildUnifiedActionsPrompt(
   userId: string
 ): Promise<{ prompt: string; actionCount: number }> {
   let prompt = '## Available Integration Actions\n\n';
+  prompt += '### Tools (use EXACT names below when calling):\n';
   let actionCount = 0;
+
+  // Collect all tool names and their input schemas for reference
+  const toolDetails: { name: string; description: string; inputs: string }[] = [];
 
   // 1. Plugin-based integrations (from WidgetIntegration)
   const bindings = await WidgetIntegration.find({ widgetId: clientId, enabled: true }).lean();
@@ -59,7 +63,9 @@ async function buildUnifiedActionsPrompt(
       const actionDef = plugin.manifest.actions.find((a: { id: string }) => a.id === actionId);
       if (!actionDef) continue;
       const toolName = `${binding.integrationSlug}_${actionId}`;
-      prompt += `- **${toolName}**: ${actionDef.description}\n`;
+      const inputKeys = Object.keys(actionDef.inputSchema || {}).join(', ');
+      prompt += `- **${toolName}**: ${actionDef.description}. Input: { ${inputKeys} }\n`;
+      toolDetails.push({ name: toolName, description: actionDef.description, inputs: inputKeys });
       actionCount++;
     }
   }
@@ -69,12 +75,26 @@ async function buildUnifiedActionsPrompt(
   for (const config of configs) {
     for (const action of config.actions) {
       const toolName = `${config.provider}_${action.id}`;
-      prompt += `- **${toolName}**: ${action.description}\n`;
+      const inputKeys = Object.keys(action.inputSchema?.properties || {}).join(', ');
+      prompt += `- **${toolName}**: ${action.description}. Input: { ${inputKeys} }\n`;
+      toolDetails.push({ name: toolName, description: action.description, inputs: inputKeys });
       actionCount++;
     }
     if (config.systemPromptAddition) {
       prompt += `\n${config.systemPromptAddition}\n`;
     }
+  }
+
+  // 3. Add execution rules
+  if (actionCount > 0) {
+    prompt += '\n### Execution Rules:\n';
+    prompt += '- Use the EXACT tool names listed above. Do NOT abbreviate or rename them.\n';
+    prompt +=
+      '- When a booking/calendar tool is available, you MUST use it to actually book — do NOT just collect the lead.\n';
+    prompt +=
+      '- When a notification/messaging tool is available, you MUST send a notification after completing an action.\n';
+    prompt += '- Workflow: collect info → check availability → book/create → notify → confirm to user.\n';
+    prompt += '- If a tool call fails, tell the user and suggest an alternative (e.g., call the business directly).\n';
   }
 
   return { prompt, actionCount };
