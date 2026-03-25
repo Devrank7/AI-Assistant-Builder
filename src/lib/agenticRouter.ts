@@ -271,9 +271,6 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
 
   // 4. Load tools for this widget
   const tools = await loadWidgetTools(input.clientId);
-  console.log(
-    `[AgenticRouter] ${input.clientId}: loaded ${tools.declarations.length} tools: ${tools.declarations.map((d) => d.name).join(', ')}`
-  );
 
   // 5. Build RAG context
   const ragContext = await buildContext(input.clientId, input.message, config.topK);
@@ -458,10 +455,6 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
             );
 
             // Execute tool with tracing
-            console.log(
-              `[AgenticRouter] ${input.clientId}: executing tool "${toolName}" with args:`,
-              JSON.stringify(toolArgs).substring(0, 200)
-            );
             const trace = tracer.startTrace(toolName, toolArgs);
             const executor = tools.executors.get(toolName);
             let toolResult: Record<string, unknown>;
@@ -477,10 +470,6 @@ export async function agenticChatStream(input: RouteMessageInput): Promise<{
             }
 
             const completed = trace.finish(toolResult);
-            console.log(
-              `[AgenticRouter] ${input.clientId}: tool "${toolName}" result:`,
-              JSON.stringify(toolResult).substring(0, 300)
-            );
 
             // Emit action_result + trace events
             controller.enqueue(
