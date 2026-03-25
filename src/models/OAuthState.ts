@@ -18,7 +18,7 @@ const OAuthStateSchema = new Schema<IOAuthState>({
   userId: { type: String, required: true },
   codeVerifier: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  expiresAt: { type: Date, required: true, index: true },
+  expiresAt: { type: Date, required: true },
 });
 
 // TTL index — MongoDB auto-deletes documents when expiresAt passes
