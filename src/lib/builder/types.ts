@@ -30,21 +30,18 @@ export const AGENT_TOOL_NAMES = [
   'add_component',
   'rollback',
   'test_widget',
-  // Integration (6)
+  // General-purpose (moved from integrationTools to coreTools)
   'web_search',
   'web_fetch',
-  'search_api_docs',
-  'write_integration',
-  'test_integration',
   'guide_user',
-  // Marketplace + Codegen (6)
-  'list_user_integrations',
   'open_connection_wizard',
-  'attach_integration_to_widget',
-  'execute_integration_action',
-  'check_integration_health',
-  'generate_integration',
-  'connect_any_api',
+  // Dynamic Integration (6 new tools)
+  'research_api',
+  'create_integration',
+  'test_integration_config',
+  'activate_integration',
+  'deactivate_integration',
+  'list_integrations',
   // No-URL builder
   'create_theme_from_scratch',
   'upload_knowledge_text',
