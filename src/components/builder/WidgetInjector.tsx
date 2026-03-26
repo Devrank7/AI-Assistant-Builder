@@ -54,7 +54,13 @@ function cleanup() {
   if (typeof window !== 'undefined') {
     delete (window as unknown as Record<string, unknown>).__WIDGET_CONFIG__;
     delete (window as unknown as Record<string, unknown>).__WIDGET_CSS__;
-  }
 
-  // Note: localStorage (aiwidget_*) is preserved across reloads to keep chat history
+    // 5. Clear widget chat history from localStorage so reloaded widget starts fresh
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('aiwidget_')) keysToRemove.push(key);
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+  }
 }

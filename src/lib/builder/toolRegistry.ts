@@ -100,6 +100,8 @@ export class ToolRegistry {
         if (deletedCount > 0) {
           console.log(`[ToolRegistry] Cleared ${deletedCount} chat logs for ${clientId} after ${name}`);
         }
+        // Notify builder frontend to reload widget preview with clean chat
+        ctx.write({ type: 'widget_ready', clientId });
       } catch (err) {
         console.error(`[ToolRegistry] Failed to clear chat logs for ${clientId}:`, err);
       }
